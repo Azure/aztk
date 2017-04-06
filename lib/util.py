@@ -1,0 +1,191 @@
+from __future__ import print_function
+import datetime
+import io
+import os
+import time
+
+import azure.storage.blob as blob
+import azure.batch.models as batch_models
+
+_STANDARD_OUT_FILE_NAME = 'stdout.txt'
+_STANDARD_ERROR_FILE_NAME = 'stderr.txt'
+_SAMPLES_CONFIG_FILE_NAME = 'configuration.cfg'
+
+
+def wait_for_tasks_to_complete(batch_client, job_id, timeout):
+    """Waits for all the tasks in a particular job to complete.
+    :param batch_client: The batch client to use.
+    :type batch_client: `batchserviceclient.BatchServiceClient`
+    :param str job_id: The id of the job to monitor.
+    :param timeout: The maximum amount of time to wait.
+    :type timeout: `datetime.timedelta`
+    """
+    time_to_timeout_at = datetime.datetime.now() + timeout
+
+    while datetime.datetime.now() < time_to_timeout_at:
+        tasks = batch_client.task.list(job_id)
+
+        incomplete_tasks = [task for task in tasks if
+                            task.state != batch_models.TaskState.completed]
+        if not incomplete_tasks:
+            return
+        time.sleep(5)
+
+    raise TimeoutError("Timed out waiting for tasks to complete")
+
+def upload_file_to_container(block_blob_client, container_name, file_path):
+    """
+    Uploads a local file to an Azure Blob storage container.
+
+    :param block_blob_client: A blob service client.
+    :type block_blob_client: `azure.storage.blob.BlockBlobService`
+    :param str container_name: The name of the Azure Blob storage container.
+    :param str file_path: The local path to the file.
+    :rtype: `azure.batch.models.ResourceFile`
+    :return: A ResourceFile initialized with a SAS URL appropriate for Batch
+    tasks.
+    """
+    blob_name = os.path.basename(file_path)
+
+    '''
+    print('\nUploading file {} to container [{}]...'.format(file_path,
+                                                          container_name))
+    '''
+
+    block_blob_client.create_blob_from_path(container_name,
+                                            blob_name,
+                                            file_path)
+
+    sas_token = block_blob_client.generate_blob_shared_access_signature(
+        container_name,
+        blob_name,
+        permission=blob.BlobPermissions.READ,
+        expiry=datetime.datetime.utcnow() + datetime.timedelta(hours=2))
+
+    sas_url = block_blob_client.make_blob_url(container_name,
+                                              blob_name,
+                                              sas_token=sas_token)
+
+    return batch_models.ResourceFile(file_path=blob_name,
+                                    blob_source=sas_url)
+
+def print_configuration(config):
+    """Prints the configuration being used as a dictionary
+    :param config: The configuration.
+    :type config: `configparser.ConfigParser`
+    """
+    configuration_dict = {s: dict(config.items(s)) for s in
+                          config.sections() + ['DEFAULT']}
+
+    print("\nConfiguration is:")
+    print(configuration_dict)
+
+def create_pool_if_not_exist(batch_client, pool):
+    """Creates the specified pool if it doesn't already exist
+    :param batch_client: The batch client to use.
+    :type batch_client: `batchserviceclient.BatchServiceClient`
+    :param pool: The pool to create.
+    :type pool: `batchserviceclient.models.PoolAddParameter`
+    """
+    try:
+        print("\nAttempting to create pool:", pool.id)
+        batch_client.pool.add(pool)
+        print("\nCreated pool:", pool.id)
+    except batch_models.BatchErrorException as e:
+        if e.error.code != "PoolExists":
+            raise
+        else:
+            print("\nPool {!r} already exists".format(pool.id))
+
+def select_latest_verified_vm_image_with_node_agent_sku(
+        batch_client, publisher, offer, sku_starts_with):
+    """Select the latest verified image that Azure Batch supports given
+    a publisher, offer and sku (starts with filter).
+    :param batch_client: The batch client to use.
+    :type batch_client: `batchserviceclient.BatchServiceClient`
+    :param str publisher: vm image publisher
+    :param str offer: vm image offer
+    :param str sku_starts_with: vm sku starts with filter
+    :rtype: tuple
+    :return: (node agent sku id to use, vm image ref to use)
+    """
+    # get verified vm image list and node agent sku ids from service
+    node_agent_skus = batch_client.account.list_node_agent_skus()
+
+    # pick the latest supported sku
+    skus_to_use = [
+        (sku, image_ref) for sku in node_agent_skus for image_ref in sorted(
+            sku.verified_image_references, key=lambda item: item.sku)
+        if image_ref.publisher.lower() == publisher.lower() and
+        image_ref.offer.lower() == offer.lower() and
+        image_ref.sku.startswith(sku_starts_with)
+    ]
+
+    # skus are listed in reverse order, pick first for latest
+    sku_to_use, image_ref_to_use = skus_to_use[0]
+    return (sku_to_use.id, image_ref_to_use)
+
+def create_sas_token(
+        block_blob_client, container_name, blob_name, permission, expiry=None,
+        timeout=None):
+    """Create a blob sas token
+    :param block_blob_client: The storage block blob client to use.
+    :type block_blob_client: `azure.storage.blob.BlockBlobService`
+    :param str container_name: The name of the container to upload the blob to.
+    :param str blob_name: The name of the blob to upload the local file to.
+    :param expiry: The SAS expiry time.
+    :type expiry: `datetime.datetime`
+    :param int timeout: timeout in minutes from now for expiry,
+        will only be used if expiry is not specified
+    :return: A SAS token
+    :rtype: str
+    """
+    if expiry is None:
+        if timeout is None:
+            timeout = 30
+        expiry = datetime.datetime.utcnow() + datetime.timedelta(
+            minutes=timeout)
+    return block_blob_client.generate_blob_shared_access_signature(
+        container_name, blob_name, permission=permission, expiry=expiry)
+
+
+def upload_blob_and_create_sas(
+        block_blob_client, container_name, blob_name, file_name, expiry,
+        timeout=None):
+    """Uploads a file from local disk to Azure Storage and creates
+    a SAS for it.
+    :param block_blob_client: The storage block blob client to use.
+    :type block_blob_client: `azure.storage.blob.BlockBlobService`
+    :param str container_name: The name of the container to upload the blob to.
+    :param str blob_name: The name of the blob to upload the local file to.
+    :param str file_name: The name of the local file to upload.
+    :param expiry: The SAS expiry time.
+    :type expiry: `datetime.datetime`
+    :param int timeout: timeout in minutes from now for expiry,
+        will only be used if expiry is not specified
+    :return: A SAS URL to the blob with the specified expiry time.
+    :rtype: str
+    """
+    block_blob_client.create_container(
+        container_name,
+        fail_on_exist=False)
+
+    block_blob_client.create_blob_from_path(
+        container_name,
+        blob_name,
+        file_name)
+
+    sas_token = create_sas_token(
+        block_blob_client,
+        container_name,
+        blob_name,
+        permission=blob.BlobPermissions.READ,
+        expiry=expiry,
+        timeout=timeout)
+
+    sas_url = block_blob_client.make_blob_url(
+        container_name,
+        blob_name,
+        sas_token=sas_token)
+
+    return sas_url
