@@ -13,45 +13,37 @@ import azure.batch.batch_auth as batch_auth
 import azure.batch.models as batch_models
 import azure.storage.blob as blob
 
-deployment_suffix       = '-42-dsvm'
-
-# config file path
-_CONFIG_PATH            = os.path.join(os.path.dirname(__file__), '../configuration.cfg')
-
-# pool configs
-_VM_SIZE                = 'Standard_D2_v2'
-_VM_COUNT               = 5
-_POOL_ID                = 'spark-test-pool' + deployment_suffix
-_JOB_ID                 = 'spark-test-job' + deployment_suffix
-_MULTIINSTANCE_TASK_ID  = 'multiinstance-spark-task' + deployment_suffix
-
-# vm image
-_VM_IMAGE_OPTIONS = {
-    'ubuntu': {
-        'publisher': 'Canonical',
-        'offer': 'UbuntuServer',
-        'sku': '16.04'
-    },
-    'dsvm': {
-        'publisher': 'microsoft-ads',
-        'offer': 'linux-data-science-vm',
-        'sku': 'linuxdsvm'
-    }
-}
-_VM_IMAGE = _VM_IMAGE_OPTIONS['dsvm']
-
-# tasks variables
-_CONTAINER_NAME         = 'sparkresourcesfiles'
-_START_TASK_NAME        = 'spark-install.sh'
-_START_TASK_PATH        = os.path.join('resource-files/dsvm-image', _START_TASK_NAME)
-_APPLICATION_TASK_NAME  = 'spark-start.sh'
-_APPLICATION_TASK_PATH  = os.path.join('resource-files/dsvm-image', _APPLICATION_TASK_NAME)
-_COORDINATION_TASK_NAME = 'spark-connect.sh'
-_COORDINATION_TASK_PATH = os.path.join('resource-files/dsvm-image', _COORDINATION_TASK_NAME)
+deployment_suffix       = '45'
 
 # ssh user variables
 _USERNAME               = 'jiata'
 _PASSWORD               = 'B1gComput#'
+
+# pool configs
+_VM_SIZE                = 'Standard_D2_v2'
+_VM_COUNT               = 5
+_POOL_ID                = 'spark-pool-' + deployment_suffix
+_JOB_ID                 = 'spark-job-' + deployment_suffix
+_MULTIINSTANCE_TASK_ID  = 'multiinstance-spark-task-' + deployment_suffix
+
+# config file path
+_CONFIG_PATH            = os.path.join(os.path.dirname(__file__), '../configuration.cfg')
+
+# vm image
+_PUBLISHER              = 'microsoft-ads'
+_OFFER                  = 'linux-data-science-vm'
+_SKU                    = 'linuxdsvm'
+
+# storage container name
+_CONTAINER_NAME         = 'azsparksetup' #'sparkresourcefiles'
+
+# tasks variables
+_START_TASK_NAME        = 'spark-install.sh'
+_START_TASK_PATH        = os.path.join(os.path.dirname(__file__), 'resource-files/dsvm-image/spark-install.sh')
+_APPLICATION_TASK_NAME  = 'spark-start.sh'
+_APPLICATION_TASK_PATH  = os.path.join(os.path.dirname(__file__), 'resource-files/dsvm-image/spark-start.sh')
+_COORDINATION_TASK_NAME = 'spark-connect.sh'
+_COORDINATION_TASK_PATH = os.path.join(os.path.dirname(__file__), 'resource-files/dsvm-image/spark-connect.sh')
 
 def connect(batch_client):
     """
@@ -97,9 +89,7 @@ def submit_task(batch_client, blob_client,
 
     :param batch_client: the batch client
     :type batch_client: azure.batch.BatchServiceClient
-    :param blob_client: the storage blob client
-    :type blob_client: azure.storage.BlobBlockService
-    :param coordination_command_resource_file: 
+    :param blob_client: the storage blob client :type blob_client: azure.storage.BlobBlockService :param coordination_command_resource_file: 
         the resource file that the coordination command will use
     :type coordination_command_resource_file: azure.batch.models.ResourceFile
     :param application_command_resource_file: 
@@ -124,22 +114,6 @@ def submit_task(batch_client, blob_client,
     # add task to job
     batch_client.task.add(job_id = _JOB_ID, task = task)
 
-def submit_job(batch_client):
-    """
-    Submits a job to the Azure Batch service and adds a task
-
-    :param batch_client: the batch client
-    :type batch_client: azure.batch.BatchServiceClient
-    """
-
-    #create job
-    job = batch_models.JobAddParameter(
-        id = _JOB_ID,
-        pool_info=batch_models.PoolInformation(pool_id = _POOL_ID))
-
-    # add job to batch
-    batch_client.job.add(job)
-
 def create_pool(batch_client, blob_client, start_task_resource_file):
     """
     Create an Azure Batch pool
@@ -155,7 +129,7 @@ def create_pool(batch_client, blob_client, start_task_resource_file):
     # Get a verified node agent sku
     sku_to_use, image_ref_to_use = \
         util.select_latest_verified_vm_image_with_node_agent_sku(
-            batch_client, _VM_IMAGE['publisher'], _VM_IMAGE['offer'], _VM_IMAGE['sku'])
+            batch_client, _PUBLISHER, _OFFER, _SKU)
 
     # Confiure the pool
     pool = batch_models.PoolAddParameter(
@@ -185,7 +159,6 @@ if __name__ == '__main__':
 
     util.print_configuration(global_config)
 
-'''
     # Set up the configuration
     batch_account_key = global_config.get('Batch', 'batchaccountkey')
     batch_account_name = global_config.get('Batch', 'batchaccountname')
@@ -212,6 +185,11 @@ if __name__ == '__main__':
         account_name = storage_account_name,
         account_key = storage_account_key,
         endpoint_suffix = storage_account_suffix)
+
+    # create new container for this pool
+    blob_client.create_container(
+        _CONTAINER_NAME,
+        fail_on_exist=False)
 
     """
     Upload resource files to storage container
@@ -242,8 +220,13 @@ if __name__ == '__main__':
         blob_client, 
         start_task_resource_file)
 
-    # Submit a job
-    submit_job(batch_client)
+    #create job
+    job = batch_models.JobAddParameter(
+        id = _JOB_ID,
+        pool_info=batch_models.PoolInformation(pool_id = _POOL_ID))
+
+    # add job to batch
+    batch_client.job.add(job)
 
     # Submit a task
     submit_task(
@@ -268,4 +251,3 @@ if __name__ == '__main__':
     print(ssh_tunnel_command)
     print()
 
-'''

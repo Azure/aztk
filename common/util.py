@@ -52,6 +52,9 @@ def upload_file_to_container(block_blob_client, container_name, file_path):
                                                           container_name))
     '''
 
+    block_blob_client.create_container(container_name,
+                                 fail_on_exist=False)
+
     block_blob_client.create_blob_from_path(container_name,
                                             blob_name,
                                             file_path)
@@ -80,7 +83,7 @@ def print_configuration(config):
     print("\nConfiguration is:")
     print(configuration_dict)
 
-def create_pool_if_not_exist(batch_client, pool):
+def create_pool_if_not_exist(batch_client, pool, wait=True):
     """Creates the specified pool if it doesn't already exist
     :param batch_client: The batch client to use.
     :type batch_client: `batchserviceclient.BatchServiceClient`
@@ -90,12 +93,51 @@ def create_pool_if_not_exist(batch_client, pool):
     try:
         print("\nAttempting to create pool:", pool.id)
         batch_client.pool.add(pool)
-        print("\nCreated pool:", pool.id)
+        if wait:
+            wait_for_all_nodes_state(batch_client, pool, frozenset(
+               (batch_models.ComputeNodeState.starttaskfailed,
+                batch_models.ComputeNodeState.unusable,
+                batch_models.ComputeNodeState.idle)
+            ))
+            print("\nCreated pool:", pool.id)
+        else:
+            print("\nCreating pool:", pool.id)
     except batch_models.BatchErrorException as e:
         if e.error.code != "PoolExists":
             raise
         else:
             print("\nPool {!r} already exists".format(pool.id))
+
+def wait_for_all_nodes_state(batch_client, pool, node_state):
+    """Waits for all nodes in pool to reach any specified state in set
+    :param batch_client: The batch client to use.
+    :type batch_client: `batchserviceclient.BatchServiceClient`
+    :param pool: The pool containing the node.
+    :type pool: `batchserviceclient.models.CloudPool`
+    :param set node_state: node states to wait for
+    :rtype: list
+    :return: list of `batchserviceclient.models.ComputeNode`
+    """
+    print('Waiting for all nodes in pool {} to reach desired state...'.format(pool.id))
+    i = 0
+    while True:
+        # refresh pool to ensure that there is no resize error
+        pool = batch_client.pool.get(pool.id)
+        if pool.resize_error is not None:
+            raise RuntimeError(
+                'resize error encountered for pool {}: {!r}'.format(
+                    pool.id, pool.resize_error))
+        nodes = list(batch_client.compute_node.list(pool.id))
+        if (len(nodes) >= pool.target_dedicated and
+                all(node.state in node_state for node in nodes)):
+            return nodes
+        i += 1
+        '''
+        if i % 3 == 0:
+            print('waiting for {} nodes to reach desired state...'.format(
+                pool.target_dedicated))
+        '''
+        time.sleep(10)
 
 def select_latest_verified_vm_image_with_node_agent_sku(
         batch_client, publisher, offer, sku_starts_with):
@@ -189,3 +231,14 @@ def upload_blob_and_create_sas(
         sas_token=sas_token)
 
     return sas_url
+
+
+def wrap_commands_in_shell(commands):
+    """Wrap commands in a shell
+    :param list commands: list of commands to wrap
+    :param str ostype: OS type, linux or windows
+    :rtype: str
+    :return: a shell wrapping commands
+    """
+    return '/bin/bash -c \'set -e; set -o pipefail; {}; wait\''.format(
+        ';'.join(commands))

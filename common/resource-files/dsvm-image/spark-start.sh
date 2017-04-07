@@ -27,13 +27,15 @@ export PATH=$PATH:$SPARK_HOME/bin
 echo "SPARK_HOME:"
 echo $SPARK_HOME
 
+<< CONFIGURE_SPARK_ENV
 cp $SPARK_HOME/conf/spark-env.sh.template $SPARK_HOME/conf/spark-env.sh
 
 # split $AZ_BATCH_MASTER_NODE (10.0.0.X:PORT) to only IP portion
 m=${AZ_BATCH_MASTER_NODE%:*}
 
 # add IP of master-node to $SPARK_HOME/conf/spark-env.sh
-echo $m >> $SPARK_HOME/conf/spark-env.sh
+echo SPARK_MASTER_HOST=$m >> $SPARK_HOME/conf/spark-env.sh
+CONFIGURE_SPARK_ENV
 
 echo ""
 echo "----------------------------"
@@ -42,6 +44,10 @@ echo ""
 echo "Running start-all.sh to start the spark cluster:"
 # start spark cluster - run in background process 
 bash $SPARK_HOME/sbin/start-all.sh &
+
+echo ""
+echo "----------------------------"
+echo ""
 
 # install and setup jupyter 
 # TODO this needs to run with root user (but running the multi-instance task on run_elavated will cause the start-all.sh script to fail)
