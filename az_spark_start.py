@@ -49,7 +49,7 @@ if __name__ == '__main__':
                         help="the unique name of your spark cluster")
     parser.add_argument("--cluster-size", type=int, 
                         help="number of vms in your cluster")
-    parser.add_argument("--cluster-vm-size", 
+    parser.add_argument("--cluster-vm-size",
                         help="size of each vm in your cluster")
     parser.add_argument('--wait', dest='wait', action='store_true')
     parser.add_argument('--no-wait', dest='wait', action='store_false')
@@ -130,7 +130,6 @@ if __name__ == '__main__':
         target_dedicated = _vm_count,
         start_task = batch_models.StartTask(
             command_line = util.wrap_commands_in_shell(start_task_commands),
-            # command_line = "/bin/sh -c " + _start_task_name,
             resource_files = [start_task_resource_file],
             run_elevated = True,
             wait_for_success = True),
