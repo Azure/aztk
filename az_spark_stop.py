@@ -47,9 +47,6 @@ if __name__ == '__main__':
     batch_account_key = global_config.get('Batch', 'batchaccountkey')
     batch_account_name = global_config.get('Batch', 'batchaccountname')
     batch_service_url = global_config.get('Batch', 'batchserviceurl')
-    storage_account_key = global_config.get('Storage', 'storageaccountkey')
-    storage_account_name = global_config.get('Storage', 'storageaccountname')
-    storage_account_suffix = global_config.get('Storage', 'storageaccountsuffix')
 
     # Set up SharedKeyCredentials
     credentials = batch_auth.SharedKeyCredentials(
@@ -63,6 +60,7 @@ if __name__ == '__main__':
 
     # delete pool by id
     pool = batch_client.pool.get(_pool_id)
+
     if batch_client.pool.exists(_pool_id) == True:
         batch_client.pool.delete(_pool_id)
         print("\nThe pool, '%s', is being deleted" % _pool_id)

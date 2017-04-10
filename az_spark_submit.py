@@ -113,16 +113,6 @@ if __name__ == '__main__':
         account_key = storage_account_key,
         endpoint_suffix = storage_account_suffix)
 
-    # Upload Coordination command resource files to blob storage
-    coordination_command_resource_file = \
-        util.upload_file_to_container(
-            blob_client, _container_name, _coordination_task_path)
-
-    # Upload Application command resource files to blob storage
-    application_command_resource_file = \
-        util.upload_file_to_container(
-            blob_client, _container_name, _application_task_path)
-
     # Upload User job resource files to blob storage
     user_job_resource_file = \
         util.upload_file_to_container(
@@ -182,12 +172,12 @@ if __name__ == '__main__':
     task = batch_models.TaskAddParameter(
         id = _multiinstance_task_id,
         command_line = util.wrap_commands_in_shell(application_commands),
-        resource_files = [application_command_resource_file, user_job_resource_file],
+        resource_files = [user_job_resource_file],
         run_elevated = False,
         multi_instance_settings = batch_models.MultiInstanceSettings(
             number_of_instances = pool_size,
             coordination_command_line = util.wrap_commands_in_shell(coordination_commands),
-            common_resource_files = [coordination_command_resource_file]))
+            common_resource_files = []))
 
     # add task to job
     batch_client.task.add(job_id = _job_id, task = task)

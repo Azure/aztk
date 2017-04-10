@@ -18,38 +18,27 @@ import azure.storage.blob as blob
 # config file path
 _config_path = os.path.join(os.path.dirname(__file__), 'configuration.cfg')
 
-# generate random number for deployment suffix
-_deployment_suffix = str(random.randint(0,1000000))
-
-# default pool configs
-_vm_size = 'Standard_D2_v2'
-_vm_count = 5
-_pool_id = 'az-spark-' + _deployment_suffix
+# pool configs
+_vm_size = None
+_vm_count = None
+_pool_id = None
 _wait = True
-# _job_id = 'az-spark-' + _deployment_suffix
 
 # vm image
 _publisher = 'microsoft-ads'
 _offer = 'linux-data-science-vm'
 _sku = 'linuxdsvm'
 
-# storage container name
-_container_name = 'azsparksetup'
-
-# tasks variables
-_start_task_name = 'spark-install.sh'
-_start_task_path = os.path.join(os.path.dirname(__file__), 'common/resource-files/dsvm-image/spark-install.sh')
-
 if __name__ == '__main__':
 
     # parse arguments
     parser = argparse.ArgumentParser(prog="az_spark")
 
-    parser.add_argument("--cluster-id",
+    parser.add_argument("--cluster-id", required=True,
                         help="the unique name of your spark cluster")
-    parser.add_argument("--cluster-size", type=int, 
+    parser.add_argument("--cluster-size", type=int, required=True,
                         help="number of vms in your cluster")
-    parser.add_argument("--cluster-vm-size",
+    parser.add_argument("--cluster-vm-size", required=True,
                         help="size of each vm in your cluster")
     parser.add_argument('--wait', dest='wait', action='store_true')
     parser.add_argument('--no-wait', dest='wait', action='store_false')
@@ -84,11 +73,6 @@ if __name__ == '__main__':
     batch_account_key = global_config.get('Batch', 'batchaccountkey')
     batch_account_name = global_config.get('Batch', 'batchaccountname')
     batch_service_url = global_config.get('Batch', 'batchserviceurl')
-    '''
-    storage_account_key = global_config.get('Storage', 'storageaccountkey')
-    storage_account_name = global_config.get('Storage', 'storageaccountname')
-    storage_account_suffix = global_config.get('Storage', 'storageaccountsuffix')
-    '''
 
     # Set up SharedKeyCredentials
     credentials = batch_auth.SharedKeyCredentials(
@@ -102,14 +86,6 @@ if __name__ == '__main__':
 
     # Set retry policy
     batch_client.config.retry_policy.retries = 5
-
-    '''
-    # Set up BlockBlobStorage
-    blob_client = blob.BlockBlobService(
-        account_name = storage_account_name,
-        account_key = storage_account_key,
-        endpoint_suffix = storage_account_suffix)
-    '''
 
     # start task command
     start_task_commands = [
@@ -134,7 +110,6 @@ if __name__ == '__main__':
         target_dedicated = _vm_count,
         start_task = batch_models.StartTask(
             command_line = util.wrap_commands_in_shell(start_task_commands),
-            # resource_files = [start_task_resource_file],
             run_elevated = True,
             wait_for_success = True),
         enable_inter_node_communication = True,
