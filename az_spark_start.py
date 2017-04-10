@@ -84,9 +84,11 @@ if __name__ == '__main__':
     batch_account_key = global_config.get('Batch', 'batchaccountkey')
     batch_account_name = global_config.get('Batch', 'batchaccountname')
     batch_service_url = global_config.get('Batch', 'batchserviceurl')
+    '''
     storage_account_key = global_config.get('Storage', 'storageaccountkey')
     storage_account_name = global_config.get('Storage', 'storageaccountname')
     storage_account_suffix = global_config.get('Storage', 'storageaccountsuffix')
+    '''
 
     # Set up SharedKeyCredentials
     credentials = batch_auth.SharedKeyCredentials(
@@ -101,24 +103,26 @@ if __name__ == '__main__':
     # Set retry policy
     batch_client.config.retry_policy.retries = 5
 
+    '''
     # Set up BlockBlobStorage
     blob_client = blob.BlockBlobService(
         account_name = storage_account_name,
         account_key = storage_account_key,
         endpoint_suffix = storage_account_suffix)
+    '''
 
-    # Upload start task resource files to blob storage
-    start_task_resource_file = \
-        util.upload_file_to_container(
-            blob_client, _container_name, _start_task_path)
-   
+    # start task command
+    start_task_commands = [
+        'export SPARK_HOME=/dsvm/tools/spark/current',
+        'export PATH=$PATH:$SPARK_HOME/bin',
+        'chmod -R 777 $SPARK_HOME',
+        'exit 0'
+    ]
+
     # Get a verified node agent sku
     sku_to_use, image_ref_to_use = \
         util.select_latest_verified_vm_image_with_node_agent_sku(
             batch_client, _publisher, _offer, _sku)
-
-    # start task command
-    start_task_commands = [ _start_task_name ]
 
     # Confiure the pool
     pool = batch_models.PoolAddParameter(
@@ -130,7 +134,7 @@ if __name__ == '__main__':
         target_dedicated = _vm_count,
         start_task = batch_models.StartTask(
             command_line = util.wrap_commands_in_shell(start_task_commands),
-            resource_files = [start_task_resource_file],
+            # resource_files = [start_task_resource_file],
             run_elevated = True,
             wait_for_success = True),
         enable_inter_node_communication = True,

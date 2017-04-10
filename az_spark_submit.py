@@ -137,11 +137,38 @@ if __name__ == '__main__':
     batch_client.job.add(job)
 
     # configure multi-instance task commands
-    coordination_commands = [ '$AZ_BATCH_TASK_DIR/' + _coordination_task_name ]
-    application_commands = [
-        '$AZ_BATCH_TASK_WORKING_DIR/' + _application_task_name,
-        # submit spark job with 'spark-submit' script on headnode
+    coordination_commands = [
+        'echo CCP_NODES:',
+        'echo $CCP_NODES',
+        'echo AZ_BATCH_NODE_LIST:',
+        'echo $AZ_BATCH_NODE_LIST',
+        'echo AZ_BATCH_HOST_LIST:',
+        'echo $AZ_BATCH_HOST_LIST',
+        'echo AZ_BATCH_MASTER_NODE:',
+        'echo $AZ_BATCH_MASTER_NODE',
+        'echo AZ_BATCH_IS_CURRENT_NODE_MASTER:',
+        'echo $AZ_BATCH_IS_CURRENT_NODE_MASTER',
+        # set SPARK_HOME environment vars
         'export SPARK_HOME=/dsvm/tools/spark/current',
+        'export PATH=$PATH:$SPARK_HOME/bin',
+        # create a 'slaves' file from the slaves.template in $SPARK_HOME/conf
+        'cp $SPARK_HOME/conf/slaves.template $SPARK_HOME/conf/slaves'
+        # create a new line in the slaves file
+        'echo >> $SPARK_HOME/conf/slaves',
+        # add batch pool ips to newly created slaves files
+        'IFS="," read -r -a workerips <<< $AZ_BATCH_HOST_LIST',
+        'for index in "${!workerips[@]}"',
+        'do echo "${workerips[index]}" >> $SPARK_HOME/conf/slaves',
+        'echo "${workerips[index]}"',
+        'done'
+    ]
+    application_commands = [
+        # set SPARK_HOME environment vars
+        'export SPARK_HOME=/dsvm/tools/spark/current',
+        'export PATH=$PATH:$SPARK_HOME/bin',
+        # kick off start-all spark command as a bg process 
+        '($SPARK_HOME/sbin/start-all.sh &)',
+        # execute spark-submit on the specified job 
         '$SPARK_HOME/bin/spark-submit ' +
             '--master spark://${AZ_BATCH_MASTER_NODE%:*}:7077 ' +
             '$AZ_BATCH_TASK_WORKING_DIR/' + _user_task_name
@@ -199,9 +226,5 @@ if __name__ == '__main__':
     print()
     print('\t%s' % ssh_tunnel_command)
     print()
-
-
-
-
 
 
