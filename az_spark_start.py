@@ -1,4 +1,4 @@
-import common.util as util
+import redbull.sparklib as sparklib
 
 try:
     import configparser
@@ -18,18 +18,12 @@ import azure.storage.blob as blob
 # config file path
 _config_path = os.path.join(os.path.dirname(__file__), 'configuration.cfg')
 
-# pool configs
-_vm_size = None
-_vm_count = None
-_pool_id = None
-_wait = True
-
-# vm image
-_publisher = 'microsoft-ads'
-_offer = 'linux-data-science-vm'
-_sku = 'linuxdsvm'
-
 if __name__ == '__main__':
+
+    _pool_id = None
+    _vm_count = None
+    _vm_size = None
+    _wait = None
 
     # parse arguments
     parser = argparse.ArgumentParser(prog="az_spark")
@@ -87,33 +81,10 @@ if __name__ == '__main__':
     # Set retry policy
     batch_client.config.retry_policy.retries = 5
 
-    # start task command
-    start_task_commands = [
-        'export SPARK_HOME=/dsvm/tools/spark/current',
-        'export PATH=$PATH:$SPARK_HOME/bin',
-        'chmod -R 777 $SPARK_HOME',
-        'exit 0'
-    ]
-
-    # Get a verified node agent sku
-    sku_to_use, image_ref_to_use = \
-        util.select_latest_verified_vm_image_with_node_agent_sku(
-            batch_client, _publisher, _offer, _sku)
-
-    # Confiure the pool
-    pool = batch_models.PoolAddParameter(
-        id = _pool_id,
-        virtual_machine_configuration = batch_models.VirtualMachineConfiguration(
-            image_reference = image_ref_to_use,
-            node_agent_sku_id = sku_to_use),
-        vm_size = _vm_size,
-        target_dedicated = _vm_count,
-        start_task = batch_models.StartTask(
-            command_line = util.wrap_commands_in_shell(start_task_commands),
-            run_elevated = True,
-            wait_for_success = True),
-        enable_inter_node_communication = True,
-        max_tasks_per_node = 1)
-
-    # Create the pool
-    util.create_pool_if_not_exist(batch_client, pool, wait=_wait)
+    # create spark cluster
+    sparklib.create_cluster(
+        batch_client,
+        _pool_id,
+        _vm_count,
+        _vm_size, 
+        _wait)

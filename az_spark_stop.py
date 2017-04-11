@@ -1,4 +1,4 @@
-import common.util as util
+import redbull.sparklib as sparklib
 
 try:
     import configparser
@@ -58,13 +58,8 @@ if __name__ == '__main__':
         credentials,
         base_url=batch_service_url)
 
-    # delete pool by id
-    pool = batch_client.pool.get(_pool_id)
-
-    if batch_client.pool.exists(_pool_id) == True:
-        batch_client.pool.delete(_pool_id)
-        print("\nThe pool, '%s', is being deleted" % _pool_id)
-    else:
-        print("\nThe pool, '%s', does not exist" % _pool_id)
-
+    # Delete specified cluster
+    sparklib.delete_cluster(
+        batch_client,
+        _pool_id)
 
