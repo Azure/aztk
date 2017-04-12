@@ -1,4 +1,6 @@
-import redbull.sparklib as sparklib
+#!/usr/bin/env python
+
+from redbull import sparklib
 
 try:
     import configparser
