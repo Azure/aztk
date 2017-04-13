@@ -38,7 +38,7 @@ if __name__ == '__main__':
 
     parser.add_argument("--cluster-id", required=True,
                         help="the unique name of your spark cluster")
-    parser.add_argument("--app-id", 
+    parser.add_argument("--app-id", required=True,
                         help="the unique name of your spark app")
     parser.add_argument("--file", required=True, 
                         help="the relative path to your spark app in your directory")

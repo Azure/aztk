@@ -31,7 +31,6 @@ def create_cluster(
     _offer = 'linux-data-science-vm'
     _sku = 'linuxdsvm'
 
-
     # start task command
     start_task_commands = [
         'export SPARK_HOME=/dsvm/tools/spark/current',
