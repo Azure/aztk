@@ -103,9 +103,7 @@ def submit_app(
         pool_id,
         app_id,
         app_file_path,
-        app_file_name,
-        username,
-        password):
+        app_file_name):
 
     """
     Submit a spark app 
@@ -122,17 +120,7 @@ def submit_app(
     :type app_file_path: string
     :param app_file_name: The name of the spark app file to run
     :type app_file_name: string
-    :param username: The username to access the head node via ssh
-    :type username: string
-    :param password: The password to access the head node via ssh
-    :type password: string
-
     """
-
-    # set multi-instance task id 
-    # TODO create a real GUID instead of just a random number
-    deployment_suffix = str(random.randint(0,1000000))
-    multiinstance_task_id= 'az-spark-' + deployment_suffix
 
     # Upload app resource files to blob storage
     app_resource_file = \
@@ -183,7 +171,7 @@ def submit_app(
 
     # Create multi-instance task
     task = batch_models.TaskAddParameter(
-        id = multiinstance_task_id,
+        id = app_id,
         command_line = util.wrap_commands_in_shell(application_commands),
         resource_files = [app_resource_file],
         run_elevated = False,
@@ -202,9 +190,31 @@ def submit_app(
         job_id,
         datetime.timedelta(minutes=60))
 
+def ssh_app(
+        batch_client,
+        pool_id,
+        app_id,
+        username,
+        password):
+
+    """
+    SSH into head node of spark-app
+
+    :param batch_client: the batch client to use
+    :type batch_client: 'batchserviceclient.BatchServiceClient'
+    :param pool_id: The id of the pool to submit app to 
+    :type pool_id: string
+    :param app_id: The id of the spark app (corresponds to batch task)
+    :type app_id: string
+    :param username: The username to access the head node via ssh
+    :type username: string
+    :param password: The password to access the head node via ssh
+    :type password: string
+    """
+
     # Get master node id from task
     master_node_id = batch_client.task \
-        .get(job_id=pool_id, task_id=multiinstance_task_id) \
+        .get(job_id=pool_id, task_id=app_id) \
         .node_info.node_id
 
     # Create new ssh user for the master node

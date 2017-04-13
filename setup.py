@@ -10,5 +10,6 @@ setup(name='redbull',
       packages=['redbull'],
       scripts=['bin/spark-cluster-create',
                'bin/spark-cluster-delete',
-               'bin/spark-app-submit'],
+               'bin/spark-app-submit',
+               'bin/spark-app-ssh'],
       zip_safe=False)
