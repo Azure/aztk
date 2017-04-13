@@ -97,7 +97,7 @@ def delete_cluster(
         print("\nThe pool, '%s', does not exist" % pool_id)
 
 
-def submit_job(
+def submit_app(
         batch_client,
         blob_client,
         pool_id,

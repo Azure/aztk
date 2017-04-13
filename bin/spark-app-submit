@@ -104,7 +104,7 @@ if __name__ == '__main__':
         endpoint_suffix = storage_account_suffix)
 
     # submit job
-    sparklib.submit_job(
+    sparklib.submit_app(
         batch_client,
         blob_client,
         pool_id = _pool_id,
