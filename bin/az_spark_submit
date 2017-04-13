@@ -18,17 +18,18 @@ import azure.batch.models as batch_models
 import azure.storage.blob as blob
 
 # config file path
-_config_path = os.path.join(os.path.dirname(__file__), 'configuration.cfg')
+_config_path = os.path.join(os.path.dirname(__file__), '../configuration.cfg')
 
 # generate random number for deployment suffix
+# TODO generate real GUID instead of a random number
 _deployment_suffix = str(random.randint(0,1000000))
 
 if __name__ == '__main__':
 
     _pool_id = None
-    _job_id = 'az-spark-' + _deployment_suffix
-    _job_file_name = None
-    _job_file_path = None
+    _app_id = 'az-spark-' + _deployment_suffix
+    _app_file_name = None
+    _app_file_path = None
     _username = 'admin'
     _password = 'pass123!'
 
@@ -37,14 +38,14 @@ if __name__ == '__main__':
 
     parser.add_argument("--cluster-id", required=True,
                         help="the unique name of your spark cluster")
-    parser.add_argument("--job-id", 
-                        help="the unique name of your spark job")
+    parser.add_argument("--app-id", 
+                        help="the unique name of your spark app")
     parser.add_argument("--file", required=True, 
-                        help="the relative path to your spark job in your directory")
+                        help="the relative path to your spark app in your directory")
     parser.add_argument("-u", "--user", 
-                        help="the relative path to your spark job in your directory")
+                        help="the relative path to your spark app in your directory")
     parser.add_argument("-p", "--password", 
-                        help="the relative path to your spark job in your directory")
+                        help="the relative path to your spark app in your directory")
 
     args = parser.parse_args()
     
@@ -53,15 +54,15 @@ if __name__ == '__main__':
         _pool_id = args.cluster_id
     print("spark cluster id:      %s" % _pool_id)
 
-    if args.job_id is not None:
-        _job_id  = args.job_id
-    print("spark job id:          %s" % _job_id)
+    if args.app_id is not None:
+        _app_id  = args.app_id
+    print("spark job id:          %s" % _app_id)
 
     if args.file is not None:
-        _job_file_path = args.file
-        _job_file_name = os.path.basename(_job_file_path)
-    print("spark job file path:   %s" % _job_file_path)
-    print("spark job file name:   %s" % _job_file_name)
+        _app_file_path = args.file
+        _app_file_name = os.path.basename(_app_file_path)
+    print("spark job file path:   %s" % _app_file_path)
+    print("spark job file name:   %s" % _app_file_name)
 
     if args.user is not None:
         _username = args.user
@@ -107,9 +108,10 @@ if __name__ == '__main__':
         batch_client,
         blob_client,
         pool_id = _pool_id,
-        job_id = _job_id,
-        job_file_name = _job_file_name,
-        job_file_path = os.path.join(os.path.dirname(__file__), _job_file_path),
+        app_id = _app_id,
+        app_file_name = _app_file_name,
+        # app_file_path = os.path.join(os.path.dirname(__file__), _app_file_path),
+        app_file_path = _app_file_path,
         username = _username,
         password = _password)
 
