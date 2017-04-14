@@ -5,6 +5,93 @@ import datetime
 
 import azure.batch.models as batch_models
 
+_WEBUI_PORT = 8082
+_JUPYTER_PORT = 7777
+
+def install_cmd():
+    '''
+    this command is run-elevated
+    '''
+    return [
+        'export SPARK_HOME=/dsvm/tools/spark/current',
+        'export PATH=$PATH:$SPARK_HOME/bin',
+        'chmod -R 777 $SPARK_HOME',
+        'exit 0'
+    ]
+
+def connect_cmd():
+    return [
+        # print env vars for debug
+        'echo CCP_NODES:',
+        'echo $CCP_NODES',
+        'echo AZ_BATCH_NODE_LIST:',
+        'echo $AZ_BATCH_NODE_LIST',
+        'echo AZ_BATCH_HOST_LIST:',
+        'echo $AZ_BATCH_HOST_LIST',
+        'echo AZ_BATCH_MASTER_NODE:',
+        'echo $AZ_BATCH_MASTER_NODE',
+        'echo AZ_BATCH_IS_CURRENT_NODE_MASTER:',
+        'echo $AZ_BATCH_IS_CURRENT_NODE_MASTER',
+
+        # set SPARK_HOME environment vars
+        'export SPARK_HOME=/dsvm/tools/spark/current',
+        'export PATH=$PATH:$SPARK_HOME/bin',
+
+        # copy a 'slaves' file from the slaves.template in $SPARK_HOME/conf
+        'cp $SPARK_HOME/conf/slaves.template $SPARK_HOME/conf/slaves'
+
+        # delete existing content & create a new line in the slaves file 
+        'echo > $SPARK_HOME/conf/slaves',
+
+        # add batch pool ips to newly created slaves files
+        'IFS="," read -r -a workerips <<< $AZ_BATCH_HOST_LIST',
+        'for index in "${!workerips[@]}"',
+        'do echo "${workerips[index]}" >> $SPARK_HOME/conf/slaves', # TODO unless node is master
+        'echo "${workerips[index]}"',
+        'done'
+    ]
+
+def custom_app_cmd(webui_port, app_file_name):
+    return [
+        # set SPARK_HOME environment vars
+        'export SPARK_HOME=/dsvm/tools/spark/current',
+        'export PATH=$PATH:$SPARK_HOME/bin',
+
+        # kick off start-all spark command as a bg process 
+        '($SPARK_HOME/sbin/start-all.sh --webui-port ' + str(webui_port) + ' &)',
+
+        # execute spark-submit on the specified app 
+        '$SPARK_HOME/bin/spark-submit ' +
+            '--master spark://${AZ_BATCH_MASTER_NODE%:*}:7077 ' +
+            '$AZ_BATCH_TASK_WORKING_DIR/' + app_file_name
+    ]
+
+# TODO not working
+def jupyter_cmd(webui_port, jupyter_port):
+    return [
+        # set SPARK_HOME environment vars
+        'export SPARK_HOME=/dsvm/tools/spark/current',
+        'export PATH=$PATH:$SPARK_HOME/bin',
+
+        # kick off start-all spark command as a bg process 
+        '($SPARK_HOME/sbin/start-all.sh  --webui-port ' + str(webui_port) + ' &)',
+
+        # jupyter setup: remove auth
+        'mkdir $HOME/.jupyter',
+        'touch $HOME/.jupyter/jupyter_notebook_config.py',
+        'echo >> $HOME/.jupyter/jupyter_notebook_config.py',
+        'echo "c.NotebookApp.token=\'\'" >> $HOME/.jupyter/jupyter_notebook_config.py',
+        'echo "c.NotebookApp.password=\'\'" >> $HOME/.jupyter/jupyter_notebook_config.py',
+
+        # start jupyter notebook
+        'PYSPARK_DRIVER_PYTHON=jupyter ' +
+            'PYSPARK_DRIVER_PYTHON_OPTS="notebook --no-browser --port=' + str(jupyter_port) + '" ' +
+            'pyspark ' +
+            '--master spark://${AZ_BATCH_MASTER_NODE%:*}:7077 ' +
+            '--executor-memory 6400M ' +
+            '--driver-memory 6400M'
+    ]
+
 def create_cluster(
         batch_client,
         pool_id,
@@ -32,13 +119,7 @@ def create_cluster(
     _sku = 'linuxdsvm'
 
     # start task command
-    start_task_commands = [
-        'export SPARK_HOME=/dsvm/tools/spark/current',
-        'export PATH=$PATH:$SPARK_HOME/bin',
-        'chmod -R 777 $SPARK_HOME',
-        'exit 0'
-    ]
-
+    start_task_commands = install_cmd() 
     # Get a verified node agent sku
     sku_to_use, image_ref_to_use = \
         util.select_latest_verified_vm_image_with_node_agent_sku(
@@ -104,6 +185,7 @@ def submit_app(
         app_id,
         app_file_path,
         app_file_name):
+    #TODO add 'wait' param
 
     """
     Submit a spark app 
@@ -126,45 +208,11 @@ def submit_app(
     app_resource_file = \
         util.upload_file_to_container(
             blob_client, container_name = app_id, file_path = app_file_path)
- 
-    # configure multi-instance task commands
-    coordination_commands = [
-        'echo CCP_NODES:',
-        'echo $CCP_NODES',
-        'echo AZ_BATCH_NODE_LIST:',
-        'echo $AZ_BATCH_NODE_LIST',
-        'echo AZ_BATCH_HOST_LIST:',
-        'echo $AZ_BATCH_HOST_LIST',
-        'echo AZ_BATCH_MASTER_NODE:',
-        'echo $AZ_BATCH_MASTER_NODE',
-        'echo AZ_BATCH_IS_CURRENT_NODE_MASTER:',
-        'echo $AZ_BATCH_IS_CURRENT_NODE_MASTER',
-        # set SPARK_HOME environment vars
-        'export SPARK_HOME=/dsvm/tools/spark/current',
-        'export PATH=$PATH:$SPARK_HOME/bin',
-        # create a 'slaves' file from the slaves.template in $SPARK_HOME/conf
-        'cp $SPARK_HOME/conf/slaves.template $SPARK_HOME/conf/slaves'
-        # create a new line in the slaves file
-        'echo >> $SPARK_HOME/conf/slaves',
-        # add batch pool ips to newly created slaves files
-        'IFS="," read -r -a workerips <<< $AZ_BATCH_HOST_LIST',
-        'for index in "${!workerips[@]}"',
-        'do echo "${workerips[index]}" >> $SPARK_HOME/conf/slaves',
-        'echo "${workerips[index]}"',
-        'done'
-    ]
-    application_commands = [
-        # set SPARK_HOME environment vars
-        'export SPARK_HOME=/dsvm/tools/spark/current',
-        'export PATH=$PATH:$SPARK_HOME/bin',
-        # kick off start-all spark command as a bg process 
-        '($SPARK_HOME/sbin/start-all.sh &)',
-        # execute spark-submit on the specified app 
-        '$SPARK_HOME/bin/spark-submit ' +
-            '--master spark://${AZ_BATCH_MASTER_NODE%:*}:7077 ' +
-            '$AZ_BATCH_TASK_WORKING_DIR/' + app_file_name
-    ]
 
+    # create application/coordination commands
+    coordination_cmd = connect_cmd()
+    application_cmd = custom_app_cmd(_WEBUI_PORT, app_file_name)
+ 
     # Get pool size
     pool = batch_client.pool.get(pool_id)
     pool_size = pool.target_dedicated
@@ -172,12 +220,12 @@ def submit_app(
     # Create multi-instance task
     task = batch_models.TaskAddParameter(
         id = app_id,
-        command_line = util.wrap_commands_in_shell(application_commands),
+        command_line = util.wrap_commands_in_shell(application_cmd),
         resource_files = [app_resource_file],
         run_elevated = False,
         multi_instance_settings = batch_models.MultiInstanceSettings(
             number_of_instances = pool_size,
-            coordination_command_line = util.wrap_commands_in_shell(coordination_commands),
+            coordination_command_line = util.wrap_commands_in_shell(coordination_cmd),
             common_resource_files = []))
 
     # Add task to batch job (which has the same name as pool_id)
@@ -195,7 +243,8 @@ def ssh_app(
         pool_id,
         app_id,
         username,
-        password):
+        password,
+        ports = None):
 
     """
     SSH into head node of spark-app
@@ -210,6 +259,8 @@ def ssh_app(
     :type username: string
     :param password: The password to access the head node via ssh
     :type password: string
+    :param ports: A list of ports to open tunnels to
+    :type ports: [<int>]
     """
 
     # Get master node id from task
@@ -237,12 +288,90 @@ def ssh_app(
     master_node_port = remote_login_settings.remote_login_port
 
     # build ssh tunnel command
-    ssh_tunnel_command = "ssh -L 8080:localhost:8080 " + \
-        username + "@" + str(master_node_ip) + " -p " + str(master_node_port)
+    ssh_command = "ssh "
+    for port in ports:
+        ssh_command += "-L " + str(port) + ":localhost:" + str(port) + " "
+    ssh_command += username + "@" + str(master_node_ip) + " -p " + str(master_node_port)
 
     print('\nuse the following command to connect to your spark head node:')
     print()
-    print('\t%s' % ssh_tunnel_command)
+    print('\t%s' % ssh_command)
     print()
 
+#TODO actually print
+def list_apps(
+        batch_client,
+        pool_id):
+    """
+    List all spark apps for a given cluster
 
+    :param batch_client: the batch client to use
+    :type batch_client: 'batchserviceclient.BatchServiceClient'
+    :param pool_id: The id of the pool to submit app to 
+    :type pool_id: string
+    """
+    apps = batch_client.task.list(job_id=pool_id)
+    print(apps)
+
+# TODO not working 
+def jupyter(
+        batch_client,
+        pool_id,
+        app_id,
+        username,
+        password):
+    """
+    Install jupyter, create app_id and open ssh tunnel
+
+    :param batch_client: the batch client to use
+    :type batch_client: 'batchserviceclient.BatchServiceClient'
+    :param pool_id: The id of the pool to submit app to 
+    :type pool_id: string
+    :param username: The username to access the head node via ssh
+    :type username: string
+    :param password: The password to access the head node via ssh
+    :type password: string
+
+    """
+
+    # create application/coordination commands
+    coordination_cmd = connect_cmd()
+    application_cmd = jupyter_cmd(_WEBUI_PORT, _JUPYTER_PORT)
+ 
+    # Get pool size
+    pool = batch_client.pool.get(pool_id)
+    pool_size = pool.target_dedicated
+
+    # Create multi-instance task
+    task = batch_models.TaskAddParameter(
+        id = app_id,
+        command_line = util.wrap_commands_in_shell(application_cmd),
+        resource_files = [],
+        run_elevated = False,
+        multi_instance_settings = batch_models.MultiInstanceSettings(
+            number_of_instances = pool_size,
+            coordination_command_line = util.wrap_commands_in_shell(coordination_cmd),
+            common_resource_files = []))
+
+    # Add task to batch job (which has the same name as pool_id)
+    job_id = pool_id
+    batch_client.task.add(job_id = job_id, task = task)
+
+    # get job id (job id is the same as pool id)
+    job_id = pool_id
+
+    # Wait for the app to finish
+    util.wait_for_tasks_to_complete(
+        batch_client,
+        job_id,
+        datetime.timedelta(minutes=60))
+
+    # print ssh command
+    ssh_app(
+        batch_client,
+        pool_id,
+        app_id,
+        username,
+        password,
+        ports = [_JUPYTER_PORT, _WEBUI_PORT])
+    
