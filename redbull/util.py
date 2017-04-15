@@ -242,3 +242,10 @@ def wrap_commands_in_shell(commands):
     """
     return '/bin/bash -c \'set -e; set -o pipefail; {}; wait\''.format(
         ';'.join(commands))
+
+def get_connection_info(batch_client, pool_id, node_id):
+    rls = batch_client.compute_node.get_remote_login_settings(
+        pool_id, node_id)
+    remote_ip = rls.remote_login_ip_address
+    ssh_port = str(rls.remote_login_port)
+    return (remote_ip, ssh_port)
