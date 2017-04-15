@@ -60,6 +60,10 @@ def custom_app_cmd(webui_port, app_file_name):
         # kick off start-all spark command as a bg process 
         '($SPARK_HOME/sbin/start-all.sh --webui-port ' + str(webui_port) + ' &)',
 
+        # set the runtime to python 3
+        'export PYSPARK_PYTHON=/usr/bin/python3',
+        'export PYSPARK_DRIVER_PYTHON=python3',
+
         # execute spark-submit on the specified app 
         '$SPARK_HOME/bin/spark-submit ' +
             '--master spark://${AZ_BATCH_MASTER_NODE%:*}:7077 ' +
@@ -152,6 +156,66 @@ def create_cluster(
     # Add job to batch
     batch_client.job.add(job)
 
+def get_cluster_details(
+        batch_client,
+        pool_id):
+    pool = batch_client.pool.get(pool_id)
+    if (pool.state == batch_models.PoolState.deleting):
+        print
+    nodes = batch_client.compute_node.list(pool_id=pool_id)
+    # node_specs = common.vm_helpers.get_vm_specs(pool.vm_size)
+    print("State:       {}".format(pool.state.value))
+    print("Node Size:   {}".format(pool.vm_size))
+    # print("Node Size:   {} [{} Core(s), {} GB RAM, {} GB Disk]".format(
+    #     pool.vm_size,
+    #     node_specs["Cores"],
+    #     node_specs["RAM"],
+    #     node_specs["Disk"]))
+    # print("Resources:   {} Core(s), {} GB RAM, {} GB Disk".format(
+    #     node_specs["Cores"] * pool.current_dedicated,
+    #     node_specs["RAM"] * pool.current_dedicated,
+    #     node_specs["Disk"] * pool.current_dedicated))
+
+    print()
+    node_label = "Nodes ({})".format(pool.current_dedicated)
+    print_format = '{:<34}| {:<10} | {:<21}| {:<8}'
+    print_format_underline = '{:-<34}|{:-<12}|{:-<22}|{:-<8}'
+    print(print_format.format(node_label, 'State', 'IP:Port', 'Master'))
+    print(print_format_underline.format('', '', '', ''))
+
+    master_node = get_master_node_id(batch_client, pool_id)
+
+    for node in nodes:
+        ip, port = util.get_connection_info(batch_client, pool_id, node.id)
+        print (print_format.format(node.id, node.state.value, "{}:{}".format(ip, port),
+                                       "*" if node.id == master_node else ""))
+    print()
+
+#TODO: Move this out of here
+def get_master_node_id(batch_client, pool_id):
+    # Currently, the jobId == poolId so this is safe to assume
+    job_id = pool_id
+    tasks = batch_client.task.list(job_id=job_id)
+    tasks = [task for task in tasks if
+             task.state != batchmodels.TaskState.completed]
+    
+    if (len(tasks) > 0):
+        master_node_id = tasks[0].node_info.node_id
+        return master_node_id
+
+    return ""
+
+def list_clusters(
+    batch_client):
+    print_format = '{:<32}|{:<10}|{:1<0}'
+    print_format_underline = '{:-<32}|{:-<10}|{:-<10}'
+    
+    pools = batch_client.pool.list()
+    print(print_format.format('Cluster', 'State', 'Nodes'))
+    print(print_format_underline.format('','',''))
+    for pool in pools:
+        print(print_format.format(pool.id, pool.state.value, pool.current_dedicated))
+    
 
 def delete_cluster(
         batch_client,

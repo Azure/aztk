@@ -20,23 +20,16 @@ import azure.storage.blob as blob
 # config file path
 _config_path = os.path.join(os.path.dirname(__file__), '../configuration.cfg')
 
-# cluster id
-_pool_id = None
-
 if __name__ == '__main__':
+
+    _pool_id = None
+    _vm_count = None
+    _vm_size = None
+    _wait = True
 
     # parse arguments
     parser = argparse.ArgumentParser(prog="az_spark")
-
-    parser.add_argument("--cluster-id", required=True,
-                        help="the unique name of your spark cluster")
-
     args = parser.parse_args()
-    
-    print()
-    if args.cluster_id is not None:
-        _pool_id = args.cluster_id
-    print("delete cluster id:      %s" % _pool_id)
 
     # Read config file
     global_config = configparser.ConfigParser()
@@ -57,8 +50,9 @@ if __name__ == '__main__':
         credentials,
         base_url=batch_service_url)
 
-    # Delete specified cluster
-    sparklib.delete_cluster(
-        batch_client,
-        _pool_id)
+    # Set retry policy
+    batch_client.config.retry_policy.retries = 5
 
+    # create spark cluster
+    sparklib.list_clusters(
+        batch_client)
