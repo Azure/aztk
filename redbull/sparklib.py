@@ -60,7 +60,7 @@ def custom_app_cmd(webui_port, app_file_name):
         # kick off start-all spark command as a bg process 
         '($SPARK_HOME/sbin/start-all.sh --webui-port ' + str(webui_port) + ' &)',
 
-        # set the runtim to python 3
+        # set the runtime to python 3
         'export PYSPARK_PYTHON=/usr/bin/python3',
         'export PYSPARK_DRIVER_PYTHON=python3',
 
