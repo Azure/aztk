@@ -192,9 +192,10 @@ def get_master_node_id(batch_client, pool_id):
     # Currently, the jobId == poolId so this is safe to assume
     job_id = pool_id
     tasks = batch_client.task.list(job_id=job_id)
-    tasks = [task for task in tasks if
-             task.state != batchmodels.TaskState.completed]
-    
+
+    # Create a local collection from the cloud enumerable
+    tasks = [task for task in tasks]
+
     if (len(tasks) > 0):
         master_node_id = tasks[0].node_info.node_id
         return master_node_id
@@ -203,15 +204,18 @@ def get_master_node_id(batch_client, pool_id):
 
 def list_clusters(
     batch_client):
-    print_format = '{:<32}|{:<10}|{:1<0}'
-    print_format_underline = '{:-<32}|{:-<10}|{:-<10}'
+    print_format = '{:<34}| {:<10}| {:<20}| {:<7}'
+    print_format_underline = '{:-<34}|{:-<11}|{:-<21}|{:-<7}'
     
     pools = batch_client.pool.list()
-    print(print_format.format('Cluster', 'State', 'Nodes'))
-    print(print_format_underline.format('','',''))
+    print(print_format.format('Cluster', 'State', 'VM Size', 'Nodes'))
+    print(print_format_underline.format('','','',''))
     for pool in pools:
-        print(print_format.format(pool.id, pool.state.value, pool.current_dedicated))
-    
+        pool_state = pool.allocation_state.value if pool.state.value is "active" else pool.state.value
+        print(print_format.format(pool.id, 
+            pool_state, 
+            pool.vm_size,
+            pool.current_dedicated))    
 
 def delete_cluster(
         batch_client,
