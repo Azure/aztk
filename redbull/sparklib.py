@@ -298,7 +298,6 @@ def ssh_app(
     print('\t%s' % ssh_command)
     print()
 
-#TODO actually print
 def list_apps(
         batch_client,
         pool_id):
@@ -311,6 +310,7 @@ def list_apps(
     :type pool_id: string
     """
     apps = batch_client.task.list(job_id=pool_id)
+    #TODO actually print
     print(apps)
 
 # TODO not working 

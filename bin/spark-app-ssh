@@ -86,8 +86,8 @@ if __name__ == '__main__':
         pool_id = _pool_id,
         app_id = _app_id,
         username = _username,
-        password = _password)
-        ports = [8888])
+        password = _password,
+        ports = [8082])
     
 
 
