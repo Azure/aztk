@@ -9,9 +9,6 @@ _WEBUI_PORT = 8082
 _JUPYTER_PORT = 7777
 
 def cluster_install_cmd():
-    '''
-    this command is run-elevated
-    '''
     return [
         'export SPARK_HOME=/dsvm/tools/spark/current',
         'export PATH=$PATH:$SPARK_HOME/bin',
@@ -94,6 +91,9 @@ def jupyter_cmd(webui_port, jupyter_port):
         'export SPARK_HOME=/dsvm/tools/spark/current',
         'export PATH=$PATH:$SPARK_HOME/bin',
 
+        # get master node ip
+        'export MASTER_NODE=$(cat $SPARK_HOME/conf/master)',
+
         # kick off start-all spark command as a bg process 
         '($SPARK_HOME/sbin/start-all.sh  --webui-port ' + str(webui_port) + ' &)',
 
@@ -121,17 +121,6 @@ def create_cluster(
         wait = True):
     """
     Create a spark cluster
-
-    :param batch_client: the batch client to use
-    :type batch_client: 'batchserviceclient.BatchServiceClient'
-    :param pool_id: The id of the pool to create
-    :type pool_id: string
-    :param vm_count: the number of nodes in the pool
-    :type vm_count: int
-    :param vm_size: The vm size to use
-    :type vm_size: string
-    :param wait: whether or not to wait for pool creation to compelete
-    :type wait: boolean
     """
 
     # vm image
@@ -275,11 +264,6 @@ def delete_cluster(
         pool_id):
     """
     Delete a spark cluster
-
-    :param batch_client: the batch client to use
-    :type batch_client: 'batchserviceclient.BatchServiceClient'
-    :param pool_id: The id of the pool to create
-    :type pool_id: string
     """
     # delete pool by id
     pool = batch_client.pool.get(pool_id)
@@ -306,19 +290,6 @@ def submit_app(
 
     """
     Submit a spark app 
-
-    :param batch_client: the batch client to use
-    :type batch_client: 'batchserviceclient.BatchServiceClient'
-    :param block_blob_client: A blob service client.
-    :type block_blob_client: `azure.storage.blob.BlockBlobService`
-    :param pool_id: The id of the pool to submit app to 
-    :type pool_id: string
-    :param app_id: The id of the spark app (corresponds to batch task)
-    :type app_id: string
-    :param app_file_path: The path of the spark app to run
-    :type app_file_path: string
-    :param app_file_name: The name of the spark app file to run
-    :type app_file_name: string
     """
 
     # Upload app resource files to blob storage
@@ -361,17 +332,6 @@ def ssh(
 
     """
     SSH into head node of spark-app
-
-    :param batch_client: the batch client to use
-    :type batch_client: 'batchserviceclient.BatchServiceClient'
-    :param pool_id: The id of the pool to submit app to 
-    :type pool_id: string
-    :param username: The username to access the head node via ssh
-    :type username: string
-    :param password: The password to access the head node via ssh
-    :type password: string
-    :param ports: A list of ports to open tunnels to
-    :type ports: [<int>]
     """
 
     # Get master node id from task (job and task are both named pool_id)
@@ -414,11 +374,6 @@ def list_apps(
         pool_id):
     """
     List all spark apps for a given cluster
-
-    :param batch_client: the batch client to use
-    :type batch_client: 'batchserviceclient.BatchServiceClient'
-    :param pool_id: The id of the pool to submit app to 
-    :type pool_id: string
     """
     apps = batch_client.task.list(job_id=pool_id)
     #TODO actually print
@@ -433,16 +388,6 @@ def jupyter(
         password):
     """
     Install jupyter, create app_id and open ssh tunnel
-
-    :param batch_client: the batch client to use
-    :type batch_client: 'batchserviceclient.BatchServiceClient'
-    :param pool_id: The id of the pool to submit app to 
-    :type pool_id: string
-    :param username: The username to access the head node via ssh
-    :type username: string
-    :param password: The password to access the head node via ssh
-    :type password: string
-
     """
 
     # create application/coordination commands
