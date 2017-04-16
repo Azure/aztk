@@ -44,10 +44,9 @@ def cluster_connect_cmd():
         'cp $SPARK_HOME/conf/slaves $SPARK_HOME/conf/master',
 
         # add batch pool ips to newly created slaves files
-        # make file name master
         'IFS="," read -r -a workerips <<< $AZ_BATCH_HOST_LIST',
         'for index in "${!workerips[@]}"',
-        'do echo "{workerips[index]}"',
+        'do echo "${workerips[index]}"',
         'if [ "${AZ_BATCH_MASTER_NODE%:*}" = "${workerips[index]}" ]',
             'then echo "${workerips[index]}" >> $SPARK_HOME/conf/master', 
             'else echo "${workerips[index]}" >> $SPARK_HOME/conf/slaves',
@@ -55,14 +54,31 @@ def cluster_connect_cmd():
         'done'
     ]
 
-def cluster_start_cmd(webui_port):
+def cluster_start_cmd(webui_port, jupyter_port):
     return [
         # set SPARK_HOME environment vars
         'export SPARK_HOME=/dsvm/tools/spark/current',
         'export PATH=$PATH:$SPARK_HOME/bin',
 
+        # get master node ip
+        'export MASTER_NODE=$(cat $SPARK_HOME/conf/master)',
+
         # kick off start-all spark command as a bg process 
         '($SPARK_HOME/sbin/start-all.sh --webui-port ' + str(webui_port) + ' &)',
+
+        # jupyter setup: remove auth
+        '/anaconda/envs/py35/bin/jupyter notebook --generate-config',
+        'echo >> $HOME/.jupyter/jupyter_notebook_config.py',
+        'echo c.NotebookApp.token=\\\"\\\" >> $HOME/.jupyter/jupyter_notebook_config.py',
+        'echo c.NotebookApp.password=\\\"\\\" >> $HOME/.jupyter/jupyter_notebook_config.py',
+
+        # start jupyter notebook
+        'PYSPARK_DRIVER_PYTHON=/anaconda/envs/py35/bin/jupyter ' +
+            'PYSPARK_DRIVER_PYTHON_OPTS="notebook --no-browser --port=' + str(jupyter_port) + '" ' +
+            'pyspark ' +
+            '--master spark://${MASTER_NODE%:*}:7077 ' +
+            '--executor-memory 6400M ' +
+            '--driver-memory 6400M'
     ]
 
 def app_submit_cmd(webui_port, app_file_name):
@@ -82,35 +98,6 @@ def app_submit_cmd(webui_port, app_file_name):
         '$SPARK_HOME/bin/spark-submit ' +
             '--master spark://${MASTER_NODE%:*}:7077 ' + 
             '$AZ_BATCH_TASK_WORKING_DIR/' + app_file_name
-    ]
-
-# TODO not working
-def jupyter_cmd(webui_port, jupyter_port):
-    return [
-        # set SPARK_HOME environment vars
-        'export SPARK_HOME=/dsvm/tools/spark/current',
-        'export PATH=$PATH:$SPARK_HOME/bin',
-
-        # get master node ip
-        'export MASTER_NODE=$(cat $SPARK_HOME/conf/master)',
-
-        # kick off start-all spark command as a bg process 
-        '($SPARK_HOME/sbin/start-all.sh  --webui-port ' + str(webui_port) + ' &)',
-
-        # jupyter setup: remove auth
-        'mkdir $HOME/.jupyter',
-        'touch $HOME/.jupyter/jupyter_notebook_config.py',
-        'echo >> $HOME/.jupyter/jupyter_notebook_config.py',
-        'echo "c.NotebookApp.token=\'\'" >> $HOME/.jupyter/jupyter_notebook_config.py',
-        'echo "c.NotebookApp.password=\'\'" >> $HOME/.jupyter/jupyter_notebook_config.py',
-
-        # start jupyter notebook
-        'PYSPARK_DRIVER_PYTHON=jupyter ' +
-            'PYSPARK_DRIVER_PYTHON_OPTS="notebook --no-browser --port=' + str(jupyter_port) + '" ' +
-            'pyspark ' +
-            '--master spark://${AZ_BATCH_MASTER_NODE%:*}:7077 ' +
-            '--executor-memory 6400M ' +
-            '--driver-memory 6400M'
     ]
 
 def create_cluster(
@@ -167,7 +154,7 @@ def create_cluster(
 
     # create application/coordination commands
     coordination_cmd = cluster_connect_cmd()
-    application_cmd = cluster_start_cmd(_WEBUI_PORT)
+    application_cmd = cluster_start_cmd(_WEBUI_PORT, _JUPYTER_PORT)
 
     # reuse pool_id as multi-instance task id
     task_id = pool_id
@@ -387,7 +374,7 @@ def jupyter(
         username,
         password):
     """
-    Install jupyter, create app_id and open ssh tunnel
+    Open jupyter ssh tunnel
     """
 
     # create application/coordination commands
