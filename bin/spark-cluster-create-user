@@ -50,7 +50,7 @@ if __name__ == '__main__':
     if args.password is not None:
         _password = args.password
     print("az_spark password:     %s" % _password)
- 
+
     # Read config file
     global_config = configparser.ConfigParser()
     global_config.read(_config_path)
@@ -73,16 +73,12 @@ if __name__ == '__main__':
     # Set retry policy
     batch_client.config.retry_policy.retries = 5
 
-    # set app_id to jupyter
-    app_id = "jupyter-" + _pool_id
-
     # get ssh command
-    sparklib.jupyter(
+    sparklib.create_user(
         batch_client, 
-        pool_id = _pool_id,
-        app_id = app_id,
-        username = _username,
-        password = _password)
+        _pool_id,
+        _username,
+        _password)
     
 
 

@@ -63,7 +63,7 @@ def cluster_start_cmd(webui_port, jupyter_port):
         # get master node ip
         'export MASTER_NODE=$(cat $SPARK_HOME/conf/master)',
 
-        # kick off start-all spark command as a bg process 
+        # kick off start-all spark command (which starts web ui)
         '($SPARK_HOME/sbin/start-all.sh --webui-port ' + str(webui_port) + ' &)',
 
         # jupyter setup: remove auth
@@ -73,12 +73,12 @@ def cluster_start_cmd(webui_port, jupyter_port):
         'echo c.NotebookApp.password=\\\"\\\" >> $HOME/.jupyter/jupyter_notebook_config.py',
 
         # start jupyter notebook
-        'PYSPARK_DRIVER_PYTHON=/anaconda/envs/py35/bin/jupyter ' +
+        '(PYSPARK_DRIVER_PYTHON=/anaconda/envs/py35/bin/jupyter ' +
             'PYSPARK_DRIVER_PYTHON_OPTS="notebook --no-browser --port=' + str(jupyter_port) + '" ' +
             'pyspark ' +
             '--master spark://${MASTER_NODE%:*}:7077 ' +
             '--executor-memory 6400M ' +
-            '--driver-memory 6400M'
+            '--driver-memory 6400M &)'
     ]
 
 def app_submit_cmd(webui_port, app_file_name):
@@ -141,8 +141,11 @@ def create_cluster(
         enable_inter_node_communication = True,
         max_tasks_per_node = 1)
 
-    # Create the pool
-    util.create_pool_if_not_exist(batch_client, pool, wait=wait)
+    # Create the pool + create user for the pool
+    util.create_pool_if_not_exist(
+        batch_client, 
+        pool, 
+        wait)
 
     # Create job 
     job = batch_models.JobAddParameter(
@@ -179,6 +182,29 @@ def create_cluster(
             batch_client,
             job_id,
             datetime.timedelta(minutes=60))
+
+def create_user(
+        batch_client,
+        pool_id,
+        username, 
+        password):
+    """
+    Create a cluster user
+    """
+
+    # Get master node id from task (job and task are both named pool_id)
+    master_node_id = batch_client.task \
+        .get(job_id=pool_id, task_id=pool_id) \
+        .node_info.node_id
+
+    # Create new ssh user for the master node
+    batch_client.compute_node.add_user(
+        pool_id,
+        master_node_id,
+        batch_models.ComputeNodeUser(
+            username,
+            is_admin = True,
+            password = password))
 
 
 def get_cluster_details(
@@ -313,30 +339,18 @@ def submit_app(
 def ssh(
         batch_client,
         pool_id,
-        username,
-        password,
         ports = None):
 
     """
     SSH into head node of spark-app
+    :param ports: an list of local and remote ports
+    :type ports: [[<local-port>, <remote-port>]]
     """
 
     # Get master node id from task (job and task are both named pool_id)
     master_node_id = batch_client.task \
         .get(job_id=pool_id, task_id=pool_id) \
         .node_info.node_id
-
-    # Create new ssh user for the master node
-    batch_client.compute_node.add_user(
-        pool_id,
-        master_node_id,
-        batch_models.ComputeNodeUser(
-            username,
-            is_admin = True,
-            password = password))
-
-    print('\nuser "{}" added to node "{}"in pool "{}"'.format(
-        username, master_node_id, pool_id))
 
     # get remote login settings for the user
     remote_login_settings = batch_client.compute_node.get_remote_login_settings(
@@ -348,13 +362,31 @@ def ssh(
     # build ssh tunnel command
     ssh_command = "ssh "
     for port in ports:
-        ssh_command += "-L " + str(port) + ":localhost:" + str(port) + " "
-    ssh_command += username + "@" + str(master_node_ip) + " -p " + str(master_node_port)
+        ssh_command += "-L " + str(port[0]) + ":localhost:" + str(port[1]) + " "
+    ssh_command += "<username>@" + str(master_node_ip) + " -p " + str(master_node_port)
 
     print('\nuse the following command to connect to your spark head node:')
     print()
     print('\t%s' % ssh_command)
     print()
+
+def jupyter(
+        batch_client,
+        pool_id,
+        local_port):
+    """
+    SSH tunnel for Jupyter
+    """
+    ssh(batch_client, pool_id, [[local_port, _JUPYTER_PORT]])
+
+def webui(
+        batch_client,
+        pool_id,
+        local_port):
+    """
+    SSH tunnel for spark web-ui
+    """
+    ssh(batch_client, pool_id, [[local_port, _WEBUI_PORT]])
 
 def list_apps(
         batch_client,
@@ -366,55 +398,4 @@ def list_apps(
     #TODO actually print
     print(apps)
 
-# TODO not working 
-def jupyter(
-        batch_client,
-        pool_id,
-        app_id,
-        username,
-        password):
-    """
-    Open jupyter ssh tunnel
-    """
-
-    # create application/coordination commands
-    coordination_cmd = cluster_connect_cmd()
-    application_cmd = jupyter_cmd(_WEBUI_PORT, _JUPYTER_PORT)
- 
-    # Get pool size
-    pool = batch_client.pool.get(pool_id)
-    pool_size = pool.target_dedicated
-
-    # Create multi-instance task
-    task = batch_models.TaskAddParameter(
-        id = app_id,
-        command_line = util.wrap_commands_in_shell(application_cmd),
-        resource_files = [],
-        run_elevated = False,
-        multi_instance_settings = batch_models.MultiInstanceSettings(
-            number_of_instances = pool_size,
-            coordination_command_line = util.wrap_commands_in_shell(coordination_cmd),
-            common_resource_files = []))
-
-    # Add task to batch job (which has the same name as pool_id)
-    job_id = pool_id
-    batch_client.task.add(job_id = job_id, task = task)
-
-    # get job id (job id is the same as pool id)
-    job_id = pool_id
-
-    # Wait for the app to finish
-    util.wait_for_tasks_to_complete(
-        batch_client,
-        job_id,
-        datetime.timedelta(minutes=60))
-
-    # print ssh command
-    ssh_app(
-        batch_client,
-        pool_id,
-        app_id,
-        username,
-        password,
-        ports = [_JUPYTER_PORT, _WEBUI_PORT])
-    
+   
