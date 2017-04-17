@@ -142,9 +142,10 @@ def create_cluster(
         target_dedicated = vm_count,
         start_task = batch_models.StartTask(
             command_line = util.wrap_commands_in_shell(start_task_commands),
-            
-            #TODO - This needs to run as pool admin, not task admin.
-            run_elevated = True,
+            user_identity = batch_models.UserIdentity(
+                auto_user = batch_models.AutoUserSpecification(
+                    scope=batch_models.AutoUserScope.pool,
+                    elevation_level=batch_models.ElevationLevel.admin)),
             wait_for_success = True),
         enable_inter_node_communication = True,
         max_tasks_per_node = 1)
@@ -175,7 +176,10 @@ def create_cluster(
         id = task_id,
         command_line = util.wrap_commands_in_shell(application_cmd),
         resource_files = [],
-        run_elevated = False,
+        user_identity = batch_models.UserIdentity(
+            auto_user= batch_models.AutoUserSpecification(
+                scope= batch_models.AutoUserScope.task,
+                elevation_level= batch_models.ElevationLevel.admin)),
         multi_instance_settings = batch_models.MultiInstanceSettings(
             number_of_instances = vm_count,
             coordination_command_line = util.wrap_commands_in_shell(coordination_cmd),
@@ -275,7 +279,8 @@ def list_clusters(
     print(print_format.format('Cluster', 'State', 'VM Size', 'Nodes'))
     print(print_format_underline.format('','','',''))
     for pool in pools:
-       pool_state = pool.allocation_state.value if pool.state.value is "active" else pool.state.value
+        pool_state = pool.allocation_state.value if pool.state.value is "active" else pool.state.value
+
         print(print_format.format(pool.id, 
             pool_state, 
             pool.vm_size,
@@ -335,7 +340,7 @@ def submit_app(
         multi_instance_settings = batch_models.MultiInstanceSettings(
             number_of_instances = pool_size,
             coordination_command_line = util.wrap_commands_in_shell(coordination_cmd),
-            common_resource_files = []))
+            common_resource_files = [])
     )
 
     # Add task to batch job (which has the same name as pool_id)
