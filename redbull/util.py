@@ -128,6 +128,7 @@ def wait_for_all_nodes_state(batch_client, pool, node_state):
                 'resize error encountered for pool {}: {!r}'.format(
                     pool.id, pool.resize_error))
         nodes = list(batch_client.compute_node.list(pool.id))
+
         if (len(nodes) >= pool.target_dedicated and
                 all(node.state in node_state for node in nodes)):
             return nodes

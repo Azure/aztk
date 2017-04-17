@@ -23,7 +23,6 @@ _config_path = os.path.join(os.path.dirname(__file__), '../configuration.cfg')
 if __name__ == '__main__':
 
     _pool_id = None
-    _app_id = None
     _username = 'admin'
     _password = 'pass123!'
 
@@ -32,8 +31,6 @@ if __name__ == '__main__':
 
     parser.add_argument("--cluster-id", required=True,
                         help="the unique name of your spark cluster")
-    parser.add_argument("--app-id", required=True,
-                        help="the unique name of your spark app")
     parser.add_argument("-u", "--user", 
                         help="the relative path to your spark app in your directory")
     parser.add_argument("-p", "--password", 
@@ -46,10 +43,6 @@ if __name__ == '__main__':
         _pool_id = args.cluster_id
     print("spark cluster id:      %s" % _pool_id)
 
-    if args.app_id is not None:
-        _app_id  = args.app_id
-    print("spark job id:          %s" % _app_id)
-
     if args.user is not None:
         _username = args.user
     print("az_spark username:     %s" % _username)
@@ -57,7 +50,7 @@ if __name__ == '__main__':
     if args.password is not None:
         _password = args.password
     print("az_spark password:     %s" % _password)
- 
+
     # Read config file
     global_config = configparser.ConfigParser()
     global_config.read(_config_path)
@@ -81,13 +74,11 @@ if __name__ == '__main__':
     batch_client.config.retry_policy.retries = 5
 
     # get ssh command
-    sparklib.ssh_app(
+    sparklib.create_user(
         batch_client, 
-        pool_id = _pool_id,
-        app_id = _app_id,
-        username = _username,
-        password = _password,
-        ports = [8082])
+        _pool_id,
+        _username,
+        _password)
     
 
 
