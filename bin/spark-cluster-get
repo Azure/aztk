@@ -41,7 +41,6 @@ if __name__ == '__main__':
     print()
     if args.cluster_id is not None:
         _pool_id = args.cluster_id
-    print("get cluster id:      %s" % _pool_id)
 
     # Read config file
     global_config = configparser.ConfigParser()
