@@ -54,5 +54,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-#sed -i -e '/Defaults requiretty/{ s/.*/# Defaults requiretty/ }' /etc/sudoers && sudo mount -t cifs //batchprodtest2.file.core.windows.net/data /mnt/foo -o vers=3.0,username=batchprodtest2,password=hoP+BHys7+8RDfc4Bzj8lEKhw86n4ppQFlMoRMgmsjN3lUU8WIrEyAThKu4bANbnRfg6uyI/BOo9PH46qaX5Hg==,dir_mode=0777,file_mode=0777
