@@ -10,12 +10,18 @@ _JUPYTER_PORT = 7777
 
 def install_cmd():
     '''
-    this command is run-elevated
+    this command is run-elevated - run as pool-admin
     '''
     return [
         'export SPARK_HOME=/dsvm/tools/spark/current',
         'export PATH=$PATH:$SPARK_HOME/bin',
         'chmod -R 777 $SPARK_HOME',
+
+        # allow SUDO to be run from tasks
+        # Dislabe tty on CENTOS images
+        'sed -i -e "/Defaults requiretty/{ s/.*/# Defaults requiretty/ }" /etc/sudoers',
+
+        # exit cleanly
         'exit 0'
     ]
 
@@ -139,6 +145,8 @@ def create_cluster(
         target_dedicated = vm_count,
         start_task = batch_models.StartTask(
             command_line = util.wrap_commands_in_shell(start_task_commands),
+            
+            #TODO - This needs to run as pool admin, not task admin.
             run_elevated = True,
             wait_for_success = True),
         enable_inter_node_communication = True,
@@ -163,8 +171,9 @@ def get_cluster_details(
     if (pool.state == batch_models.PoolState.deleting):
         print
     nodes = batch_client.compute_node.list(pool_id=pool_id)
+    visible_state = pool.allocation_state.value if pool.state.value is "active" else pool.state.value
     # node_specs = common.vm_helpers.get_vm_specs(pool.vm_size)
-    print("State:       {}".format(pool.state.value))
+    print("State:       {}".format(visible_state))
     print("Node Size:   {}".format(pool.vm_size))
     # print("Node Size:   {} [{} Core(s), {} GB RAM, {} GB Disk]".format(
     #     pool.vm_size,
@@ -178,8 +187,8 @@ def get_cluster_details(
 
     print()
     node_label = "Nodes ({})".format(pool.current_dedicated)
-    print_format = '{:<34}| {:<10} | {:<21}| {:<8}'
-    print_format_underline = '{:-<34}|{:-<12}|{:-<22}|{:-<8}'
+    print_format = '{:<34}| {:<15} | {:<21}| {:<8}'
+    print_format_underline = '{:-<34}|{:-<17}|{:-<22}|{:-<8}'
     print(print_format.format(node_label, 'State', 'IP:Port', 'Master'))
     print(print_format_underline.format('', '', '', ''))
 
@@ -214,7 +223,8 @@ def list_clusters(
     print(print_format.format('Cluster', 'State', 'Nodes'))
     print(print_format_underline.format('','',''))
     for pool in pools:
-        print(print_format.format(pool.id, pool.state.value, pool.current_dedicated))
+        visible_state = pool.allocation_state.value if pool.state.value is "active" else pool.state.value
+        print(print_format.format(pool.id, visible_state, pool.current_dedicated))
     
 
 def delete_cluster(
@@ -286,7 +296,7 @@ def submit_app(
         id = app_id,
         command_line = util.wrap_commands_in_shell(application_cmd),
         resource_files = [app_resource_file],
-        run_elevated = False,
+        run_elevated = True,
         multi_instance_settings = batch_models.MultiInstanceSettings(
             number_of_instances = pool_size,
             coordination_command_line = util.wrap_commands_in_shell(coordination_cmd),
