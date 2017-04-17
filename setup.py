@@ -17,5 +17,5 @@ setup(name='redbull',
                'bin/spark-cluster-get',
                'bin/spark-cluster-list',
                'bin/spark-app-submit',
-               'bin/spark-app-list']
+               'bin/spark-app-list'],
       zip_safe=False)

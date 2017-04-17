@@ -1,6 +1,9 @@
 # custom
 configuration.cfg
 
+# Virtual environments
+ENV/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
