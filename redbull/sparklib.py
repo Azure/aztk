@@ -178,7 +178,7 @@ def create_cluster(
         resource_files = [],
         user_identity = batch_models.UserIdentity(
             auto_user= batch_models.AutoUserSpecification(
-                scope= batch_models.AutoUserScope.task,
+                scope= batch_models.AutoUserScope.pool,
                 elevation_level= batch_models.ElevationLevel.admin)),
         multi_instance_settings = batch_models.MultiInstanceSettings(
             number_of_instances = vm_count,
@@ -186,7 +186,14 @@ def create_cluster(
             common_resource_files = []))
 
     # Add task to batch job (which has the same name as pool_id)
-    batch_client.task.add(job_id = job_id, task = task)
+    try:
+        batch_client.task.add(job_id = job_id, task = task)
+    except batch_models.batch_error.BatchErrorException as err:
+        util.print_batch_exception(err)
+        if err.error.code != "JobExists":
+            raise
+        else:
+            print("Job {!r} already exists".format(job_id))
 
     # Wait for the app to finish
     if wait == True:
@@ -265,6 +272,9 @@ def get_master_node_id(batch_client, pool_id):
     tasks = [task for task in tasks]
 
     if (len(tasks) > 0):
+        if (tasks[0].node_info is None):
+            return ""
+
         master_node_id = tasks[0].node_info.node_id
         return master_node_id
 
@@ -331,16 +341,20 @@ def submit_app(
     pool = batch_client.pool.get(pool_id)
     pool_size = pool.target_dedicated
 
+    # Affinitize task to master node
+    master_node_affinity_id = get_master_node_id(batch_client, pool_id)
+
     # Create task
     task = batch_models.TaskAddParameter(
         id=app_id,
+        affinity_info=batch_models.AffinityInformation(
+            affinity_id=master_node_affinity_id),
         command_line=util.wrap_commands_in_shell(cmd),
         resource_files = [app_resource_file],
-        run_elevated = True,
-        multi_instance_settings = batch_models.MultiInstanceSettings(
-            number_of_instances = pool_size,
-            coordination_command_line = util.wrap_commands_in_shell(coordination_cmd),
-            common_resource_files = [])
+        user_identity = batch_models.UserIdentity(
+            auto_user= batch_models.AutoUserSpecification(
+                scope= batch_models.AutoUserScope.task,
+                elevation_level= batch_models.ElevationLevel.admin))
     )
 
     # Add task to batch job (which has the same name as pool_id)
