@@ -61,7 +61,7 @@ if __name__ == '__main__':
     if args.wait is not None:
         if args.wait == False:
             _wait = False
-    print("wait for cluster:      %r" % _wait)
+    print("wait for job:          %r" % _wait)
 
     # Read config file
     global_config = configparser.ConfigParser()
