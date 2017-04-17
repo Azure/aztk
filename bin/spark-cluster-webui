@@ -23,17 +23,26 @@ _config_path = os.path.join(os.path.dirname(__file__), '../configuration.cfg')
 if __name__ == '__main__':
 
     _pool_id = None
+    _local_port = 8080
+
     # parse arguments
     parser = argparse.ArgumentParser(prog="az_spark")
 
     parser.add_argument("--cluster-id", required=True,
                         help="the unique name of your spark cluster")
+    parser.add_argument("--local-port",
+                        help="the port you want your spark webui session mapped to")
+
     args = parser.parse_args()
     
     print()
     if args.cluster_id is not None:
         _pool_id = args.cluster_id
     print("spark cluster id:      %s" % _pool_id)
+
+    if args.local_port is not None:
+        _local_port = args.local_port
+    print("local port:            %i" % _local_port)
 
     # Read config file
     global_config = configparser.ConfigParser()
@@ -58,17 +67,10 @@ if __name__ == '__main__':
     batch_client.config.retry_policy.retries = 5
 
     # get ssh command
-    sparklib.ssh(
+    sparklib.webui(
         batch_client, 
-        pool_id = _pool_id)
-    
-
-
-
-
-
-
-
+        pool_id = _pool_id,
+        local_port = _local_port)
 
 
 
