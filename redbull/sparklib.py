@@ -377,14 +377,3 @@ def ssh(
     print('\t%s' % ssh_command)
     print()
 
-def list_apps(
-        batch_client,
-        pool_id):
-    """
-    List all spark apps for a given cluster
-    """
-    apps = batch_client.task.list(job_id=pool_id)
-    #TODO actually print
-    print(apps)
-
-   

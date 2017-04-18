@@ -12,7 +12,9 @@ setup(name='redbull',
                'bin/spark-cluster-delete',
                'bin/spark-cluster-create-user',
                'bin/spark-cluster-ssh',
+               'bin/spark-cluster-jupyter',
+               'bin/spark-cluster-webui',
                'bin/spark-cluster-get',
                'bin/spark-cluster-list',
-               'bin/spark-app-submit']
+               'bin/spark-app-submit'],
       zip_safe=False)
