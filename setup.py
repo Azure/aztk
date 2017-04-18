@@ -14,6 +14,5 @@ setup(name='redbull',
                'bin/spark-cluster-ssh',
                'bin/spark-cluster-get',
                'bin/spark-cluster-list',
-               'bin/spark-app-submit',
-               'bin/spark-app-list']
+               'bin/spark-app-submit']
       zip_safe=False)
