@@ -291,10 +291,17 @@ def list_clusters(
     for pool in pools:
         pool_state = pool.allocation_state.value if pool.state.value is "active" else pool.state.value
 
+        node_count = pool.current_dedicated
+        if pool_state is "resizing" or (pool_state is "deleting" and pool.allocation_state.value is "resizing"):
+            if pool.target_dedicated > pool.current_dedicated:
+                node_count = '{} -> {}'.format(pool.current_dedicated, pool.target_dedicated)        
+            else:
+                node_count = '{} -> {}'.format(pool.target_dedicated, pool.current_dedicated)     
+   
         print(print_format.format(pool.id, 
             pool_state, 
             pool.vm_size,
-            pool.current_dedicated))    
+            node_count))
 
 def delete_cluster(
         batch_client,
