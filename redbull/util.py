@@ -95,7 +95,7 @@ def create_pool_if_not_exist(batch_client, pool, wait=True):
         batch_client.pool.add(pool)
         if wait:
             wait_for_all_nodes_state(batch_client, pool, frozenset(
-               (batch_models.ComputeNodeState.starttaskfailed,
+               (batch_models.ComputeNodeState.start_task_failed,
                 batch_models.ComputeNodeState.unusable,
                 batch_models.ComputeNodeState.idle)
             ))
