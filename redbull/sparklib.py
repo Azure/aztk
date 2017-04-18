@@ -339,6 +339,8 @@ def submit_app(
 def ssh(
         batch_client,
         pool_id,
+        webui = None,
+        jupyter = None,
         ports = None):
 
     """
@@ -361,32 +363,19 @@ def ssh(
 
     # build ssh tunnel command
     ssh_command = "ssh "
-    for port in ports:
-        ssh_command += "-L " + str(port[0]) + ":localhost:" + str(port[1]) + " "
+    if webui is not None:
+        ssh_command += "-L " + str(webui) + ":localhost:" + str(_WEBUI_PORT) + " "
+    if jupyter is not None:
+        ssh_command += "-L " + str(jupyter) + ":localhost:" + str(_JUPYTER_PORT) + " "
+    if ports is not None:
+        for port in ports:
+            ssh_command += "-L " + str(port[0]) + ":localhost:" + str(port[1]) + " "
     ssh_command += "<username>@" + str(master_node_ip) + " -p " + str(master_node_port)
 
     print('\nuse the following command to connect to your spark head node:')
     print()
     print('\t%s' % ssh_command)
     print()
-
-def jupyter(
-        batch_client,
-        pool_id,
-        local_port):
-    """
-    SSH tunnel for Jupyter
-    """
-    ssh(batch_client, pool_id, [[local_port, _JUPYTER_PORT]])
-
-def webui(
-        batch_client,
-        pool_id,
-        local_port):
-    """
-    SSH tunnel for spark web-ui
-    """
-    ssh(batch_client, pool_id, [[local_port, _WEBUI_PORT]])
 
 def list_apps(
         batch_client,
