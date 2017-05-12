@@ -1,5 +1,5 @@
 # Redbull
-Run Spark on Azure Batch
+Run Spark Standalone on Azure Batch
 
 ## Setup  
 1. Clone the repo
@@ -11,14 +11,16 @@ Run Spark on Azure Batch
     ```
     python3 setup.py install
     ```
-4. Rename 'configuration.cfg.template' to 'configuration.cfg' and fill in the fields for your Batch account and Storage account. These fields can be found in the Azure portal. To complete this step, you will need an Azure account that has a Batch account and Storage account:
+4. Rename 'configuration.cfg.template' to 'configuration.cfg' and fill in the fields for your Batch account and Storage account. These fields can be found in the Azure portal. 
+
+   To complete this step, you will need an Azure account that has a Batch account and Storage account:
     - To create an Azure account: https://azure.microsoft.com/free/
     - To create a Batch account: https://docs.microsoft.com/en-us/azure/batch/batch-account-create-portal
     - To create a Storage account: https://docs.microsoft.com/en-us/azure/storage/storage-create-storage-account
 
 ## Getting Started
 
-The entire experience of this package is centered around a few commands in the bin folder that you execute. 
+The entire experience of this package is centered around a few commands in the bin folder.
 
 First, create your cluster:
 ```
@@ -70,6 +72,3 @@ Finally, you can get the state of any specified cluster:
 ./bin/spark-cluster-get \
     --cluster-id <my-cluster-id>
 ```
-
-
-

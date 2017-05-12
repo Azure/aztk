@@ -39,7 +39,7 @@ if __name__ == '__main__':
                         help="size of each vm in your cluster")
     parser.add_argument('--wait', dest='wait', action='store_true')
     parser.add_argument('--no-wait', dest='wait', action='store_false')
-    parser.set_defaults(wait=True)
+    parser.set_defaults(wait=False)
 
     args = parser.parse_args()
     

@@ -95,7 +95,7 @@ def create_pool_if_not_exist(batch_client, pool, wait=True):
         batch_client.pool.add(pool)
         if wait:
             wait_for_all_nodes_state(batch_client, pool, frozenset(
-               (batch_models.ComputeNodeState.starttaskfailed,
+               (batch_models.ComputeNodeState.start_task_failed,
                 batch_models.ComputeNodeState.unusable,
                 batch_models.ComputeNodeState.idle)
             ))
@@ -250,3 +250,20 @@ def get_connection_info(batch_client, pool_id, node_id):
     remote_ip = rls.remote_login_ip_address
     ssh_port = str(rls.remote_login_port)
     return (remote_ip, ssh_port)
+
+def print_batch_exception(batch_exception):
+    """
+    Prints the contents of the specified Batch exception.
+    :param batch_exception:
+    """
+    print('-------------------------------------------')
+    print('Exception encountered:')
+    if batch_exception.error and \
+            batch_exception.error.message and \
+            batch_exception.error.message.value:
+        print(batch_exception.error.message.value)
+        if batch_exception.error.values:
+            print()
+            for mesg in batch_exception.error.values:
+                print('{}:\t{}'.format(mesg.key, mesg.value))
+    print('-------------------------------------------')
