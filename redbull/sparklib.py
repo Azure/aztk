@@ -1,8 +1,7 @@
 from . import util
 
 import random
-import datetime
-
+from datetime import datetime, timedelta
 import azure.batch.models as batch_models
 
 _WEBUI_PORT = 8082
@@ -204,7 +203,8 @@ def create_user(
         batch_models.ComputeNodeUser(
             username,
             is_admin = True,
-            password = password))
+            password = password,
+            expiry_time = datetime.now() + timedelta(days=365)))
 
 
 def get_cluster_details(
