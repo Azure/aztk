@@ -1,11 +1,9 @@
-from . import util
+from . import util, constants
 
 import random
 from datetime import datetime, timedelta
 import azure.batch.models as batch_models
-
-_WEBUI_PORT = 8082
-_JUPYTER_PORT = 7777
+from subprocess import call
 
 def cluster_install_cmd():
     return [
@@ -106,25 +104,6 @@ def cluster_start_cmd(webui_port, jupyter_port):
         #     '--driver-memory 6400M &)'
     ]
 
-def app_submit_cmd(webui_port, app_file_name):
-    return [
-        # set SPARK_HOME environment vars
-        'export SPARK_HOME=/dsvm/tools/spark/current',
-        'export PATH=$PATH:$SPARK_HOME/bin',
-
-        # set the runtime to python 3
-        'export PYSPARK_PYTHON=/usr/bin/python3',
-        'export PYSPARK_DRIVER_PYTHON=python3',
-
-        # get master node ip
-        'export MASTER_NODE=$(cat $SPARK_HOME/conf/master)',
-
-        # execute spark-submit on the specified app 
-        '$SPARK_HOME/bin/spark-submit ' +
-            '--master spark://${MASTER_NODE%:*}:7077 ' + 
-            '$AZ_BATCH_TASK_WORKING_DIR/' + app_file_name
-    ]
-
 def create_cluster(
         batch_client,
         pool_id,
@@ -185,7 +164,7 @@ def create_cluster(
 
     # create application/coordination commands
     coordination_cmd = cluster_connect_cmd()
-    application_cmd = cluster_start_cmd(_WEBUI_PORT, _JUPYTER_PORT)
+    application_cmd = cluster_start_cmd(constants._WEBUI_PORT, constants._JUPYTER_PORT)
 
     # reuse pool_id as multi-instance task id
     task_id = pool_id
@@ -250,51 +229,26 @@ def get_cluster_details(
         print
     nodes = batch_client.compute_node.list(pool_id=pool_id)
     visible_state = pool.allocation_state.value if pool.state.value is "active" else pool.state.value
-    # node_specs = common.vm_helpers.get_vm_specs(pool.vm_size)
+    node_count = '{} -> {}'.format(pool.current_dedicated, pool.target_dedicated) if pool.state.value is "resizing" or (pool.state.value is "deleting" and pool.allocation_state.value is "resizing") else '{}'.format(pool.current_dedicated)
+
     print("State:       {}".format(visible_state))
     print("Node Size:   {}".format(pool.vm_size))
-    # print("Node Size:   {} [{} Core(s), {} GB RAM, {} GB Disk]".format(
-    #     pool.vm_size,
-    #     node_specs["Cores"],
-    #     node_specs["RAM"],
-    #     node_specs["Disk"]))
-    # print("Resources:   {} Core(s), {} GB RAM, {} GB Disk".format(
-    #     node_specs["Cores"] * pool.current_dedicated,
-    #     node_specs["RAM"] * pool.current_dedicated,
-    #     node_specs["Disk"] * pool.current_dedicated))
-
+    print("Nodes:       {}".format(node_count))
     print()
-    node_label = "Nodes ({})".format(pool.current_dedicated)
+
+    node_label = "Nodes"
     print_format = '{:<34}| {:<15} | {:<21}| {:<8}'
     print_format_underline = '{:-<34}|{:-<17}|{:-<22}|{:-<8}'
     print(print_format.format(node_label, 'State', 'IP:Port', 'Master'))
     print(print_format_underline.format('', '', '', ''))
 
-    master_node = get_master_node_id(batch_client, pool_id)
+    master_node = util.get_master_node_id(batch_client, pool_id)
 
     for node in nodes:
         ip, port = util.get_connection_info(batch_client, pool_id, node.id)
         print (print_format.format(node.id, node.state.value, "{}:{}".format(ip, port),
                                        "*" if node.id == master_node else ""))
     print()
-
-#TODO: Move this out of here
-def get_master_node_id(batch_client, pool_id):
-    # Currently, the jobId == poolId so this is safe to assume
-    job_id = pool_id
-    tasks = batch_client.task.list(job_id=job_id)
-
-    # Create a local collection from the cloud enumerable
-    tasks = [task for task in tasks]
-
-    if (len(tasks) > 0):
-        if (tasks[0].node_info is None):
-            return ""
-
-        master_node_id = tasks[0].node_info.node_id
-        return master_node_id
-
-    return ""
 
 def list_clusters(
         batch_client):
@@ -309,7 +263,7 @@ def list_clusters(
 
         node_count = pool.current_dedicated
         if pool_state is "resizing" or (pool_state is "deleting" and pool.allocation_state.value is "resizing"):
-            node_count = '{} -> {}'.format(pool.current_dedicated, pool.target_dedicated)        
+            node_count = '{} -> {}'.format(pool.current_dedicated, pool.target_dedicated)
    
         print(print_format.format(pool.id, 
             pool_state, 
@@ -335,65 +289,15 @@ def delete_cluster(
     else:
         print("\nThe pool, '%s', does not exist" % pool_id)
 
-
-def submit_app(
-        batch_client,
-        blob_client,
-        pool_id,
-        app_id,
-        app_file_path,
-        app_file_name,
-        wait):
-
-    """
-    Submit a spark app 
-    """
-
-    # Upload app resource files to blob storage
-    app_resource_file = \
-        util.upload_file_to_container(
-            blob_client, container_name = app_id, file_path = app_file_path)
-
-    # create command to submit task
-    cmd = app_submit_cmd(_WEBUI_PORT, app_file_name)
- 
-    # Get pool size
-    pool = batch_client.pool.get(pool_id)
-    pool_size = pool.target_dedicated
-
-    # Affinitize task to master node
-    master_node_affinity_id = get_master_node_id(batch_client, pool_id)
-
-    # Create task
-    task = batch_models.TaskAddParameter(
-        id=app_id,
-        affinity_info=batch_models.AffinityInformation(
-            affinity_id=master_node_affinity_id),
-        command_line=util.wrap_commands_in_shell(cmd),
-        resource_files = [app_resource_file],
-        user_identity = batch_models.UserIdentity(
-            auto_user= batch_models.AutoUserSpecification(
-                scope= batch_models.AutoUserScope.task,
-                elevation_level= batch_models.ElevationLevel.admin))
-    )
-
-    # Add task to batch job (which has the same name as pool_id)
-    job_id = pool_id
-    batch_client.task.add(job_id = job_id, task = task)
-
-    # Wait for the app to finish
-    if wait == True:
-        util.wait_for_tasks_to_complete(
-            batch_client,
-            job_id,
-            datetime.timedelta(minutes=60))
-
 def ssh(
         batch_client,
         pool_id,
+        username = None,
+        masterui = None,
         webui = None,
         jupyter = None,
-        ports = None):
+        ports = None,
+        connect = True):
 
     """
     SSH into head node of spark-app
@@ -415,17 +319,26 @@ def ssh(
 
     # build ssh tunnel command
     ssh_command = "ssh "
+    if masterui is not None:
+        ssh_command += "-L " + str(masterui) + ":localhost:" + str(constants._MASTER_UI_PORT) + " "
     if webui is not None:
-        ssh_command += "-L " + str(webui) + ":localhost:" + str(_WEBUI_PORT) + " "
+        ssh_command += "-L " + str(webui) + ":localhost:" + str(constants._WEBUI_PORT) + " "
     if jupyter is not None:
-        ssh_command += "-L " + str(jupyter) + ":localhost:" + str(_JUPYTER_PORT) + " "
+        ssh_command += "-L " + str(jupyter) + ":localhost:" + str(constants._JUPYTER_PORT) + " "
     if ports is not None:
         for port in ports:
             ssh_command += "-L " + str(port[0]) + ":localhost:" + str(port[1]) + " "
-    ssh_command += "<username>@" + str(master_node_ip) + " -p " + str(master_node_port)
+    
+    user = username if username is not None else "<username>";
+    ssh_command += user + "@" + str(master_node_ip) + " -p " + str(master_node_port)
+    ssh_command_array = ssh_command.split()
 
-    print('\nuse the following command to connect to your spark head node:')
-    print()
-    print('\t%s' % ssh_command)
-    print()
+    if (not connect):
+        print('\nuse the following command to connect to your spark head node:')
+        print()
+        print('\t%s' % ssh_command)
+        print()
+    else:
+        call(ssh_command_array)
 
+    

@@ -83,6 +83,23 @@ def print_configuration(config):
     print("\nConfiguration is:")
     print(configuration_dict)
 
+def get_master_node_id(batch_client, pool_id):
+    # Currently, the jobId == poolId so this is safe to assume
+    job_id = pool_id
+    tasks = batch_client.task.list(job_id=job_id)
+
+    # Create a local collection from the cloud enumerable
+    tasks = [task for task in tasks]
+
+    if (len(tasks) > 0):
+        if (tasks[0].node_info is None):
+            return ""
+
+        master_node_id = tasks[0].node_info.node_id
+        return master_node_id
+
+    return ""
+
 def create_pool_if_not_exist(batch_client, pool, wait=True):
     """Creates the specified pool if it doesn't already exist
     :param batch_client: The batch client to use.

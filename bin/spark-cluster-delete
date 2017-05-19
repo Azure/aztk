@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from redbull import sparklib
+from redbull import clusterlib
 
 try:
     import configparser
@@ -58,7 +58,7 @@ if __name__ == '__main__':
         base_url=batch_service_url)
 
     # Delete specified cluster
-    sparklib.delete_cluster(
+    clusterlib.delete_cluster(
         batch_client,
         _pool_id)
 
