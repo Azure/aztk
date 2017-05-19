@@ -23,45 +23,131 @@ _config_path = os.path.join(os.path.dirname(__file__), '../configuration.cfg')
 if __name__ == '__main__':
 
     _pool_id = None
-    _app_id = None
-    _app_file_name = None
-    _app_file_path = None
     _wait = True
 
+    # spark submit options we're passing through
+    _name = None
+    _app = None
+    _app_args = []
+    _main_class = None
+    _jars = []
+    _py_files = []
+    _files = []
+    _driver_memory = None
+    _executor_memory = None
+    _driver_cores = None
+    _executor_cores = None
+
     # parse arguments
-    parser = argparse.ArgumentParser(prog="az_spark")
+    parser = argparse.ArgumentParser(
+        prog="spark-app-submit", 
+        usage="spark-app-submit \n \
+            --cluster-id CLUSTER_ID \n \
+            --name APP_NAME \n \
+            [options] \n \
+            <app jar | python file> \n \
+            [app arguments]")
 
     parser.add_argument("--cluster-id", required=True,
                         help="the unique name of your spark cluster")
-    parser.add_argument("--app-id", required=True,
-                        help="the unique name of your spark app")
-    parser.add_argument("--file", required=True, 
-                        help="the relative path to your spark app in your directory")
-    parser.add_argument('--wait', dest='wait', action='store_true')
-    parser.add_argument('--no-wait', dest='wait', action='store_false')
+
+    parser.add_argument("--name", required=True,
+                        help="a name for your application")
+
+    parser.add_argument('--wait', dest='wait', action='store_true', 
+                        help="Wait for app to complete")
+    parser.add_argument('--no-wait', dest='wait', action='store_false', 
+                        help="Do not wait for app to complete")
     parser.set_defaults(wait=True)
+
+    parser.add_argument("--class", dest="main_class",
+                        help="Your application's main class (for Java only).")
+
+    parser.add_argument("--jars",
+                        help="Comma-separated list of local jars to include \
+                              on the driver and executor classpaths")
+
+    parser.add_argument("--py-files",
+                        help="Comma-separated list of .zip, .egg, or .py files \
+                              to place on the PYTHONPATH for Python apps.")
+
+    parser.add_argument("--files",
+                        help="Comma-separated list of .zip, .egg, or .py files \
+                              to place on the PYTHONPATH for Python apps.")
+
+    parser.add_argument("--driver-memory",
+                        help="Memory for driver (e.g. 1000M, 2G) (Default: 1024M).")
+
+    parser.add_argument("--executor-memory",
+                        help="Memory per executor (e.g. 1000M, 2G) (Default: 1G).")
+
+    parser.add_argument("--driver-cores",
+                        help="Cores for driver (Default: 1).")
+
+    parser.add_argument("--executor-cores",
+                        help="Number of cores per executor. (Default: All \
+                              available cores on the worker")
+
+    parser.add_argument("application", nargs='*',
+                        help="App jar OR python file to execute")
 
     args = parser.parse_args()
     
     print()
+
     if args.cluster_id is not None:
         _pool_id = args.cluster_id
-    print("spark cluster id:      %s" % _pool_id)
+        print("Spark cluster id: %s" % _pool_id)
 
-    if args.app_id is not None:
-        _app_id  = args.app_id
-    print("spark job id:          %s" % _app_id)
-
-    if args.file is not None:
-        _app_file_path = args.file
-        _app_file_name = os.path.basename(_app_file_path)
-    print("spark job file path:   %s" % _app_file_path)
-    print("spark job file name:   %s" % _app_file_name)
+    if args.name is not None:
+        _name = args.name
+        print("Spark app name: %s" % _name)
 
     if args.wait is not None:
         if args.wait == False:
             _wait = False
-    print("wait for job:          %r" % _wait)
+        print("Wait for app completion: %r" % _wait)
+
+    if args.main_class is not None:
+        _main_class = args.main_class
+        print("Entry point class: %s" % _main_class)
+
+    if args.jars is not None:
+        _jars = args.jars.replace(' ','').split(',')
+        print("JARS: %s" % _jars)
+
+    if args.py_files is not None:
+        _py_files = args.py_files.replace(' ','').split(',')
+        print("PY_Files: %s" % _py_files)
+
+    if args.files is not None:
+        _files = args.py_files.replace(' ','').split(',')
+        print("Files: %s" % _files)
+
+    if args.driver_memory is not None:
+        _driver_memory = args.driver_memory
+        print("Driver memory: %s" % _driver_memory)
+
+    if args.executor_memory is not None:
+        _executor_memory = args.executor_memory
+        print("Executor memory: %s" % _executor_memory)
+
+    if args.driver_cores is not None:
+        _driver_cores = args.driver_cores
+        print("Driver cores: %s" % _driver_cores)
+
+    if args.executor_cores is not None:
+        _executor_cores = args.executor_cores
+        print("Executor cores: %s" % _executor_cores)
+
+    if args.application is not None:
+        _app = args.application[0]
+        if len(args.application) > 1:
+            _app_args = args.application[1:]
+        print("Application: %s" % _app)
+        print("Application arguments: %s" % _app_args)
+
+    print()
 
     # Read config file
     global_config = configparser.ConfigParser()
@@ -94,14 +180,21 @@ if __name__ == '__main__':
         account_key = storage_account_key,
         endpoint_suffix = storage_account_suffix)
 
+
     # submit job
     joblib.submit_app(
         batch_client,
         blob_client,
         pool_id = _pool_id,
-        app_id = _app_id,
-        app_file_name = _app_file_name,
-        # app_file_path = os.path.join(os.path.dirname(__file__), _app_file_path),
-        app_file_path = _app_file_path,
-        wait = _wait)
-
+        name = _name,
+        app = _app, 
+        app_args = _app_args,
+        wait = _wait,
+        main_class = _main_class,
+        jars = _jars, 
+        py_files = _py_files, 
+        files = _files, 
+        driver_memory = _driver_memory,
+        executor_memory = _executor_memory,
+        driver_cores = _driver_cores,
+        executor_cores = _executor_cores)

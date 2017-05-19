@@ -340,5 +340,3 @@ def ssh(
         print()
     else:
         call(ssh_command_array)
-
-    

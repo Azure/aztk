@@ -113,16 +113,3 @@ if __name__ == '__main__':
         jupyter = _jupyter,
         username = _user,
         connect = _connect)
-    
-
-
-
-
-
-
-
-
-
-
-
-
