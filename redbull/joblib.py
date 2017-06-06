@@ -7,11 +7,14 @@ import azure.batch.models as batch_models
 def app_submit_cmd(
         webui_port, 
         app, 
-        app_args, # list
+        app_args, 
         main_class,
-        jars, # list
-        py_files,# list 
-        files, # list
+        jars, 
+        py_files,
+        files, 
+        driver_java_options,
+        driver_library_path,
+        driver_class_path,
         driver_memory, 
         executor_memory, 
         driver_cores, 
@@ -21,6 +24,9 @@ def app_submit_cmd(
     jars_option = '--jars "' + ','.join(jars) + '" ' if jars else ''
     py_files_option = '--py-files "' + ','.join(py_files) + '" ' if py_files else ''
     files_option = '--jars "' + ','.join(files) + '" ' if files else ''
+    driver_java_options = '--driver-java-options ' + driver_java_options + ' ' if driver_java_options else ''
+    driver_library_path = '--driver-library-path ' + driver_library_path + ' ' if driver_library_path else ''
+    driver_class_path = '--driver-class-path ' + driver_class_path + ' ' if driver_class_path else ''
     driver_memory_option = '--driver-memory ' + driver_memory + ' ' if driver_memory else ''
     executor_memory_option = '--executor-memory ' + executor_memory + ' ' if executor_memory else ''
     driver_cores_option = '--driver-cores ' + driver_cores + ' ' if driver_cores else ''
@@ -45,6 +51,9 @@ def app_submit_cmd(
             jars_option +
             py_files_option +
             files_option +
+            driver_java_options +
+            driver_library_path +
+            driver_class_path +
             driver_memory_option +
             executor_memory_option +
             driver_cores_option +
@@ -64,6 +73,9 @@ def submit_app(
         jars, 
         py_files, 
         files, 
+        driver_java_options,
+        driver_library_path,
+        driver_class_path,
         driver_memory,
         executor_memory,
         driver_cores,
@@ -107,6 +119,9 @@ def submit_app(
         jars=jars, 
         py_files=py_files,
         files=files, 
+        driver_java_options=driver_java_options,
+        driver_library_path=driver_library_path,
+        driver_class_path=driver_class_path,
         driver_memory=driver_memory, 
         executor_memory=executor_memory, 
         driver_cores=driver_cores, 

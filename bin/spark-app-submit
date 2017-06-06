@@ -33,6 +33,9 @@ if __name__ == '__main__':
     _jars = []
     _py_files = []
     _files = []
+    _driver_java_options = None
+    _driver_library_path = None
+    _driver_class_path = None
     _driver_memory = None
     _executor_memory = None
     _driver_cores = None
@@ -74,6 +77,17 @@ if __name__ == '__main__':
     parser.add_argument("--files",
                         help="Comma-separated list of .zip, .egg, or .py files \
                               to place on the PYTHONPATH for Python apps.")
+
+    parser.add_argument("--driver-java-options",
+                        help="Extra Java options to pass to the driver.")
+
+    parser.add_argument("--driver-library-path",
+                        help="Extra library path entries to pass to the driver.")
+
+    parser.add_argument("--driver-class-path",
+                        help="Extra class path entries to pass to the driver. \
+                              Note that jars added with --jars are automatically \
+                              included in the classpath.")
 
     parser.add_argument("--driver-memory",
                         help="Memory for driver (e.g. 1000M, 2G) (Default: 1024M).")
@@ -123,6 +137,18 @@ if __name__ == '__main__':
     if args.files is not None:
         _files = args.py_files.replace(' ','').split(',')
         print("Files: %s" % _files)
+
+    if args.driver_java_options is not None:
+        _driver_java_options = args.driver_java_options
+        print("Driver java options: %s" % _driver_java_options)
+
+    if args.driver_library_path is not None:
+        _driver_library_path = args.driver_library_path
+        print("Driver library path: %s" % _driver_library_path)
+
+    if args.driver_class_path is not None:
+        _driver_class_path = args.driver_class_path
+        print("Driver class path: %s" % _driver_class_path)
 
     if args.driver_memory is not None:
         _driver_memory = args.driver_memory
@@ -194,6 +220,9 @@ if __name__ == '__main__':
         jars = _jars, 
         py_files = _py_files, 
         files = _files, 
+        driver_java_options = _driver_java_options,
+        driver_library_path = _driver_library_path,
+        driver_class_path = _driver_class_path,
         driver_memory = _driver_memory,
         executor_memory = _executor_memory,
         driver_cores = _driver_cores,
