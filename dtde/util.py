@@ -3,14 +3,56 @@ import datetime
 import io
 import os
 import time
+from .version import __version__
 
-import azure.storage.blob as blob
+import azure.batch.batch_service_client as batch
+import azure.batch.batch_auth as batch_auth 
 import azure.batch.models as batch_models
+import azure.storage.blob as blob
 
 _STANDARD_OUT_FILE_NAME = 'stdout.txt'
 _STANDARD_ERROR_FILE_NAME = 'stderr.txt'
-_SAMPLES_CONFIG_FILE_NAME = 'configuration.cfg'
+# _SAMPLES_CONFIG_FILE_NAME = 'configuration.cfg'
 
+def create_batch_client(
+        batch_account_key,
+        batch_account_name,
+        batch_service_url):
+    """
+    Creates a batch client object
+    """
+
+    # Set up SharedKeyCredentials
+    credentials = batch_auth.SharedKeyCredentials(
+        batch_account_name,
+        batch_account_key)
+
+    # Set up Batch Client
+    batch_client = batch.BatchServiceClient(
+        credentials,
+        base_url=batch_service_url)
+
+    # Set retry policy
+    batch_client.config.retry_policy.retries = 5
+    batch_client.config.add_user_agent('dtde/{}'.format(__version__))
+
+    return batch_client
+
+def create_blob_client(
+        storage_account_key,
+        storage_account_name,
+        storage_account_suffix):
+    """
+    Creates a blob client object
+    """
+
+    # Set up BlockBlobStorage
+    blob_client = blob.BlockBlobService(
+        account_name = storage_account_name,
+        account_key = storage_account_key,
+        endpoint_suffix = storage_account_suffix)
+
+    return blob_client
 
 def wait_for_tasks_to_complete(batch_client, job_id, timeout):
     """Waits for all the tasks in a particular job to complete.
@@ -113,7 +155,7 @@ def create_pool_if_not_exist(batch_client, pool, wait=True):
     :type pool: `batchserviceclient.models.PoolAddParameter`
     """
     try:
-        print("\nAttempting to create pool:", pool.id)
+        # print("\nAttempting to create pool:", pool.id)
         batch_client.pool.add(pool)
         if wait:
             wait_for_all_nodes_state(batch_client, pool, frozenset(

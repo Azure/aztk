@@ -32,4 +32,4 @@ wheels/
 *.egg
 
 # Visual Studio Code
-.vscode/
+.vscode
