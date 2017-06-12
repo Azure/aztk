@@ -5,6 +5,19 @@ from datetime import datetime, timedelta
 import azure.batch.models as batch_models
 from subprocess import call
 
+VM_IMAGES = {
+    'centos': {
+        'publisher': 'microsoft-ads',
+        'offer': 'linux-data-science-vm',
+        'sku': 'linuxdsvm'
+    },
+    'ubuntu': {
+        'publisher': 'microsoft-ads',
+        'offer': 'linux-data-science-vm-ubuntu',
+        'sku': 'linuxdsvmubuntu'
+    }
+}
+
 def cluster_install_cmd():
     return [
         'export SPARK_HOME=/dsvm/tools/spark/current',
@@ -23,7 +36,7 @@ def cluster_connect_cmd():
         'echo $AZ_BATCH_NODE_LIST',
         'echo AZ_BATCH_HOST_LIST:',
         'echo $AZ_BATCH_HOST_LIST',
-        'echo AZ1_BATCH_MASTER_NODE:',
+        'echo AZ_BATCH_MASTER_NODE:',
         'echo $AZ_BATCH_MASTER_NODE',
         'echo AZ_BATCH_IS_CURRENT_NODE_MASTER:',
         'echo $AZ_BATCH_IS_CURRENT_NODE_MASTER',
@@ -109,15 +122,25 @@ def create_cluster(
         pool_id,
         vm_count,
         vm_size,
+        os,
         wait = True):
     """
     Create a spark cluster
     """
 
+    # set OS
+    image = None
+    if os == 'ubuntu':
+        image = VM_IMAGES['ubuntu']
+    elif os == 'centos':
+        image = VM_IMAGES['centos']
+    else:
+        print("\nInvalid OS")
+
     # vm image
-    _publisher = 'microsoft-ads'
-    _offer = 'linux-data-science-vm'
-    _sku = 'linuxdsvm'
+    _publisher = image['publisher']
+    _offer = image['offer']
+    _sku = image['sku']
 
     # reuse pool_id as job_id
     job_id = pool_id

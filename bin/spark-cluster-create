@@ -17,6 +17,7 @@ if __name__ == '__main__':
     _pool_id = None
     _vm_count = None
     _vm_size = None
+    _os = None
 
     _wait = True
 
@@ -29,6 +30,8 @@ if __name__ == '__main__':
                         help="number of vms in your cluster")
     parser.add_argument("--cluster-vm-size", required=True,
                         help="size of each vm in your cluster")
+    parser.add_argument("--cluster-os", default='ubuntu',
+                        help="select between 'ubuntu' or 'centos' (default: 'ubuntu')")
     parser.add_argument('--wait', dest='wait', action='store_true')
     parser.add_argument('--no-wait', dest='wait', action='store_false')
     parser.set_defaults(wait=False)
@@ -38,20 +41,24 @@ if __name__ == '__main__':
     print()
     if args.cluster_id is not None:
         _pool_id = args.cluster_id
-    print("spark cluster id:      %s" % _pool_id)
+    print("spark cluster id: %s" % _pool_id)
 
     if args.cluster_size is not None:
         _vm_count = args.cluster_size
-    print("spark cluster size:    %i" % _vm_count)
+    print("spark cluster size: %i" % _vm_count)
 
     if args.cluster_vm_size is not None:
         _vm_size = args.cluster_vm_size
     print("spark cluster vm size: %s" % _vm_size)
  
+    if args.cluster_os is not None:
+        _os = args.cluster_os
+    print("spark cluster operating system: %s" % _os)
+
     if args.wait is not None:
         if args.wait == False:
             _wait = False
-    print("wait for cluster:      %r" % _wait)
+    print("wait for cluster: %r" % _wait)
 
     # Read config file
     global_config = configparser.ConfigParser()
@@ -74,4 +81,5 @@ if __name__ == '__main__':
         _pool_id,
         _vm_count,
         _vm_size, 
+        _os,
         _wait)
