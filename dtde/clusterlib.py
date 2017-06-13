@@ -136,14 +136,14 @@ def create_cluster(
     job_id = pool_id
 
     # Upload custom script file
-    custom_script_resource_file = None
+    resource_files = []
     if custom_script is not None:
-        custom_script_resource_file = \
+        resource_files.append(
             util.upload_file_to_container(
                 blob_client, 
                 container_name = pool_id, 
                 file_path = custom_script, 
-                use_full_path = True)
+                use_full_path = True))
 
     # start task command
     start_task_commands = \
@@ -164,7 +164,7 @@ def create_cluster(
         target_dedicated = vm_count,
         start_task = batch_models.StartTask(
             command_line = util.wrap_commands_in_shell(start_task_commands),
-            resource_files = [custom_script_resource_file],
+            resource_files = resource_files,
             user_identity = batch_models.UserIdentity(
                 auto_user = batch_models.AutoUserSpecification(
                     scope=batch_models.AutoUserScope.pool,
