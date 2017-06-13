@@ -60,15 +60,18 @@ if __name__ == '__main__':
 
     parser.add_argument("--jars",
                         help="Comma-separated list of local jars to include \
-                              on the driver and executor classpaths")
+                              on the driver and executor classpaths. Use \
+                              absolute path to reference files.")
 
     parser.add_argument("--py-files",
                         help="Comma-separated list of .zip, .egg, or .py files \
-                              to place on the PYTHONPATH for Python apps.")
+                              to place on the PYTHONPATH for Python apps. Use \
+                              absolute path to reference files.")
 
     parser.add_argument("--files",
                         help="Comma-separated list of .zip, .egg, or .py files \
-                              to place on the PYTHONPATH for Python apps.")
+                              to place on the PYTHONPATH for Python apps. Use \
+                              absolute path ot reference files.")
 
     parser.add_argument("--driver-java-options",
                         help="Extra Java options to pass to the driver.")
@@ -95,7 +98,8 @@ if __name__ == '__main__':
                               available cores on the worker")
 
     parser.add_argument("application", nargs='*',
-                        help="App jar OR python file to execute")
+                        help="App jar OR python file to execute. Use absolute \
+                              path to reference file.")
 
     args = parser.parse_args()
     

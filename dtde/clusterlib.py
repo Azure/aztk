@@ -5,12 +5,23 @@ from datetime import datetime, timedelta
 import azure.batch.models as batch_models
 from subprocess import call
 
-def cluster_install_cmd():
+def cluster_install_cmd(custom_script_file):
+    
+    run_custom_script = ''
+    if custom_script_file is not None:
+        run_custom_script = '/bin/sh -c ' + custom_script_file    
+
     return [
+        # setup spark home and permissions for spark folder
         'export SPARK_HOME=/dsvm/tools/spark/current',
         'export PATH=$PATH:$SPARK_HOME/bin',
         'chmod -R 777 $SPARK_HOME',
         'chmod -R 777 /usr/local/share/jupyter/kernels',
+
+        # To avoid error: "sudo: sorry, you must have a tty to run sudo"
+        'sed -i -e "s/Defaults    requiretty.*/ #Defaults    requiretty/g" /etc/sudoers',
+        run_custom_script,
+
         'exit 0'
     ]
 
@@ -106,6 +117,8 @@ def cluster_start_cmd(webui_port, jupyter_port):
 
 def create_cluster(
         batch_client,
+        blob_client,
+        custom_script,
         pool_id,
         vm_count,
         vm_size,
@@ -122,8 +135,19 @@ def create_cluster(
     # reuse pool_id as job_id
     job_id = pool_id
 
+    # Upload custom script file
+    custom_script_resource_file = None
+    if custom_script is not None:
+        custom_script_resource_file = \
+            util.upload_file_to_container(
+                blob_client, 
+                container_name = pool_id, 
+                file_path = custom_script, 
+                use_full_path = True)
+
     # start task command
-    start_task_commands = cluster_install_cmd() 
+    start_task_commands = \
+        cluster_install_cmd(custom_script) 
 
     # Get a verified node agent sku
     sku_to_use, image_ref_to_use = \
@@ -140,6 +164,7 @@ def create_cluster(
         target_dedicated = vm_count,
         start_task = batch_models.StartTask(
             command_line = util.wrap_commands_in_shell(start_task_commands),
+            resource_files = [custom_script_resource_file],
             user_identity = batch_models.UserIdentity(
                 auto_user = batch_models.AutoUserSpecification(
                     scope=batch_models.AutoUserScope.pool,
