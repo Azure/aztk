@@ -24,7 +24,7 @@ if __name__ == '__main__':
     # parse arguments
     parser = argparse.ArgumentParser(prog='az_spark')
 
-    parser.add_argument('--cluster-id', required=True,
+    parser.add_argument('--id', dest="cluster_id", required=True,
                         help='The unique id of your spark cluster')
     parser.add_argument('--masterui', 
                         help='Local port to port spark\'s master UI to')

@@ -37,13 +37,13 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         prog='az-spark', 
         usage='spark-submit \n \
-               --cluster-id CLUSTER_ID \n \
+               --id CLUSTER_ID \n \
                --name APP_NAME \n \
                [options] \n \
                <app jar | python file> \n \
                [app arguments]')
 
-    parser.add_argument('--cluster-id', required=True,
+    parser.add_argument('--id', dest='cluster_id', required=True,
                         help='The unique id of your spark cluster')
 
     parser.add_argument('--name', required=True,

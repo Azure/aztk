@@ -23,11 +23,11 @@ if __name__ == '__main__':
     # parse arguments
     parser = argparse.ArgumentParser(prog='az_spark')
 
-    parser.add_argument('--cluster-id', required=True,
+    parser.add_argument('--id', dest='cluster_id', required=True,
                         help='The unique id of your spark cluster')
-    parser.add_argument('--cluster-size', type=int, required=True,
+    parser.add_argument('--size', type=int, required=True,
                         help='Number of vms in your cluster')
-    parser.add_argument('--cluster-vm-size', required=True,
+    parser.add_argument('--vm-size', required=True,
                         help='VM size for nodes in your cluster')
     parser.add_argument('--custom-script', 
                         help='Absolute path of custom bash script (.sh) to run on each node')
@@ -40,11 +40,11 @@ if __name__ == '__main__':
     if args.cluster_id is not None:
         pool_id = args.cluster_id
 
-    if args.cluster_size is not None:
-        vm_count = args.cluster_size
+    if args.size is not None:
+        vm_count = args.size
 
-    if args.cluster_vm_size is not None:
-        vm_size = args.cluster_vm_size
+    if args.vm_size is not None:
+        vm_size = args.vm_size
  
     if args.custom_script is not None:
         custom_script = args.custom_script

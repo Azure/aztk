@@ -19,9 +19,9 @@ if __name__ == '__main__':
     # parse arguments
     parser = argparse.ArgumentParser(prog='az_spark')
 
-    parser.add_argument('--cluster-id', required=True,
+    parser.add_argument(dest='cluster_id', 
                         help='The unique id of your spark cluster')
-
+    
     args = parser.parse_args()
     
     if args.cluster_id is not None:
