@@ -10,59 +10,60 @@ except ImportError:
     import ConfigParser as configparser
 
 # Path to config
-_config_path = os.path.join(os.path.dirname(__file__), '../configuration.cfg') 
+CONFIG_PATH = os.path.join(os.path.dirname(__file__), '../configuration.cfg') 
 
 if __name__ == '__main__':
 
-    _pool_id = None
-    _vm_count = None
-    _vm_size = None
-    _custom_script = None
-
-    _wait = True
+    pool_id = None
+    vm_count = None
+    vm_size = None
+    custom_script = None
+    wait = True
 
     # parse arguments
-    parser = argparse.ArgumentParser(prog="az_spark")
+    parser = argparse.ArgumentParser(prog='az_spark')
 
-    parser.add_argument("--cluster-id", required=True,
-                        help="the unique name of your spark cluster")
-    parser.add_argument("--cluster-size", type=int, required=True,
-                        help="number of vms in your cluster")
-    parser.add_argument("--cluster-vm-size", required=True,
-                        help="size of each vm in your cluster")
-    parser.add_argument("--custom-script", 
-                        help="absolute path of custom bash script (.sh) to run on each node")
+    parser.add_argument('--cluster-id', required=True,
+                        help='The unique id of your spark cluster')
+    parser.add_argument('--cluster-size', type=int, required=True,
+                        help='Number of vms in your cluster')
+    parser.add_argument('--cluster-vm-size', required=True,
+                        help='VM size for nodes in your cluster')
+    parser.add_argument('--custom-script', 
+                        help='Absolute path of custom bash script (.sh) to run on each node')
     parser.add_argument('--wait', dest='wait', action='store_true')
     parser.add_argument('--no-wait', dest='wait', action='store_false')
     parser.set_defaults(wait=False)
 
     args = parser.parse_args()
     
-    print()
     if args.cluster_id is not None:
-        _pool_id = args.cluster_id
-    print("spark cluster id:      %s" % _pool_id)
+        pool_id = args.cluster_id
 
     if args.cluster_size is not None:
-        _vm_count = args.cluster_size
-    print("spark cluster size:    %i" % _vm_count)
+        vm_count = args.cluster_size
 
     if args.cluster_vm_size is not None:
-        _vm_size = args.cluster_vm_size
-    print("spark cluster vm size: %s" % _vm_size)
+        vm_size = args.cluster_vm_size
  
     if args.custom_script is not None:
-        _custom_script = args.custom_script
-    print("path to custom script: %s" % _custom_script)
+        custom_script = args.custom_script
  
     if args.wait is not None:
         if args.wait == False:
-            _wait = False
-    print("wait for cluster:      %r" % _wait)
+            wait = False
+
+    print('-------------------------------------------')
+    print('spark cluster id:        {}'.format(pool_id))
+    print('spark cluster size:      {}'.format(vm_count))
+    print('spark cluster vm size:   {}'.format(vm_size))
+    print('path to custom script:   {}'.format(custom_script))
+    print('wait for cluster:        {}'.format(wait))
+    print('-------------------------------------------')
 
     # Read config file
     global_config = configparser.ConfigParser()
-    global_config.read(_config_path)
+    global_config.read(CONFIG_PATH)
 
     # Set up batch configuration
     batch_account_key = global_config.get('Batch', 'batchaccountkey')
@@ -90,8 +91,8 @@ if __name__ == '__main__':
     clusterlib.create_cluster(
         batch_client,
         blob_client,
-        _custom_script,
-        _pool_id,
-        _vm_count,
-        _vm_size, 
-        _wait)
+        custom_script,
+        pool_id,
+        vm_count,
+        vm_size, 
+        wait)

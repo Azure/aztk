@@ -6,39 +6,27 @@ import azure.batch.models as batch_models
 from subprocess import call
 
 def cluster_install_cmd(custom_script_file):
-    
-    run_custom_script = ''
-    if custom_script_file is not None:
-        run_custom_script = '/bin/sh -c ' + custom_script_file    
-
-    return [
+    ret = [
         # setup spark home and permissions for spark folder
         'export SPARK_HOME=/dsvm/tools/spark/current',
         'export PATH=$PATH:$SPARK_HOME/bin',
         'chmod -R 777 $SPARK_HOME',
-        'chmod -R 777 /usr/local/share/jupyter/kernels',
-
-        # To avoid error: "sudo: sorry, you must have a tty to run sudo"
-        'sed -i -e "s/Defaults    requiretty.*/ #Defaults    requiretty/g" /etc/sudoers',
-        run_custom_script,
-
-        'exit 0'
+        'chmod -R 777 /usr/local/share/jupyter/kernels'
     ]
+
+    if custom_script_file is not None:
+        ret.extend([
+            # To avoid error: "sudo: sorry, you must have a tty to run sudo"
+            'sed -i -e "s/Defaults    requiretty.*/ #Defaults    requiretty/g" /etc/sudoers',
+            '/bin/sh -c {}'.format(custom_script_file)
+        ])
+
+    ret.extend(['exit 0'])
+
+    return ret
 
 def cluster_connect_cmd():
     return [
-        # print env vars for debug
-        'echo CCP_NODES:',
-        'echo $CCP_NODES',
-        'echo AZ_BATCH_NODE_LIST:',
-        'echo $AZ_BATCH_NODE_LIST',
-        'echo AZ_BATCH_HOST_LIST:',
-        'echo $AZ_BATCH_HOST_LIST',
-        'echo AZ1_BATCH_MASTER_NODE:',
-        'echo $AZ_BATCH_MASTER_NODE',
-        'echo AZ_BATCH_IS_CURRENT_NODE_MASTER:',
-        'echo $AZ_BATCH_IS_CURRENT_NODE_MASTER',
-
         # set SPARK_HOME environment vars
         'export SPARK_HOME=/dsvm/tools/spark/current',
         'export PATH=$PATH:$SPARK_HOME/bin',
@@ -128,9 +116,9 @@ def create_cluster(
     """
 
     # vm image
-    _publisher = 'microsoft-ads'
-    _offer = 'linux-data-science-vm'
-    _sku = 'linuxdsvm'
+    publisher = 'microsoft-ads'
+    offer = 'linux-data-science-vm'
+    sku = 'linuxdsvm'
 
     # reuse pool_id as job_id
     job_id = pool_id
@@ -152,7 +140,7 @@ def create_cluster(
     # Get a verified node agent sku
     sku_to_use, image_ref_to_use = \
         util.select_latest_verified_vm_image_with_node_agent_sku(
-            batch_client, _publisher, _offer, _sku)
+            batch_client, publisher, offer, sku)
 
     # Confiure the pool
     pool = batch_models.PoolAddParameter(
@@ -209,10 +197,10 @@ def create_cluster(
         batch_client.task.add(job_id = job_id, task = task)
     except batch_models.batch_error.BatchErrorException as err:
         util.print_batch_exception(err)
-        if err.error.code != "JobExists":
+        if err.error.code != 'JobExists':
             raise
         else:
-            print("Job {!r} already exists".format(job_id))
+            print('Job {!r} already exists'.format(job_id))
 
     # Wait for the app to finish
     if wait == True:
@@ -249,19 +237,23 @@ def create_user(
 def get_cluster_details(
         batch_client,
         pool_id):
+    """
+    print out specified cluster info
+    """
     pool = batch_client.pool.get(pool_id)
     if (pool.state == batch_models.PoolState.deleting):
         print
     nodes = batch_client.compute_node.list(pool_id=pool_id)
-    visible_state = pool.allocation_state.value if pool.state.value is "active" else pool.state.value
-    node_count = '{} -> {}'.format(pool.current_dedicated, pool.target_dedicated) if pool.state.value is "resizing" or (pool.state.value is "deleting" and pool.allocation_state.value is "resizing") else '{}'.format(pool.current_dedicated)
+    visible_state = pool.allocation_state.value if pool.state.value is 'active' else pool.state.value
+    node_count = '{} -> {}'.format(pool.current_dedicated, pool.target_dedicated) if pool.state.value is 'resizing' or (pool.state.value is 'deleting' and pool.allocation_state.value is 'resizing') else '{}'.format(pool.current_dedicated)
 
-    print("State:       {}".format(visible_state))
-    print("Node Size:   {}".format(pool.vm_size))
-    print("Nodes:       {}".format(node_count))
+    print()
+    print('State:       {}'.format(visible_state))
+    print('Node Size:   {}'.format(pool.vm_size))
+    print('Nodes:       {}'.format(node_count))
     print()
 
-    node_label = "Nodes"
+    node_label = 'Nodes'
     print_format = '{:<34}| {:<15} | {:<21}| {:<8}'
     print_format_underline = '{:-<34}|{:-<17}|{:-<22}|{:-<8}'
     print(print_format.format(node_label, 'State', 'IP:Port', 'Master'))
@@ -271,12 +263,15 @@ def get_cluster_details(
 
     for node in nodes:
         ip, port = util.get_connection_info(batch_client, pool_id, node.id)
-        print (print_format.format(node.id, node.state.value, "{}:{}".format(ip, port),
-                                       "*" if node.id == master_node else ""))
+        print (print_format.format(node.id, node.state.value, '{}:{}'.format(ip, port),
+                                       '*' if node.id == master_node else ''))
     print()
 
 def list_clusters(
         batch_client):
+    """
+    print out all clusters 
+    """
     print_format = '{:<34}| {:<10}| {:<20}| {:<7}'
     print_format_underline = '{:-<34}|{:-<11}|{:-<21}|{:-<7}'
     
@@ -284,10 +279,10 @@ def list_clusters(
     print(print_format.format('Cluster', 'State', 'VM Size', 'Nodes'))
     print(print_format_underline.format('','','',''))
     for pool in pools:
-        pool_state = pool.allocation_state.value if pool.state.value is "active" else pool.state.value
+        pool_state = pool.allocation_state.value if pool.state.value is 'active' else pool.state.value
 
         node_count = pool.current_dedicated
-        if pool_state is "resizing" or (pool_state is "deleting" and pool.allocation_state.value is "resizing"):
+        if pool_state is 'resizing' or (pool_state is 'deleting' and pool.allocation_state.value is 'resizing'):
             node_count = '{} -> {}'.format(pool.current_dedicated, pool.target_dedicated)
    
         print(print_format.format(pool.id, 
@@ -310,9 +305,9 @@ def delete_cluster(
     if batch_client.pool.exists(pool_id) == True:
         batch_client.pool.delete(pool_id)
         batch_client.job.delete(job_id)
-        print("\nThe pool, '%s', is being deleted" % pool_id)
+        print('The pool, \'{}\', is being deleted'.format(pool_id))
     else:
-        print("\nThe pool, '%s', does not exist" % pool_id)
+        print('The pool, \'{}\', does not exist'.format(pool_id))
 
 def ssh(
         batch_client,
@@ -343,25 +338,24 @@ def ssh(
     master_node_port = remote_login_settings.remote_login_port
 
     # build ssh tunnel command
-    ssh_command = "ssh "
+    ssh_command = 'ssh '
     if masterui is not None:
-        ssh_command += "-L " + str(masterui) + ":localhost:" + str(constants._MASTER_UI_PORT) + " "
+        ssh_command += '-L ' + str(masterui) + ':localhost:' + str(constants._MASTER_UI_PORT) + ' '
     if webui is not None:
-        ssh_command += "-L " + str(webui) + ":localhost:" + str(constants._WEBUI_PORT) + " "
+        ssh_command += '-L ' + str(webui) + ':localhost:' + str(constants._WEBUI_PORT) + ' '
     if jupyter is not None:
-        ssh_command += "-L " + str(jupyter) + ":localhost:" + str(constants._JUPYTER_PORT) + " "
+        ssh_command += '-L ' + str(jupyter) + ':localhost:' + str(constants._JUPYTER_PORT) + ' '
     if ports is not None:
         for port in ports:
-            ssh_command += "-L " + str(port[0]) + ":localhost:" + str(port[1]) + " "
+            ssh_command += '-L ' + str(port[0]) + ':localhost:' + str(port[1]) + ' '
     
-    user = username if username is not None else "<username>";
-    ssh_command += user + "@" + str(master_node_ip) + " -p " + str(master_node_port)
+    user = username if username is not None else '<username>';
+    ssh_command += user + '@' + str(master_node_ip) + ' -p ' + str(master_node_port)
     ssh_command_array = ssh_command.split()
 
     if (not connect):
         print('\nuse the following command to connect to your spark head node:')
-        print()
-        print('\t%s' % ssh_command)
-        print()
+        print('\n\t{}\n'.format(ssh_command))
     else:
         call(ssh_command_array)
+

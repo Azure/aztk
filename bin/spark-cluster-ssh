@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 from dtde import clusterlib, util
-import argparse import os
+import argparse 
+import os
 
 try:
     import configparser
@@ -9,73 +10,75 @@ except ImportError:
     import ConfigParser as configparser
 
 # Path to config
-_config_path = os.path.join(os.path.dirname(__file__), '../configuration.cfg') 
+CONFIG_PATH = os.path.join(os.path.dirname(__file__), '../configuration.cfg') 
 
 if __name__ == '__main__':
 
-    _pool_id = None
-    _jupyter = None
-    _webui = None
-    _masterui = None
-    _user = None
-    _connect = True
+    pool_id = None
+    jupyter = None
+    webui = None
+    masterui = None
+    username = None
+    connect = True
 
     # parse arguments
-    parser = argparse.ArgumentParser(prog="az_spark")
+    parser = argparse.ArgumentParser(prog='az_spark')
 
-    parser.add_argument("--cluster-id", required=True,
-                        help="the unique name of your spark cluster")
+    parser.add_argument('--cluster-id', required=True,
+                        help='The unique id of your spark cluster')
     parser.add_argument('--masterui', 
-                        help="open spark's webui on local port")
+                        help='Local port to port spark\'s master UI to')
     parser.add_argument('--webui', 
-                        help="open spark's webui on local port")
+                        help='Local port to port spark\'s webui to')
     parser.add_argument('--jupyter', 
-                        help="open jupyter on local port")
-    parser.add_argument('--user', 
-                        help="ssh user")
+                        help='Local port to port jupyter to')
+    parser.add_argument('-u', '--username', 
+                        help='Username to spark cluster')
     parser.add_argument('--no-connect',
-                        dest='noconnect',
                         action='store_false',
                         default=True,
-                        help="Do not create the ssh session. Only print out \
-                        the command to run.")
+                        help='Do not create the ssh session. Only print out \
+                        the command to run.')
 
     args = parser.parse_args()
-    
-    print()
+ 
+    if (args.no_connect is True and args.username is None):
+        print('You must specify a username in order to connect automatically.')
+        exit()
+
     if args.cluster_id is not None:
-        _pool_id = args.cluster_id
-    print("spark cluster id:      %s" % _pool_id)
+        pool_id = args.cluster_id
 
     if args.masterui is not None:
-        _masterui = args.masterui
-    print("open masterui:         %s" % _masterui)
+        masterui = args.masterui
 
     if args.webui is not None:
-        _webui = args.webui
-    print("open webui:            %s" % _webui)
+        webui = args.webui
 
     if args.jupyter is not None:
-        _jupyter = args.jupyter
-    print("open jupyter:          %s" % _jupyter)
+        jupyter = args.jupyter
 
-    if args.user is not None:
-        _user = args.user
-    print("ssh user:              %s" % _user)
+    if args.username is not None:
+        username = args.username
 
-    if args.noconnect is not None:
-        if (args.noconnect is True and _user is None):
-            _connect = False
-        elif (args.noconnect is False):
-            _connect = False
-    print("connect:               %s" % _connect)
+    if args.no_connect is not None:
+        if (args.no_connect is True and username is None):
+            connect = False
+        elif (args.no_connect is False):
+            connect = False
 
-    if (args.noconnect is True and _user is None):
-            print("You must specify a user in order to connect automatically")
+    print('-------------------------------------------')
+    print('spark cluster id:    {}'.format(pool_id))
+    print('open masterui:       {}'.format(masterui))
+    print('open webui:          {}'.format(webui))
+    print('open jupyter:        {}'.format(jupyter))
+    print('ssh username:        {}'.format(username))
+    print('connect:             {}'.format(connect))
+    print('-------------------------------------------')
 
     # Read config file
     global_config = configparser.ConfigParser()
-    global_config.read(_config_path)
+    global_config.read(CONFIG_PATH)
 
     # Set up batch configuration
     batch_account_key = global_config.get('Batch', 'batchaccountkey')
@@ -91,9 +94,9 @@ if __name__ == '__main__':
     # get ssh command
     clusterlib.ssh(
         batch_client, 
-        pool_id = _pool_id,
-        masterui = _masterui,
-        webui = _webui,
-        jupyter = _jupyter,
-        username = _user,
-        connect = _connect)
+        pool_id = pool_id,
+        masterui = masterui,
+        webui = webui,
+        jupyter = jupyter,
+        username = username,
+        connect = connect)
