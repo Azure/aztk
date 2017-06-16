@@ -12,7 +12,6 @@ import azure.storage.blob as blob
 
 _STANDARD_OUT_FILE_NAME = 'stdout.txt'
 _STANDARD_ERROR_FILE_NAME = 'stderr.txt'
-# _SAMPLES_CONFIG_FILE_NAME = 'configuration.cfg'
 
 def create_batch_client(
         batch_account_key,
@@ -20,8 +19,10 @@ def create_batch_client(
         batch_service_url):
     """
     Creates a batch client object
+    :param str batch_account_key: batch account key
+    :param str batch_account_name: batch account name
+    :param str batch_service_url: batch service url
     """
-
     # Set up SharedKeyCredentials
     credentials = batch_auth.SharedKeyCredentials(
         batch_account_name,
@@ -44,8 +45,10 @@ def create_blob_client(
         storage_account_suffix):
     """
     Creates a blob client object
+    :param str storage_account_key: storage account key
+    :param str storage_account_name: storage account name
+    :param str storage_account_suffix: storage account suffix
     """
-
     # Set up BlockBlobStorage
     blob_client = blob.BlockBlobService(
         account_name = storage_account_name,
@@ -55,7 +58,8 @@ def create_blob_client(
     return blob_client
 
 def wait_for_tasks_to_complete(batch_client, job_id, timeout):
-    """Waits for all the tasks in a particular job to complete.
+    """
+    Waits for all the tasks in a particular job to complete.
     :param batch_client: The batch client to use.
     :type batch_client: `batchserviceclient.BatchServiceClient`
     :param str job_id: The id of the job to monitor.
@@ -78,7 +82,6 @@ def wait_for_tasks_to_complete(batch_client, job_id, timeout):
 def upload_file_to_container(block_blob_client, container_name, file_path, use_full_path):
     """
     Uploads a local file to an Azure Blob storage container.
-
     :param block_blob_client: A blob service client.
     :type block_blob_client: `azure.storage.blob.BlockBlobService`
     :param str container_name: The name of the Azure Blob storage container.
@@ -87,17 +90,11 @@ def upload_file_to_container(block_blob_client, container_name, file_path, use_f
     :return: A ResourceFile initialized with a SAS URL appropriate for Batch
     tasks.
     """
-
     blob_name = None
     if (use_full_path):
         blob_name = file_path
     else:
         blob_name = os.path.basename(file_path)
-
-    '''
-    print('\nUploading file {} to container [{}]...'.format(file_path,
-                                                          container_name))
-    '''
 
     block_blob_client.create_container(container_name,
                                  fail_on_exist=False)
@@ -120,7 +117,8 @@ def upload_file_to_container(block_blob_client, container_name, file_path, use_f
                                     blob_source=sas_url)
 
 def print_configuration(config):
-    """Prints the configuration being used as a dictionary
+    """
+    Prints the configuration being used as a dictionary
     :param config: The configuration.
     :type config: `configparser.ConfigParser`
     """
@@ -131,6 +129,11 @@ def print_configuration(config):
     print(configuration_dict)
 
 def get_master_node_id(batch_client, pool_id):
+    """
+    Uploads a local file to an Azure Blob storage container.
+    :param block_blob_client: A blob service client.
+    :type block_blob_client: `azure.storage.blob.BlockBlobService`
+    """
     # Currently, the jobId == poolId so this is safe to assume
     job_id = pool_id
     tasks = batch_client.task.list(job_id=job_id)
@@ -148,14 +151,14 @@ def get_master_node_id(batch_client, pool_id):
     return ""
 
 def create_pool_if_not_exist(batch_client, pool, wait=True):
-    """Creates the specified pool if it doesn't already exist
+    """
+    Creates the specified pool if it doesn't already exist
     :param batch_client: The batch client to use.
     :type batch_client: `batchserviceclient.BatchServiceClient`
     :param pool: The pool to create.
     :type pool: `batchserviceclient.models.PoolAddParameter`
     """
     try:
-        # print("\nAttempting to create pool:", pool.id)
         batch_client.pool.add(pool)
         if wait:
             wait_for_all_nodes_state(batch_client, pool, frozenset(
@@ -163,17 +166,18 @@ def create_pool_if_not_exist(batch_client, pool, wait=True):
                 batch_models.ComputeNodeState.unusable,
                 batch_models.ComputeNodeState.idle)
             ))
-            print("\nCreated pool:", pool.id)
+            print("Created pool: {}".format(pool.id))
         else:
-            print("\nCreating pool:", pool.id)
+            print("Creating pool: {}".format(pool.id))
     except batch_models.BatchErrorException as e:
         if e.error.code != "PoolExists":
             raise
         else:
-            print("\nPool {!r} already exists".format(pool.id))
+            print("Pool {!r} already exists.".format(pool.id))
 
 def wait_for_all_nodes_state(batch_client, pool, node_state):
-    """Waits for all nodes in pool to reach any specified state in set
+    """
+    Waits for all nodes in pool to reach any specified state in set
     :param batch_client: The batch client to use.
     :type batch_client: `batchserviceclient.BatchServiceClient`
     :param pool: The pool containing the node.
@@ -183,7 +187,6 @@ def wait_for_all_nodes_state(batch_client, pool, node_state):
     :return: list of `batchserviceclient.models.ComputeNode`
     """
     print('Waiting for all nodes in pool {} to reach desired state...'.format(pool.id))
-    i = 0
     while True:
         # refresh pool to ensure that there is no resize error
         pool = batch_client.pool.get(pool.id)
@@ -196,17 +199,16 @@ def wait_for_all_nodes_state(batch_client, pool, node_state):
         if (len(nodes) >= pool.target_dedicated and
                 all(node.state in node_state for node in nodes)):
             return nodes
-        i += 1
         '''
-        if i % 3 == 0:
-            print('waiting for {} nodes to reach desired state...'.format(
-                pool.target_dedicated))
+        print('waiting for {} nodes to reach desired state...'.format(
+            pool.target_dedicated))
         '''
-        time.sleep(10)
+        time.sleep(1)
 
 def select_latest_verified_vm_image_with_node_agent_sku(
         batch_client, publisher, offer, sku_starts_with):
-    """Select the latest verified image that Azure Batch supports given
+    """
+    Select the latest verified image that Azure Batch supports given
     a publisher, offer and sku (starts with filter).
     :param batch_client: The batch client to use.
     :type batch_client: `batchserviceclient.BatchServiceClient`
@@ -235,7 +237,8 @@ def select_latest_verified_vm_image_with_node_agent_sku(
 def create_sas_token(
         block_blob_client, container_name, blob_name, permission, expiry=None,
         timeout=None):
-    """Create a blob sas token
+    """
+    Create a blob sas token
     :param block_blob_client: The storage block blob client to use.
     :type block_blob_client: `azure.storage.blob.BlockBlobService`
     :param str container_name: The name of the container to upload the blob to.
@@ -259,8 +262,8 @@ def create_sas_token(
 def upload_blob_and_create_sas(
         block_blob_client, container_name, blob_name, file_name, expiry,
         timeout=None):
-    """Uploads a file from local disk to Azure Storage and creates
-    a SAS for it.
+    """
+    Uploads a file from local disk to Azure Storage and creates a SAS for it.
     :param block_blob_client: The storage block blob client to use.
     :type block_blob_client: `azure.storage.blob.BlockBlobService`
     :param str container_name: The name of the container to upload the blob to.
@@ -299,7 +302,8 @@ def upload_blob_and_create_sas(
 
 
 def wrap_commands_in_shell(commands):
-    """Wrap commands in a shell
+    """
+    Wrap commands in a shell
     :param list commands: list of commands to wrap
     :param str ostype: OS type, linux or windows
     :rtype: str
@@ -309,6 +313,13 @@ def wrap_commands_in_shell(commands):
         ';'.join(commands))
 
 def get_connection_info(batch_client, pool_id, node_id):
+    """
+    Get connection info of specified node in pool
+    :param batch_client: The batch client to use.
+    :type batch_client: `batchserviceclient.BatchServiceClient`
+    :param str pool_id: The pool id to look up
+    :param str node_id: The node id to look up
+    """
     rls = batch_client.compute_node.get_remote_login_settings(
         pool_id, node_id)
     remote_ip = rls.remote_login_ip_address

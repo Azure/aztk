@@ -10,22 +10,17 @@ except ImportError:
     import ConfigParser as configparser
 
 # Path to config
-_config_path = os.path.join(os.path.dirname(__file__), '../configuration.cfg') 
+CONFIG_PATH = os.path.join(os.path.dirname(__file__), '../configuration.cfg') 
 
 if __name__ == '__main__':
 
-    _pool_id = None
-    _vm_count = None
-    _vm_size = None
-    _wait = True
-
     # parse arguments
-    parser = argparse.ArgumentParser(prog="az_spark")
+    parser = argparse.ArgumentParser(prog='az_spark')
     args = parser.parse_args()
 
     # Read config file
     global_config = configparser.ConfigParser()
-    global_config.read(_config_path)
+    global_config.read(CONFIG_PATH)
 
     # Set up batch configuration
     batch_account_key = global_config.get('Batch', 'batchaccountkey')
@@ -39,5 +34,4 @@ if __name__ == '__main__':
             batch_service_url)
 
     # create spark cluster
-    clusterlib.list_clusters(
-        batch_client)
+    clusterlib.list_clusters(batch_client)

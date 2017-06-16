@@ -10,42 +10,44 @@ except ImportError:
     import ConfigParser as configparser
 
 # Path to config
-_config_path = os.path.join(os.path.dirname(__file__), '../configuration.cfg') 
+CONFIG_PATH = os.path.join(os.path.dirname(__file__), '../configuration.cfg') 
 
 if __name__ == '__main__':
 
-    _pool_id = None
-    _username = 'admin'
-    _password = 'pass123!'
+    pool_id = None
+    username = 'admin'
+    password = 'pass123!'
 
     # parse arguments
-    parser = argparse.ArgumentParser(prog="az_spark")
+    parser = argparse.ArgumentParser(prog='az_spark')
 
-    parser.add_argument("--cluster-id", required=True,
-                        help="the unique name of your spark cluster")
-    parser.add_argument("-u", "--user", 
-                        help="the relative path to your spark app in your directory")
-    parser.add_argument("-p", "--password", 
-                        help="the relative path to your spark app in your directory")
+    parser.add_argument('--id', dest='cluster_id', required=True,
+                        help='The unique id of your spark cluster')
+    parser.add_argument('-u', '--username', 
+                        help='The usernameto access your spark cluster\'s head node')
+    parser.add_argument('-p', '--password', 
+                        help='The password to access your spark cluster\'s head node')
 
     args = parser.parse_args()
     
-    print()
     if args.cluster_id is not None:
-        _pool_id = args.cluster_id
-    print("spark cluster id:      %s" % _pool_id)
+        pool_id = args.cluster_id
 
-    if args.user is not None:
-        _username = args.user
-    print("az_spark username:     %s" % _username)
+    if args.username is not None:
+        username = args.username
 
     if args.password is not None:
-        _password = args.password
-    print("az_spark password:     %s" % _password)
+        password = args.password
+
+    print('-------------------------------------------')
+    print('spark cluster id:    {}'.format(pool_id))
+    print('username:            {}'.format(username))
+    print('password:            {}'.format(password))
+    print('-------------------------------------------')
 
     # Read config file
     global_config = configparser.ConfigParser()
-    global_config.read(_config_path)
+    global_config.read(CONFIG_PATH)
 
     # Set up batch configuration
     batch_account_key = global_config.get('Batch', 'batchaccountkey')
@@ -61,19 +63,7 @@ if __name__ == '__main__':
     # get ssh command
     clusterlib.create_user(
         batch_client, 
-        _pool_id,
-        _username,
-        _password)
+        pool_id,
+        username,
+        password)
     
-
-
-
-
-
-
-
-
-
-
-
-

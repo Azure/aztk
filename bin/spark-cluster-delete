@@ -10,28 +10,26 @@ except ImportError:
     import ConfigParser as configparser
 
 # Path to config
-_config_path = os.path.join(os.path.dirname(__file__), '../configuration.cfg') 
+CONFIG_PATH = os.path.join(os.path.dirname(__file__), '../configuration.cfg') 
 
 if __name__ == '__main__':
 
-    _pool_id = None
+    pool_id = None
 
     # parse arguments
-    parser = argparse.ArgumentParser(prog="az_spark")
+    parser = argparse.ArgumentParser(prog='az_spark')
 
-    parser.add_argument("--cluster-id", required=True,
-                        help="the unique name of your spark cluster")
-
+    parser.add_argument(dest='cluster_id', 
+                        help='The unique id of your spark cluster')
+    
     args = parser.parse_args()
     
-    print()
     if args.cluster_id is not None:
-        _pool_id = args.cluster_id
-    print("delete cluster id:      %s" % _pool_id)
+        pool_id = args.cluster_id
 
     # Read config file
     global_config = configparser.ConfigParser()
-    global_config.read(_config_path)
+    global_config.read(CONFIG_PATH)
 
     # Set up batch configuration
     batch_account_key = global_config.get('Batch', 'batchaccountkey')
@@ -47,5 +45,5 @@ if __name__ == '__main__':
     # Delete specified cluster
     clusterlib.delete_cluster(
         batch_client,
-        _pool_id)
+        pool_id)
 
