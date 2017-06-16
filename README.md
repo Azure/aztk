@@ -1,5 +1,7 @@
-# Redbull
-Run Spark Standalone on Azure Batch
+# Distributed Tools for Data Engineering (DTDE)
+A suite of distributed tools to help engineers scale their work into Azure.
+
+# Spark on DTDE
 
 ## Setup  
 1. Clone the repo
@@ -25,40 +27,41 @@ The entire experience of this package is centered around a few commands in the b
 First, create your cluster:
 ```
 ./bin/spark-cluster-create \
-    --cluster-id <my-cluster-id> \
-    --cluster-size <number of nodes> \
-    --cluster-vm-size <vm-size> \
+    --id <my-cluster-id> \
+    --size <number of nodes> \
+    --vm-size <vm-size> \
+    --custom-script <path to custom bash script to run on each node> \
     --wait/--no-wait (optional)
 ```
 
 When your cluster is ready, create a user for your cluster:
 ```
 ./bin/spark-cluster-create-user \
-    --cluster-id <my-cluster-id> \
+    ---id <my-cluster-id> \
     --username <username> \
     --password <password>
 ```
 
 Now you can submit jobs to run against the cluster:
 ```
-./bin/spark-app-submit \
-    --cluster-id <my-cluster-id> \
-    --app-id <my-application> \
-    --file <my-spark-job>
+./bin/spark-submit \
+    --id <my-cluster-id> \
+    --name <my-job-name> \
+    [list of options] \
+    --application <path-to-spark-job>
 ```
 
-To view the spark UI, open up an ssh tunnel with the "webui" option and a local port to map to:
+To view the spark UI, open up an ssh tunnel with the "masterui" option and a local port to map to:
 ```
 ./bin/spark-cluster-ssh \ 
-    --cluster-id <my-cluster-id> \
-    --webui <local-port>
+    --id <my-cluster-id> \
+    --masterui <local-port>
 ```
 
 Optionally, you can also open up a jupyter notebook with the "jupyter" option to work in:
 ```
 ./bin/spark-cluster-ssh \ 
-    --cluster-id <my-cluster-id> \
-    --webui <local-port> \
+    --id <my-cluster-id> \
     --jupyter <local-port>
 ```
 
@@ -67,8 +70,12 @@ You can also see your clusters from the CLI:
 ./bin/spark-cluster-list
 ```
 
-Finally, you can get the state of any specified cluster:
+And get the state of any specified cluster:
 ```
-./bin/spark-cluster-get \
-    --cluster-id <my-cluster-id>
+./bin/spark-cluster-get <my-cluster-id>
+```
+
+Finally, you can delete any specified cluster:
+```
+./bin/spark-cluster-delete <my-cluster-id>
 ```
