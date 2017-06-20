@@ -109,6 +109,7 @@ def create_cluster(
         custom_script,
         pool_id,
         vm_count,
+        vm_low_pri_count,
         vm_size,
         wait = True):
     """
@@ -149,7 +150,8 @@ def create_cluster(
             image_reference = image_ref_to_use,
             node_agent_sku_id = sku_to_use),
         vm_size = vm_size,
-        target_dedicated = vm_count,
+        target_dedicated_nodes = vm_count,
+        target_low_priority_nodes  = vm_low_pri_count,
         start_task = batch_models.StartTask(
             command_line = util.wrap_commands_in_shell(start_task_commands),
             resource_files = resource_files,
@@ -188,7 +190,7 @@ def create_cluster(
         command_line = util.wrap_commands_in_shell(application_cmd),
         resource_files = [],
         multi_instance_settings = batch_models.MultiInstanceSettings(
-            number_of_instances = vm_count,
+            number_of_instances = vm_count + vm_low_pri_count,
             coordination_command_line = util.wrap_commands_in_shell(coordination_cmd),
             common_resource_files = []))
 
@@ -245,17 +247,21 @@ def get_cluster_details(
         print
     nodes = batch_client.compute_node.list(pool_id=pool_id)
     visible_state = pool.allocation_state.value if pool.state.value is 'active' else pool.state.value
-    node_count = '{} -> {}'.format(pool.current_dedicated, pool.target_dedicated) if pool.state.value is 'resizing' or (pool.state.value is 'deleting' and pool.allocation_state.value is 'resizing') else '{}'.format(pool.current_dedicated)
+    node_count = '{} -> {}'.format(
+        pool.current_dedicated_nodes + pool.current_low_priority_nodes,
+        pool.target_dedicated_nodes + pool.target_low_priority_nodes) if pool.state.value is 'resizing' or (pool.state.value is 'deleting' and pool.allocation_state.value is 'resizing') else '{}'.format(pool.current_dedicated_nodes)
 
     print()
-    print('State:       {}'.format(visible_state))
-    print('Node Size:   {}'.format(pool.vm_size))
-    print('Nodes:       {}'.format(node_count))
+    print('State:          {}'.format(visible_state))
+    print('Node Size:      {}'.format(pool.vm_size))
+    print('Nodes:          {}'.format(node_count))
+    print('| Dedicated:    {}'.format(pool.current_dedicated_nodes))
+    print('| Low priority: {}'.format(pool.current_low_priority_nodes))
     print()
 
     node_label = 'Nodes'
-    print_format = '{:<34}| {:<15} | {:<21}| {:<8}'
-    print_format_underline = '{:-<34}|{:-<17}|{:-<22}|{:-<8}'
+    print_format = '{:<36}| {:<15} | {:<21}| {:<8}'
+    print_format_underline = '{:-<36}|{:-<17}|{:-<22}|{:-<8}'
     print(print_format.format(node_label, 'State', 'IP:Port', 'Master'))
     print(print_format_underline.format('', '', '', ''))
 
@@ -281,9 +287,11 @@ def list_clusters(
     for pool in pools:
         pool_state = pool.allocation_state.value if pool.state.value is 'active' else pool.state.value
 
-        node_count = pool.current_dedicated
+        target_nodes = util.get_cluster_total_target_nodes(pool)
+        current_nodes = util.get_cluster_total_current_nodes(pool);
+        node_count = current_nodes
         if pool_state is 'resizing' or (pool_state is 'deleting' and pool.allocation_state.value is 'resizing'):
-            node_count = '{} -> {}'.format(pool.current_dedicated, pool.target_dedicated)
+            node_count = '{} -> {}'.format(current_nodes, target_nodes)
    
         print(print_format.format(pool.id, 
             pool_state, 
@@ -358,4 +366,3 @@ def ssh(
         print('\n\t{}\n'.format(ssh_command))
     else:
         call(ssh_command_array)
-

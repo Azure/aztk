@@ -342,3 +342,15 @@ def print_batch_exception(batch_exception):
             for mesg in batch_exception.error.values:
                 print('{}:\t{}'.format(mesg.key, mesg.value))
     print('-------------------------------------------')
+
+def get_cluster_total_target_nodes(pool):
+    """
+    Get the total number of target nodes (dedicated + low pri) for the pool
+    """
+    return pool.target_dedicated_nodes + pool.target_low_priority_nodes
+
+def get_cluster_total_current_nodes(pool):
+    """
+    Get the total number of current nodes (dedicated + low pri) in the pool
+    """
+    return pool.current_dedicated_nodes + pool.current_low_priority_nodes

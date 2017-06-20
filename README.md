@@ -29,6 +29,7 @@ First, create your cluster:
 ./bin/spark-cluster-create \
     --id <my-cluster-id> \
     --size <number of nodes> \
+    --size-low-pri <number of low priority nodes> \
     --vm-size <vm-size> \
     --custom-script <path to custom bash script to run on each node> \
     --wait/--no-wait (optional)
