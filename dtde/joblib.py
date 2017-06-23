@@ -129,7 +129,7 @@ def submit_app(
 
     # Get pool size
     pool = batch_client.pool.get(pool_id)
-    pool_size = util.get_total_target_nodes(pool)
+    pool_size = util.get_cluster_total_target_nodes(pool)
 
     # Affinitize task to master node
     master_node_affinity_id = util.get_master_node_id(batch_client, pool_id)
