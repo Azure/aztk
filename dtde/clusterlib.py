@@ -5,6 +5,8 @@ from datetime import datetime, timedelta
 import azure.batch.models as batch_models
 from subprocess import call
 
+import sys
+
 def cluster_install_cmd(custom_script_file):
     ret = [
         # setup spark home and permissions for spark folder
@@ -111,6 +113,8 @@ def create_cluster(
         vm_count,
         vm_low_pri_count,
         vm_size,
+        username,
+        password,
         wait = True):
     """
     Create a spark cluster
@@ -206,10 +210,14 @@ def create_cluster(
 
     # Wait for the app to finish
     if wait == True:
+
         util.wait_for_tasks_to_complete(
             batch_client,
             job_id,
-            datetime.timedelta(minutes=60))
+            timedelta(minutes=60))
+
+        if username is not None and password is not None:
+            create_user(batch_client, pool_id, username, password)
 
 def create_user(
         batch_client,
@@ -220,10 +228,18 @@ def create_user(
     Create a cluster user
     """
 
-    # Get master node id from task (job and task are both named pool_id)
-    master_node_id = batch_client.task \
-        .get(job_id=pool_id, task_id=pool_id) \
-        .node_info.node_id
+    # Get master node id from task 
+    master_node_id = None
+    try:
+        # job and task are both named pool_id
+        master_node_id = batch_client.task \
+            .get(job_id=pool_id, task_id=pool_id) \
+            .node_info.node_id
+    except AttributeError as err:
+        print('cluster, "{}", is still setting up - ' +
+              'please wait for your cluster to be created ' + 
+              'before creating a user'.format(pool_id))
+        exit()
 
     # Create new ssh user for the master node
     batch_client.compute_node.add_user(

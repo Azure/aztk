@@ -20,6 +20,8 @@ if __name__ == '__main__':
     vm_size = None
     custom_script = None
     wait = True
+    username = None
+    password = None
 
     # parse arguments
     parser = argparse.ArgumentParser(prog='az_spark')
@@ -29,21 +31,37 @@ if __name__ == '__main__':
 
     # Make --size and --size-low-pri mutually exclusive until there is a fix for
     # having clusters with mixed priority types
-    group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument('--size', type=int,
+    size_group = parser.add_mutually_exclusive_group(required=True)
+    size_group.add_argument('--size', type=int,
                         help='Number of vms in your cluster')
-    group.add_argument('--size-low-pri', type=int,
+    size_group.add_argument('--size-low-pri', type=int,
                         help='Number of low priority vms in your cluster')
     parser.add_argument('--vm-size', required=True,
                         help='VM size for nodes in your cluster')
     parser.add_argument('--custom-script', 
                         help='Absolute path of custom bash script (.sh) to run on each node')
-    parser.add_argument('--wait', dest='wait', action='store_true')
+    parser.add_argument('--username',
+                        help='Username to access your cluster (required: --wait flag)')
+    parser.add_argument('--password',
+                        help='Password to access your cluster (required: --wait flag)')
     parser.add_argument('--no-wait', dest='wait', action='store_false')
+    parser.add_argument('--wait', dest='wait', action='store_true')
     parser.set_defaults(wait=False)
 
+
     args = parser.parse_args()
-    
+
+    if args.wait is False:
+        if args.username is not None or args.password is not None:
+            print('You must specify set --wait to "True" ' +
+                  'in order to specify a username/password.')
+            exit()
+    else:
+        if (args.username is not None and args.password is None) or \
+            (args.username is None and args.password is not None):
+            print('You must specify both --username and --password together')
+            exit()
+
     if args.cluster_id is not None:
         pool_id = args.cluster_id
 
@@ -62,6 +80,12 @@ if __name__ == '__main__':
     if args.wait is not None:
         if args.wait == False:
             wait = False
+    
+    if args.username is not None:
+        username = args.username
+
+    if args.password is not None:
+        password = args.password
 
     print('-------------------------------------------')
     print('spark cluster id:        {}'.format(pool_id))
@@ -71,6 +95,8 @@ if __name__ == '__main__':
     print('spark cluster vm size:   {}'.format(vm_size))
     print('path to custom script:   {}'.format(custom_script))
     print('wait for cluster:        {}'.format(wait))
+    print('username:                {}'.format(username))
+    print('password:                {}'.format(password))
     print('-------------------------------------------')
 
     # Read config file
@@ -108,4 +134,6 @@ if __name__ == '__main__':
         vm_count,
         vm_low_pri_count,
         vm_size, 
+        username,
+        password,
         wait)
