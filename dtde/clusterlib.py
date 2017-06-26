@@ -236,9 +236,9 @@ def create_user(
             .get(job_id=pool_id, task_id=pool_id) \
             .node_info.node_id
     except AttributeError as err:
-        print('cluster, "{}", is still setting up - ' +
+        print('cluster, "{}", is still setting up - '.format(pool_id) +
               'please wait for your cluster to be created ' + 
-              'before creating a user'.format(pool_id))
+              'before creating a user')
         exit()
 
     # Create new ssh user for the master node
