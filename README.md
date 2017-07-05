@@ -47,7 +47,7 @@ You can also create your cluster with [low-priority](https://docs.microsoft.com/
 When your cluster is ready, create a user for your cluster:
 ```
 ./bin/spark-cluster-create-user \
-    ---id <my-cluster-id> \
+    --id <my-cluster-id> \
     --username <username> \
     --password <password>
 ```
@@ -59,8 +59,9 @@ Now you can submit jobs to run against the cluster:
 ./bin/spark-submit \
     --id <my-cluster-id> \
     --name <my-job-name> \
-    [list of options] \
-    --application <path-to-spark-job>
+    [options] 
+    <app jar | python file> 
+    [app arguments]
 ```
 
 ### Interact with your Spark cluster
@@ -69,7 +70,8 @@ To view the spark UI, open up an ssh tunnel with the "masterui" option and a loc
 ```
 ./bin/spark-cluster-ssh \ 
     --id <my-cluster-id> \
-    --masterui <local-port>
+    --masterui <local-port> \
+    --username <user-name>
 ```
 
 Optionally, you can also open up a jupyter notebook with the "jupyter" option to work in:
