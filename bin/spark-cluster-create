@@ -51,16 +51,17 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    if args.wait is False:
-        if args.username is not None or args.password is not None:
-            print('You must specify set --wait to "True" ' +
-                  'in order to specify a username/password.')
-            exit()
-    else:
-        if (args.username is not None and args.password is None) or \
-            (args.username is None and args.password is not None):
-            print('You must specify both --username and --password together')
-            exit()
+    if args.username is not None and \
+        args.password is not None and \
+        args.wait is False:
+        print('You must specify set --wait to "True" ' +
+              'in order to specify a username/password.')
+        exit()
+
+    if (args.username is not None and args.password is None) or \
+        (args.username is None and args.password is not None):
+        print('You must specify both --username and --password together')
+        exit()
 
     if args.cluster_id is not None:
         pool_id = args.cluster_id
