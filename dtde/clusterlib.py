@@ -1,10 +1,8 @@
 from . import util, constants
-
 import random
 from datetime import datetime, timedelta
 import azure.batch.models as batch_models
 from subprocess import call
-
 import sys
 
 def cluster_install_cmd(custom_script_file):
