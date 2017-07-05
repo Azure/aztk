@@ -44,7 +44,7 @@ You can also create your cluster with [low-priority](https://docs.microsoft.com/
     --vm-size <vm-size>
 ```
 
-When your cluster is ready, create a user for your cluster:
+When your cluster is ready, create a user for your cluster (if you didn't already do so when creating your cluster):
 ```
 ./bin/spark-cluster-create-user \
     --id <my-cluster-id> \
@@ -78,6 +78,7 @@ Optionally, you can also open up a jupyter notebook with the "jupyter" option to
 ```
 ./bin/spark-cluster-ssh \ 
     --id <my-cluster-id> \
+    --masterui <local-port> \
     --jupyter <local-port>
 ```
 

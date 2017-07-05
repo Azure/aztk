@@ -151,6 +151,7 @@ def get_master_node_id(batch_client, pool_id):
     return ""
 
 def create_pool_if_not_exist(batch_client, pool, wait=True):
+
     """
     Creates the specified pool if it doesn't already exist
     :param batch_client: The batch client to use.
@@ -190,13 +191,14 @@ def wait_for_all_nodes_state(batch_client, pool, node_state):
     while True:
         # refresh pool to ensure that there is no resize error
         pool = batch_client.pool.get(pool.id)
-        if pool.resize_error is not None:
+        if pool.resize_errors is not None:
             raise RuntimeError(
                 'resize error encountered for pool {}: {!r}'.format(
                     pool.id, pool.resize_error))
         nodes = list(batch_client.compute_node.list(pool.id))
 
-        if (len(nodes) >= pool.target_dedicated and
+        totalNodes = pool.target_dedicated_nodes + pool.target_low_priority_nodes
+        if (len(nodes) >= totalNodes and
                 all(node.state in node_state for node in nodes)):
             return nodes
         '''
