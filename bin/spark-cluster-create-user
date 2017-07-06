@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from dtde import clusterlib, util, azure_api
+from dtde import clusterlib, util
 import argparse
 import os
 
