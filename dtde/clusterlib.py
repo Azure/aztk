@@ -273,6 +273,10 @@ def get_cluster_details(
     print('| Low priority: {}'.format(pool.current_low_priority_nodes))
     print()
 
+    # Do not print node details if the pool is deleting
+    if pool.state.value is 'deleting':
+        return;
+
     node_label = 'Nodes'
     print_format = '{:<36}| {:<15} | {:<21}| {:<8}'
     print_format_underline = '{:-<36}|{:-<17}|{:-<22}|{:-<8}'
