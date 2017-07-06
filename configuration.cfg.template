@@ -6,6 +6,6 @@ batchserviceurl=
 [Storage]
 storageaccountname=
 storageaccountkey=
-storageaccountsuffix=
+storageaccountsuffix=core.windows.net
 
 [Default]
