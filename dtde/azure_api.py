@@ -10,21 +10,24 @@ global_config = config.get()
 batch_client = None
 blob_client = None
 
-def get_batch_client(): 
+
+def get_batch_client():
     """
         :returns: the batch client singleton
     """
-    if not batch_client: 
+    if not batch_client:
         __load_batch_client()
     return batch_client
+
 
 def get_blob_client():
     """
         :returns: the batch client singleton
     """
-    if not blob_client: 
+    if not blob_client:
         __load_blob_client()
-    return blob_client;
+    return blob_client
+
 
 def __load_batch_client():
     global batch_client
@@ -39,19 +42,20 @@ def __load_batch_client():
         batch_account_name,
         batch_service_url)
 
+
 def __load_blob_client():
     global blob_client
     # Get configuration
     storage_account_key = global_config.get('Storage', 'storageaccountkey')
     storage_account_name = global_config.get('Storage', 'storageaccountname')
-    storage_account_suffix = global_config.get('Storage', 'storageaccountsuffix')
+    storage_account_suffix = global_config.get(
+        'Storage', 'storageaccountsuffix')
 
     # create storage client
     blob_client = create_blob_client(
         storage_account_key,
         storage_account_name,
         storage_account_suffix)
-
 
 
 def create_batch_client(
