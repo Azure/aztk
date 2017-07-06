@@ -1,6 +1,14 @@
-from . import config, util
+import azure.batch.batch_service_client as batch
+import azure.batch.batch_auth as batch_auth
+import azure.storage.blob as blob
+from . import config
+from .version import __version__
+
 
 global_config = config.get()
+
+batch_client = None
+blob_client = None
 
 def get_batch_client(): 
     """
@@ -14,30 +22,79 @@ def get_blob_client():
     """
         :returns: the batch client singleton
     """
-     if not blob_client: 
+    if not blob_client: 
         __load_blob_client()
     return blob_client;
 
 def __load_batch_client():
+    global batch_client
     # Get configuration
     batch_account_key = global_config.get('Batch', 'batchaccountkey')
     batch_account_name = global_config.get('Batch', 'batchaccountname')
     batch_service_url = global_config.get('Batch', 'batchserviceurl')
 
     # create batch client
-    batch_client = util.create_batch_client(
+    batch_client = create_batch_client(
         batch_account_key,
         batch_account_name,
         batch_service_url)
 
 def __load_blob_client():
+    global blob_client
     # Get configuration
     storage_account_key = global_config.get('Storage', 'storageaccountkey')
     storage_account_name = global_config.get('Storage', 'storageaccountname')
     storage_account_suffix = global_config.get('Storage', 'storageaccountsuffix')
 
     # create storage client
-    blob_client = util.create_blob_client(
+    blob_client = create_blob_client(
         storage_account_key,
         storage_account_name,
         storage_account_suffix)
+
+
+
+def create_batch_client(
+        batch_account_key,
+        batch_account_name,
+        batch_service_url):
+    """
+    Creates a batch client object
+    :param str batch_account_key: batch account key
+    :param str batch_account_name: batch account name
+    :param str batch_service_url: batch service url
+    """
+    # Set up SharedKeyCredentials
+    credentials = batch_auth.SharedKeyCredentials(
+        batch_account_name,
+        batch_account_key)
+
+    # Set up Batch Client
+    batch_client = batch.BatchServiceClient(
+        credentials,
+        base_url=batch_service_url)
+
+    # Set retry policy
+    batch_client.config.retry_policy.retries = 5
+    batch_client.config.add_user_agent('dtde/{}'.format(__version__))
+
+    return batch_client
+
+
+def create_blob_client(
+        storage_account_key,
+        storage_account_name,
+        storage_account_suffix):
+    """
+    Creates a blob client object
+    :param str storage_account_key: storage account key
+    :param str storage_account_name: storage account name
+    :param str storage_account_suffix: storage account suffix
+    """
+    # Set up BlockBlobStorage
+    blob_client = blob.BlockBlobService(
+        account_name=storage_account_name,
+        account_key=storage_account_key,
+        endpoint_suffix=storage_account_suffix)
+
+    return blob_client

@@ -1,4 +1,4 @@
-from . import util, constants
+from . import util, constants, azure_api
 
 import random
 from datetime import datetime, timedelta
@@ -62,8 +62,6 @@ def app_submit_cmd(
     ]
 
 def submit_app(
-        batch_client,
-        blob_client,
         pool_id,
         name,
         app, 
@@ -84,7 +82,9 @@ def submit_app(
     """
     Submit a spark app 
     """
-
+    batch_client = azure_api.get_batch_client()
+    blob_client = azure_api.get_blob_client()
+    
     resource_files = []
 
     # Upload application file
@@ -132,7 +132,7 @@ def submit_app(
     pool_size = util.get_cluster_total_target_nodes(pool)
 
     # Affinitize task to master node
-    master_node_affinity_id = util.get_master_node_id(batch_client, pool_id)
+    master_node_affinity_id = util.get_master_node_id(pool_id)
 
     # Create task
     task = batch_models.TaskAddParameter(
@@ -154,6 +154,5 @@ def submit_app(
     # Wait for the app to finish
     if wait == True:
         util.wait_for_tasks_to_complete(
-            batch_client,
             job_id,
             timedelta(minutes=60))

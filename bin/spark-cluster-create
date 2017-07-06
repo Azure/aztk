@@ -94,8 +94,6 @@ if __name__ == '__main__':
 
     # create spark cluster
     clusterlib.create_cluster(
-        azure_api.get_batch_client(),
-        azure_api.get_blob_client(),
         custom_script,
         pool_id,
         vm_count,
