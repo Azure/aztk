@@ -51,6 +51,7 @@ When your cluster is ready, create a user for your cluster (if you didn't alread
     --username <username> \
     --password <password>
 ```
+NOTE: The cluster id (--id) can only contain alphanumeric characters including hyphens and underscores, and cannot contain more than 64 characters. 
 
 ### Submit a Spark job
 
@@ -63,6 +64,7 @@ Now you can submit jobs to run against the cluster:
     <app jar | python file> 
     [app arguments]
 ```
+NOTE: The job name (--name) must be atleast 3 characters long, can only contain alphanumeric characters including hyphens but excluding underscores, and cannot contain uppercase letters.
 
 ### Interact with your Spark cluster
 
