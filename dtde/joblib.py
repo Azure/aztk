@@ -1,11 +1,12 @@
-from . import util, constants
+from . import util, constants, azure_api
 
 import random
 from datetime import datetime, timedelta
 import azure.batch.models as batch_models
 
 def app_submit_cmd(
-        webui_port, 
+        webui_port,
+        name,
         app, 
         app_args, 
         main_class,
@@ -20,6 +21,7 @@ def app_submit_cmd(
         driver_cores, 
         executor_cores):
 
+    name_option = '--name ' + name + ' ' if name else ''
     main_class_option = '--class ' + main_class + ' ' if main_class else ''
     jars_option = '--jars "' + ','.join(jars) + '" ' if jars else ''
     py_files_option = '--py-files "' + ','.join(py_files) + '" ' if py_files else ''
@@ -46,6 +48,7 @@ def app_submit_cmd(
 
         # execute spark-submit on the specified app 
         '$SPARK_HOME/bin/spark-submit ' +
+            name_option +
             '--master spark://${MASTER_NODE%:*}:7077 ' + 
             main_class_option +
             jars_option +
@@ -62,8 +65,6 @@ def app_submit_cmd(
     ]
 
 def submit_app(
-        batch_client,
-        blob_client,
         pool_id,
         name,
         app, 
@@ -84,7 +85,9 @@ def submit_app(
     """
     Submit a spark app 
     """
-
+    batch_client = azure_api.get_batch_client()
+    blob_client = azure_api.get_blob_client()
+    
     resource_files = []
 
     # Upload application file
@@ -112,7 +115,8 @@ def submit_app(
 
     # create command to submit task
     cmd = app_submit_cmd(
-        webui_port=constants._WEBUI_PORT, 
+        webui_port=constants._WEBUI_PORT,
+        name=name,
         app=app, 
         app_args=app_args, 
         main_class=main_class, 
@@ -129,10 +133,10 @@ def submit_app(
 
     # Get pool size
     pool = batch_client.pool.get(pool_id)
-    pool_size = util.get_total_target_nodes(pool)
+    pool_size = util.get_cluster_total_target_nodes(pool)
 
     # Affinitize task to master node
-    master_node_affinity_id = util.get_master_node_id(batch_client, pool_id)
+    master_node_affinity_id = util.get_master_node_id(pool_id)
 
     # Create task
     task = batch_models.TaskAddParameter(
@@ -154,6 +158,5 @@ def submit_app(
     # Wait for the app to finish
     if wait == True:
         util.wait_for_tasks_to_complete(
-            batch_client,
             job_id,
             timedelta(minutes=60))
