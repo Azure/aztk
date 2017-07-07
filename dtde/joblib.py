@@ -5,7 +5,8 @@ from datetime import datetime, timedelta
 import azure.batch.models as batch_models
 
 def app_submit_cmd(
-        webui_port, 
+        webui_port,
+        name,
         app, 
         app_args, 
         main_class,
@@ -20,6 +21,7 @@ def app_submit_cmd(
         driver_cores, 
         executor_cores):
 
+    name_option = '--name ' + name + ' ' if name else ''
     main_class_option = '--class ' + main_class + ' ' if main_class else ''
     jars_option = '--jars "' + ','.join(jars) + '" ' if jars else ''
     py_files_option = '--py-files "' + ','.join(py_files) + '" ' if py_files else ''
@@ -46,6 +48,7 @@ def app_submit_cmd(
 
         # execute spark-submit on the specified app 
         '$SPARK_HOME/bin/spark-submit ' +
+            name_option +
             '--master spark://${MASTER_NODE%:*}:7077 ' + 
             main_class_option +
             jars_option +
@@ -112,7 +115,8 @@ def submit_app(
 
     # create command to submit task
     cmd = app_submit_cmd(
-        webui_port=constants._WEBUI_PORT, 
+        webui_port=constants._WEBUI_PORT,
+        name=name,
         app=app, 
         app_args=app_args, 
         main_class=main_class, 
