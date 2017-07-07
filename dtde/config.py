@@ -20,7 +20,7 @@ def load_config():
     global_config = configparser.ConfigParser()
     global_config.read(constants.CONFIG_PATH)
 
-def get():
+def get() -> configparser.ConfigParser:
     if not global_config:
         load_config()
         

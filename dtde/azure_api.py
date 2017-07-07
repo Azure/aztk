@@ -11,6 +11,9 @@ batch_client = None
 blob_client = None
 
 
+class AzureApiInitError(Exception):
+    pass
+
 def get_batch_client():
     """
         :returns: the batch client singleton
@@ -29,44 +32,15 @@ def get_blob_client():
     return blob_client
 
 
-def __load_batch_client():
-    global batch_client
-    # Get configuration
-    batch_account_key = global_config.get('Batch', 'batchaccountkey')
-    batch_account_name = global_config.get('Batch', 'batchaccountname')
-    batch_service_url = global_config.get('Batch', 'batchserviceurl')
-
-    # create batch client
-    batch_client = create_batch_client(
-        batch_account_key,
-        batch_account_name,
-        batch_service_url)
-
-
-def __load_blob_client():
-    global blob_client
-    # Get configuration
-    storage_account_key = global_config.get('Storage', 'storageaccountkey')
-    storage_account_name = global_config.get('Storage', 'storageaccountname')
-    storage_account_suffix = global_config.get(
-        'Storage', 'storageaccountsuffix')
-
-    # create storage client
-    blob_client = create_blob_client(
-        storage_account_key,
-        storage_account_name,
-        storage_account_suffix)
-
-
 def create_batch_client(
-        batch_account_key,
-        batch_account_name,
-        batch_service_url):
+        batch_account_key: str,
+        batch_account_name: str,
+        batch_service_url: str):
     """
-    Creates a batch client object
-    :param str batch_account_key: batch account key
-    :param str batch_account_name: batch account name
-    :param str batch_service_url: batch service url
+        Creates a batch client object
+        :param str batch_account_key: batch account key
+        :param str batch_account_name: batch account name
+        :param str batch_service_url: batch service url
     """
     # Set up SharedKeyCredentials
     credentials = batch_auth.SharedKeyCredentials(
@@ -86,14 +60,14 @@ def create_batch_client(
 
 
 def create_blob_client(
-        storage_account_key,
-        storage_account_name,
-        storage_account_suffix):
+        storage_account_key: str,
+        storage_account_name: str,
+        storage_account_suffix: str):
     """
-    Creates a blob client object
-    :param str storage_account_key: storage account key
-    :param str storage_account_name: storage account name
-    :param str storage_account_suffix: storage account suffix
+        Creates a blob client object
+        :param str storage_account_key: storage account key
+        :param str storage_account_name: storage account name
+        :param str storage_account_suffix: storage account suffix
     """
     # Set up BlockBlobStorage
     blob_client = blob.BlockBlobService(
@@ -102,3 +76,51 @@ def create_blob_client(
         endpoint_suffix=storage_account_suffix)
 
     return blob_client
+
+
+def __load_batch_client():
+    global batch_client
+    if not global_config.has_option('Batch', 'batchaccountkey'):
+        raise AzureApiInitError("Batch account key is not set in config")
+
+    if not global_config.has_option('Batch', 'batchaccountname'):
+        raise AzureApiInitError("Batch account name is not set in config")
+
+    if not global_config.has_option('Batch', 'batchserviceurl'):
+        raise AzureApiInitError("Batch account url is not set in config")
+
+    # Get configuration
+    batch_account_key = global_config.get('Batch', 'batchaccountkey')
+    batch_account_name = global_config.get('Batch', 'batchaccountname')
+    batch_service_url = global_config.get('Batch', 'batchserviceurl')
+
+    # create batch client
+    batch_client = create_batch_client(
+        batch_account_key,
+        batch_account_name,
+        batch_service_url)
+
+
+def __load_blob_client():
+    global blob_client
+
+    if not global_config.has_option('Storage', 'storageaccountkey'):
+        raise AzureApiInitError("Storage account key is not set in config")
+
+    if not global_config.has_option('Storage', 'storageaccountname'):
+        raise AzureApiInitError("Storage account name is not set in config")
+
+    if not global_config.has_option('Storage', 'storageaccountsuffix'):
+        raise AzureApiInitError("Storage account suffix is not set in config")
+
+    # Get configuration
+    storage_account_key = global_config.get('Storage', 'storageaccountkey')
+    storage_account_name = global_config.get('Storage', 'storageaccountname')
+    storage_account_suffix = global_config.get(
+        'Storage', 'storageaccountsuffix')
+
+    # create storage client
+    blob_client = create_blob_client(
+        storage_account_key,
+        storage_account_name,
+        storage_account_suffix)
