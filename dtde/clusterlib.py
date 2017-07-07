@@ -1,24 +1,28 @@
-from . import util, constants, azure_api
+from . import util, constants, azure_api, upload_node_scripts
 import random
 from datetime import datetime, timedelta
 import azure.batch.models as batch_models
 from subprocess import call
 import sys
 
-def cluster_install_cmd(custom_script_file):
+def cluster_install_cmd(zip_resource_file: batch_models.ResourceFile, custom_script_file):
+    print('REx', zip_resource_file)
     ret = [
         # setup spark home and permissions for spark folder
         'export SPARK_HOME=/dsvm/tools/spark/current',
         'export PATH=$PATH:$SPARK_HOME/bin',
         'chmod -R 777 $SPARK_HOME',
-        'chmod -R 777 /usr/local/share/jupyter/kernels'
+        'chmod -R 777 /usr/local/share/jupyter/kernels',
+        # To avoid error: "sudo: sorry, you must have a tty to run sudo"
+        'sed -i -e "s/Defaults    requiretty.*/ #Defaults    requiretty/g" /etc/sudoers',
+        '/bin/sh -c "unzip $AZ_BATCH_TASK_WORKING_DIR/%s"' % zip_resource_file.file_path,
+        'chmod +x $AZ_BATCH_TASK_WORKING_DIR/setup_node.sh',
+        '/bin/bash -c "$AZ_BATCH_TASK_WORKING_DIR/setup_node.sh"'
     ]
 
     if custom_script_file is not None:
         ret.extend([
-            # To avoid error: "sudo: sorry, you must have a tty to run sudo"
-            'sed -i -e "s/Defaults    requiretty.*/ #Defaults    requiretty/g" /etc/sudoers',
-            '/bin/sh -c {}'.format(custom_script_file)
+            '/bin/sh -c {}'.format(custom_script_file),
         ])
 
     ret.extend(['exit 0'])
@@ -115,6 +119,11 @@ def create_cluster(
     """
     Create a spark cluster
     """
+
+    # Upload start task scripts
+    zip_resource_file = upload_node_scripts.zip_and_upload()
+
+
     batch_client = azure_api.get_batch_client()
     blob_client = azure_api.get_blob_client()
 
@@ -127,7 +136,7 @@ def create_cluster(
     job_id = pool_id
 
     # Upload custom script file
-    resource_files = []
+    resource_files = [zip_resource_file]
     if custom_script is not None:
         resource_files.append(
             util.upload_file_to_container(
@@ -137,13 +146,21 @@ def create_cluster(
 
     # start task command
     start_task_commands = \
-        cluster_install_cmd(custom_script) 
+        cluster_install_cmd(zip_resource_file, custom_script) 
 
     # Get a verified node agent sku
     sku_to_use, image_ref_to_use = \
         util.select_latest_verified_vm_image_with_node_agent_sku(
             publisher, offer, sku)
 
+    batch_config = azure_api.get_batch_config()
+
+    # TODO use certificate
+    environment_settings = [
+        batch_models.EnvironmentSetting(name = "ACCOUNT_KEY", value = batch_config.account_key),
+        batch_models.EnvironmentSetting(name = "ACCOUNT_URL", value = batch_config.account_url),
+    ]
+    
     # Confiure the pool
     pool = batch_models.PoolAddParameter(
         id = pool_id,
@@ -156,6 +173,7 @@ def create_cluster(
         start_task = batch_models.StartTask(
             command_line = util.wrap_commands_in_shell(start_task_commands),
             resource_files = resource_files,
+            environment_settings = environment_settings,
             user_identity = batch_models.UserIdentity(
                 auto_user = batch_models.AutoUserSpecification(
                     scope=batch_models.AutoUserScope.pool,

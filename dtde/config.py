@@ -13,7 +13,6 @@ def load_config():
         Loads the config file at the root of the repository(configuration.cfg)
     """
     global global_config
-    print("Loading config", constants.CONFIG_PATH)
     if not os.path.isfile(constants.CONFIG_PATH):
         raise Exception("Configuration file doesn't exists at %s" % constants.CONFIG_PATH)
 

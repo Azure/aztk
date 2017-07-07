@@ -40,7 +40,7 @@ def wait_for_tasks_to_complete(job_id, timeout):
     raise TimeoutError("Timed out waiting for tasks to complete")
 
 
-def upload_file_to_container(container_name, file_path, use_full_path):
+def upload_file_to_container(container_name, file_path, use_full_path) -> batch_models.ResourceFile:
     """
     Uploads a local file to an Azure Blob storage container.
     :param block_blob_client: A blob service client.

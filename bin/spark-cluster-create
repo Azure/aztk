@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 
-from dtde import clusterlib, util
+from dtde import clusterlib, util, upload_node_scripts
 import argparse 
 import os
 
 if __name__ == '__main__':
-
     pool_id = None
     vm_count = 0
     vm_low_pri_count = 0
@@ -79,7 +78,7 @@ if __name__ == '__main__':
 
     if args.password is not None:
         password = args.password
-
+        
     print('-------------------------------------------')
     print('spark cluster id:        {}'.format(pool_id))
     print('spark cluster size:      {}'.format(vm_count + vm_low_pri_count))

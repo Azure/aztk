@@ -30,7 +30,9 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+tmp/
 
 # Visual Studio Code
 .vscode
 .DS_Store
+

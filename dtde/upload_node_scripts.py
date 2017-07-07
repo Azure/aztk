@@ -1,10 +1,15 @@
 import os
 import zipfile
-from . import util, constants
+from . import constants, util
 
 root = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
 
-local_tmp_zipfile = "node-scripts.zip";
+local_tmp_zipfile = "tmp/node-scripts.zip";
+
+def ensure_dir(file_path):
+    directory = os.path.dirname(file_path)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
 
 def zipdir(path, ziph):
     """
@@ -15,22 +20,20 @@ def zipdir(path, ziph):
             ziph.write(os.path.join(root, file), file)
 
 
-def zip_node_scripts():
+def zip():
+    ensure_dir(local_tmp_zipfile)
     zipf = zipfile.ZipFile(local_tmp_zipfile, 'w', zipfile.ZIP_DEFLATED)
     zipdir(os.path.join(root, "node"), zipf)
     zipf.close()
     print("Ziped file")
 
-def upload(blob_client):
+def upload():
     print("Uploading node scripts...")
-    util.upload_file_to_container(
-                blob_client, 
-                container_name = "node-scripts", 
-                file_path = "node-scripts.zip", 
-                use_full_path = True)
+    return util.upload_file_to_container(
+                container_name = "spark-node-scripts", 
+                file_path = local_tmp_zipfile, 
+                use_full_path = False)
 
-
-    print("Uploaded")
-
-if __name__ == '__main__':
-    zip_node_scripts()
+def zip_and_upload():
+    zip()
+    return upload()
