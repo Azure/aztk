@@ -1,4 +1,4 @@
-from . import util, constants
+from . import util, constants, azure_api
 import random
 from datetime import datetime, timedelta
 import azure.batch.models as batch_models
@@ -104,8 +104,6 @@ def cluster_start_cmd(webui_port, jupyter_port):
     ]
 
 def create_cluster(
-        batch_client,
-        blob_client,
         custom_script,
         pool_id,
         vm_count,
@@ -117,6 +115,8 @@ def create_cluster(
     """
     Create a spark cluster
     """
+    batch_client = azure_api.get_batch_client()
+    blob_client = azure_api.get_blob_client()
 
     # vm image
     publisher = 'microsoft-ads'
@@ -131,7 +131,6 @@ def create_cluster(
     if custom_script is not None:
         resource_files.append(
             util.upload_file_to_container(
-                blob_client, 
                 container_name = pool_id, 
                 file_path = custom_script, 
                 use_full_path = True))
@@ -143,7 +142,7 @@ def create_cluster(
     # Get a verified node agent sku
     sku_to_use, image_ref_to_use = \
         util.select_latest_verified_vm_image_with_node_agent_sku(
-            batch_client, publisher, offer, sku)
+            publisher, offer, sku)
 
     # Confiure the pool
     pool = batch_models.PoolAddParameter(
@@ -167,7 +166,6 @@ def create_cluster(
 
     # Create the pool + create user for the pool
     util.create_pool_if_not_exist(
-        batch_client, 
         pool, 
         wait)
 
@@ -210,22 +208,21 @@ def create_cluster(
     if wait == True:
 
         util.wait_for_tasks_to_complete(
-            batch_client,
             job_id,
             timedelta(minutes=60))
 
         if username is not None and password is not None:
-            create_user(batch_client, pool_id, username, password)
+            create_user(pool_id, username, password)
 
 def create_user(
-        batch_client,
         pool_id,
         username, 
         password):
     """
     Create a cluster user
     """
-
+    batch_client = azure_api.get_batch_client()
+    
     # Get master node id from task 
     master_node_id = None
     try:
@@ -250,12 +247,12 @@ def create_user(
             expiry_time = datetime.now() + timedelta(days=365)))
 
 
-def get_cluster_details(
-        batch_client,
-        pool_id):
+def get_cluster_details(pool_id:str):
     """
     print out specified cluster info
     """
+    batch_client = azure_api.get_batch_client()
+    
     pool = batch_client.pool.get(pool_id)
     if (pool.state == batch_models.PoolState.deleting):
         print
@@ -283,19 +280,20 @@ def get_cluster_details(
     print(print_format.format(node_label, 'State', 'IP:Port', 'Master'))
     print(print_format_underline.format('', '', '', ''))
 
-    master_node = util.get_master_node_id(batch_client, pool_id)
+    master_node = util.get_master_node_id(pool_id)
 
     for node in nodes:
-        ip, port = util.get_connection_info(batch_client, pool_id, node.id)
+        ip, port = util.get_connection_info(pool_id, node.id)
         print (print_format.format(node.id, node.state.value, '{}:{}'.format(ip, port),
                                        '*' if node.id == master_node else ''))
     print()
 
-def list_clusters(
-        batch_client):
+def list_clusters():
     """
     print out all clusters 
     """
+    batch_client = azure_api.get_batch_client()
+    
     print_format = '{:<34}| {:<10}| {:<20}| {:<7}'
     print_format_underline = '{:-<34}|{:-<11}|{:-<21}|{:-<7}'
     
@@ -316,12 +314,12 @@ def list_clusters(
             pool.vm_size,
             node_count))
 
-def delete_cluster(
-        batch_client,
-        pool_id):
+def delete_cluster(pool_id:str):
     """
     Delete a spark cluster
     """
+    batch_client = azure_api.get_batch_client()
+    
     # delete pool by id
     pool = batch_client.pool.get(pool_id)
 
@@ -336,8 +334,7 @@ def delete_cluster(
         print('The pool, \'{}\', does not exist'.format(pool_id))
 
 def ssh(
-        batch_client,
-        pool_id,
+        pool_id:str,
         username = None,
         masterui = None,
         webui = None,
@@ -350,6 +347,7 @@ def ssh(
     :param ports: an list of local and remote ports
     :type ports: [[<local-port>, <remote-port>]]
     """
+    batch_client = azure_api.get_batch_client()
 
     # Get master node id from task (job and task are both named pool_id)
     master_node_id = batch_client.task \
