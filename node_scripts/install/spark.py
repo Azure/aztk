@@ -3,7 +3,7 @@
 """
 import time
 import os
-from subprocess import call
+from subprocess import call, Popen
 from typing import List
 import azure.batch.models as batchmodels
 from core import config
@@ -107,7 +107,8 @@ def start_jupyter():
     my_env["PYSPARK_DRIVER_PYTHON"] = "/anaconda/envs/py35/bin/jupyter"
     my_env["PYSPARK_DRIVER_PYTHON_OPTS"] = "notebook --no-browser --port='%s'" % jupyter_port
 
-    call("pyspark", "&", env=my_env)
+    # call("pyspark", "&", env=my_env)
+    Popen(["pyspark"], close_fds=True)
 
 
 def start_spark():

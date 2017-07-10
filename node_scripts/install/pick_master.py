@@ -53,8 +53,9 @@ def find_master(client: batch.BatchServiceClient) -> bool:
         :returns bool: If the node is the master it returns true otherwise returns false
     """
     # If not dedicated the node cannot be a master
-    if not config.is_dedicated:
-        return False
+    # TODO enable when inter node communication is working with low pri and dedicated together.
+    # if not config.is_dedicated:
+        # return False
     for i in range(0, 5):
         pool = client.pool.get(config.pool_id)
         master = get_master_node_id(pool)
