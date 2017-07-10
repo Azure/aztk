@@ -13,10 +13,13 @@ node_id = os.environ["AZ_BATCH_NODE_ID"]
 account_name = os.environ["AZ_BATCH_ACCOUNT_NAME"]
 account_key = os.environ["ACCOUNT_KEY"]
 account_url = os.environ["ACCOUNT_URL"]
+is_dedicated = os.environ["AZ_BATCH_NODE_IS_DEDICATED"]
+
 
 print("Pool id is", node_id)
 print("Node id is", node_id)
 print("Account name", account_name)
+print("Is dedicated", is_dedicated)
 
 master_node_metadata_key = "_spark_master_node"
 
@@ -61,6 +64,9 @@ def try_assign_self_as_master(client: batch.BatchServiceClient, pool: batchmodel
 
 
 def find_master(client: batch.BatchServiceClient):
+    # If not dedicated the node cannot be a master
+    if not is_dedicated:
+        return True
     for i in range(0, 5):
         pool = client.pool.get(pool_id)
         master = get_master_node_id(pool)
