@@ -12,7 +12,9 @@ pool_admin_user = batch_models.UserIdentity(
 
 
 def cluster_install_cmd(zip_resource_file: batch_models.ResourceFile, custom_script_file):
-    print('REx', zip_resource_file)
+    """
+        This will return the command line to be run on the start task of the pool to setup spark.
+    """
     ret = [
         # setup spark home and permissions for spark folder
         'export SPARK_HOME=/dsvm/tools/spark/current',
@@ -116,7 +118,7 @@ def cluster_start_cmd(webui_port, jupyter_port):
     ]
 
 
-def generate_cluster_start_task(custom_script: str = None):
+def generate_cluster_start_task(zip_resource_file: batch_models.ResourceFile, custom_script: str = None):
     """
         This will return the start task object for the pool to be created.
         :param custom_script str: Path to a local file to be uploaded to storage and run after spark started.
@@ -133,6 +135,7 @@ def generate_cluster_start_task(custom_script: str = None):
                 use_full_path=True))
 
     # TODO use certificate
+    batch_config = azure_api.get_batch_config()
     environment_settings = [
         batch_models.EnvironmentSetting(
             name="ACCOUNT_KEY", value=batch_config.account_key),
@@ -183,8 +186,6 @@ def create_cluster(
         util.select_latest_verified_vm_image_with_node_agent_sku(
             publisher, offer, sku)
 
-    batch_config = azure_api.get_batch_config()
-
     # Confiure the pool
     pool = batch_models.PoolAddParameter(
         id=pool_id,
@@ -194,7 +195,7 @@ def create_cluster(
         vm_size=vm_size,
         target_dedicated_nodes=vm_count,
         target_low_priority_nodes=vm_low_pri_count,
-        start_task=generate_cluster_start_task(custom_script),
+        start_task=generate_cluster_start_task(zip_resource_file, custom_script),
         enable_inter_node_communication=True,
         max_tasks_per_node=1)
 
