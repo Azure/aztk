@@ -24,7 +24,8 @@ def cluster_install_cmd(zip_resource_file: batch_models.ResourceFile, custom_scr
         # To avoid error: "sudo: sorry, you must have a tty to run sudo"
         'sed -i -e "s/Defaults    requiretty.*/ #Defaults    requiretty/g" /etc/sudoers',
         '/bin/sh -c "unzip $AZ_BATCH_TASK_WORKING_DIR/%s"' % zip_resource_file.file_path,
-        'chmod +x $AZ_BATCH_TASK_WORKING_DIR/setup_node.sh',
+        'chmod 777 $AZ_BATCH_TASK_WORKING_DIR/setup_node.sh',
+        'dos2unix $AZ_BATCH_TASK_WORKING_DIR/setup_node.sh', # Convert windows line ending to unix if applicable
         '/bin/bash -c "$AZ_BATCH_TASK_WORKING_DIR/setup_node.sh"'
     ]
 
@@ -146,7 +147,7 @@ def generate_cluster_start_task(zip_resource_file: batch_models.ResourceFile, cu
     # start task command
     command = cluster_install_cmd(zip_resource_file, custom_script)
 
-    batch_models.StartTask(
+    return batch_models.StartTask(
         command_line=util.wrap_commands_in_shell(command),
         resource_files=resource_files,
         environment_settings=environment_settings,
