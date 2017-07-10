@@ -3,12 +3,16 @@
 """
 import time
 import os
+from subprocess import call
 from typing import List
-import azure.batch.batch_service_client as batch
 import azure.batch.models as batchmodels
 from core import config
+import shutil
+import json
 
 batch_client = config.batch_client
+spark_home = "/dsvm/tools/spark/current"
+spark_conf_folder = os.path.join(spark_home, "conf")
 
 
 def get_pool() -> batchmodels.CloudPool:
@@ -19,7 +23,8 @@ def list_nodes() -> List[batchmodels.ComputeNode]:
     """
         List all the nodes in the pool.
     """
-    # TODO use continuation token & verify against current/target dedicated of pool
+    # TODO use continuation token & verify against current/target dedicated of
+    # pool
     return batch_client.compute_node.list(config.pool_id)
 
 
@@ -32,7 +37,8 @@ def wait_for_pool_ready() -> batchmodels.CloudPool:
         if pool.allocation_state == batchmodels.AllocationState.steady:
             return pool
         else:
-            print("Waiting for pool to be steady. It is currently %s" % pool.allocation_state)
+            print("Waiting for pool to be steady. It is currently %s" %
+                  pool.allocation_state)
             time.sleep(5)  # Sleep for 10 seconds before trying again
 
 
@@ -43,9 +49,6 @@ def setup_connection():
     wait_for_pool_ready()
     print("Pool is now steady. Setting up master")
 
-    spark_home = "/dsvm/tools/spark/current"
-    spark_conf_folder = os.path.join(spark_home, "conf")
-
     nodes = list_nodes()
 
     master_file = open(os.path.join(spark_conf_folder, "master"), 'w')
@@ -55,61 +58,63 @@ def setup_connection():
         if node.id == config.node_id:
             print("Adding node %s as a master" % node.id)
             master_file.write("%s\n" % node.ip_address)
-        else: 
+        else:
             print("Adding node %s as a slave" % node.id)
             slaves_file.write("%s\n" % node.ip_address)
-    
+
     master_file.close()
     slaves_file.close()
 
-def start_spark(webui_port, jupyter_port):
-    return [
-        # set SPARK_HOME environment vars
-        'export SPARK_HOME=/dsvm/tools/spark/current',
-        'export PATH=$PATH:$SPARK_HOME/bin',
 
-        # get master node ip
-        'export MASTER_NODE=$(cat $SPARK_HOME/conf/master)',
+def generate_jupyter_config():
+    return dict(
+        display_name="PySpark",
+        language="python",
+        argv=[
+            "/usr/bin/python3",
+            "-m",
+            "ipykernel",
+            "-f",
+            "",
+        ],
+        env=dict(
+            SPARK_HOME="/dsvm/tools/spark/current",
+            PYSPARK_PYTHON="/usr/bin/python3",
+            PYSPARK_SUBMIT_ARGS="--master spark://${MASTER_NODE%:*}:7077 pyspark-shell",
+        )
+    )
 
-        # kick off start-all spark command (which starts web ui)
-        '($SPARK_HOME/sbin/start-all.sh --webui-port ' + str(webui_port) + ' &)',
 
-        # jupyter setup: remove auth
-        '/anaconda/envs/py35/bin/jupyter notebook --generate-config',
-        'echo >> $HOME/.jupyter/jupyter_notebook_config.py',
-        'echo c.NotebookApp.token=\\\"\\\" >> $HOME/.jupyter/jupyter_notebook_config.py',
-        'echo c.NotebookApp.password=\\\"\\\" >> $HOME/.jupyter/jupyter_notebook_config.py',
+def setup_jupyter():
+    print("Setting up jupyter.")
+    call(["/anaconda/envs/py35/bin/jupyter", "notebook", "--generate-config"])
+    with open("test.txt", "a") as config_file:
+        config_file.write('\n')
+        config_file.write('c.NotebookApp.token=""\n')
+        config_file.write('c.NotebookApp.password=""\n')
+    shutil.rmtree('/usr/local/share/jupyter/kernels')
+    os.makedirs('/usr/local/share/jupyter/kernels/pyspark', exist_ok=True)
 
-        # create jupyter kernal for pyspark
-        'rm -rf /usr/local/share/jupyter/kernels/*',
-        'mkdir /usr/local/share/jupyter/kernels/pyspark',
-        'touch /usr/local/share/jupyter/kernels/pyspark/kernel.json',
-        'echo { ' +
-        '\\\"display_name\\\": \\\"PySpark\\\", ' +
-        '\\\"language\\\": \\\"python\\\", ' +
-        '\\\"argv\\\": [ ' +
-        '\\\"/usr/bin/python3\\\", ' +
-        '\\\"-m\\\", ' +
-        '\\\"ipykernel\\\", ' +
-        '\\\"-f\\\", ' +
-        '\\\"{connection_file}\\\" ' +
-        '], ' +
-        '\\\"env\\\": { ' +
-        '\\\"SPARK_HOME\\\": \\\"/dsvm/tools/spark/current\\\", ' +
-        '\\\"PYSPARK_PYTHON\\\": \\\"/usr/bin/python3\\\", ' +
-        '\\\"PYSPARK_SUBMIT_ARGS\\\": ' +
-        '\\\"--master spark://${MASTER_NODE%:*}:7077 ' +
-        # '--executor-memory 6400M ' +
-        # '--driver-memory 6400M ' +
-        'pyspark-shell\\\" ' +
-        '}' +
-        '} >> /usr/local/share/jupyter/kernels/pyspark/kernel.json',
+    with open('/usr/local/share/jupyter/kernels/pyspark/kernel.json', 'w') as outfile:
+        data = generate_jupyter_config()
+        json.dump(data, outfile)
 
-        # start jupyter notebook
-        '(PYSPARK_DRIVER_PYTHON=/anaconda/envs/py35/bin/jupyter ' +
-        'PYSPARK_DRIVER_PYTHON_OPTS="notebook --no-browser --port=' + str(jupyter_port) + '" ' +
-        'pyspark &)'  # +
-        #     '--master spark://${MASTER_NODE%:*}:7077 '  +
-        #     '--executor-memory 6400M ' +
-        #     '--driver-memory 6400M &)'
-    ]
+
+def start_jupyter():
+    jupyter_port = config.jupyter_port
+    
+    my_env = os.environ.copy()
+    my_env["PYSPARK_DRIVER_PYTHON"] = "/anaconda/envs/py35/bin/jupyter"
+    my_env["PYSPARK_DRIVER_PYTHON_OPTS"] = "notebook --no-browser --port='%s'" % jupyter_port
+
+    call("pyspark", "&", env=my_env)
+
+
+def start_spark():
+    webui_port = config.webui_port
+
+    exe = os.path.join(spark_home, "sbin", "start-all.sh")
+    call([exe, "--webui-port", str(webui_port), "&"])
+
+    setup_jupyter()
+    start_jupyter()
