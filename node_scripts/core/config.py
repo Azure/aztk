@@ -19,7 +19,7 @@ def get_client() -> batch.BatchServiceClient:
 
 batch_client = get_client()
 
-print("Pool id is", node_id)
+print("Pool id is", pool_id)
 print("Node id is", node_id)
 print("Account name", account_name)
 print("Is dedicated", is_dedicated)

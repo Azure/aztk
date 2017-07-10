@@ -61,7 +61,7 @@ def find_master(client: batch.BatchServiceClient) -> bool:
 
         if master:
             print("Pool already has a master '%s'. This node will be a worker" % master)
-            return True
+            return False
         else:
             print("Pool has no master. Fighting for the throne! (%i/5)" % (i + 1))
             result = try_assign_self_as_master(client, pool)

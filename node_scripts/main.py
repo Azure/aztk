@@ -1,15 +1,6 @@
 import sys
-from install import pick_master
+from install import pick_master, install
 from core import config
-
-
-def setup_as_master():
-    print("Setting up as master.")
-
-
-def setup_as_worker():
-    print("Setting up as worker.")
-
 
 def run():
 
@@ -20,15 +11,7 @@ def run():
     action = sys.argv[1]
 
     if action == "install":
-
-        client = config.batch_client
-
-        is_master = pick_master.find_master(client)
-
-        if is_master:
-            setup_as_master()
-        else:
-            setup_as_worker()
+        install.setup_node()        
     else:
         print("Action not supported")
 

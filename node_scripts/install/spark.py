@@ -2,6 +2,8 @@
     Code that handle spark configuration
 """
 import time
+import os
+from typing import List
 import azure.batch.batch_service_client as batch
 import azure.batch.models as batchmodels
 from core import config
@@ -14,21 +16,31 @@ def get_pool() -> batchmodels.CloudPool:
 
 
 def list_nodes() -> List[batchmodels.ComputeNode]:
+    """
+        List all the nodes in the pool.
+    """
+    # TODO use continuation token & verify against current/target dedicated of pool
     return batch_client.compute_node.list(config.pool_id)
 
 
 def wait_for_pool_ready() -> batchmodels.CloudPool:
+    """
+        Wait for the pool to have allocated all the nodes
+    """
     while True:
         pool = get_pool()
-        if pool.state == batchmodels.AllocationState.steady
+        if pool.allocation_state == batchmodels.AllocationState.steady:
             return pool
         else:
-            print("Waiting for pool to be steady.")
+            print("Waiting for pool to be steady. It is currently %s" % pool.allocation_state)
             time.sleep(5)  # Sleep for 10 seconds before trying again
 
 
-def connect_node(batch_client: batch.BatchServiceClient):
-    pool = wait_for_pool_ready()
+def setup_connection():
+    """
+        This setup spark config with which nodes are slaves and which are master
+    """
+    wait_for_pool_ready()
     print("Pool is now steady. Setting up master")
 
     spark_home = "/dsvm/tools/spark/current"
@@ -36,34 +48,21 @@ def connect_node(batch_client: batch.BatchServiceClient):
 
     nodes = list_nodes()
 
+    master_file = open(os.path.join(spark_conf_folder, "master"), 'w')
+    slaves_file = open(os.path.join(spark_conf_folder, "slaves"), 'w')
+
     for node in nodes:
-        
-    return [
-        # set SPARK_HOME environment vars
-        'export PATH=$PATH:$SPARK_HOME/bin',
+        if node.id == config.node_id:
+            print("Adding node %s as a master" % node.id)
+            master_file.write("%s\n" % node.ip_address)
+        else: 
+            print("Adding node %s as a slave" % node.id)
+            slaves_file.write("%s\n" % node.ip_address)
+    
+    master_file.close()
+    slaves_file.close()
 
-        # copy a 'slaves' file from the slaves.template in $SPARK_HOME/conf
-        'cp $SPARK_HOME/conf/slaves.template $SPARK_HOME/conf/slaves'
-
-        # delete existing content & create a new line in the slaves file
-        'echo > $SPARK_HOME/conf/slaves',
-
-        # make empty 'master' file in $SPARK/conf
-        'cp $SPARK_HOME/conf/slaves $SPARK_HOME/conf/master',
-
-        # add batch pool ips to newly created slaves files
-        'IFS="," read -r -a workerips <<< $AZ_BATCH_HOST_LIST',
-        'for index in "${!workerips[@]}"',
-        'do echo "${workerips[index]}"',
-        'if [ "${AZ_BATCH_MASTER_NODE%:*}" = "${workerips[index]}" ]',
-        'then echo "${workerips[index]}" >> $SPARK_HOME/conf/master',
-        'else echo "${workerips[index]}" >> $SPARK_HOME/conf/slaves',
-        'fi',
-        'done'
-    ]
-
-
-def start_cmd(webui_port, jupyter_port):
+def start_spark(webui_port, jupyter_port):
     return [
         # set SPARK_HOME environment vars
         'export SPARK_HOME=/dsvm/tools/spark/current',

@@ -21,10 +21,10 @@ def cluster_install_cmd(zip_resource_file: batch_models.ResourceFile, custom_scr
         'chmod -R 777 /usr/local/share/jupyter/kernels',
         # To avoid error: "sudo: sorry, you must have a tty to run sudo"
         'sed -i -e "s/Defaults    requiretty.*/ #Defaults    requiretty/g" /etc/sudoers',
-        '/bin/sh -c "unzip $AZ_BATCH_TASK_WORKING_DIR/%s"' % zip_resource_file.file_path,
+        'unzip $AZ_BATCH_TASK_WORKING_DIR/%s' % zip_resource_file.file_path,
         'chmod 777 $AZ_BATCH_TASK_WORKING_DIR/main.sh',
         'dos2unix $AZ_BATCH_TASK_WORKING_DIR/main.sh', # Convert windows line ending to unix if applicable
-        '/bin/bash -c "$AZ_BATCH_TASK_WORKING_DIR/main.sh"'
+        '$AZ_BATCH_TASK_WORKING_DIR/main.sh'
     ]
 
     if custom_script_file is not None:
@@ -202,6 +202,8 @@ def create_cluster(
     util.create_pool_if_not_exist(
         pool,
         wait)
+
+    return # TODO 
 
     # Create job
     job = batch_models.JobAddParameter(
