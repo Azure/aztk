@@ -1,9 +1,7 @@
-from . import util, constants, azure_api, upload_node_scripts
-import random
 from datetime import datetime, timedelta
-import azure.batch.models as batch_models
 from subprocess import call
-import sys
+import azure.batch.models as batch_models
+from . import util, constants, azure_api, upload_node_scripts
 
 pool_admin_user = batch_models.UserIdentity(
     auto_user=batch_models.AutoUserSpecification(
@@ -24,9 +22,9 @@ def cluster_install_cmd(zip_resource_file: batch_models.ResourceFile, custom_scr
         # To avoid error: "sudo: sorry, you must have a tty to run sudo"
         'sed -i -e "s/Defaults    requiretty.*/ #Defaults    requiretty/g" /etc/sudoers',
         '/bin/sh -c "unzip $AZ_BATCH_TASK_WORKING_DIR/%s"' % zip_resource_file.file_path,
-        'chmod 777 $AZ_BATCH_TASK_WORKING_DIR/setup_node.sh',
-        'dos2unix $AZ_BATCH_TASK_WORKING_DIR/setup_node.sh', # Convert windows line ending to unix if applicable
-        '/bin/bash -c "$AZ_BATCH_TASK_WORKING_DIR/setup_node.sh"'
+        'chmod 777 $AZ_BATCH_TASK_WORKING_DIR/main.sh',
+        'dos2unix $AZ_BATCH_TASK_WORKING_DIR/main.sh', # Convert windows line ending to unix if applicable
+        '/bin/bash -c "$AZ_BATCH_TASK_WORKING_DIR/main.sh"'
     ]
 
     if custom_script_file is not None:
@@ -119,7 +117,7 @@ def cluster_start_cmd(webui_port, jupyter_port):
     ]
 
 
-def generate_cluster_start_task(zip_resource_file: batch_models.ResourceFile, custom_script: str = None):
+def generate_cluster_start_task(cluster_id: str, zip_resource_file: batch_models.ResourceFile, custom_script: str = None):
     """
         This will return the start task object for the pool to be created.
         :param custom_script str: Path to a local file to be uploaded to storage and run after spark started.
@@ -131,7 +129,7 @@ def generate_cluster_start_task(zip_resource_file: batch_models.ResourceFile, cu
     if custom_script is not None:
         resource_files.append(
             util.upload_file_to_container(
-                container_name=pool_id,
+                container_name=cluster_id,
                 file_path=custom_script,
                 use_full_path=True))
 
@@ -196,7 +194,7 @@ def create_cluster(
         vm_size=vm_size,
         target_dedicated_nodes=vm_count,
         target_low_priority_nodes=vm_low_pri_count,
-        start_task=generate_cluster_start_task(zip_resource_file, custom_script),
+        start_task=generate_cluster_start_task(pool_id, zip_resource_file, custom_script),
         enable_inter_node_communication=True,
         max_tasks_per_node=1)
 

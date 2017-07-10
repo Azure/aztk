@@ -1,7 +1,10 @@
 {
-    "python.linting.pylintEnabled": false,
+    // "python.linting.pylintEnabled": false,
     "search.exclude": {
         "build/**": true,
         "bin/**": true
-    }
+    },
+    "python.autoComplete.extraPaths": [
+        "${workspaceRoot}/node"
+    ]
 }
