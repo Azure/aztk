@@ -92,30 +92,24 @@ def print_configuration(config):
     print("\nConfiguration is:")
     print(configuration_dict)
 
+master_node_metadata_key = "_spark_master_node"
+
+def get_master_node_id_from_pool(pool: batch_models.CloudPool):
+    """
+        :returns: the id of the node that is the assigned master of this pool
+    """
+    if pool.metadata is None:
+        return None
+
+    for metadata in pool.metadata:
+        if metadata.name == master_node_metadata_key:
+            return metadata.value
+
+    return None
 
 def get_master_node_id(pool_id):
-    """
-    Uploads a local file to an Azure Blob storage container.
-    :param block_blob_client: A blob service client.
-    :type block_blob_client: `azure.storage.blob.BlockBlobService`
-    """
     batch_client = azure_api.get_batch_client()
-
-    # Currently, the jobId == poolId so this is safe to assume
-    job_id = pool_id
-    tasks = batch_client.task.list(job_id=job_id)
-
-    # Create a local collection from the cloud enumerable
-    tasks = [task for task in tasks]
-
-    if (len(tasks) > 0):
-        if (tasks[0].node_info is None):
-            return ""
-
-        master_node_id = tasks[0].node_info.node_id
-        return master_node_id
-
-    return ""
+    return get_master_node_id_from_pool(batch_client.pool.get(pool_id))
 
 
 def create_pool_if_not_exist(pool, wait=True):

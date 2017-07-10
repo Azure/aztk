@@ -252,21 +252,6 @@ def create_cluster(
         if username is not None and password is not None:
             create_user(pool_id, username, password)
 
-master_node_metadata_key = "_spark_master_node"
-
-def get_master_node_id(pool: batch_models.CloudPool):
-    """
-        :returns: the id of the node that is the assigned master of this pool
-    """
-    if pool.metadata is None:
-        return None
-
-    for metadata in pool.metadata:
-        if metadata.name == master_node_metadata_key:
-            return metadata.value
-
-    return None
-
 
 def create_user(
         pool_id,
@@ -277,24 +262,12 @@ def create_user(
     """
     batch_client = azure_api.get_batch_client()
 
-    # TODO wait
-    # Get master node id from task
-    # master_node_id = None
-    # try:
-    #     # job and task are both named pool_id
-    #     master_node_id = batch_client.task \
-    #         .get(job_id=pool_id, task_id=pool_id) \
-    #         .node_info.node_id
-    # except AttributeError as err:
-    #     print('cluster, "{}", is still setting up - '.format(pool_id) +
-    #           'please wait for your cluster to be created ' +
-    #           'before creating a user')
-    #     exit()
-    pool = batch_client.pool.get(pool_id)
+    # TODO wait for pool to be ready?
+    
     # Create new ssh user for the master node
     batch_client.compute_node.add_user(
         pool_id,
-        get_master_node_id(pool),
+        util.get_master_node_id(pool_id),
         batch_models.ComputeNodeUser(
             username,
             is_admin=True,
@@ -407,7 +380,7 @@ def ssh(
     batch_client = azure_api.get_batch_client()
 
     # Get master node id from task (job and task are both named pool_id)
-    master_node_id = get_master_node_id(batch_client.pool.get(pool_id))
+    master_node_id = util.get_master_node_id(pool_id)
 
     # get remote login settings for the user
     remote_login_settings = batch_client.compute_node.get_remote_login_settings(
