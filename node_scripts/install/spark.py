@@ -20,6 +20,10 @@ def get_pool() -> batchmodels.CloudPool:
     return batch_client.pool.get(config.pool_id)
 
 
+def get_node(node_id: str) -> batchmodels.ComputeNode:
+    return batch_client.compute_node.get(config.pool_id, node_id)
+
+
 def list_nodes() -> List[batchmodels.ComputeNode]:
     """
         List all the nodes in the pool.
@@ -49,8 +53,9 @@ def setup_connection():
     """
     wait_for_pool_ready()
     print("Pool is now steady. Setting up master")
-    master_node_ip = pick_master.get_master_node_id(batch_client.pool.get(config.pool_id))
-    
+    master_node_ip = pick_master.get_master_node_id(
+        batch_client.pool.get(config.pool_id))
+
     nodes = list_nodes()
 
     master_file = open(os.path.join(spark_conf_folder, "master"), 'w')
@@ -58,10 +63,12 @@ def setup_connection():
 
     for node in nodes:
         if node.id == master_node_ip:
-            print("Adding node %s as a master" % node.id)
+            print("Adding node %s as a master with ip %s" %
+                  (node.id, node.ip_address))
             master_file.write("%s\n" % node.ip_address)
         else:
-            print("Adding node %s as a slave" % node.id)
+            print("Adding node %s as a slave with ip %s" %
+                  (node.id, node.ip_address))
             slaves_file.write("%s\n" % node.ip_address)
 
     master_file.close()
@@ -69,7 +76,8 @@ def setup_connection():
 
 
 def generate_jupyter_config():
-    master_node_ip = pick_master.get_master_node_id(batch_client.pool.get(config.pool_id))
+    master_node_ip = pick_master.get_master_node_id(
+        batch_client.pool.get(config.pool_id))
     return dict(
         display_name="PySpark",
         language="python",
@@ -91,34 +99,67 @@ def generate_jupyter_config():
 def setup_jupyter():
     print("Setting up jupyter.")
     call(["/anaconda/envs/py35/bin/jupyter", "notebook", "--generate-config"])
-    with open("test.txt", "a") as config_file:
+
+    jupyter_config_file = os.path.join(os.path.expanduser("~"), ".jupyter/jupyter_notebook_config.py")
+
+    with open(jupyter_config_file, "a") as config_file:
         config_file.write('\n')
         config_file.write('c.NotebookApp.token=""\n')
         config_file.write('c.NotebookApp.password=""\n')
     shutil.rmtree('/usr/local/share/jupyter/kernels')
-    os.makedirs('/usr/local/share/jupyter/kernels/pyspark', exist_ok=True)
+    os.makedirs('/usr/local/share/jupyter/kernels/pyspark', exist_ok = True)
 
     with open('/usr/local/share/jupyter/kernels/pyspark/kernel.json', 'w') as outfile:
-        data = generate_jupyter_config()
+        data=generate_jupyter_config()
         json.dump(data, outfile)
 
 
 def start_jupyter():
-    jupyter_port = config.jupyter_port
-    
-    my_env = os.environ.copy()
-    my_env["PYSPARK_DRIVER_PYTHON"] = "/anaconda/envs/py35/bin/jupyter"
-    my_env["PYSPARK_DRIVER_PYTHON_OPTS"] = "notebook --no-browser --port='%s'" % jupyter_port
+    jupyter_port=config.jupyter_port
 
-    # call("pyspark", "&", env=my_env)
-    Popen(["pyspark"], close_fds=True)
+    my_env=os.environ.copy()
+    my_env["PYSPARK_DRIVER_PYTHON"]="/anaconda/envs/py35/bin/jupyter"
+    my_env["PYSPARK_DRIVER_PYTHON_OPTS"]="notebook --no-browser --port='%s'" % jupyter_port
+
+    Popen(["pyspark"], close_fds = True)
 
 
-def start_spark():
-    webui_port = config.webui_port
+def wait_for_master():
+    print("Waiting for master to be ready.")
+    master_node_ip=pick_master.get_master_node_id(
+        batch_client.pool.get(config.pool_id))
+    while True:
+        master_node=get_node(master_node_ip)
 
-    exe = os.path.join(spark_home, "sbin", "start-all.sh")
-    call([exe, "--webui-port", str(webui_port), "&"])
+        if master_node.state == batchmodels.ComputeNodeState.idle or master_node.state == batchmodels.ComputeNodeState.running:
+            break
+        else:
+            print("Still waiting on master")
+            time.sleep(10)
+
+
+def start_spark_master():
+    webui_port=config.webui_port
+    master_ip=get_node(config.node_id).ip_address
+    exe=os.path.join(spark_home, "sbin", "start-master.sh")
+    cmd=[exe, "-h", master_ip]
+    print("Starting master with '%s'" % " ".join(cmd))
+    call(cmd)
 
     setup_jupyter()
     start_jupyter()
+
+
+def start_spark_worker():
+    wait_for_master()
+    exe=os.path.join(spark_home, "sbin", "start-slave.sh")
+    master_node_id=pick_master.get_master_node_id(
+        batch_client.pool.get(config.pool_id))
+    master_node=get_node(master_node_id)
+
+    my_env=os.environ.copy()
+    my_env["SPARK_MASTER_IP"]=master_node.ip_address
+
+    cmd=[exe, "spark://%s:7077" % master_node.ip_address]
+    print("Connecting to master with '%s'" % " ".join(cmd))
+    call(cmd)

@@ -23,7 +23,8 @@ def cluster_install_cmd(zip_resource_file: batch_models.ResourceFile, custom_scr
         'sed -i -e "s/Defaults    requiretty.*/ #Defaults    requiretty/g" /etc/sudoers',
         'unzip $AZ_BATCH_TASK_WORKING_DIR/%s' % zip_resource_file.file_path,
         'chmod 777 $AZ_BATCH_TASK_WORKING_DIR/main.sh',
-        'dos2unix $AZ_BATCH_TASK_WORKING_DIR/main.sh', # Convert windows line ending to unix if applicable
+        # Convert windows line ending to unix if applicable
+        'dos2unix $AZ_BATCH_TASK_WORKING_DIR/main.sh',
         '$AZ_BATCH_TASK_WORKING_DIR/main.sh'
     ]
 
@@ -194,7 +195,8 @@ def create_cluster(
         vm_size=vm_size,
         target_dedicated_nodes=vm_count,
         target_low_priority_nodes=vm_low_pri_count,
-        start_task=generate_cluster_start_task(pool_id, zip_resource_file, custom_script),
+        start_task=generate_cluster_start_task(
+            pool_id, zip_resource_file, custom_script),
         enable_inter_node_communication=True,
         max_tasks_per_node=1)
 
@@ -203,51 +205,17 @@ def create_cluster(
         pool,
         wait)
 
-    return # TODO 
-
     # Create job
     job = batch_models.JobAddParameter(
         id=job_id,
         pool_info=batch_models.PoolInformation(pool_id=pool_id))
 
     # Add job to batch
-    batch_client.job.add(job)
-
-    # create application/coordination commands
-    coordination_cmd = cluster_connect_cmd()
-    application_cmd = cluster_start_cmd(
-        constants._WEBUI_PORT, constants._JUPYTER_PORT)
-
-    # reuse pool_id as multi-instance task id
-    task_id = pool_id
-
-    # Create multi-instance task
-    task = batch_models.TaskAddParameter(
-        id=task_id,
-        command_line=util.wrap_commands_in_shell(application_cmd),
-        resource_files=[],
-        multi_instance_settings=batch_models.MultiInstanceSettings(
-            number_of_instances=vm_count + vm_low_pri_count,
-            coordination_command_line=util.wrap_commands_in_shell(
-                coordination_cmd),
-            common_resource_files=[]))
-
-    # Add task to batch job (which has the same name as pool_id)
-    try:
-        batch_client.task.add(job_id=job_id, task=task)
-    except batch_models.batch_error.BatchErrorException as err:
-        util.print_batch_exception(err)
-        if err.error.code != 'JobExists':
-            raise
-        else:
-            print('Job {!r} already exists'.format(job_id))
+    # batch_client.job.add(job) # TODO
 
     # Wait for the app to finish
     if wait == True:
-
-        util.wait_for_tasks_to_complete(
-            job_id,
-            timedelta(minutes=60))
+        util.wait_for_master_to_be_ready(pool_id)
 
         if username is not None and password is not None:
             create_user(pool_id, username, password)
@@ -263,7 +231,7 @@ def create_user(
     batch_client = azure_api.get_batch_client()
 
     # TODO wait for pool to be ready?
-    
+
     # Create new ssh user for the master node
     batch_client.compute_node.add_user(
         pool_id,
