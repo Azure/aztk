@@ -49,14 +49,15 @@ def setup_connection():
     """
     wait_for_pool_ready()
     print("Pool is now steady. Setting up master")
-
+    master_node_ip = pick_master.get_master_node_id(batch_client.pool.get(config.pool_id))
+    
     nodes = list_nodes()
 
     master_file = open(os.path.join(spark_conf_folder, "master"), 'w')
     slaves_file = open(os.path.join(spark_conf_folder, "slaves"), 'w')
 
     for node in nodes:
-        if node.id == config.node_id:
+        if node.id == master_node_ip:
             print("Adding node %s as a master" % node.id)
             master_file.write("%s\n" % node.ip_address)
         else:
