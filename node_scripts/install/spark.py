@@ -52,32 +52,22 @@ def setup_connection():
         This setup spark config with which nodes are slaves and which are master
     """
     wait_for_pool_ready()
-    print("Pool is now steady. Setting up master")
+
     master_node_ip = pick_master.get_master_node_id(
         batch_client.pool.get(config.pool_id))
 
-    nodes = list_nodes()
-
     master_file = open(os.path.join(spark_conf_folder, "master"), 'w')
-    slaves_file = open(os.path.join(spark_conf_folder, "slaves"), 'w')
 
-    for node in nodes:
-        if node.id == master_node_ip:
-            print("Adding node %s as a master with ip %s" %
-                  (node.id, node.ip_address))
-            master_file.write("%s\n" % node.ip_address)
-        else:
-            print("Adding node %s as a slave with ip %s" %
-                  (node.id, node.ip_address))
-            slaves_file.write("%s\n" % node.ip_address)
+    print("Adding master node ip to conf file" % (master_node_ip))
+    master_file.write("%s\n" % master_node_ip)
 
     master_file.close()
-    slaves_file.close()
 
 
 def generate_jupyter_config():
-    master_node_ip = pick_master.get_master_node_id(
-        batch_client.pool.get(config.pool_id))
+    master_node = get_node(config.node_id)
+    master_node_ip = master_node.ip_address
+
     return dict(
         display_name="PySpark",
         language="python",
@@ -86,7 +76,7 @@ def generate_jupyter_config():
             "-m",
             "ipykernel",
             "-f",
-            "",
+            "{connection_file}",
         ],
         env=dict(
             SPARK_HOME="/dsvm/tools/spark/current",
@@ -111,7 +101,7 @@ def setup_jupyter():
 
     with open('/usr/local/share/jupyter/kernels/pyspark/kernel.json', 'w') as outfile:
         data=generate_jupyter_config()
-        json.dump(data, outfile)
+        json.dump(data, outfile, indent=2)
 
 
 def start_jupyter():
