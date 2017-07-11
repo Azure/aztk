@@ -4,7 +4,7 @@ import io
 import os
 import time
 from .version import __version__
-from . import azure_api
+from . import azure_api, constants
 
 import azure.batch.batch_service_client as batch
 import azure.batch.batch_auth as batch_auth
@@ -92,8 +92,6 @@ def print_configuration(config):
     print("\nConfiguration is:")
     print(configuration_dict)
 
-master_node_metadata_key = "_spark_master_node"
-
 def get_master_node_id_from_pool(pool: batch_models.CloudPool):
     """
         :returns: the id of the node that is the assigned master of this pool
@@ -102,7 +100,7 @@ def get_master_node_id_from_pool(pool: batch_models.CloudPool):
         return None
 
     for metadata in pool.metadata:
-        if metadata.name == master_node_metadata_key:
+        if metadata.name == constants.MASTER_NODE_METADATA_KEY:
             return metadata.value
 
     return None

@@ -19,4 +19,5 @@ def setup_as_master():
 
 def setup_as_worker():
     print("Setting up as worker.")
-    spark.start_spark()
+    spark.setup_connection()
+    # spark.start_spark()

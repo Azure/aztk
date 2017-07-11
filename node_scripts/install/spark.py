@@ -3,12 +3,13 @@
 """
 import time
 import os
+import json
+import shutil
 from subprocess import call, Popen
 from typing import List
 import azure.batch.models as batchmodels
 from core import config
-import shutil
-import json
+from install import pick_master
 
 batch_client = config.batch_client
 spark_home = "/dsvm/tools/spark/current"
@@ -67,6 +68,7 @@ def setup_connection():
 
 
 def generate_jupyter_config():
+    master_node_ip = pick_master.get_master_node_id(batch_client.pool.get(config.pool_id))
     return dict(
         display_name="PySpark",
         language="python",
@@ -80,7 +82,7 @@ def generate_jupyter_config():
         env=dict(
             SPARK_HOME="/dsvm/tools/spark/current",
             PYSPARK_PYTHON="/usr/bin/python3",
-            PYSPARK_SUBMIT_ARGS="--master spark://${MASTER_NODE%:*}:7077 pyspark-shell",
+            PYSPARK_SUBMIT_ARGS="--master spark://%s:7077 pyspark-shell" % master_node_ip,
         )
     )
 
