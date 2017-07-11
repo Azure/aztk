@@ -6,7 +6,7 @@ cd $SPARK_HOME/conf
 cp spark-defaults.conf.template spark-defaults.conf
 
 cat >> spark-defaults.conf <<EOF
-spark.jars                 /dsvm/tools/spark/current/jars/azure-storage-4.4.0.jar,/dsvm/tools/spark/current/jars/hadoop-azure-2.7.3.jar
+spark.jars                 /dsvm/tools/spark/current/jars/azure-storage-2.0.0.jar,/dsvm/tools/spark/current/jars/hadoop-azure-2.7.3.jar
 EOF
 
 cat >> core-site.xml <<EOF
@@ -18,12 +18,13 @@ cat >> core-site.xml <<EOF
 <value>org.apache.hadoop.fs.azure.Wasb</value>
 </property>
 <property>
-<name>fs.azure.account.key.YOURSTORAGEACCOUNT.blob.core.windows.net</name>
-<value>YOURSTORAGEACCOUNTKEY</value>
+<name>fs.azure.account.key.STORAGE_ACCOUNT_NAME.blob.core.windows.net</name>
+<value>STORAGE_ACCOUNT_KEY</value>
 </property>
 </configuration>
 EOF
 
-cd /opt/azure-storage-jars
+sudo rm $SPARK_HOME/jars/azure-storage-4.4.0.jar
+
+cd $SPARK_HOME/jars
 sudo wget http://repo1.maven.org/maven2/com/microsoft/azure/azure-storage/2.0.0/azure-storage-2.0.0.jar
-sudo ln -sf /opt/azure-storage-jars/azure-storage-2.0.0.jar $SPARK_HOME/jars/azure-storage-4.4.0.jar
