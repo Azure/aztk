@@ -120,10 +120,14 @@ def start_jupyter():
 
 def wait_for_master():
     print("Waiting for master to be ready.")
-    master_node_ip = pick_master.get_master_node_id(
+    master_node_id = pick_master.get_master_node_id(
         batch_client.pool.get(config.pool_id))
+
+    if master_node_id == config.node_id:
+        return
+
     while True:
-        master_node = get_node(master_node_ip)
+        master_node = get_node(master_node_id)
 
         if master_node.state in [batchmodels.ComputeNodeState.idle, batchmodels.ComputeNodeState.running]:
             break
