@@ -4,6 +4,9 @@
         "build/**": true,
         "bin/**": true
     },
+    "files.exclude": {
+        "**/__pycache__/**/*": true
+    },
     "python.autoComplete.extraPaths": [
         "${workspaceRoot}/node"
     ]
