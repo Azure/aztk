@@ -112,8 +112,10 @@ def start_jupyter():
     my_env["PYSPARK_DRIVER_PYTHON"] = "/anaconda/envs/py35/bin/jupyter"
     my_env["PYSPARK_DRIVER_PYTHON_OPTS"] = "notebook --no-browser --port='{0}'".format(jupyter_port)
 
+    pyspark_wd = os.path.join(os.getcwd(), "pyspark")
+    os.mkdir(pyspark_wd)
     print("Starting pyspark")
-    process = Popen(["pyspark"], env=my_env)
+    process = Popen(["pyspark"], env=my_env, cwd=pyspark_wd)
     print("Started pyspark with pid {0}".format(process.pid))
 
 
