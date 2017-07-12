@@ -171,7 +171,6 @@ def create_cluster(
     zip_resource_file = upload_node_scripts.zip_and_upload()
 
     batch_client = azure_api.get_batch_client()
-    blob_client = azure_api.get_blob_client()
 
     # vm image
     publisher = 'microsoft-ads'
@@ -211,7 +210,7 @@ def create_cluster(
         pool_info=batch_models.PoolInformation(pool_id=pool_id))
 
     # Add job to batch
-    # batch_client.job.add(job) # TODO
+    batch_client.job.add(job) # TODO
 
     # Wait for the app to finish
     if wait == True:

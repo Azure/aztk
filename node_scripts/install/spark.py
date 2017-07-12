@@ -53,13 +53,14 @@ def setup_connection():
     """
     wait_for_pool_ready()
 
-    master_node_ip = pick_master.get_master_node_id(
+    master_node_id = pick_master.get_master_node_id(
         batch_client.pool.get(config.pool_id))
-
+    master_node = get_node(master_node_id)
+    
     master_file = open(os.path.join(spark_conf_folder, "master"), 'w')
 
-    print("Adding master node ip to conf fil '%s'" % master_node_ip)
-    master_file.write("%s\n" % master_node_ip)
+    print("Adding master node ip to config file '%s'" % master_node.ip_address)
+    master_file.write("%s\n" % master_node.ip_address)
 
     master_file.close()
 
