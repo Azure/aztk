@@ -1,10 +1,9 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
+from dtde.core import CommandBuilder
 import azure.batch.models as batch_models
-from . import util, constants, azure_api
-
+from . import util, azure_api
 
 def app_submit_cmd(
-        webui_port,
         name,
         app,
         app_args,
@@ -19,27 +18,23 @@ def app_submit_cmd(
         executor_memory,
         driver_cores,
         executor_cores):
+    spark_submit_cmd = CommandBuilder('$SPARK_HOME/bin/spark-submit')
 
-    name_option = '--name ' + name + ' ' if name else ''
-    main_class_option = '--class ' + main_class + ' ' if main_class else ''
-    jars_option = '--jars "' + ','.join(jars) + '" ' if jars else ''
-    py_files_option = '--py-files "' + \
-        ','.join(py_files) + '" ' if py_files else ''
-    files_option = '--jars "' + ','.join(files) + '" ' if files else ''
-    driver_java_options = '--driver-java-options ' + \
-        driver_java_options + ' ' if driver_java_options else ''
-    driver_library_path = '--driver-library-path ' + \
-        driver_library_path + ' ' if driver_library_path else ''
-    driver_class_path = '--driver-class-path ' + \
-        driver_class_path + ' ' if driver_class_path else ''
-    driver_memory_option = '--driver-memory ' + \
-        driver_memory + ' ' if driver_memory else ''
-    executor_memory_option = '--executor-memory ' + \
-        executor_memory + ' ' if executor_memory else ''
-    driver_cores_option = '--driver-cores ' + \
-        driver_cores + ' ' if driver_cores else ''
-    executor_cores_option = '--executor-cores ' + \
-        executor_cores + ' ' if executor_cores else ''
+    spark_submit_cmd.add_option('--name', name)
+    spark_submit_cmd.add_option('--master', 'spark://${MASTER_NODE%:*}:7077')
+    spark_submit_cmd.add_option('--class', main_class)
+    spark_submit_cmd.add_option('--class', main_class)
+    spark_submit_cmd.add_option('--jars', jars and ','.join(jars))
+    spark_submit_cmd.add_option('--py-files', py_files and ','.join(py_files))
+    spark_submit_cmd.add_option('--jars', files and ','.join(files))
+    spark_submit_cmd.add_option('--driver-java-options', driver_java_options)
+    spark_submit_cmd.add_option('--driver-library-path', driver_library_path)
+    spark_submit_cmd.add_option('--driver-class-path', driver_class_path)
+    spark_submit_cmd.add_option('--driver-memory', driver_memory)
+    spark_submit_cmd.add_option('--executor-memory', executor_memory)
+    spark_submit_cmd.add_option('--driver-cores', driver_cores)
+    spark_submit_cmd.add_option('--executor-cores', executor_cores)
+    spark_submit_cmd.add_argument('$AZ_BATCH_TASK_WORKING_DIR/' + app + ' ' + ' '.join(app_args))
 
     return [
         # set SPARK_HOME environment vars
@@ -53,23 +48,7 @@ def app_submit_cmd(
         # get master node ip
         'export MASTER_NODE=$(cat $SPARK_HOME/conf/master)',
         'echo "Master node ip is $MASTER_NODE"',
-
-        # execute spark-submit on the specified app
-        '$SPARK_HOME/bin/spark-submit ' +
-        name_option +
-        '--master spark://${MASTER_NODE%:*}:7077 ' +
-        main_class_option +
-        jars_option +
-        py_files_option +
-        files_option +
-        driver_java_options +
-        driver_library_path +
-        driver_class_path +
-        driver_memory_option +
-        executor_memory_option +
-        driver_cores_option +
-        executor_cores_option +
-        '$AZ_BATCH_TASK_WORKING_DIR/' + app + ' ' + ' '.join(app_args)
+        spark_submit_cmd.to_str(),
     ]
 
 
@@ -91,7 +70,7 @@ def submit_app(
         driver_cores,
         executor_cores):
     """
-    Submit a spark app 
+    Submit a spark app
     """
     batch_client = azure_api.get_batch_client()
 
@@ -118,7 +97,6 @@ def submit_app(
 
     # create command to submit task
     cmd = app_submit_cmd(
-        webui_port=constants._WEBUI_PORT,
         name=name,
         app=app,
         app_args=app_args,
