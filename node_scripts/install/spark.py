@@ -42,8 +42,7 @@ def wait_for_pool_ready() -> batchmodels.CloudPool:
         if pool.allocation_state == batchmodels.AllocationState.steady:
             return pool
         else:
-            print("Waiting for pool to be steady. It is currently %s" %
-                  pool.allocation_state)
+            print("Waiting for pool to be steady. It is currently {0}".format(pool.allocation_state))
             time.sleep(5)  # Sleep for 10 seconds before trying again
 
 
@@ -56,11 +55,11 @@ def setup_connection():
     master_node_id = pick_master.get_master_node_id(
         batch_client.pool.get(config.pool_id))
     master_node = get_node(master_node_id)
-    
+
     master_file = open(os.path.join(spark_conf_folder, "master"), 'w')
 
-    print("Adding master node ip to config file '%s'" % master_node.ip_address)
-    master_file.write("%s\n" % master_node.ip_address)
+    print("Adding master node ip to config file '{0}'".format(master_node.ip_address))
+    master_file.write("{0}\n".format(master_node.ip_address))
 
     master_file.close()
 
@@ -82,7 +81,7 @@ def generate_jupyter_config():
         env=dict(
             SPARK_HOME="/dsvm/tools/spark/current",
             PYSPARK_PYTHON="/usr/bin/python3",
-            PYSPARK_SUBMIT_ARGS="--master spark://%s:7077 pyspark-shell" % master_node_ip,
+            PYSPARK_SUBMIT_ARGS="--master spark://{0}:7077 pyspark-shell".format(master_node_ip),
         )
     )
 
@@ -111,11 +110,11 @@ def start_jupyter():
 
     my_env = os.environ.copy()
     my_env["PYSPARK_DRIVER_PYTHON"] = "/anaconda/envs/py35/bin/jupyter"
-    my_env["PYSPARK_DRIVER_PYTHON_OPTS"] = "notebook --no-browser --port='%s'" % jupyter_port
+    my_env["PYSPARK_DRIVER_PYTHON_OPTS"] = "notebook --no-browser --port='{0}'".format(jupyter_port)
 
     print("Starting pyspark")
     process = Popen(["pyspark"], env=my_env)
-    print("Started pyspark with pid %s" % process.pid)
+    print("Started pyspark with pid {0}".format(process.pid))
 
 
 def wait_for_master():
@@ -140,7 +139,7 @@ def start_spark_master():
     master_ip = get_node(config.node_id).ip_address
     exe = os.path.join(spark_home, "sbin", "start-master.sh")
     cmd = [exe, "-h", master_ip]
-    print("Starting master with '%s'" % " ".join(cmd))
+    print("Starting master with '{0}'".format(" ".join(cmd)))
     call(cmd)
 
     setup_jupyter()
@@ -157,6 +156,6 @@ def start_spark_worker():
     my_env = os.environ.copy()
     my_env["SPARK_MASTER_IP"] = master_node.ip_address
 
-    cmd = [exe, "spark://%s:7077" % master_node.ip_address]
-    print("Connecting to master with '%s'" % " ".join(cmd))
+    cmd = [exe, "spark://{0}:7077".format(master_node.ip_address)]
+    print("Connecting to master with '{0}'".format(" ".join(cmd)))
     call(cmd)
