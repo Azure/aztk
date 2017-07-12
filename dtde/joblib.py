@@ -94,7 +94,6 @@ def submit_app(
     Submit a spark app 
     """
     batch_client = azure_api.get_batch_client()
-    blob_client = azure_api.get_blob_client()
 
     resource_files = []
 

@@ -1,5 +1,6 @@
 # custom
 configuration.cfg
+my-custom-scripts/
 
 # Virtual environments
 ENV/
