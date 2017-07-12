@@ -93,25 +93,25 @@ def submit_app(
     # Upload application file
     resource_files.append(
         util.upload_file_to_container(
-            blob_client, container_name = name, file_path = app, use_full_path = True))
+                container_name = name, file_path = app, use_full_path = True))
 
     # Upload dependent JARS
     for jar in jars:
         resource_files.append(
             util.upload_file_to_container(
-                blob_client, container_name = name, file_path = jar, use_full_path = True))
+                container_name = name, file_path = jar, use_full_path = True))
 
     # Upload dependent python files 
     for py_file in py_files:
         resource_files.append(
             util.upload_file_to_container(
-                blob_client, container_name = name, file_path = py_file, use_full_path = True))
+                container_name = name, file_path = py_file, use_full_path = True))
 
     # Upload other dependent files 
     for file in files:
         resource_files.append(
             util.upload_file_to_container(
-                blob_client, container_name = name, file_path = file, use_full_path = True))
+                ontainer_name = name, file_path = file, use_full_path = True))
 
     # create command to submit task
     cmd = app_submit_cmd(
