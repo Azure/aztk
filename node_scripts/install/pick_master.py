@@ -55,24 +55,25 @@ def find_master(client: batch.BatchServiceClient) -> bool:
     # If not dedicated the node cannot be a master
     # TODO enable when inter node communication is working with low pri and dedicated together.
     # if not config.is_dedicated:
-        # return False
+    # return False
+
     for i in range(0, 5):
         pool = client.pool.get(config.pool_id)
         master = get_master_node_id(pool)
 
         if master:
             if master == config.node_id:
-                print("Node is already the master '%s'" % master)
+                print("Node is already the master '{0}'".format(master))
                 return True
             else:
-                print("Pool already has a master '%s'. This node will be a worker" % master)
+                print("Pool already has a master '{0}'. This node will be a worker".format(master))
                 return False
         else:
-            print("Pool has no master. Fighting for the throne! (%i/5)" % (i + 1))
+            print("Pool has no master. Fighting for the throne! ({0}/5)".format(i + 1))
             result = try_assign_self_as_master(client, pool)
 
             if result:
-                print("The battle has been won! Node %s is the new master." % config.node_id)
+                print("The battle has been won! Node {0} is the new master.".format(config.node_id))
                 return True
 
     raise CannotAllocateMasterError("Unable to assign node as a master in 5 tries")

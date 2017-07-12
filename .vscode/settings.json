@@ -9,5 +9,6 @@
     },
     "python.autoComplete.extraPaths": [
         "${workspaceRoot}/node"
-    ]
+    ],
+    "python.formatting.autopep8Args": [""]
 }
