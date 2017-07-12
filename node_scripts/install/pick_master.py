@@ -3,13 +3,12 @@
 """
 
 import azure.batch.batch_service_client as batch
-import azure.batch.batch_auth as batchauth
 import azure.batch.models as batchmodels
 import azure.batch.models.batch_error as batcherror
 from core import config
 
 
-master_node_metadata_key = "_spark_master_node"
+MASTER_NODE_METADATA_KEY = "_spark_master_node"
 
 
 class CannotAllocateMasterError(Exception):
@@ -24,20 +23,19 @@ def get_master_node_id(pool: batchmodels.CloudPool):
         return None
 
     for metadata in pool.metadata:
-        if metadata.name == master_node_metadata_key:
+        if metadata.name == MASTER_NODE_METADATA_KEY:
             return metadata.value
 
     return None
 
 
 def try_assign_self_as_master(client: batch.BatchServiceClient, pool: batchmodels.CloudPool):
-    currentMetadata = pool.metadata or []
-    newMetadata = currentMetadata + \
-        [{"name": master_node_metadata_key, "value": config.node_id}]
+    current_metadata = pool.metadata or []
+    new_metadata = current_metadata + [{"name": MASTER_NODE_METADATA_KEY, "value": config.node_id}]
 
     try:
         client.pool.patch(config.pool_id, batchmodels.PoolPatchParameter(
-            metadata=newMetadata
+            metadata=new_metadata
         ), batchmodels.PoolPatchOptions(
             if_match=pool.e_tag,
         ))
