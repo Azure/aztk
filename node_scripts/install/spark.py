@@ -144,6 +144,6 @@ def start_spark_worker():
     my_env = os.environ.copy()
     my_env["SPARK_MASTER_IP"] = master_node.ip_address
 
-    cmd = [exe, "spark://{0}:7077".format(master_node.ip_address), "--webui-port", str(config.WORKER_UI_PORT`)]
+    cmd = [exe, "spark://{0}:7077".format(master_node.ip_address), "--webui-port", str(config.WORKER_UI_PORT)]
     print("Connecting to master with '{0}'".format(" ".join(cmd)))
     call(cmd)
