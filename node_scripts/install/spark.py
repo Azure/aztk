@@ -32,26 +32,10 @@ def list_nodes() -> List[batchmodels.ComputeNode]:
     # pool
     return batch_client.compute_node.list(config.pool_id)
 
-
-def wait_for_pool_ready() -> batchmodels.CloudPool:
-    """
-        Wait for the pool to have allocated all the nodes
-    """
-    while True:
-        pool = get_pool()
-        if pool.allocation_state == batchmodels.AllocationState.steady:
-            return pool
-        else:
-            print("Waiting for pool to be steady. It is currently {0}".format(pool.allocation_state))
-            time.sleep(5)  # Sleep for 10 seconds before trying again
-
-
 def setup_connection():
     """
         This setup spark config with which nodes are slaves and which are master
     """
-    wait_for_pool_ready()
-
     master_node_id = pick_master.get_master_node_id(
         batch_client.pool.get(config.pool_id))
     master_node = get_node(master_node_id)

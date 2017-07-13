@@ -4,8 +4,10 @@ class CommandBuilder:
         self.options = []
         self.arguments = []
 
-    def add_option(self, name: str, value: str):
-        if value:
+    def add_option(self, name: str, value: str, enable: bool=None):
+        if enable is None:
+            enable = value
+        if enable:
             self.options.append(dict(name=name, value=value))
             return True
 

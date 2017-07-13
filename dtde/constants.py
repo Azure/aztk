@@ -1,8 +1,8 @@
 import os
 
-_MASTER_UI_PORT = 8082
-_WEBUI_PORT = 4040
-_JUPYTER_PORT = 7777
+MASTER_UI_PORT = 8082
+WEBUI_PORT = 4040
+JUPYTER_PORT = 7777
 
 """
     Root path of this repository

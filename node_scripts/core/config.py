@@ -3,8 +3,8 @@ import azure.batch.batch_service_client as batch
 import azure.batch.batch_auth as batchauth
 
 account_name = os.environ["AZ_BATCH_ACCOUNT_NAME"]
-account_key = os.environ["ACCOUNT_KEY"]
-account_url = os.environ["ACCOUNT_URL"]
+account_key = os.environ["BATCH_ACCOUNT_KEY"]
+account_url = os.environ["BATCH_ACCOUNT_URL"]
 pool_id = os.environ["AZ_BATCH_POOL_ID"]
 node_id = os.environ["AZ_BATCH_NODE_ID"]
 is_dedicated = os.environ["AZ_BATCH_NODE_IS_DEDICATED"]
