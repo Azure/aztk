@@ -39,21 +39,36 @@ def wait_for_tasks_to_complete(job_id, timeout):
 
     raise TimeoutError("Timed out waiting for tasks to complete")
 
+class MasterInvalidStateError(Exception):
+    pass
 
 def wait_for_master_to_be_ready(cluster_id: str):
     batch_client = azure_api.get_batch_client()
     master_node_id = None
+
+    start_time = datetime.datetime.now()
     while True:
         if not master_node_id:
             master_node_id = get_master_node_id(cluster_id)
             if not master_node_id:
                 time.sleep(5)
                 continue
-            
+
         master_node = batch_client.compute_node.get(cluster_id, master_node_id)
-        if master_node.state == batch_models.ComputeNodeState.idle or master_node.state == batch_models.ComputeNodeState.running:
+
+        if master_node.state in [batch_models.ComputeNodeState.idle,  batch_models.ComputeNodeState.running]:
             break
+        elif master_node.state is batch_models.ComputeNodeState.start_task_failed:
+            raise MasterInvalidStateError("Start task failed on master")
+        elif master_node.state in [batch_models.ComputeNodeState.unknown, batch_models.ComputeNodeState.unusable]:
+            raise MasterInvalidStateError("Master is in an invalid state")
         else:
+            now = datetime.datetime.now()
+
+            delta = now - start_time
+            if delta.total_seconds() > constants.WAIT_FOR_MASTER_TIMEOUT:
+                raise MasterInvalidStateError("Master didn't become ready before timeout.")
+
             time.sleep(10)
     time.sleep(5)
 
@@ -281,7 +296,6 @@ def upload_blob_and_create_sas(
         file_name)
 
     sas_token = create_sas_token(
-        block_blob_client,
         container_name,
         blob_name,
         permission=blob.BlobPermissions.READ,

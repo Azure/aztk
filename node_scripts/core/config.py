@@ -14,6 +14,7 @@ master_ui_port = 8082
 webui_port = 4040
 jupyter_port = 7777
 
+
 def get_client() -> batch.BatchServiceClient:
     credentials = batchauth.SharedKeyCredentials(
         account_name,
@@ -25,5 +26,5 @@ batch_client = get_client()
 
 print("Pool id is", pool_id)
 print("Node id is", node_id)
-print("Account name", account_name)
+print("Batch account name", account_name)
 print("Is dedicated", is_dedicated)

@@ -41,7 +41,7 @@ def try_assign_self_as_master(client: batch.BatchServiceClient, pool: batchmodel
         ))
         return True
     except batcherror.BatchErrorException:
-        print("Failed to gain power!")
+        print("Couldn't assign itself as master the pool because the pool was modified since last get.")
         return False
 
 
@@ -67,11 +67,11 @@ def find_master(client: batch.BatchServiceClient) -> bool:
                 print("Pool already has a master '{0}'. This node will be a worker".format(master))
                 return False
         else:
-            print("Pool has no master. Fighting for the throne! ({0}/5)".format(i + 1))
+            print("Pool has no master. Trying to assign itself! ({0}/5)".format(i + 1))
             result = try_assign_self_as_master(client, pool)
 
             if result:
-                print("The battle has been won! Node {0} is the new master.".format(config.node_id))
+                print("Assignment was successfull! Node {0} is the new master.".format(config.node_id))
                 return True
 
     raise CannotAllocateMasterError("Unable to assign node as a master in 5 tries")

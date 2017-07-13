@@ -1,6 +1,7 @@
 """
     Code that handle spark configuration
 """
+import datetime
 import time
 import os
 import json
@@ -40,9 +41,10 @@ def setup_connection():
         batch_client.pool.get(config.pool_id))
     master_node = get_node(master_node_id)
 
-    master_file = open(os.path.join(spark_conf_folder, "master"), 'w')
+    master_config_file = os.path.join(spark_conf_folder, "master")
+    master_file = open(master_config_file, 'w')
 
-    print("Adding master node ip to config file '{0}'".format(master_node.ip_address))
+    print("Adding master node ip {0} to config file '{1}'".format(master_node.ip_address, master_config_file))
     master_file.write("{0}\n".format(master_node.ip_address))
 
     master_file.close()
@@ -117,7 +119,7 @@ def wait_for_master():
         if master_node.state in [batchmodels.ComputeNodeState.idle, batchmodels.ComputeNodeState.running]:
             break
         else:
-            print("Still waiting on master")
+            print("{0} Still waiting on master", datetime.datetime.now())
             time.sleep(10)
 
 

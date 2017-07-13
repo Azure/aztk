@@ -1,9 +1,8 @@
 import sys
-from install import pick_master, install
-from core import config
+from install import install
+
 
 def run():
-
     if len(sys.argv) < 2:
         print("Error: Expected at least one argument")
         exit(1)
@@ -11,7 +10,7 @@ def run():
     action = sys.argv[1]
 
     if action == "install":
-        install.setup_node()        
+        install.setup_node()
     else:
         print("Action not supported")
 

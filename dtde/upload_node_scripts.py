@@ -24,7 +24,7 @@ def zipdir(path, ziph):
                        os.path.join(relative_folder, file))
 
 
-def create_zip():
+def __create_zip():
     ensure_dir(local_tmp_zipfile)
     zipf = zipfile.ZipFile(local_tmp_zipfile, 'w', zipfile.ZIP_DEFLATED)
     zipdir(os.path.join(root, "node_scripts"), zipf)
@@ -32,7 +32,7 @@ def create_zip():
     print("Ziped file")
 
 
-def upload():
+def __upload():
     print("Uploading node scripts...")
     return util.upload_file_to_container(
         container_name="spark-node-scripts",
@@ -41,5 +41,5 @@ def upload():
 
 
 def zip_and_upload():
-    create_zip()
-    return upload()
+    __create_zip()
+    return __upload()

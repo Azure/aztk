@@ -1,23 +1,24 @@
 from datetime import timedelta
+from typing import List
 from dtde.core import CommandBuilder
 import azure.batch.models as batch_models
-from . import util, azure_api
+from . import azure_api, util
 
 def app_submit_cmd(
-        name,
-        app,
-        app_args,
-        main_class,
-        jars,
-        py_files,
-        files,
-        driver_java_options,
-        driver_library_path,
-        driver_class_path,
-        driver_memory,
-        executor_memory,
-        driver_cores,
-        executor_cores):
+        name: str,
+        app: str,
+        app_args: str,
+        main_class: str,
+        jars: List[str],
+        py_files: List[str],
+        files: List[str],
+        driver_java_options: str,
+        driver_library_path: str,
+        driver_class_path: str,
+        driver_memory: str,
+        executor_memory: str,
+        driver_cores: str,
+        executor_cores: str):
     spark_submit_cmd = CommandBuilder('$SPARK_HOME/bin/spark-submit')
 
     spark_submit_cmd.add_option('--name', name)
@@ -34,7 +35,8 @@ def app_submit_cmd(
     spark_submit_cmd.add_option('--executor-memory', executor_memory)
     spark_submit_cmd.add_option('--driver-cores', driver_cores)
     spark_submit_cmd.add_option('--executor-cores', executor_cores)
-    spark_submit_cmd.add_argument('$AZ_BATCH_TASK_WORKING_DIR/' + app + ' ' + ' '.join(app_args))
+    spark_submit_cmd.add_argument(
+        '$AZ_BATCH_TASK_WORKING_DIR/' + app + ' ' + ' '.join(app_args))
 
     return [
         # set SPARK_HOME environment vars
