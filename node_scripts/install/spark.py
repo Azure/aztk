@@ -92,7 +92,7 @@ def setup_jupyter():
 
 
 def start_jupyter():
-    jupyter_port = config.jupyter_port
+    jupyter_port = config.JUPYTER_PORT
 
     my_env = os.environ.copy()
     my_env["PYSPARK_DRIVER_PYTHON"] = "/anaconda/envs/py35/bin/jupyter"
@@ -126,7 +126,7 @@ def wait_for_master():
 def start_spark_master():
     master_ip = get_node(config.node_id).ip_address
     exe = os.path.join(spark_home, "sbin", "start-master.sh")
-    cmd = [exe, "-h", master_ip]
+    cmd = [exe, "-h", master_ip, "--webui-port", str(config.MASTER_UI_PORT)]
     print("Starting master with '{0}'".format(" ".join(cmd)))
     call(cmd)
 
@@ -144,6 +144,6 @@ def start_spark_worker():
     my_env = os.environ.copy()
     my_env["SPARK_MASTER_IP"] = master_node.ip_address
 
-    cmd = [exe, "spark://{0}:7077".format(master_node.ip_address)]
+    cmd = [exe, "spark://{0}:7077".format(master_node.ip_address), "--webui-port", str(config.WORKER_UI_PORT`)]
     print("Connecting to master with '{0}'".format(" ".join(cmd)))
     call(cmd)
