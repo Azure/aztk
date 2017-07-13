@@ -81,13 +81,13 @@ def generate_cluster_start_task(
 
 
 def create_cluster(
-        custom_script:str,
-        cluster_id:str,
+        custom_script: str,
+        cluster_id: str,
         vm_count,
         vm_low_pri_count,
         vm_size,
-        username:str,
-        password:str,
+        username: str,
+        password: str,
         wait=True):
     """
         Create a spark cluster
@@ -257,7 +257,13 @@ def delete_cluster(cluster_id: str):
 
     # job id is equal to pool id
     job_id = pool_id
-    job_exists = batch_client.job.exists(job_id)
+    job_exists = True
+
+    try:
+        batch_client.job.get(job_id)
+    except:
+        job_exists = False
+        
     pool_exists = batch_client.pool.exists(pool_id)
 
     if job_exists:
@@ -268,6 +274,7 @@ def delete_cluster(cluster_id: str):
 
     if job_exists or pool_exists:
         print("Deleting cluster {0}".format(cluster_id))
+
 
 def ssh(
         cluster_id: str,
@@ -296,6 +303,7 @@ def ssh(
     remote_login_settings = batch_client.compute_node.get_remote_login_settings(
         cluster_id, master_node_id)
 
+    master_node_ip = remote_login_settings.remote_login_ip_address
     master_node_port = remote_login_settings.remote_login_port
 
     ssh_command = CommandBuilder('ssh')
@@ -308,7 +316,7 @@ def ssh(
             ssh_command.add_option("-L", "{0}:localhost:{1}".format(port[0], port[1]))
 
     user = username if username is not None else '<username>'
-    ssh_command.add_argument("{0}@{1} -p {2}".format(user, master_node_id, master_node_port))
+    ssh_command.add_argument("{0}@{1} -p {2}".format(user, master_node_ip, master_node_port))
 
     command = ssh_command.to_str()
     ssh_command_array = command.split()
