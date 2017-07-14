@@ -4,7 +4,7 @@ import io
 import os
 import time
 from .version import __version__
-from . import azure_api
+from . import azure_api, constants
 
 import azure.batch.batch_service_client as batch
 import azure.batch.batch_auth as batch_auth
@@ -39,8 +39,41 @@ def wait_for_tasks_to_complete(job_id, timeout):
 
     raise TimeoutError("Timed out waiting for tasks to complete")
 
+class MasterInvalidStateError(Exception):
+    pass
 
-def upload_file_to_container(container_name, file_path, use_full_path):
+def wait_for_master_to_be_ready(cluster_id: str):
+    batch_client = azure_api.get_batch_client()
+    master_node_id = None
+
+    start_time = datetime.datetime.now()
+    while True:
+        if not master_node_id:
+            master_node_id = get_master_node_id(cluster_id)
+            if not master_node_id:
+                time.sleep(5)
+                continue
+
+        master_node = batch_client.compute_node.get(cluster_id, master_node_id)
+
+        if master_node.state in [batch_models.ComputeNodeState.idle,  batch_models.ComputeNodeState.running]:
+            break
+        elif master_node.state is batch_models.ComputeNodeState.start_task_failed:
+            raise MasterInvalidStateError("Start task failed on master")
+        elif master_node.state in [batch_models.ComputeNodeState.unknown, batch_models.ComputeNodeState.unusable]:
+            raise MasterInvalidStateError("Master is in an invalid state")
+        else:
+            now = datetime.datetime.now()
+
+            delta = now - start_time
+            if delta.total_seconds() > constants.WAIT_FOR_MASTER_TIMEOUT:
+                raise MasterInvalidStateError("Master didn't become ready before timeout.")
+
+            time.sleep(10)
+    time.sleep(5)
+
+
+def upload_file_to_container(container_name, file_path, use_full_path) -> batch_models.ResourceFile:
     """
     Uploads a local file to an Azure Blob storage container.
     :param block_blob_client: A blob service client.
@@ -93,29 +126,23 @@ def print_configuration(config):
     print(configuration_dict)
 
 
+def get_master_node_id_from_pool(pool: batch_models.CloudPool):
+    """
+        :returns: the id of the node that is the assigned master of this pool
+    """
+    if pool.metadata is None:
+        return None
+
+    for metadata in pool.metadata:
+        if metadata.name == constants.MASTER_NODE_METADATA_KEY:
+            return metadata.value
+
+    return None
+
+
 def get_master_node_id(pool_id):
-    """
-    Uploads a local file to an Azure Blob storage container.
-    :param block_blob_client: A blob service client.
-    :type block_blob_client: `azure.storage.blob.BlockBlobService`
-    """
     batch_client = azure_api.get_batch_client()
-
-    # Currently, the jobId == poolId so this is safe to assume
-    job_id = pool_id
-    tasks = batch_client.task.list(job_id=job_id)
-
-    # Create a local collection from the cloud enumerable
-    tasks = [task for task in tasks]
-
-    if (len(tasks) > 0):
-        if (tasks[0].node_info is None):
-            return ""
-
-        master_node_id = tasks[0].node_info.node_id
-        return master_node_id
-
-    return ""
+    return get_master_node_id_from_pool(batch_client.pool.get(pool_id))
 
 
 def create_pool_if_not_exist(pool, wait=True):
@@ -132,7 +159,7 @@ def create_pool_if_not_exist(pool, wait=True):
     try:
         batch_client.pool.add(pool)
         if wait:
-            wait_for_all_nodes_state(batch_client, pool, frozenset(
+            wait_for_all_nodes_state(pool, frozenset(
                 (batch_models.ComputeNodeState.start_task_failed,
                  batch_models.ComputeNodeState.unusable,
                  batch_models.ComputeNodeState.idle)
@@ -269,7 +296,6 @@ def upload_blob_and_create_sas(
         file_name)
 
     sas_token = create_sas_token(
-        block_blob_client,
         container_name,
         blob_name,
         permission=blob.BlobPermissions.READ,

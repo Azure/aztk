@@ -8,11 +8,20 @@ from .version import __version__
 global_config = config.get()
 
 batch_client = None
+batch_config = None
 blob_client = None
 
 
 class AzureApiInitError(Exception):
     pass
+
+
+class BatchConfig:
+    def __init__(self, account_key: str, account_name: str, account_url: str):
+        self.account_key = account_key
+        self.account_name = account_name
+        self.account_url = account_url
+
 
 def get_batch_client():
     """
@@ -78,8 +87,16 @@ def create_blob_client(
     return blob_client
 
 
-def __load_batch_client():
-    global batch_client
+def get_batch_config() -> BatchConfig:
+    if not batch_config:
+        __load_batch_config()
+
+    return batch_config
+
+
+def __load_batch_config():
+    global batch_config
+
     if not global_config.has_option('Batch', 'batchaccountkey'):
         raise AzureApiInitError("Batch account key is not set in config")
 
@@ -90,15 +107,24 @@ def __load_batch_client():
         raise AzureApiInitError("Batch account url is not set in config")
 
     # Get configuration
-    batch_account_key = global_config.get('Batch', 'batchaccountkey')
-    batch_account_name = global_config.get('Batch', 'batchaccountname')
-    batch_service_url = global_config.get('Batch', 'batchserviceurl')
+    account_key = global_config.get('Batch', 'batchaccountkey')
+    account_name = global_config.get('Batch', 'batchaccountname')
+    account_url = global_config.get('Batch', 'batchserviceurl')
+
+    batch_config = BatchConfig(
+        account_key=account_key, account_name=account_name, account_url=account_url)
+
+
+def __load_batch_client():
+    global batch_client
+
+    config = get_batch_config()
 
     # create batch client
     batch_client = create_batch_client(
-        batch_account_key,
-        batch_account_name,
-        batch_service_url)
+        config.account_key,
+        config.account_name,
+        config.account_url)
 
 
 def __load_blob_client():
