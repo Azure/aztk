@@ -1,13 +1,3 @@
 {
-    // "python.linting.pylintEnabled": false,
-    "search.exclude": {
-        "build/**": true,
-        "bin/**": true
-    },
-    "files.exclude": {
-        "**/__pycache__/**/*": true
-    },
-    "python.autoComplete.extraPaths": [
-        "${workspaceRoot}/node"
-    ]
+    "python.linting.pylintEnabled": false
 }

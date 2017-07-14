@@ -1,42 +1,38 @@
-from datetime import timedelta
-from typing import List
-from dtde.core import CommandBuilder
+from . import util, constants, azure_api
+
+import random
+from datetime import datetime, timedelta
 import azure.batch.models as batch_models
-from . import azure_api, util
 
 def app_submit_cmd(
-        name: str,
-        app: str,
-        app_args: str,
-        main_class: str,
-        jars: List[str],
-        py_files: List[str],
-        files: List[str],
-        driver_java_options: str,
-        driver_library_path: str,
-        driver_class_path: str,
-        driver_memory: str,
-        executor_memory: str,
-        driver_cores: str,
-        executor_cores: str):
-    spark_submit_cmd = CommandBuilder('$SPARK_HOME/bin/spark-submit')
+        webui_port,
+        name,
+        app, 
+        app_args, 
+        main_class,
+        jars, 
+        py_files,
+        files, 
+        driver_java_options,
+        driver_library_path,
+        driver_class_path,
+        driver_memory, 
+        executor_memory, 
+        driver_cores, 
+        executor_cores):
 
-    spark_submit_cmd.add_option('--name', name)
-    spark_submit_cmd.add_option('--master', 'spark://${MASTER_NODE%:*}:7077')
-    spark_submit_cmd.add_option('--class', main_class)
-    spark_submit_cmd.add_option('--class', main_class)
-    spark_submit_cmd.add_option('--jars', jars and ','.join(jars))
-    spark_submit_cmd.add_option('--py-files', py_files and ','.join(py_files))
-    spark_submit_cmd.add_option('--jars', files and ','.join(files))
-    spark_submit_cmd.add_option('--driver-java-options', driver_java_options)
-    spark_submit_cmd.add_option('--driver-library-path', driver_library_path)
-    spark_submit_cmd.add_option('--driver-class-path', driver_class_path)
-    spark_submit_cmd.add_option('--driver-memory', driver_memory)
-    spark_submit_cmd.add_option('--executor-memory', executor_memory)
-    spark_submit_cmd.add_option('--driver-cores', driver_cores)
-    spark_submit_cmd.add_option('--executor-cores', executor_cores)
-    spark_submit_cmd.add_argument(
-        '$AZ_BATCH_TASK_WORKING_DIR/' + app + ' ' + ' '.join(app_args))
+    name_option = '--name ' + name + ' ' if name else ''
+    main_class_option = '--class ' + main_class + ' ' if main_class else ''
+    jars_option = '--jars "' + ','.join(jars) + '" ' if jars else ''
+    py_files_option = '--py-files "' + ','.join(py_files) + '" ' if py_files else ''
+    files_option = '--jars "' + ','.join(files) + '" ' if files else ''
+    driver_java_options = '--driver-java-options ' + driver_java_options + ' ' if driver_java_options else ''
+    driver_library_path = '--driver-library-path ' + driver_library_path + ' ' if driver_library_path else ''
+    driver_class_path = '--driver-class-path ' + driver_class_path + ' ' if driver_class_path else ''
+    driver_memory_option = '--driver-memory ' + driver_memory + ' ' if driver_memory else ''
+    executor_memory_option = '--executor-memory ' + executor_memory + ' ' if executor_memory else ''
+    driver_cores_option = '--driver-cores ' + driver_cores + ' ' if driver_cores else ''
+    executor_cores_option = '--executor-cores ' + executor_cores + ' ' if executor_cores else ''
 
     return [
         # set SPARK_HOME environment vars
@@ -49,21 +45,35 @@ def app_submit_cmd(
 
         # get master node ip
         'export MASTER_NODE=$(cat $SPARK_HOME/conf/master)',
-        'echo "Master node ip is $MASTER_NODE"',
-        spark_submit_cmd.to_str(),
-    ]
 
+        # execute spark-submit on the specified app 
+        '$SPARK_HOME/bin/spark-submit ' +
+            name_option +
+            '--master spark://${MASTER_NODE%:*}:7077 ' + 
+            main_class_option +
+            jars_option +
+            py_files_option +
+            files_option +
+            driver_java_options +
+            driver_library_path +
+            driver_class_path +
+            driver_memory_option +
+            executor_memory_option +
+            driver_cores_option +
+            executor_cores_option +
+            '$AZ_BATCH_TASK_WORKING_DIR/' + app + ' ' + ' '.join(app_args)
+    ]
 
 def submit_app(
         pool_id,
         name,
-        app,
+        app, 
         app_args,
         wait,
         main_class,
-        jars,
-        py_files,
-        files,
+        jars, 
+        py_files, 
+        files, 
         driver_java_options,
         driver_library_path,
         driver_class_path,
@@ -71,47 +81,54 @@ def submit_app(
         executor_memory,
         driver_cores,
         executor_cores):
+
     """
-    Submit a spark app
+    Submit a spark app 
     """
     batch_client = azure_api.get_batch_client()
-
+    blob_client = azure_api.get_blob_client()
+    
     resource_files = []
 
     # Upload application file
     resource_files.append(
-        util.upload_file_to_container(container_name=name, file_path=app, use_full_path=True))
+        util.upload_file_to_container(
+                container_name = name, file_path = app, use_full_path = True))
 
     # Upload dependent JARS
     for jar in jars:
         resource_files.append(
-            util.upload_file_to_container(container_name=name, file_path=jar, use_full_path=True))
+            util.upload_file_to_container(
+                container_name = name, file_path = jar, use_full_path = True))
 
-    # Upload dependent python files
+    # Upload dependent python files 
     for py_file in py_files:
         resource_files.append(
-            util.upload_file_to_container(container_name=name, file_path=py_file, use_full_path=True))
+            util.upload_file_to_container(
+                container_name = name, file_path = py_file, use_full_path = True))
 
-    # Upload other dependent files
+    # Upload other dependent files 
     for file in files:
         resource_files.append(
-            util.upload_file_to_container(container_name=name, file_path=file, use_full_path=True))
+            util.upload_file_to_container(
+                ontainer_name = name, file_path = file, use_full_path = True))
 
     # create command to submit task
     cmd = app_submit_cmd(
+        webui_port=constants._WEBUI_PORT,
         name=name,
-        app=app,
-        app_args=app_args,
-        main_class=main_class,
-        jars=jars,
+        app=app, 
+        app_args=app_args, 
+        main_class=main_class, 
+        jars=jars, 
         py_files=py_files,
-        files=files,
+        files=files, 
         driver_java_options=driver_java_options,
         driver_library_path=driver_library_path,
         driver_class_path=driver_class_path,
-        driver_memory=driver_memory,
-        executor_memory=executor_memory,
-        driver_cores=driver_cores,
+        driver_memory=driver_memory, 
+        executor_memory=executor_memory, 
+        driver_cores=driver_cores, 
         executor_cores=executor_cores)
 
     # Get pool size
@@ -127,16 +144,16 @@ def submit_app(
         affinity_info=batch_models.AffinityInformation(
             affinity_id=master_node_affinity_id),
         command_line=util.wrap_commands_in_shell(cmd),
-        resource_files=resource_files,
-        user_identity=batch_models.UserIdentity(
-            auto_user=batch_models.AutoUserSpecification(
-                scope=batch_models.AutoUserScope.task,
-                elevation_level=batch_models.ElevationLevel.admin))
+        resource_files = resource_files,
+        user_identity = batch_models.UserIdentity(
+            auto_user= batch_models.AutoUserSpecification(
+                scope= batch_models.AutoUserScope.task,
+                elevation_level= batch_models.ElevationLevel.admin))
     )
 
     # Add task to batch job (which has the same name as pool_id)
     job_id = pool_id
-    batch_client.task.add(job_id=job_id, task=task)
+    batch_client.task.add(job_id = job_id, task = task)
 
     # Wait for the app to finish
     if wait == True:

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from dtde import clusterlib, util
-import argparse
+import argparse 
 import os
 
 if __name__ == '__main__':
@@ -18,13 +18,13 @@ if __name__ == '__main__':
 
     parser.add_argument('--id', dest="cluster_id", required=True,
                         help='The unique id of your spark cluster')
-    parser.add_argument('--masterui',
+    parser.add_argument('--masterui', 
                         help='Local port to port spark\'s master UI to')
-    parser.add_argument('--webui',
+    parser.add_argument('--webui', 
                         help='Local port to port spark\'s webui to')
-    parser.add_argument('--jupyter',
+    parser.add_argument('--jupyter', 
                         help='Local port to port jupyter to')
-    parser.add_argument('-u', '--username',
+    parser.add_argument('-u', '--username', 
                         help='Username to spark cluster')
     parser.add_argument('--no-connect',
                         action='store_false',
@@ -33,7 +33,7 @@ if __name__ == '__main__':
                         the command to run.')
 
     args = parser.parse_args()
-
+ 
     if (args.no_connect is True and args.username is None):
         print('You must specify a username in order to connect automatically.')
         exit()
@@ -70,7 +70,7 @@ if __name__ == '__main__':
 
     # get ssh command
     clusterlib.ssh(
-        cluster_id = pool_id,
+        pool_id = pool_id,
         masterui = masterui,
         webui = webui,
         jupyter = jupyter,
