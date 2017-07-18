@@ -1,3 +1,8 @@
+class CommandOption():
+    def __init__(self, name:str, value: str):
+        self.name = name
+        self.value = value
+
 class CommandBuilder:
     """
         Helper class to build a command line
@@ -11,7 +16,7 @@ class CommandBuilder:
         self.options = []
         self.arguments = []
 
-    def add_option(self, name: str, value: str, enable: bool=None):
+    def add_option(self, name: str, value: str = None, enable: bool=None):
         """
             Add an option to the command line.
 
@@ -26,7 +31,7 @@ class CommandBuilder:
         if enable is None:
             enable = value
         if enable:
-            self.options.append(dict(name=name, value=value))
+            self.options.append(CommandOption(name=name, value=value))
             return True
 
         return False
@@ -34,8 +39,17 @@ class CommandBuilder:
     def add_argument(self, arg):
         self.arguments.append(arg)
 
+    def to_array(self):
+        cmd = [self.executable]
+        for option in self.options:
+            cmd.append(option.name)
+            if option.value is not None:
+                cmd.append(option.value)
+
+        for arg in self.arguments:
+            cmd.append(arg)
+        return cmd
+
     def to_str(self):
-        option_str = " ".join(["{name} {value}".format(**x)
-                               for x in self.options])
-        argument_str = " ".join(self.arguments)
-        return "{0} {1} {2}".format(self.executable, option_str, argument_str)
+        cmd = self.to_array()
+        return " ".join(cmd)
