@@ -1,4 +1,5 @@
 from setuptools import setup
+from dtde import constants
 
 setup(name='dtde',
       version='0.1',
@@ -8,11 +9,12 @@ setup(name='dtde',
       author_email='jiata@microsoft.com',
       license='MIT',
       packages=['dtde'],
-      scripts=['bin/spark-cluster-create',
-               'bin/spark-cluster-delete',
-               'bin/spark-cluster-create-user',
-               'bin/spark-cluster-ssh',
-               'bin/spark-cluster-get',
-               'bin/spark-cluster-list',
-               'bin/spark-submit'],
+      scripts=[
+      #     'bin/azb',
+      ],
+      entry_points=dict(
+            console_scripts=[
+                  "{0} = dtde.cli:main".format(constants.CLI_EXE)
+            ]
+      ),
       zip_safe=False)

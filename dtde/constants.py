@@ -1,8 +1,13 @@
 import os
 
-MASTER_UI_PORT = 8082
-WEBUI_PORT = 4040
-JUPYTER_PORT = 7777
+"""
+    Name of the executable
+"""
+CLI_EXE = 'azb'
+
+SPARK_MASTER_UI_PORT = 8082
+SPARK_WEBUI_PORT = 4040
+SPARK_JUPYTER_PORT = 7777
 
 """
     Root path of this repository

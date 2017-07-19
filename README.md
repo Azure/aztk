@@ -6,13 +6,16 @@ A suite of distributed tools to help engineers scale their work into Azure.
 ## Setup  
 1. Clone the repo
 2. Use pip to install required packages:
-    ```
+```bash
     pip3 install -r requirements.txt
-    ```
+```
 3. Use setuptools:
-    ```
-    python3 setup.py install
-    ```
+```bash
+    pip3 install .
+
+    # For development use this instead
+    pip3 install -e . 
+```
 4. Rename 'configuration.cfg.template' to 'configuration.cfg' and fill in the fields for your Batch account and Storage account. These fields can be found in the Azure portal. 
 
    To complete this step, you will need an Azure account that has a Batch account and Storage account:
@@ -27,8 +30,8 @@ The entire experience of this package is centered around a few commands in the b
 ### Create and setup your cluster
 
 First, create your cluster:
-```
-./bin/spark-cluster-create \
+```bash
+azb spark cluster create \
     --id <my-cluster-id> \
     --size <number of nodes> \
     --vm-size <vm-size> \
@@ -38,7 +41,7 @@ First, create your cluster:
 
 You can also create your cluster with [low-priority](https://docs.microsoft.com/en-us/azure/batch/batch-low-pri-vms) VMs at an 80% discount by using **--size-low-pri** instead of **--size**:
 ```
-./bin/spark-cluster-create \
+azb spark cluster create \
     --id <my-cluster-id> \
     --size-low-pri <number of low-pri nodes>
     --vm-size <vm-size>
@@ -46,7 +49,7 @@ You can also create your cluster with [low-priority](https://docs.microsoft.com/
 
 When your cluster is ready, create a user for your cluster (if you didn't already do so when creating your cluster):
 ```
-./bin/spark-cluster-create-user \
+azb spark cluster add-user \
     --id <my-cluster-id> \
     --username <username> \
     --password <password>
@@ -57,7 +60,7 @@ NOTE: The cluster id (--id) can only contain alphanumeric characters including h
 
 Now you can submit jobs to run against the cluster:
 ```
-./bin/spark-submit \
+azb spark submit \
     --id <my-cluster-id> \
     --name <my-job-name> \
     [options] 
@@ -70,7 +73,7 @@ NOTE: The job name (--name) must be atleast 3 characters long, can only contain 
 
 To view the spark UI, open up an ssh tunnel with the "masterui" option and a local port to map to:
 ```
-./bin/spark-cluster-ssh \ 
+azb spark cluster ssh \ 
     --id <my-cluster-id> \
     --masterui <local-port> \
     --username <user-name>
@@ -78,7 +81,7 @@ To view the spark UI, open up an ssh tunnel with the "masterui" option and a loc
 
 Optionally, you can also open up a jupyter notebook with the "jupyter" option to work in:
 ```
-./bin/spark-cluster-ssh \ 
+azb spark cluster ssh  \ 
     --id <my-cluster-id> \
     --masterui <local-port> \
     --jupyter <local-port>
@@ -88,15 +91,15 @@ Optionally, you can also open up a jupyter notebook with the "jupyter" option to
 
 You can also see your clusters from the CLI:
 ```
-./bin/spark-cluster-list
+azb spark cluster list
 ```
 
 And get the state of any specified cluster:
 ```
-./bin/spark-cluster-get --id <my-cluster-id>
+azb spark cluster get --id <my-cluster-id>
 ```
 
 Finally, you can delete any specified cluster:
 ```
-./bin/spark-cluster-delete --id <my-cluster-id>
+azb spark cluster delete --id <my-cluster-id>
 ```

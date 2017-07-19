@@ -263,7 +263,7 @@ def delete_cluster(cluster_id: str):
         batch_client.job.get(job_id)
     except:
         job_exists = False
-        
+
     pool_exists = batch_client.pool.exists(pool_id)
 
     if job_exists:
@@ -274,6 +274,10 @@ def delete_cluster(cluster_id: str):
 
     if job_exists or pool_exists:
         print("Deleting cluster {0}".format(cluster_id))
+
+
+class ClusterNotReadyError(Exception):
+    pass
 
 
 def ssh(
@@ -299,6 +303,9 @@ def ssh(
     # Get master node id from task (job and task are both named pool_id)
     master_node_id = util.get_master_node_id(cluster_id)
 
+    if master_node_id is None:
+        raise ClusterNotReadyError("Master node has not yet been picked!")
+
     # get remote login settings for the user
     remote_login_settings = batch_client.compute_node.get_remote_login_settings(
         cluster_id, master_node_id)
@@ -308,9 +315,9 @@ def ssh(
 
     ssh_command = CommandBuilder('ssh')
 
-    ssh_command.add_option("-L", "{0}:localhost:{1}".format(masterui, constants.MASTER_UI_PORT), enable=masterui)
-    ssh_command.add_option("-L", "{0}:localhost:{1}".format(webui, constants.WEBUI_PORT), enable=webui)
-    ssh_command.add_option("-L", "{0}:localhost:{1}".format(jupyter, constants.JUPYTER_PORT), enable=jupyter)
+    ssh_command.add_option("-L", "{0}:localhost:{1}".format(masterui, constants.SPARK_MASTER_UI_PORT), enable=masterui)
+    ssh_command.add_option("-L", "{0}:localhost:{1}".format(webui, constants.SPARK_WEBUI_PORT), enable=webui)
+    ssh_command.add_option("-L", "{0}:localhost:{1}".format(jupyter, constants.SPARK_JUPYTER_PORT), enable=jupyter)
     if ports is not None:
         for port in ports:
             ssh_command.add_option("-L", "{0}:localhost:{1}".format(port[0], port[1]))

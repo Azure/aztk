@@ -10,10 +10,10 @@ node_id = os.environ["AZ_BATCH_NODE_ID"]
 is_dedicated = os.environ["AZ_BATCH_NODE_IS_DEDICATED"]
 
 # TODO save this as env/metadata
-MASTER_UI_PORT = 8082
-WORKER_UI_PORT = 8083
-WEB_UI_PORT = 4040
-JUPYTER_PORT = 7777
+SPARK_MASTER_UI_PORT = 8082
+SPARK_WORKER_UI_PORT = 8083
+SPARK_WEB_UI_PORT = 4040
+SPARK_JUPYTER_PORT = 7777
 
 
 def get_client() -> batch.BatchServiceClient:

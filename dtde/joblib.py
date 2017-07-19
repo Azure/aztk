@@ -55,22 +55,22 @@ def app_submit_cmd(
 
 
 def submit_app(
-        pool_id,
-        name,
-        app,
-        app_args,
-        wait,
-        main_class,
-        jars,
-        py_files,
-        files,
-        driver_java_options,
-        driver_library_path,
-        driver_class_path,
-        driver_memory,
-        executor_memory,
-        driver_cores,
-        executor_cores):
+        cluster_id:str,
+        name:str,
+        app:str,
+        app_args:List[str],
+        wait:bool,
+        main_class:str,
+        jars:List[str],
+        py_files:List[str],
+        files:List[str],
+        driver_java_options:str,
+        driver_library_path:str,
+        driver_class_path:str,
+        driver_memory:str,
+        executor_memory:str,
+        driver_cores:str,
+        executor_cores:str):
     """
     Submit a spark app
     """
@@ -115,11 +115,11 @@ def submit_app(
         executor_cores=executor_cores)
 
     # Get pool size
-    pool = batch_client.pool.get(pool_id)
+    pool = batch_client.pool.get(cluster_id)
     pool_size = util.get_cluster_total_target_nodes(pool)
 
     # Affinitize task to master node
-    master_node_affinity_id = util.get_master_node_id(pool_id)
+    master_node_affinity_id = util.get_master_node_id(cluster_id)
 
     # Create task
     task = batch_models.TaskAddParameter(
@@ -135,11 +135,11 @@ def submit_app(
     )
 
     # Add task to batch job (which has the same name as pool_id)
-    job_id = pool_id
+    job_id = cluster_id
     batch_client.task.add(job_id=job_id, task=task)
 
     # Wait for the app to finish
-    if wait == True:
+    if wait:
         util.wait_for_tasks_to_complete(
             job_id,
             timedelta(minutes=60))
