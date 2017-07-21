@@ -315,9 +315,9 @@ def ssh(
 
     ssh_command = CommandBuilder('ssh')
 
-    ssh_command.add_option("-L", "{0}:localhost:{1}".format(masterui, constants.SPARK_MASTER_UI_PORT), enable=masterui)
-    ssh_command.add_option("-L", "{0}:localhost:{1}".format(webui, constants.SPARK_WEBUI_PORT), enable=webui)
-    ssh_command.add_option("-L", "{0}:localhost:{1}".format(jupyter, constants.SPARK_JUPYTER_PORT), enable=jupyter)
+    ssh_command.add_option("-L", "{0}:localhost:{1}".format(masterui, constants.SPARK_MASTER_UI_PORT), enable=bool(masterui))
+    ssh_command.add_option("-L", "{0}:localhost:{1}".format(webui, constants.SPARK_WEBUI_PORT), enable=bool(webui))
+    ssh_command.add_option("-L", "{0}:localhost:{1}".format(jupyter, constants.SPARK_JUPYTER_PORT), enable=bool(jupyter))
     if ports is not None:
         for port in ports:
             ssh_command.add_option("-L", "{0}:localhost:{1}".format(port[0], port[1]))
