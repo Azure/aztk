@@ -1,8 +1,10 @@
 from datetime import datetime, timedelta
 from subprocess import call
 import azure.batch.models as batch_models
-from . import azure_api, constants, upload_node_scripts, util
 from dtde.core import CommandBuilder
+from dtde.cli import Software
+from . import azure_api, constants, upload_node_scripts, util
+
 
 POOL_ADMIN_USER_IDENTITY = batch_models.UserIdentity(
     auto_user=batch_models.AutoUserSpecification(
@@ -132,7 +134,10 @@ def create_cluster(
         start_task=generate_cluster_start_task(
             pool_id, zip_resource_file, custom_script),
         enable_inter_node_communication=True,
-        max_tasks_per_node=1)
+        max_tasks_per_node=1,
+        metadata=[
+            batch_models.MetadataItem(name=constants.AZB_SOFTWARE_METADATA_KEY, value=Software.spark),
+        ])
 
     # Create the pool + create user for the pool
     util.create_pool_if_not_exist(
@@ -218,6 +223,17 @@ def get_cluster_details(cluster_id: str):
     print()
 
 
+def is_pool_running_spark(pool: batch_models.CloudPool):
+    if pool.metadata is None:
+        return False
+
+    for metadata in pool.metadata:
+        if metadata.name == constants.AZB_SOFTWARE_METADATA_KEY:
+            return metadata.value == Software.spark
+
+    return False
+
+
 def list_clusters():
     """
         List all the cluster on your account.
@@ -231,6 +247,8 @@ def list_clusters():
     print(print_format.format('Cluster', 'State', 'VM Size', 'Nodes'))
     print(print_format_underline.format('', '', '', ''))
     for pool in pools:
+        if not is_pool_running_spark(pool):
+            continue
         pool_state = pool.allocation_state.value if pool.state.value is 'active' else pool.state.value
 
         target_nodes = util.get_cluster_total_target_nodes(pool)
@@ -318,9 +336,11 @@ def ssh(
     ssh_command.add_option("-L", "{0}:localhost:{1}".format(masterui, constants.SPARK_MASTER_UI_PORT), enable=bool(masterui))
     ssh_command.add_option("-L", "{0}:localhost:{1}".format(webui, constants.SPARK_WEBUI_PORT), enable=bool(webui))
     ssh_command.add_option("-L", "{0}:localhost:{1}".format(jupyter, constants.SPARK_JUPYTER_PORT), enable=bool(jupyter))
+
     if ports is not None:
         for port in ports:
-            ssh_command.add_option("-L", "{0}:localhost:{1}".format(port[0], port[1]))
+            ssh_command.add_option(
+                "-L", "{0}:localhost:{1}".format(port[0], port[1]))
 
     user = username if username is not None else '<username>'
     ssh_command.add_argument("{0}@{1} -p {2}".format(user, master_node_ip, master_node_port))

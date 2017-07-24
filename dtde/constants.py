@@ -29,3 +29,6 @@ MASTER_NODE_METADATA_KEY = "_spark_master_node"
     Value: 20 minutes
 """
 WAIT_FOR_MASTER_TIMEOUT = 60 * 20
+
+
+AZB_SOFTWARE_METADATA_KEY = "_azb_software"
