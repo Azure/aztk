@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from subprocess import call
 import azure.batch.models as batch_models
 from dtde.core import CommandBuilder
-from dtde.cli import Software
+from dtde.models import Software
 from . import azure_api, constants, upload_node_scripts, util
 
 

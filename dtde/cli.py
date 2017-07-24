@@ -7,14 +7,7 @@
 import argparse
 from dtde import constants
 from dtde.spark.cli import spark
-
-
-class Software:
-    """
-        Enum with list of available softwares
-    """
-    spark = "spark"
-
+from dtde.models import Software
 
 def main():
     parser = argparse.ArgumentParser(prog=constants.CLI_EXE)
