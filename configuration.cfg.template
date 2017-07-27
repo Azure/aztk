@@ -9,3 +9,6 @@ storageaccountkey=
 storageaccountsuffix=core.windows.net
 
 [Default]
+# SSH public key used to create a user and connect to a server.
+# It can either be the public key itself(ssh-rsa ...) or the path to the ssh key.
+#ssh_pub_key=~/.ssh/id_rsa.pub

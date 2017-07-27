@@ -369,3 +369,4 @@ def get_cluster_total_current_nodes(pool):
     Get the total number of current nodes (dedicated + low pri) in the pool
     """
     return pool.current_dedicated_nodes + pool.current_low_priority_nodes
+

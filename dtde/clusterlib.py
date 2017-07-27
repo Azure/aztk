@@ -1,10 +1,11 @@
 from datetime import datetime, timedelta
 from subprocess import call
+from dtde.core import CommandBuilder, ssh
+from collections import namedtuple
 import azure.batch.models as batch_models
-from dtde.core import CommandBuilder
 from dtde.models import Software
+from dtde.error import ClusterNotReadyError, InvalidUserCredentialsError
 from . import azure_api, constants, upload_node_scripts, util
-
 
 POOL_ADMIN_USER_IDENTITY = batch_models.UserIdentity(
     auto_user=batch_models.AutoUserSpecification(
@@ -24,7 +25,8 @@ def cluster_install_cmd(zip_resource_file: batch_models.ResourceFile, custom_scr
         'chmod -R 777 /usr/local/share/jupyter/kernels',
         # To avoid error: "sudo: sorry, you must have a tty to run sudo"
         'sed -i -e "s/Defaults    requiretty.*/ #Defaults    requiretty/g" /etc/sudoers',
-        'unzip $AZ_BATCH_TASK_WORKING_DIR/{0}'.format(zip_resource_file.file_path),
+        'unzip $AZ_BATCH_TASK_WORKING_DIR/{0}'.format(
+            zip_resource_file.file_path),
         'chmod 777 $AZ_BATCH_TASK_WORKING_DIR/main.sh',
         # Convert windows line ending to unix if applicable
         'dos2unix $AZ_BATCH_TASK_WORKING_DIR/main.sh',
@@ -89,7 +91,8 @@ def create_cluster(
         vm_low_pri_count,
         vm_size,
         username: str,
-        password: str,
+        password: str = None,
+        ssh_key: str = None,
         wait=True):
     """
         Create a spark cluster
@@ -136,7 +139,8 @@ def create_cluster(
         enable_inter_node_communication=True,
         max_tasks_per_node=1,
         metadata=[
-            batch_models.MetadataItem(name=constants.AZB_SOFTWARE_METADATA_KEY, value=Software.spark),
+            batch_models.MetadataItem(
+                name=constants.AZB_SOFTWARE_METADATA_KEY, value=Software.spark),
         ])
 
     # Create the pool + create user for the pool
@@ -156,14 +160,15 @@ def create_cluster(
     if wait:
         util.wait_for_master_to_be_ready(pool_id)
 
-        if username is not None and password is not None:
-            create_user(pool_id, username, password)
+        if username is not None:
+            create_user(pool_id, username, password, ssh_key)
 
 
 def create_user(
         cluster_id: str,
         username: str,
-        password: str):
+        password: str = None,
+        ssh_key: str = None) -> str:
     """
         Create a cluster user
         :param cluster_id: id of the spark cluster
@@ -171,6 +176,12 @@ def create_user(
         :param password: password of the user to add
     """
     batch_client = azure_api.get_batch_client()
+    if password is None:
+        ssh_key = ssh.get_user_public_key(ssh_key)
+
+    if not password and not ssh_key:
+        raise InvalidUserCredentialsError(
+            "Cannot add user to cluster. Need to provide a ssh public key or password.")
 
     # Create new ssh user for the master node
     batch_client.compute_node.add_user(
@@ -180,7 +191,13 @@ def create_user(
             username,
             is_admin=True,
             password=password,
+            ssh_public_key=ssh_key,
             expiry_time=datetime.now() + timedelta(days=365)))
+
+    return (
+        '*' * len(password) if password else None,
+        ssh_key,
+    )
 
 
 def get_cluster_details(cluster_id: str):
@@ -294,11 +311,7 @@ def delete_cluster(cluster_id: str):
         print("Deleting cluster {0}".format(cluster_id))
 
 
-class ClusterNotReadyError(Exception):
-    pass
-
-
-def ssh(
+def ssh_in_master(
         cluster_id: str,
         username: str=None,
         masterui: str=None,
@@ -333,9 +346,12 @@ def ssh(
 
     ssh_command = CommandBuilder('ssh')
 
-    ssh_command.add_option("-L", "{0}:localhost:{1}".format(masterui, constants.SPARK_MASTER_UI_PORT), enable=bool(masterui))
-    ssh_command.add_option("-L", "{0}:localhost:{1}".format(webui, constants.SPARK_WEBUI_PORT), enable=bool(webui))
-    ssh_command.add_option("-L", "{0}:localhost:{1}".format(jupyter, constants.SPARK_JUPYTER_PORT), enable=bool(jupyter))
+    ssh_command.add_option("-L", "{0}:localhost:{1}".format(
+        masterui, constants.SPARK_MASTER_UI_PORT), enable=bool(masterui))
+    ssh_command.add_option(
+        "-L", "{0}:localhost:{1}".format(webui, constants.SPARK_WEBUI_PORT), enable=bool(webui))
+    ssh_command.add_option("-L", "{0}:localhost:{1}".format(
+        jupyter, constants.SPARK_JUPYTER_PORT), enable=bool(jupyter))
 
     if ports is not None:
         for port in ports:
@@ -343,7 +359,8 @@ def ssh(
                 "-L", "{0}:localhost:{1}".format(port[0], port[1]))
 
     user = username if username is not None else '<username>'
-    ssh_command.add_argument("{0}@{1} -p {2}".format(user, master_node_ip, master_node_port))
+    ssh_command.add_argument(
+        "{0}@{1} -p {2}".format(user, master_node_ip, master_node_port))
 
     command = ssh_command.to_str()
     ssh_command_array = command.split()

@@ -1,6 +1,6 @@
 import argparse
 import typing
-from dtde import clusterlib, util
+from dtde import clusterlib
 
 
 def setup_parser(parser: argparse.ArgumentParser):
@@ -33,7 +33,7 @@ def execute(args: typing.NamedTuple):
     print('-------------------------------------------')
 
     # get ssh command
-    clusterlib.ssh(
+    clusterlib.ssh_in_master(
         cluster_id=args.cluster_id,
         masterui=args.masterui,
         webui=args.webui,

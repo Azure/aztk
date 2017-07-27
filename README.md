@@ -3,7 +3,7 @@ A suite of distributed tools to help engineers scale their work into Azure.
 
 # Spark on DTDE
 
-## Setup  
+## Setup
 1. Clone the repo
 2. Use pip to install required packages:
 ```bash
@@ -14,9 +14,9 @@ A suite of distributed tools to help engineers scale their work into Azure.
     pip3 install .
 
     # For development use this instead
-    pip3 install -e . 
+    pip3 install -e .
 ```
-4. Rename 'configuration.cfg.template' to 'configuration.cfg' and fill in the fields for your Batch account and Storage account. These fields can be found in the Azure portal. 
+4. Rename 'configuration.cfg.template' to 'configuration.cfg' and fill in the fields for your Batch account and Storage account. These fields can be found in the Azure portal.
 
    To complete this step, you will need an Azure account that has a Batch account and Storage account:
     - To create an Azure account: https://azure.microsoft.com/free/
@@ -43,18 +43,37 @@ You can also create your cluster with [low-priority](https://docs.microsoft.com/
 ```
 azb spark cluster create \
     --id <my-cluster-id> \
-    --size-low-pri <number of low-pri nodes>
+    --size-low-pri <number of low-pri nodes> \
     --vm-size <vm-size>
 ```
 
+You can also add a user directly in this command using the same inputs as the `add-user` command described bellow.
+
+#### Add a user to your cluster to connect
 When your cluster is ready, create a user for your cluster (if you didn't already do so when creating your cluster):
-```
+```bash
+# **Recommended usage**
+# Add a user with a ssh public key. It will use the value specified in the configuration.cfg (Either path to the file or the actual key)
+azb spark cluster add-user \
+    --id <my-cluster-id> \
+    --username <username>
+
+# You can also explicity specify the ssh public key(Path or actual key)
+azb spark cluster add-user \
+    --id <my-cluster-id> \
+    --username <username> \
+    --ssh-key ~/.ssh/id_rsa.pub
+
+# **Not recommended**
+# You can also just specify a password
 azb spark cluster add-user \
     --id <my-cluster-id> \
     --username <username> \
     --password <password>
+
 ```
-NOTE: The cluster id (--id) can only contain alphanumeric characters including hyphens and underscores, and cannot contain more than 64 characters. 
+
+NOTE: The cluster id (--id) can only contain alphanumeric characters including hyphens and underscores, and cannot contain more than 64 characters.
 
 ### Submit a Spark job
 
@@ -63,8 +82,8 @@ Now you can submit jobs to run against the cluster:
 azb spark submit \
     --id <my-cluster-id> \
     --name <my-job-name> \
-    [options] 
-    <app jar | python file> 
+    [options] \
+    <app jar | python file> \
     [app arguments]
 ```
 NOTE: The job name (--name) must be atleast 3 characters long, can only contain alphanumeric characters including hyphens but excluding underscores, and cannot contain uppercase letters.
@@ -73,7 +92,7 @@ NOTE: The job name (--name) must be atleast 3 characters long, can only contain 
 
 To view the spark UI, open up an ssh tunnel with the "masterui" option and a local port to map to:
 ```
-azb spark cluster ssh \ 
+azb spark cluster ssh \
     --id <my-cluster-id> \
     --masterui <local-port> \
     --username <user-name>
@@ -81,7 +100,7 @@ azb spark cluster ssh \
 
 Optionally, you can also open up a jupyter notebook with the "jupyter" option to work in:
 ```
-azb spark cluster ssh  \ 
+azb spark cluster ssh  \
     --id <my-cluster-id> \
     --masterui <local-port> \
     --jupyter <local-port>

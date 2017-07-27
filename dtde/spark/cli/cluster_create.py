@@ -1,7 +1,6 @@
 import argparse
 import typing
-from dtde import clusterlib, util
-
+from dtde import clusterlib
 
 def setup_parser(parser: argparse.ArgumentParser):
     parser.add_argument('--id', dest='cluster_id', required=True,
@@ -21,7 +20,9 @@ def setup_parser(parser: argparse.ArgumentParser):
     parser.add_argument('--username',
                         help='Username to access your cluster (required: --wait flag)')
     parser.add_argument('--password',
-                        help='Password to access your cluster (required: --wait flag)')
+                        help="The password to access your spark cluster's head node. If not provided will use ssh public key.")
+    parser.add_argument('--ssh-key',
+                        help="The ssh public key to access your spark cluster\'s head node. You can also set the ssh-key in the configuration file.")
     parser.add_argument('--no-wait', dest='wait', action='store_false')
     parser.add_argument('--wait', dest='wait', action='store_true')
     parser.set_defaults(wait=False, size=0, size_low_pri=0)
@@ -49,4 +50,5 @@ def execute(args: typing.NamedTuple):
         args.vm_size,
         args.username,
         args.password,
+        args.ssh_key,
         args.wait)
