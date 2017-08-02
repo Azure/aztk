@@ -12,4 +12,5 @@ def setup_parser(parser: argparse.ArgumentParser):
 
 def execute(args: typing.NamedTuple):
     cluster_id = args.cluster_id
-    clusterlib.get_cluster_details(cluster_id)
+    cluster = clusterlib.get_cluster(cluster_id)
+    clusterlib.print_cluster(cluster)

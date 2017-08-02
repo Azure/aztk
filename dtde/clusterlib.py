@@ -1,11 +1,12 @@
 from datetime import datetime, timedelta
-from subprocess import call
 from dtde.core import CommandBuilder, ssh
-from collections import namedtuple
-import azure.batch.models as batch_models
+from subprocess import call
+from typing import List
 from dtde.models import Software
+import azure.batch.models as batch_models
+from . import azure_api, constants, upload_node_scripts, util, log
 from dtde.error import ClusterNotReadyError, InvalidUserCredentialsError
-from . import azure_api, constants, upload_node_scripts, util
+from collections import namedtuple
 
 POOL_ADMIN_USER_IDENTITY = batch_models.UserIdentity(
     auto_user=batch_models.AutoUserSpecification(
@@ -200,7 +201,62 @@ def create_user(
     )
 
 
-def get_cluster_details(cluster_id: str):
+class Cluster:
+    def __init__(self, pool, nodes=None):
+        self.id = pool.id
+        self.pool = pool
+        self.nodes = nodes
+        self.master_node_id = util.get_master_node_id_from_pool(pool)
+        if pool.state.value is batch_models.PoolState.active:
+            self.visible_state = pool.allocation_state.value
+        else:
+            self.visible_state = pool.state.value
+        self.vm_size = pool.vm_size
+        self.total_current_nodes = pool.current_dedicated_nodes + \
+            pool.current_low_priority_nodes
+        self.total_target_nodes = pool.target_dedicated_nodes + \
+            pool.target_low_priority_nodes
+        self.dedicated_nodes = pool.current_dedicated_nodes
+        self.low_pri_nodes = pool.current_low_priority_nodes
+
+
+def pretty_node_count(cluster: Cluster)-> str:
+    if cluster.pool.allocation_state.value is batch_models.AllocationState.resizing:
+        return '{} -> {}'.format(
+            cluster.total_current_nodes,
+            cluster.total_target_nodes)
+    else:
+        return '{}'.format(cluster.dedicated_nodes)
+
+
+def print_cluster(cluster: Cluster):
+    node_count = pretty_node_count(cluster)
+
+    log.info("")
+    log.info("Cluster         %s", cluster.id)
+    log.info("------------------------------------------")
+    log.info("State:          %s", cluster.visible_state)
+    log.info("Node Size:      %s", cluster.vm_size)
+    log.info("Nodes:          %s", node_count)
+    log.info("| Dedicated:    %s", cluster.dedicated_nodes)
+    log.info("| Low priority: %s", cluster.low_pri_nodes)
+    log.info("")
+
+    print_format = '{:<36}| {:<15} | {:<21}| {:<8}'
+    print_format_underline = '{:-<36}|{:-<17}|{:-<22}|{:-<8}'
+    log.info(print_format.format("Nodes", "State", "IP:Port", "Master"))
+    log.info(print_format_underline.format('', '', '', ''))
+
+    if not cluster.nodes:
+        return
+    for node in cluster.nodes:
+        ip, port = util.get_connection_info(cluster.id, node.id)
+        log.info(print_format.format(node.id, node.state.value, '{}:{}'.format(ip, port),
+                                     '*' if node.id == cluster.master_node_id else ''))
+    log.info('')
+
+
+def get_cluster(cluster_id: str) -> Cluster:
     """
         Print the information for the given cluster
         :param cluster_id: Id of the cluster
@@ -209,35 +265,10 @@ def get_cluster_details(cluster_id: str):
 
     pool = batch_client.pool.get(cluster_id)
     if pool.state is batch_models.PoolState.deleting:
-        print("Cluster is being deleted!")
-        return
+        return Cluster(pool)
+
     nodes = batch_client.compute_node.list(pool_id=cluster_id)
-    visible_state = pool.allocation_state.value if pool.state.value is 'active' else pool.state.value
-    node_count = '{} -> {}'.format(
-        pool.current_dedicated_nodes + pool.current_low_priority_nodes,
-        pool.target_dedicated_nodes + pool.target_low_priority_nodes) if pool.state.value is 'resizing' or (pool.state.value is 'deleting' and pool.allocation_state.value is 'resizing') else '{}'.format(pool.current_dedicated_nodes)
-
-    print()
-    print('State:          {}'.format(visible_state))
-    print('Node Size:      {}'.format(pool.vm_size))
-    print('Nodes:          {}'.format(node_count))
-    print('| Dedicated:    {}'.format(pool.current_dedicated_nodes))
-    print('| Low priority: {}'.format(pool.current_low_priority_nodes))
-    print()
-
-    node_label = 'Nodes'
-    print_format = '{:<36}| {:<15} | {:<21}| {:<8}'
-    print_format_underline = '{:-<36}|{:-<17}|{:-<22}|{:-<8}'
-    print(print_format.format(node_label, 'State', 'IP:Port', 'Master'))
-    print(print_format_underline.format('', '', '', ''))
-
-    master_node = util.get_master_node_id_from_pool(pool)
-
-    for node in nodes:
-        ip, port = util.get_connection_info(cluster_id, node.id)
-        print(print_format.format(node.id, node.state.value, '{}:{}'.format(ip, port),
-                                  '*' if node.id == master_node else ''))
-    print()
+    return Cluster(pool, nodes)
 
 
 def is_pool_running_spark(pool: batch_models.CloudPool):
@@ -251,36 +282,33 @@ def is_pool_running_spark(pool: batch_models.CloudPool):
     return False
 
 
-def list_clusters():
+def list_clusters() -> List[Cluster]:
     """
         List all the cluster on your account.
     """
     batch_client = azure_api.get_batch_client()
 
+    pools = batch_client.pool.list()
+
+    return [Cluster(pool) for pool in pools if is_pool_running_spark(pool)]
+
+
+def print_clusters(clusters: List[Cluster]):
     print_format = '{:<34}| {:<10}| {:<20}| {:<7}'
     print_format_underline = '{:-<34}|{:-<11}|{:-<21}|{:-<7}'
 
-    pools = batch_client.pool.list()
-    print(print_format.format('Cluster', 'State', 'VM Size', 'Nodes'))
-    print(print_format_underline.format('', '', '', ''))
-    for pool in pools:
-        if not is_pool_running_spark(pool):
-            continue
-        pool_state = pool.allocation_state.value if pool.state.value is 'active' else pool.state.value
+    log.info(print_format.format('Cluster', 'State', 'VM Size', 'Nodes'))
+    log.info(print_format_underline.format('', '', '', ''))
+    for cluster in clusters:
+        node_count = pretty_node_count(cluster)
 
-        target_nodes = util.get_cluster_total_target_nodes(pool)
-        current_nodes = util.get_cluster_total_current_nodes(pool)
-        node_count = current_nodes
-        if pool_state is 'resizing' or (pool_state is 'deleting' and pool.allocation_state.value is 'resizing'):
-            node_count = '{} -> {}'.format(current_nodes, target_nodes)
-
-        print(print_format.format(pool.id,
-                                  pool_state,
-                                  pool.vm_size,
-                                  node_count))
+        log.info(print_format.format(cluster.id,
+                                     cluster.visible_state,
+                                     cluster.vm_size,
+                                     node_count))
 
 
-def delete_cluster(cluster_id: str):
+def delete_cluster(cluster_id: str) -> bool:
     """
         Delete a spark cluster
         :param cluster_id: Id of the cluster to delete
@@ -307,8 +335,7 @@ def delete_cluster(cluster_id: str):
     if pool_exists:
         batch_client.pool.delete(pool_id)
 
-    if job_exists or pool_exists:
-        print("Deleting cluster {0}".format(cluster_id))
+    return job_exists or pool_exists
 
 
 def ssh_in_master(
@@ -365,8 +392,6 @@ def ssh_in_master(
     command = ssh_command.to_str()
     ssh_command_array = command.split()
 
-    if not connect:
-        print('\nuse the following command to connect to your spark head node:')
-        print('\n\t{}\n'.format(command))
-    else:
+    if connect:
         call(ssh_command_array)
+    return '\n\t{}\n'.format(command)

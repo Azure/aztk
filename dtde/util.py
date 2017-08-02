@@ -1,15 +1,14 @@
 from __future__ import print_function
 import datetime
-import io
 import os
 import time
-from .version import __version__
-from . import azure_api, constants
-
 import azure.batch.batch_service_client as batch
 import azure.batch.batch_auth as batch_auth
 import azure.batch.models as batch_models
 import azure.storage.blob as blob
+from .version import __version__
+from . import azure_api, constants, log
+
 
 _STANDARD_OUT_FILE_NAME = 'stdout.txt'
 _STANDARD_ERROR_FILE_NAME = 'stderr.txt'
@@ -39,8 +38,10 @@ def wait_for_tasks_to_complete(job_id, timeout):
 
     raise TimeoutError("Timed out waiting for tasks to complete")
 
+
 class MasterInvalidStateError(Exception):
     pass
+
 
 def wait_for_master_to_be_ready(cluster_id: str):
     batch_client = azure_api.get_batch_client()
@@ -67,7 +68,8 @@ def wait_for_master_to_be_ready(cluster_id: str):
 
             delta = now - start_time
             if delta.total_seconds() > constants.WAIT_FOR_MASTER_TIMEOUT:
-                raise MasterInvalidStateError("Master didn't become ready before timeout.")
+                raise MasterInvalidStateError(
+                    "Master didn't become ready before timeout.")
 
             time.sleep(10)
     time.sleep(5)
@@ -122,8 +124,9 @@ def print_configuration(config):
     configuration_dict = {s: dict(config.items(s)) for s in
                           config.sections() + ['DEFAULT']}
 
-    print("\nConfiguration is:")
-    print(configuration_dict)
+    log.info("")
+    log.info("Configuration is:")
+    log.info(configuration_dict)
 
 
 def get_master_node_id_from_pool(pool: batch_models.CloudPool):
@@ -164,14 +167,14 @@ def create_pool_if_not_exist(pool, wait=True):
                  batch_models.ComputeNodeState.unusable,
                  batch_models.ComputeNodeState.idle)
             ))
-            print("Created pool: {}".format(pool.id))
+            return True
         else:
-            print("Creating pool: {}".format(pool.id))
+            return True
     except batch_models.BatchErrorException as e:
         if e.error.code != "PoolExists":
             raise
         else:
-            print("Pool {!r} already exists.".format(pool.id))
+            return False
 
 
 def wait_for_all_nodes_state(pool, node_state):
@@ -187,7 +190,7 @@ def wait_for_all_nodes_state(pool, node_state):
     """
     batch_client = azure_api.get_batch_client()
 
-    print('Waiting for all nodes in pool {} to reach desired state...'.format(pool.id))
+    log.info('Waiting for all nodes in pool %s to reach desired state...', pool.id)
     while True:
         # refresh pool to ensure that there is no resize error
         pool = batch_client.pool.get(pool.id)
@@ -201,10 +204,6 @@ def wait_for_all_nodes_state(pool, node_state):
         if (len(nodes) >= totalNodes and
                 all(node.state in node_state for node in nodes)):
             return nodes
-        '''
-        print('waiting for {} nodes to reach desired state...'.format(
-            pool.target_dedicated))
-        '''
         time.sleep(1)
 
 
@@ -344,17 +343,17 @@ def print_batch_exception(batch_exception):
     Prints the contents of the specified Batch exception.
     :param batch_exception:
     """
-    print('-------------------------------------------')
-    print('Exception encountered:')
+    log.info("-------------------------------------------")
+    log.info("Exception encountered:")
     if batch_exception.error and \
             batch_exception.error.message and \
             batch_exception.error.message.value:
-        print(batch_exception.error.message.value)
+        log.info(batch_exception.error.message.value)
         if batch_exception.error.values:
-            print()
+            log.info()
             for mesg in batch_exception.error.values:
-                print('{}:\t{}'.format(mesg.key, mesg.value))
-    print('-------------------------------------------')
+                log.info("%s:\t%s", mesg.key, mesg.value)
+    log.info("-------------------------------------------")
 
 
 def get_cluster_total_target_nodes(pool):

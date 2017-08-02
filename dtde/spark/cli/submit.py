@@ -1,6 +1,6 @@
 import argparse
 import typing
-from dtde import joblib
+from dtde import joblib, log
 
 
 def setup_parser(parser: argparse.ArgumentParser):
@@ -80,35 +80,35 @@ def execute(args: typing.NamedTuple):
     if args.files is not None:
         files = args.py_files.replace(' ', '').split(',')
 
-    print('-------------------------------------------')
-    print('Spark cluster id:        {}'.format(args.cluster_id))
-    print('Spark app name:          {}'.format(args.name))
-    print('Wait for app completion: {}'.format(args.wait))
+    log.info("-------------------------------------------")
+    log.info("Spark cluster id:        %s", args.cluster_id)
+    log.info("Spark app name:          %s", args.name)
+    log.info("Wait for app completion: %s", args.wait)
     if args.main_class is not None:
-        print('Entry point class:       {}'.format(args.main_class))
+        log.info("Entry point class:       %s", args.main_class)
     if jars:
-        print('JARS:                    {}'.format(jars))
+        log.info("JARS:                    %s", jars)
     if py_files:
-        print('PY_Files:                {}'.format(py_files))
+        log.info("PY_Files:                %s", py_files)
     if files:
-        print('Files:                   {}'.format(files))
+        log.info("Files:                   %s", files)
     if args.driver_java_options is not None:
-        print('Driver java options:     {}'.format(args.driver_java_options))
+        log.info("Driver java options:     %s", args.driver_java_options)
     if args.driver_library_path is not None:
-        print('Driver library path:     {}'.format(args.driver_library_path))
+        log.info("Driver library path:     %s", args.driver_library_path)
     if args.driver_class_path is not None:
-        print('Driver class path:       {}'.format(args.driver_class_path))
+        log.info("Driver class path:       %s", args.driver_class_path)
     if args.driver_memory is not None:
-        print('Driver memory:           {}'.format(args.driver_memory))
+        log.info("Driver memory:           %s", args.driver_memory)
     if args.executor_memory is not None:
-        print('Executor memory:         {}'.format(args.executor_memory))
+        log.info("Executor memory:         %s", args.executor_memory)
     if args.driver_cores is not None:
-        print('Driver cores:            {}'.format(args.driver_cores))
+        log.info("Driver cores:            %s", args.driver_cores)
     if args.executor_cores is not None:
-        print('Executor cores:          {}'.format(args.executor_cores))
-    print('Application:             {}'.format(args.app))
-    print('Application arguments:   {}'.format(args.app_args))
-    print('-------------------------------------------')
+        log.info("Executor cores:          %s", args.executor_cores)
+    log.info("Application:             %s", args.app)
+    log.info("Application arguments:   %s", args.app_args)
+    log.info("-------------------------------------------")
 
     joblib.submit_app(
         cluster_id=args.cluster_id,

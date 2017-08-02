@@ -9,4 +9,5 @@ def setup_parser(_: argparse.ArgumentParser):
 
 
 def execute(_: typing.NamedTuple):
-    clusterlib.list_clusters()
+    clusters = clusterlib.list_clusters()
+    clusterlib.print_clusters(clusters)

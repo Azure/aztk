@@ -1,6 +1,7 @@
 import argparse
 import typing
-from dtde import clusterlib
+from dtde import clusterlib, log
+
 
 def setup_parser(parser: argparse.ArgumentParser):
     parser.add_argument('--id', dest='cluster_id', required=True,
@@ -29,17 +30,17 @@ def setup_parser(parser: argparse.ArgumentParser):
 
 
 def execute(args: typing.NamedTuple):
-    print('-------------------------------------------')
-    print('spark cluster id:        {}'.format(args.cluster_id))
-    print('spark cluster size:      {}'.format(args.size + args.size_low_pri))
-    print('>        dedicated:      {}'.format(args.size))
-    print('>     low priority:      {}'.format(args.size_low_pri))
-    print('spark cluster vm size:   {}'.format(args.vm_size))
-    print('path to custom script:   {}'.format(args.custom_script))
-    print('wait for cluster:        {}'.format(args.wait))
-    print('username:                {}'.format(args.username))
-    print('password:                {}'.format(args.password))
-    print('-------------------------------------------')
+    log.info("-------------------------------------------")
+    log.info("spark cluster id:        %s", args.cluster_id)
+    log.info("spark cluster size:      %s", args.size + args.size_low_pri)
+    log.info(">        dedicated:      %s", args.size)
+    log.info(">     low priority:      %s", args.size_low_pri)
+    log.info("spark cluster vm size:   %s", args.vm_size)
+    log.info("path to custom script:   %s", args.custom_script)
+    log.info("wait for cluster:        %s", args.wait)
+    log.info("username:                %s", args.username)
+    log.info("password:                %s", args.password)
+    log.info("-------------------------------------------")
 
     # create spark cluster
     clusterlib.create_cluster(
@@ -52,3 +53,5 @@ def execute(args: typing.NamedTuple):
         args.password,
         args.ssh_key,
         args.wait)
+
+    log.info("Cluster created successfully.")

@@ -20,8 +20,6 @@ def setup_parser(parser: argparse.ArgumentParser):
 
 
 def execute(args: typing.NamedTuple):
-    print("Spark ARgs are", args)
-
     actions = dict(
         cluster=cluster.execute,
         submit=submit.execute,

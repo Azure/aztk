@@ -1,6 +1,6 @@
 import argparse
 import typing
-from dtde import clusterlib
+from dtde import clusterlib, log
 
 
 def setup_parser(parser: argparse.ArgumentParser):
@@ -23,20 +23,25 @@ def setup_parser(parser: argparse.ArgumentParser):
 
 
 def execute(args: typing.NamedTuple):
-    print('-------------------------------------------')
-    print('spark cluster id:    {}'.format(args.cluster_id))
-    print('open masterui:       {}'.format(args.masterui))
-    print('open webui:          {}'.format(args.webui))
-    print('open jupyter:        {}'.format(args.jupyter))
-    print('ssh username:        {}'.format(args.username))
-    print('connect:             {}'.format(args.connect))
-    print('-------------------------------------------')
+    log.info("-------------------------------------------")
+    log.info("spark cluster id:    %s", args.cluster_id)
+    log.info("open masterui:       %s", args.masterui)
+    log.info("open webui:          %s", args.webui)
+    log.info("open jupyter:        %s", args.jupyter)
+    log.info("ssh username:        %s", args.username)
+    log.info("connect:             %s", args.connect)
+    log.info("-------------------------------------------")
 
     # get ssh command
-    clusterlib.ssh_in_master(
+    ssh_cmd = clusterlib.ssh_in_master(
         cluster_id=args.cluster_id,
         masterui=args.masterui,
         webui=args.webui,
         jupyter=args.jupyter,
         username=args.username,
         connect=args.connect)
+
+    if not args.connect:
+        log.info("")
+        log.info("Use the following command to connect to your spark head node:")
+        log.info("\t%s", ssh_cmd)

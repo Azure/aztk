@@ -1,4 +1,5 @@
 import os
+import logging
 import zipfile
 from . import util
 
@@ -29,11 +30,11 @@ def __create_zip():
     zipf = zipfile.ZipFile(local_tmp_zipfile, 'w', zipfile.ZIP_DEFLATED)
     zipdir(os.path.join(root, "node_scripts"), zipf)
     zipf.close()
-    print("Ziped file")
+    logging.debug("Ziped file")
 
 
 def __upload():
-    print("Uploading node scripts...")
+    logging.debug("Uploading node scripts...")
     return util.upload_file_to_container(
         container_name="spark-node-scripts",
         file_path=local_tmp_zipfile,

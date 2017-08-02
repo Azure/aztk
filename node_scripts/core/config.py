@@ -1,4 +1,5 @@
 import os
+import logging
 import azure.batch.batch_service_client as batch
 import azure.batch.batch_auth as batchauth
 
@@ -25,7 +26,7 @@ def get_client() -> batch.BatchServiceClient:
 
 batch_client = get_client()
 
-print("Pool id is", pool_id)
-print("Node id is", node_id)
-print("Batch account name", account_name)
-print("Is dedicated", is_dedicated)
+logging.info("Pool id is %s", pool_id)
+logging.info("Node id is %s", node_id)
+logging.info("Batch account name %s", account_name)
+logging.info("Is dedicated %s", is_dedicated)

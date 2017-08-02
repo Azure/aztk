@@ -1,6 +1,6 @@
 import argparse
 import typing
-from dtde import clusterlib
+from dtde import clusterlib, log
 
 
 def setup_parser(parser: argparse.ArgumentParser):
@@ -18,10 +18,11 @@ def setup_parser(parser: argparse.ArgumentParser):
 
 
 def execute(args: typing.NamedTuple):
-    print('-------------------------------------------')
-    print('spark cluster id:    {}'.format(args.cluster_id))
-    print('username:            {}'.format(args.username))
-
+    log.info('-------------------------------------------')
+    log.info('spark cluster id:    {}'.format(args.cluster_id))
+    log.info('username:            {}'.format(args.username))
+    log.info('password:            {}'.format(args.password))
+    log.info('-------------------------------------------')
     password, ssh_key = clusterlib.create_user(
         args.cluster_id,
         args.username,
@@ -29,8 +30,8 @@ def execute(args: typing.NamedTuple):
         args.ssh_key)
 
     if password:
-        print('password:            {}'.format(password))
+        log.info('password:            %s', password)
     elif ssh_key:
-        print('ssh public key:      {}'.format(ssh_key))
+        log.info('ssh public key:      %s', ssh_key)
 
-    print('-------------------------------------------')
+    log.info('-------------------------------------------')
