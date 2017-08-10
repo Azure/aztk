@@ -7,14 +7,11 @@ A suite of distributed tools to help engineers scale their work into Azure.
 1. Clone the repo
 2. Use pip to install required packages:
 ```bash
-    pip3 install -r requirements.txt
+    pip install -r requirements.txt
 ```
 3. Use setuptools:
 ```bash
-    pip3 install .
-
-    # For development use this instead
-    pip3 install -e .
+    pip install -e .
 ```
 4. Rename 'configuration.cfg.template' to 'configuration.cfg' and fill in the fields for your Batch account and Storage account. These fields can be found in the Azure portal.
 
@@ -24,8 +21,6 @@ A suite of distributed tools to help engineers scale their work into Azure.
     - To create a Storage account: https://docs.microsoft.com/en-us/azure/storage/storage-create-storage-account
 
 ## Getting Started
-
-The entire experience of this package is centered around a few commands in the bin folder.
 
 ### Create and setup your cluster
 
