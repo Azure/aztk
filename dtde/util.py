@@ -75,13 +75,14 @@ def wait_for_master_to_be_ready(cluster_id: str):
     time.sleep(5)
 
 
-def upload_file_to_container(container_name, file_path, use_full_path) -> batch_models.ResourceFile:
+def upload_file_to_container(container_name, file_path, use_full_path = False, node_path = None) -> batch_models.ResourceFile:
     """
     Uploads a local file to an Azure Blob storage container.
     :param block_blob_client: A blob service client.
     :type block_blob_client: `azure.storage.blob.BlockBlobService`
     :param str container_name: The name of the Azure Blob storage container.
     :param str file_path: The local path to the file.
+    :param str node_path: Path on the local node. By default will be the same as file_path
     :rtype: `azure.batch.models.ResourceFile`
     :return: A ResourceFile initialized with a SAS URL appropriate for Batch
     tasks.
@@ -89,10 +90,13 @@ def upload_file_to_container(container_name, file_path, use_full_path) -> batch_
     block_blob_client = azure_api.get_blob_client()
 
     blob_name = None
-    if (use_full_path):
+    if use_full_path:
         blob_name = file_path
     else:
         blob_name = os.path.basename(file_path)
+
+    if not node_path:
+        node_path = blob_name
 
     block_blob_client.create_container(container_name,
                                        fail_on_exist=False)
@@ -111,7 +115,7 @@ def upload_file_to_container(container_name, file_path, use_full_path) -> batch_
                                               blob_name,
                                               sas_token=sas_token)
 
-    return batch_models.ResourceFile(file_path=blob_name,
+    return batch_models.ResourceFile(file_path=node_path,
                                      blob_source=sas_url)
 
 

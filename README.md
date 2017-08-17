@@ -22,6 +22,8 @@ A suite of distributed tools to help engineers scale their work into Azure.
 
 ## Getting Started
 
+The entire experience of this package is centered around a few commands.
+
 ### Create and setup your cluster
 
 First, create your cluster:
@@ -40,6 +42,18 @@ azb spark cluster create \
     --id <my-cluster-id> \
     --size-low-pri <number of low-pri nodes> \
     --vm-size <vm-size>
+```
+
+By default, this package runs Spark in docker from an ubuntu16.04 base image on a ubuntu16.04 VM. More info on this image can be found in the **docker-images** folder in this repo.
+
+You can opt out of using this image and use the Azure CentOS DSVM instead - the Azure CentOS DSVM has Spark 2.0.2 pre-installed (*as of 07/24/17*). To do this, use the --no-docker flag, and it will default to using the Azure DSVM.
+
+```
+azb spark cluster create \
+    --id <my-cluster-id> \
+    --size-low-pri <number of low-pri nodes> \
+    --vm-size <vm-size> \
+    --no-docker
 ```
 
 You can also add a user directly in this command using the same inputs as the `add-user` command described bellow.
@@ -69,6 +83,7 @@ azb spark cluster add-user \
 ```
 
 NOTE: The cluster id (--id) can only contain alphanumeric characters including hyphens and underscores, and cannot contain more than 64 characters.
+
 
 ### Submit a Spark job
 

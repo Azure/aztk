@@ -1,7 +1,6 @@
 import sys
 from install import install
 
-
 def run():
     if len(sys.argv) < 2:
         print("Error: Expected at least one argument")

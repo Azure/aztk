@@ -1,3 +1,4 @@
+import os
 from datetime import datetime, timedelta
 from dtde.core import CommandBuilder, ssh
 from subprocess import call
@@ -14,34 +15,54 @@ POOL_ADMIN_USER_IDENTITY = batch_models.UserIdentity(
         elevation_level=batch_models.ElevationLevel.admin))
 
 
-def cluster_install_cmd(zip_resource_file: batch_models.ResourceFile, custom_script_file):
+def cluster_install_cmd(zip_resource_file: batch_models.ResourceFile):
     """
-        This will return the command line to be run on the start task of the pool to setup spark.
+        For Docker on ubuntu 16.04 - return the command line to be run on the start task of the pool to setup spark.
     """
+
     ret = [
-        # setup spark home and permissions for spark folder
-        'export SPARK_HOME=/dsvm/tools/spark/current',
-        'export PATH=$PATH:$SPARK_HOME/bin',
-        'chmod -R 777 $SPARK_HOME',
-        'chmod -R 777 /usr/local/share/jupyter/kernels',
-        # To avoid error: "sudo: sorry, you must have a tty to run sudo"
-        'sed -i -e "s/Defaults    requiretty.*/ #Defaults    requiretty/g" /etc/sudoers',
+        'apt-get -y clean',
+        'apt-get -y update',
+        'apt-get install --fix-missing',
+        'apt-get -y install unzip',
         'unzip $AZ_BATCH_TASK_WORKING_DIR/{0}'.format(
             zip_resource_file.file_path),
-        'chmod 777 $AZ_BATCH_TASK_WORKING_DIR/main.sh',
-        # Convert windows line ending to unix if applicable
-        'dos2unix $AZ_BATCH_TASK_WORKING_DIR/main.sh',
-        '$AZ_BATCH_TASK_WORKING_DIR/main.sh'
+        'chmod 777 $AZ_BATCH_TASK_WORKING_DIR/setup_node.sh',
+        '/bin/bash $AZ_BATCH_TASK_WORKING_DIR/setup_node.sh {0} {1} "{2}"'.format(
+            constants.DOCKER_SPARK_CONTAINER_NAME, constants.DOCKER_REPO_NAME, docker_run_cmd()),
     ]
 
-    if custom_script_file is not None:
-        ret.extend([
-            '/bin/sh -c {}'.format(custom_script_file),
-        ])
-
-    ret.extend(['exit 0'])
-
     return ret
+
+
+def docker_run_cmd() -> str:
+    """
+        Build the docker run command by setting up the environment variables
+    """
+    cmd = CommandBuilder('docker run')
+    cmd.add_option('--net', 'host')
+    cmd.add_option('--name', constants.DOCKER_SPARK_CONTAINER_NAME)
+    cmd.add_option('-v', '/mnt/batch/tasks:/batch')
+
+    cmd.add_option('-e', 'DOCKER_WORKING_DIR=/batch/startup/wd')
+    cmd.add_option('-e', 'AZ_BATCH_ACCOUNT_NAME=$AZ_BATCH_ACCOUNT_NAME')
+    cmd.add_option('-e', 'BATCH_ACCOUNT_KEY=$BATCH_ACCOUNT_KEY')
+    cmd.add_option('-e', 'BATCH_ACCOUNT_URL=$BATCH_ACCOUNT_URL')
+    cmd.add_option('-e', 'AZ_BATCH_POOL_ID=$AZ_BATCH_POOL_ID')
+    cmd.add_option('-e', 'AZ_BATCH_NODE_ID=$AZ_BATCH_NODE_ID')
+    cmd.add_option(
+        '-e', 'AZ_BATCH_NODE_IS_DEDICATED=$AZ_BATCH_NODE_IS_DEDICATED')
+    cmd.add_option('-e', 'SPARK_MASTER_UI_PORT=$SPARK_MASTER_UI_PORT')
+    cmd.add_option('-e', 'SPARK_WORKER_UI_PORT=$SPARK_WORKER_UI_PORT')
+    cmd.add_option('-e', 'SPARK_JUPYTER_PORT=$SPARK_JUPYTER_PORT')
+    cmd.add_option('-e', 'SPARK_WEB_UI_PORT=$SPARK_WEB_UI_PORT')
+    cmd.add_option('-p', '8080:8080')
+    cmd.add_option('-p', '7077:7077')
+    cmd.add_option('-p', '4040:4040')
+    cmd.add_option('-p', '8888:8888')
+    cmd.add_option('-d', constants.DOCKER_REPO_NAME)
+    cmd.add_argument('/bin/bash /batch/startup/wd/docker_main.sh')
+    return cmd.to_str()
 
 
 def generate_cluster_start_task(
@@ -63,7 +84,12 @@ def generate_cluster_start_task(
             util.upload_file_to_container(
                 container_name=cluster_id,
                 file_path=custom_script,
-                use_full_path=True))
+                node_path="custom-scripts/{0}".format(os.path.basename(custom_script))))
+
+    spark_master_ui_port = constants.DOCKER_SPARK_MASTER_UI_PORT
+    spark_worker_ui_port = constants.DOCKER_SPARK_WORKER_UI_PORT
+    spark_jupyter_port = constants.DOCKER_SPARK_JUPYTER_PORT
+    spark_web_ui_port = constants.DOCKER_SPARK_WEB_UI_PORT
 
     # TODO use certificate
     batch_config = azure_api.get_batch_config()
@@ -72,10 +98,18 @@ def generate_cluster_start_task(
             name="BATCH_ACCOUNT_KEY", value=batch_config.account_key),
         batch_models.EnvironmentSetting(
             name="BATCH_ACCOUNT_URL", value=batch_config.account_url),
+        batch_models.EnvironmentSetting(
+            name="SPARK_MASTER_UI_PORT", value=spark_master_ui_port),
+        batch_models.EnvironmentSetting(
+            name="SPARK_WORKER_UI_PORT", value=spark_worker_ui_port),
+        batch_models.EnvironmentSetting(
+            name="SPARK_JUPYTER_PORT", value=spark_jupyter_port),
+        batch_models.EnvironmentSetting(
+            name="SPARK_WEB_UI_PORT", value=spark_web_ui_port),
     ]
 
     # start task command
-    command = cluster_install_cmd(zip_resource_file, custom_script)
+    command = cluster_install_cmd(zip_resource_file)
 
     return batch_models.StartTask(
         command_line=util.wrap_commands_in_shell(command),
@@ -113,9 +147,9 @@ def create_cluster(
     batch_client = azure_api.get_batch_client()
 
     # vm image
-    publisher = 'microsoft-ads'
-    offer = 'linux-data-science-vm'
-    sku = 'linuxdsvm'
+    publisher = 'Canonical'
+    offer = 'UbuntuServer'
+    sku = '16.04'
 
     # reuse pool_id as job_id
     pool_id = cluster_id
@@ -221,12 +255,12 @@ class Cluster:
 
 
 def pretty_node_count(cluster: Cluster)-> str:
-    if cluster.pool.allocation_state.value is batch_models.AllocationState.resizing:
+    if cluster.pool.allocation_state is batch_models.AllocationState.resizing:
         return '{} -> {}'.format(
             cluster.total_current_nodes,
             cluster.total_target_nodes)
     else:
-        return '{}'.format(cluster.dedicated_nodes)
+        return '{}'.format(cluster.total_current_nodes)
 
 
 def print_cluster(cluster: Cluster):
@@ -371,14 +405,21 @@ def ssh_in_master(
     master_node_ip = remote_login_settings.remote_login_ip_address
     master_node_port = remote_login_settings.remote_login_port
 
+    pool = batch_client.pool.get(cluster_id)
+
+    spark_master_ui_port = constants.DOCKER_SPARK_MASTER_UI_PORT
+    spark_worker_ui_port = constants.DOCKER_SPARK_WORKER_UI_PORT
+    spark_jupyter_port = constants.DOCKER_SPARK_JUPYTER_PORT
+    spark_web_ui_port = constants.DOCKER_SPARK_WEB_UI_PORT
+
     ssh_command = CommandBuilder('ssh')
 
     ssh_command.add_option("-L", "{0}:localhost:{1}".format(
-        masterui, constants.SPARK_MASTER_UI_PORT), enable=bool(masterui))
-    ssh_command.add_option(
-        "-L", "{0}:localhost:{1}".format(webui, constants.SPARK_WEBUI_PORT), enable=bool(webui))
+        masterui,  spark_master_ui_port), enable=bool(masterui))
     ssh_command.add_option("-L", "{0}:localhost:{1}".format(
-        jupyter, constants.SPARK_JUPYTER_PORT), enable=bool(jupyter))
+        webui, spark_web_ui_port), enable=bool(webui))
+    ssh_command.add_option("-L", "{0}:localhost:{1}".format(
+        jupyter, spark_jupyter_port), enable=bool(jupyter))
 
     if ports is not None:
         for port in ports:

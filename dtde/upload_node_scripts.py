@@ -1,3 +1,5 @@
+import fnmatch
+import io
 import os
 import logging
 import zipfile
@@ -21,9 +23,15 @@ def zipdir(path, ziph):
     for base, _, files in os.walk(path):
         relative_folder = os.path.relpath(base, path)
         for file in files:
-            ziph.write(os.path.join(base, file),
-                       os.path.join(relative_folder, file))
+            if __includeFile(file):
+                with io.open(os.path.join(base, file), 'r') as f:
+                    ziph.writestr(os.path.join(relative_folder, file), f.read().replace('\r\n', '\n'))
 
+def __includeFile(filename: str) -> bool:
+    if fnmatch.fnmatch(filename, '*.pyc'):
+        return False
+
+    return True
 
 def __create_zip():
     ensure_dir(local_tmp_zipfile)

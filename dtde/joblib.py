@@ -2,9 +2,16 @@ from datetime import timedelta
 from typing import List
 from dtde.core import CommandBuilder
 import azure.batch.models as batch_models
-from . import azure_api, util
+from . import azure_api, util, constants
+
+
+def get_node(node_id: str, cluster_id: str) -> batch_models.ComputeNode:
+    batch_client = azure_api.get_batch_client()
+    return batch_client.compute_node.get(cluster_id, node_id)
+
 
 def app_submit_cmd(
+        cluster_id: str,
         name: str,
         app: str,
         app_args: str,
@@ -19,11 +26,21 @@ def app_submit_cmd(
         executor_memory: str,
         driver_cores: str,
         executor_cores: str):
-    spark_submit_cmd = CommandBuilder('$SPARK_HOME/bin/spark-submit')
 
+    master_id = util.get_master_node_id(cluster_id)
+    master_ip = get_node(master_id, cluster_id).ip_address
+
+    # get pool data from pool meta key/value store
+    batch_client = azure_api.get_batch_client()
+    pool = batch_client.pool.get(cluster_id)
+
+    spark_home = constants.DOCKER_SPARK_HOME
+
+    spark_submit_cmd = CommandBuilder(
+        '{0}/bin/spark-submit'.format(spark_home))
+    spark_submit_cmd.add_option(
+        '--master', 'spark://{0}:7077'.format(master_ip))
     spark_submit_cmd.add_option('--name', name)
-    spark_submit_cmd.add_option('--master', 'spark://${MASTER_NODE%:*}:7077')
-    spark_submit_cmd.add_option('--class', main_class)
     spark_submit_cmd.add_option('--class', main_class)
     spark_submit_cmd.add_option('--jars', jars and ','.join(jars))
     spark_submit_cmd.add_option('--py-files', py_files and ','.join(py_files))
@@ -35,42 +52,39 @@ def app_submit_cmd(
     spark_submit_cmd.add_option('--executor-memory', executor_memory)
     spark_submit_cmd.add_option('--driver-cores', driver_cores)
     spark_submit_cmd.add_option('--executor-cores', executor_cores)
+
     spark_submit_cmd.add_argument(
-        '$AZ_BATCH_TASK_WORKING_DIR/' + app + ' ' + ' '.join(app_args))
+        '/batch/workitems/{0}/{1}/{2}/wd/'.format(cluster_id, "job-1", name) +
+        app + ' ' + ' '.join(app_args))
+
+    docker_exec_cmd = CommandBuilder('sudo docker exec')
+    docker_exec_cmd.add_option('-e', 'PYSPARK_PYTHON=/usr/bin/python3')
+    docker_exec_cmd.add_option('-i', constants.DOCKER_SPARK_CONTAINER_NAME)
+    docker_exec_cmd.add_argument(spark_submit_cmd.to_str())
 
     return [
-        # set SPARK_HOME environment vars
-        'export SPARK_HOME=/dsvm/tools/spark/current',
-        'export PATH=$PATH:$SPARK_HOME/bin',
-
-        # set the runtime to python 3
-        'export PYSPARK_PYTHON=/usr/bin/python3',
-        'export PYSPARK_DRIVER_PYTHON=python3',
-
-        # get master node ip
-        'export MASTER_NODE=$(cat $SPARK_HOME/conf/master)',
-        'echo "Master node ip is $MASTER_NODE"',
-        spark_submit_cmd.to_str(),
+        docker_exec_cmd.to_str()
     ]
 
 
+
 def submit_app(
-        cluster_id:str,
-        name:str,
-        app:str,
-        app_args:List[str],
-        wait:bool,
-        main_class:str,
-        jars:List[str],
-        py_files:List[str],
-        files:List[str],
-        driver_java_options:str,
-        driver_library_path:str,
-        driver_class_path:str,
-        driver_memory:str,
-        executor_memory:str,
-        driver_cores:str,
-        executor_cores:str):
+        cluster_id: str,
+        name: str,
+        app: str,
+        app_args: List[str],
+        wait: bool,
+        main_class: str,
+        jars: List[str],
+        py_files: List[str],
+        files: List[str],
+        driver_java_options: str,
+        driver_library_path: str,
+        driver_class_path: str,
+        driver_memory: str,
+        executor_memory: str,
+        driver_cores: str,
+        executor_cores: str):
     """
     Submit a spark app
     """
@@ -99,6 +113,7 @@ def submit_app(
 
     # create command to submit task
     cmd = app_submit_cmd(
+        cluster_id=cluster_id,
         name=name,
         app=app,
         app_args=app_args,
@@ -134,7 +149,7 @@ def submit_app(
                 elevation_level=batch_models.ElevationLevel.admin))
     )
 
-    # Add task to batch job (which has the same name as pool_id)
+    # Add task to batch job (which has the same name as cluster_id)
     job_id = cluster_id
     batch_client.task.add(job_id=job_id, task=task)
 

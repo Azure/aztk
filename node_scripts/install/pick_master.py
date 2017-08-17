@@ -7,13 +7,10 @@ import azure.batch.models as batchmodels
 import azure.batch.models.batch_error as batcherror
 from core import config
 
-
 MASTER_NODE_METADATA_KEY = "_spark_master_node"
-
 
 class CannotAllocateMasterError(Exception):
     pass
-
 
 def get_master_node_id(pool: batchmodels.CloudPool):
     """
@@ -27,7 +24,6 @@ def get_master_node_id(pool: batchmodels.CloudPool):
             return metadata.value
 
     return None
-
 
 def try_assign_self_as_master(client: batch.BatchServiceClient, pool: batchmodels.CloudPool):
     current_metadata = pool.metadata or []

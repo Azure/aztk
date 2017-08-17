@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Custom script to setup a WASB connection on the CentOS DSVM
+
 export SPARK_HOME=/dsvm/tools/spark/current
 cd $SPARK_HOME/conf
 

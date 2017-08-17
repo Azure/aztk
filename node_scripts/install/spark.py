@@ -6,14 +6,17 @@ import time
 import os
 import json
 import shutil
-from subprocess import call, Popen
+from subprocess import call, Popen, check_output
 from typing import List
 import azure.batch.models as batchmodels
 from core import config
 from install import pick_master
 
 batch_client = config.batch_client
-spark_home = "/dsvm/tools/spark/current"
+
+spark_home = "/home/spark-2.2.0-bin-hadoop2.7"
+pyspark_driver_python = "/usr/local/bin/jupyter"
+
 spark_conf_folder = os.path.join(spark_home, "conf")
 
 
@@ -33,6 +36,7 @@ def list_nodes() -> List[batchmodels.ComputeNode]:
     # pool
     return batch_client.compute_node.list(config.pool_id)
 
+
 def setup_connection():
     """
         This setup spark config with which nodes are slaves and which are master
@@ -44,7 +48,8 @@ def setup_connection():
     master_config_file = os.path.join(spark_conf_folder, "master")
     master_file = open(master_config_file, 'w')
 
-    print("Adding master node ip {0} to config file '{1}'".format(master_node.ip_address, master_config_file))
+    print("Adding master node ip {0} to config file '{1}'".format(
+        master_node.ip_address, master_config_file))
     master_file.write("{0}\n".format(master_node.ip_address))
 
     master_file.close()
@@ -65,19 +70,27 @@ def generate_jupyter_config():
             "{connection_file}",
         ],
         env=dict(
-            SPARK_HOME="/dsvm/tools/spark/current",
+            SPARK_HOME=spark_home,
             PYSPARK_PYTHON="/usr/bin/python3",
-            PYSPARK_SUBMIT_ARGS="--master spark://{0}:7077 pyspark-shell".format(master_node_ip),
+            PYSPARK_SUBMIT_ARGS="--master spark://{0}:7077 pyspark-shell".format(
+                master_node_ip),
         )
     )
 
 
 def setup_jupyter():
     print("Setting up jupyter.")
-    call(["/anaconda/envs/py35/bin/jupyter", "notebook", "--generate-config"])
 
     jupyter_config_file = os.path.join(os.path.expanduser(
         "~"), ".jupyter/jupyter_notebook_config.py")
+    if os.path.isfile(jupyter_config_file):
+        print("Jupyter config is already set. Skipping setup. (Start task is probably reruning after reboot)")
+        return
+
+    generate_jupyter_config_cmd = ["jupyter", "notebook", "--generate-config"]
+    generate_jupyter_config_cmd.append("--allow-root")
+
+    call(generate_jupyter_config_cmd)
 
     with open(jupyter_config_file, "a") as config_file:
         config_file.write('\n')
@@ -92,16 +105,24 @@ def setup_jupyter():
 
 
 def start_jupyter():
-    jupyter_port = config.SPARK_JUPYTER_PORT
+    jupyter_port = config.spark_jupyter_port
+
+    pyspark_driver_python_opts = "notebook --no-browser --port='{0}'".format(
+        jupyter_port)
+    pyspark_driver_python_opts += " --allow-root"
 
     my_env = os.environ.copy()
-    my_env["PYSPARK_DRIVER_PYTHON"] = "/anaconda/envs/py35/bin/jupyter"
-    my_env["PYSPARK_DRIVER_PYTHON_OPTS"] = "notebook --no-browser --port='{0}'".format(jupyter_port)
+    my_env["PYSPARK_DRIVER_PYTHON"] = pyspark_driver_python
+    my_env["PYSPARK_DRIVER_PYTHON_OPTS"] = pyspark_driver_python_opts
 
     pyspark_wd = os.path.join(os.getcwd(), "pyspark")
-    os.mkdir(pyspark_wd)
+    if not os.path.exists(pyspark_wd):
+        os.mkdir(pyspark_wd)
+
     print("Starting pyspark")
-    process = Popen(["pyspark"], env=my_env, cwd=pyspark_wd)
+    process = Popen([
+        os.path.join(spark_home, "bin/pyspark")
+    ], env=my_env, cwd=pyspark_wd)
     print("Started pyspark with pid {0}".format(process.pid))
 
 
@@ -126,7 +147,8 @@ def wait_for_master():
 def start_spark_master():
     master_ip = get_node(config.node_id).ip_address
     exe = os.path.join(spark_home, "sbin", "start-master.sh")
-    cmd = [exe, "-h", master_ip, "--webui-port", str(config.SPARK_MASTER_UI_PORT)]
+    cmd = [exe, "-h", master_ip, "--webui-port",
+           str(config.spark_master_ui_port)]
     print("Starting master with '{0}'".format(" ".join(cmd)))
     call(cmd)
 
@@ -144,6 +166,7 @@ def start_spark_worker():
     my_env = os.environ.copy()
     my_env["SPARK_MASTER_IP"] = master_node.ip_address
 
-    cmd = [exe, "spark://{0}:7077".format(master_node.ip_address), "--webui-port", str(config.SPARK_WORKER_UI_PORT)]
+    cmd = [exe, "spark://{0}:7077".format(master_node.ip_address),
+           "--webui-port", str(config.spark_worker_ui_port)]
     print("Connecting to master with '{0}'".format(" ".join(cmd)))
     call(cmd)
