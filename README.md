@@ -89,7 +89,7 @@ NOTE: The cluster id (--id) can only contain alphanumeric characters including h
 
 Now you can submit jobs to run against the cluster:
 ```
-azb spark submit \
+azb spark app submit \
     --id <my-cluster-id> \
     --name <my-job-name> \
     [options] \
@@ -97,6 +97,19 @@ azb spark submit \
     [app arguments]
 ```
 NOTE: The job name (--name) must be atleast 3 characters long, can only contain alphanumeric characters including hyphens but excluding underscores, and cannot contain uppercase letters.
+
+The output of spark-submit will be streamed to the console. Use the `--no-wait` option to return immediately.
+
+### Read the output of your spark job.
+
+If you decided not to tail the log when submiting the job or want to read it again you can use this command.
+
+```bash
+azb spark app logs \
+    --id <my-cluster-id> \
+    -- name <my-job-name>
+    [--tail] # If you want it to tail the log if the task is still runing
+```
 
 ### Interact with your Spark cluster
 

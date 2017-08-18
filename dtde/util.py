@@ -1,5 +1,6 @@
 from __future__ import print_function
 import datetime
+import io
 import os
 import time
 import azure.batch.batch_service_client as batch
@@ -373,3 +374,34 @@ def get_cluster_total_current_nodes(pool):
     """
     return pool.current_dedicated_nodes + pool.current_low_priority_nodes
 
+
+def get_file_properties(job_id: str, task_id: str, file_path: str):
+    batch_client = azure_api.get_batch_client()
+
+    raw = batch_client.file.get_properties_from_task(
+        job_id, task_id, file_path, raw=True)
+
+    return batch_models.FileProperties(
+        content_length=raw.headers["Content-Length"],
+        last_modified=raw.headers["Last-Modified"],
+        creation_time=raw.headers["ocp-creation-time"],
+        file_mode=raw.headers["ocp-batch-file-mode"],
+    )
+
+
+def read_stream_as_string(stream, encoding="utf-8"):
+    """
+        Read stream as string
+        :param stream: input stream generator
+        :param str encoding: The encoding of the file. The default is utf-8.
+        :return: The file content.
+        :rtype: str
+    """
+    output = io.BytesIO()
+    try:
+        for data in stream:
+            output.write(data)
+        return output.getvalue().decode(encoding)
+    finally:
+        output.close()
+    raise RuntimeError('could not write data to stream or decode bytes')

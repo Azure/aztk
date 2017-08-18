@@ -1,8 +1,13 @@
-from datetime import timedelta
+import time
+import io
 from typing import List
 from dtde.core import CommandBuilder
 import azure.batch.models as batch_models
-from . import azure_api, util, constants
+import azure.batch.models.batch_error as batch_error
+from . import azure_api, util, log, constants
+
+output_file = constants.TASK_WORKING_DIR + \
+    "/" + constants.SPARK_SUBMIT_LOGS_FILE
 
 
 def get_node(node_id: str, cluster_id: str) -> batch_models.ComputeNode:
@@ -26,7 +31,6 @@ def app_submit_cmd(
         executor_memory: str,
         driver_cores: str,
         executor_cores: str):
-
     master_id = util.get_master_node_id(cluster_id)
     master_ip = get_node(master_id, cluster_id).ip_address
 
@@ -36,8 +40,9 @@ def app_submit_cmd(
 
     spark_home = constants.DOCKER_SPARK_HOME
 
+    # 2>&1 redirect stdout and stderr to be in the same file
     spark_submit_cmd = CommandBuilder(
-        '{0}/bin/spark-submit'.format(spark_home))
+        '{0}/bin/spark-submit >> {1} 2>&1'.format(spark_home, constants.SPARK_SUBMIT_LOGS_FILE))
     spark_submit_cmd.add_option(
         '--master', 'spark://{0}:7077'.format(master_ip))
     spark_submit_cmd.add_option('--name', name)
@@ -65,7 +70,6 @@ def app_submit_cmd(
     return [
         docker_exec_cmd.to_str()
     ]
-
 
 
 def submit_app(
@@ -155,6 +159,89 @@ def submit_app(
 
     # Wait for the app to finish
     if wait:
-        util.wait_for_tasks_to_complete(
-            job_id,
-            timedelta(minutes=60))
+        read_log(cluster_id, name, tail=True)
+
+
+def wait_for_app_to_be_running(cluster_id: str, app_name: str) -> batch_models.CloudTask:
+    """
+        Wait for the batch task to leave the waiting state into running(or completed if it was fast enough)
+    """
+    batch_client = azure_api.get_batch_client()
+
+    while True:
+        task = batch_client.task.get(cluster_id, app_name)
+
+        if task.state is batch_models.TaskState.active or task.state is batch_models.TaskState.preparing:
+            log.info("Task is waiting to be scheduled.")
+            time.sleep(5)
+        else:
+            return task
+
+
+def check_task_node_exist(cluster_id: str, task: batch_models.CloudTask) -> bool:
+    batch_client = azure_api.get_batch_client()
+
+    try:
+        batch_client.compute_node.get(
+            cluster_id, task.node_info.node_id)
+        return True
+    except batch_error.BatchErrorException:
+        return False
+
+
+def get_output_file_properties(cluster_id: str, app_name: str):
+    while True:
+        try:
+            file = util.get_file_properties(
+                cluster_id, app_name, output_file)
+            return file
+        except batch_error.BatchErrorException as e:
+            if e.response.status_code == 404:
+                log.info("Output file hasn't been created yet")
+                time.sleep(5)
+                continue
+            else:
+                raise e
+
+
+def read_log(cluster_id: str, app_name: str, tail=False):
+    job_id = cluster_id
+    task_id = app_name
+
+    batch_client = azure_api.get_batch_client()
+    current_bytes = 0
+
+    task = wait_for_app_to_be_running(cluster_id, app_name)
+
+    if not check_task_node_exist(cluster_id, task):
+        log.error("The app ran on doesn't exists anymore(Node id: %s)!",
+                  task.node_info.node_id)
+        return
+
+    while True:
+        file = get_output_file_properties(cluster_id, app_name)
+        target_bytes = file.content_length
+
+        if target_bytes != current_bytes:
+            ocp_range = None
+
+            if tail:
+                ocp_range = "bytes={0}-{1}".format(
+                    current_bytes, target_bytes - 1)
+
+            stream = batch_client.file.get_from_task(
+                job_id, task_id, output_file, batch_models.FileGetFromTaskOptions(ocp_range=ocp_range))
+            content = util.read_stream_as_string(stream)
+
+            print(content, end="")
+            current_bytes = target_bytes
+
+            if not tail:
+                return
+
+        if task.state is batch_models.TaskState.completed:
+            log.info("Spark application is completed!")
+            return
+        task = batch_client.task.get(cluster_id, app_name)
+
+        time.sleep(5)
