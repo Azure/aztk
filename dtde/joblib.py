@@ -96,9 +96,9 @@ def submit_app(
 
     resource_files = []
 
+    app_resource_file = util.upload_file_to_container(container_name=name, file_path=app, use_full_path=True)
     # Upload application file
-    resource_files.append(
-        util.upload_file_to_container(container_name=name, file_path=app, use_full_path=True))
+    resource_files.append(app_resource_file)
 
     # Upload dependent JARS
     for jar in jars:
@@ -119,7 +119,7 @@ def submit_app(
     cmd = app_submit_cmd(
         cluster_id=cluster_id,
         name=name,
-        app=app,
+        app=app_resource_file.file_path,
         app_args=app_args,
         main_class=main_class,
         jars=jars,

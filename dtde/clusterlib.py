@@ -81,7 +81,7 @@ def generate_cluster_start_task(
     # Upload custom script file if given
     if custom_script is not None:
         resource_files.append(
-            util.upload_file_to_container(
+            util.upload_shell_script_to_container(
                 container_name=cluster_id,
                 file_path=custom_script,
                 node_path="custom-scripts/{0}".format(os.path.basename(custom_script))))
