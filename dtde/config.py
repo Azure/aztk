@@ -11,7 +11,7 @@ global_config = None
 
 def load_config(path: str=constants.DEFAULT_CONFIG_PATH):
     """
-        Loads the config file at the root of the repository(configuration.cfg)
+        Loads the config file at the root of the repository(secrets.cfg)
     """
     global global_config
     if not os.path.isfile(path):
@@ -25,5 +25,4 @@ def load_config(path: str=constants.DEFAULT_CONFIG_PATH):
 def get() -> configparser.ConfigParser:
     if not global_config:
         load_config()
-
     return global_config

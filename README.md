@@ -13,7 +13,7 @@ A suite of distributed tools to help engineers scale their work into Azure.
 ```bash
     pip install -e .
 ```
-4. Rename 'configuration.cfg.template' to 'configuration.cfg' and fill in the fields for your Batch account and Storage account. These fields can be found in the Azure portal.
+4. Rename 'secrets.cfg.template' to 'secrets.cfg' and fill in the fields for your Batch account and Storage account. These fields can be found in the Azure portal.
 
    To complete this step, you will need an Azure account that has a Batch account and Storage account:
     - To create an Azure account: https://azure.microsoft.com/free/
@@ -62,7 +62,7 @@ You can also add a user directly in this command using the same inputs as the `a
 When your cluster is ready, create a user for your cluster (if you didn't already do so when creating your cluster):
 ```bash
 # **Recommended usage**
-# Add a user with a ssh public key. It will use the value specified in the configuration.cfg (Either path to the file or the actual key)
+# Add a user with a ssh public key. It will use the value specified in the secrets.cfg (Either path to the file or the actual key)
 azb spark cluster add-user \
     --id <my-cluster-id> \
     --username <username>

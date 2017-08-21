@@ -5,7 +5,7 @@ from . import config
 from .version import __version__
 
 
-global_config = config.get()
+global_config = None
 
 batch_client = None
 batch_config = None
@@ -95,6 +95,8 @@ def get_batch_config() -> BatchConfig:
 
 
 def __load_batch_config():
+    global_config = config.get()
+
     global batch_config
 
     if not global_config.has_option('Batch', 'batchaccountkey'):
@@ -128,6 +130,7 @@ def __load_batch_client():
 
 
 def __load_blob_client():
+    global_config = config.get()
     global blob_client
 
     if not global_config.has_option('Storage', 'storageaccountkey'):

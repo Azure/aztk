@@ -23,7 +23,7 @@ ROOT_PATH = os.path.normpath(os.path.join(os.path.dirname(__file__), '..'))
 """
     Path to the configuration file
 """
-DEFAULT_CONFIG_PATH = os.path.join(os.getcwd(), 'configuration.cfg')
+DEFAULT_CONFIG_PATH = os.path.join(os.getcwd(), 'secrets.cfg')
 
 """
     Key of the metadata entry for the pool that is used to store the master node id

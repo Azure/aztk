@@ -252,15 +252,39 @@ class Cluster:
             pool.target_low_priority_nodes
         self.dedicated_nodes = pool.current_dedicated_nodes
         self.low_pri_nodes = pool.current_low_priority_nodes
+        self.target_dedicated_nodes = pool.target_dedicated_nodes
+        self.target_low_pri_nodes = pool.target_low_priority_nodes
 
 
-def pretty_node_count(cluster: Cluster)-> str:
+def pretty_node_count(cluster: Cluster) -> str:
     if cluster.pool.allocation_state is batch_models.AllocationState.resizing:
         return '{} -> {}'.format(
             cluster.total_current_nodes,
             cluster.total_target_nodes)
     else:
         return '{}'.format(cluster.total_current_nodes)
+
+
+def pretty_dedicated_node_count(cluster: Cluster)-> str:
+    if (cluster.pool.allocation_state is batch_models.AllocationState.resizing\
+        or cluster.pool.state is batch_models.PoolState.deleting)\
+        and cluster.dedicated_nodes != cluster.target_dedicated_nodes:
+        return '{} -> {}'.format(
+            cluster.dedicated_nodes,
+            cluster.target_dedicated_nodes)
+    else:
+        return '{}'.format(cluster.dedicated_nodes)
+
+
+def pretty_low_pri_node_count(cluster: Cluster)-> str:
+    if (cluster.pool.allocation_state is batch_models.AllocationState.resizing\
+        or cluster.pool.state is batch_models.PoolState.deleting)\
+        and cluster.low_pri_nodes != cluster.target_low_pri_nodes:
+        return '{} -> {}'.format(
+            cluster.low_pri_nodes,
+            cluster.target_low_pri_nodes)
+    else:
+        return '{}'.format(cluster.low_pri_nodes)
 
 
 def print_cluster(cluster: Cluster):
@@ -272,8 +296,8 @@ def print_cluster(cluster: Cluster):
     log.info("State:          %s", cluster.visible_state)
     log.info("Node Size:      %s", cluster.vm_size)
     log.info("Nodes:          %s", node_count)
-    log.info("| Dedicated:    %s", cluster.dedicated_nodes)
-    log.info("| Low priority: %s", cluster.low_pri_nodes)
+    log.info("| Dedicated:    %s", pretty_dedicated_node_count(cluster))
+    log.info("| Low priority: %s", pretty_low_pri_node_count(cluster))
     log.info("")
 
     print_format = '{:<36}| {:<15} | {:<21}| {:<8}'
