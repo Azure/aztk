@@ -5,7 +5,6 @@ import os
 """
 CLI_EXE = 'azb'
 
-# DOCKER_REPO_NAME = "jiata/spark:latest"
 DOCKER_REPO_NAME = "jiata/spark-2.2.0:latest"
 DOCKER_SPARK_CONTAINER_NAME = "spark"
 
@@ -15,13 +14,6 @@ DOCKER_SPARK_WORKER_UI_PORT = 8081
 DOCKER_SPARK_JUPYTER_PORT = 8888
 DOCKER_SPARK_WEB_UI_PORT = 4040
 DOCKER_SPARK_HOME = "/home/spark-2.2.0-bin-hadoop2.7"
-
-# DSVM
-DSVM_SPARK_MASTER_UI_PORT = 8082
-DSVM_SPARK_WORKER_UI_PORT = 8083
-DSVM_SPARK_JUPYTER_PORT = 7777
-DSVM_SPARK_WEB_UI_PORT = 4040
-DSVM_SPARK_HOME = "/dsvm/tools/spark/current"
 
 """
     Root path of this repository
