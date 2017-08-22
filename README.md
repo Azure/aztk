@@ -13,12 +13,14 @@ A suite of distributed tools to help engineers scale their work into Azure.
 ```bash
     pip install -e .
 ```
-4. Rename 'secrets.cfg.template' to 'secrets.cfg' and fill in the fields for your Batch account and Storage account. These fields can be found in the Azure portal.
+4. Rename 'secrets.cfg.template' to 'secrets.cfg' and fill in the fields for your Batch account and Storage account. These fields can be found in the Azure portal, and in the [Getting Started](./docs/00-getting-started.md) docs.
 
    To complete this step, you will need an Azure account that has a Batch account and Storage account:
     - To create an Azure account: https://azure.microsoft.com/free/
     - To create a Batch account: https://docs.microsoft.com/en-us/azure/batch/batch-account-create-portal
     - To create a Storage account: https://docs.microsoft.com/en-us/azure/storage/storage-create-storage-account
+
+
 
 ## Getting Started
 
@@ -45,16 +47,6 @@ azb spark cluster create \
 ```
 
 By default, this package runs Spark in docker from an ubuntu16.04 base image on a ubuntu16.04 VM. More info on this image can be found in the **docker-images** folder in this repo.
-
-You can opt out of using this image and use the Azure CentOS DSVM instead - the Azure CentOS DSVM has Spark 2.0.2 pre-installed (*as of 07/24/17*). To do this, use the --no-docker flag, and it will default to using the Azure DSVM.
-
-```
-azb spark cluster create \
-    --id <my-cluster-id> \
-    --size-low-pri <number of low-pri nodes> \
-    --vm-size <vm-size> \
-    --no-docker
-```
 
 You can also add a user directly in this command using the same inputs as the `add-user` command described bellow.
 
@@ -84,6 +76,8 @@ azb spark cluster add-user \
 
 NOTE: The cluster id (--id) can only contain alphanumeric characters including hyphens and underscores, and cannot contain more than 64 characters.
 
+More information regarding using a cluster can be found in the [cluster documentation](./documentation/10%20-%20Clusters.md)
+
 
 ### Submit a Spark job
 
@@ -110,24 +104,7 @@ azb spark app logs \
     -- name <my-job-name>
     [--tail] # If you want it to tail the log if the task is still runing
 ```
-
-### Interact with your Spark cluster
-
-To view the spark UI, open up an ssh tunnel with the "masterui" option and a local port to map to:
-```
-azb spark cluster ssh \
-    --id <my-cluster-id> \
-    --masterui <local-port> \
-    --username <user-name>
-```
-
-Optionally, you can also open up a jupyter notebook with the "jupyter" option to work in:
-```
-azb spark cluster ssh  \
-    --id <my-cluster-id> \
-    --masterui <local-port> \
-    --jupyter <local-port>
-```
+More information regarding using a cluster can be found in the [spark submit documentation](./documentation/20%20-%20Spark%20Submit.md)
 
 ### Connect your cluster to Azure Blob Storage (WASB connection)
 
@@ -161,3 +138,6 @@ Finally, you can delete any specified cluster:
 ```
 azb spark cluster delete --id <my-cluster-id>
 ```
+
+## Next Steps
+You can find more documentation [here](./documentation)
