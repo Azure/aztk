@@ -139,5 +139,9 @@ Finally, you can delete any specified cluster:
 azb spark cluster delete --id <my-cluster-id>
 ```
 
+### Examples
+
+Please see the samples folder for a curated list of samples from Spark-2.2.0.
+
 ## Next Steps
 You can find more documentation [here](./documentation)

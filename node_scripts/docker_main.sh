@@ -18,6 +18,14 @@ else
     echo "Custom script dir '$custom_script_dir' doesn't exists. Will not run any custom scripts."
 fi
 
+mkdir /jupyter
+mkdir /jupyter/samples
+
+# add all files from 'jupyter-samples' to container folder '/pyspark/samples'
+for file in $(dirname $0)/jupyter-samples/*; do
+    cp $file /jupyter/samples
+done
+
 storage_account_name=$STORAGE_ACCOUNT_NAME
 storage_account_key=$STORAGE_ACCOUNT_KEY
 storage_account_suffix=$STORAGE_ACCOUNT_SUFFIX

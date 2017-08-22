@@ -115,7 +115,7 @@ def start_jupyter():
     my_env["PYSPARK_DRIVER_PYTHON"] = pyspark_driver_python
     my_env["PYSPARK_DRIVER_PYTHON_OPTS"] = pyspark_driver_python_opts
 
-    pyspark_wd = os.path.join(os.getcwd(), "pyspark")
+    pyspark_wd = os.path.join(os.getcwd(), "jupyter")
     if not os.path.exists(pyspark_wd):
         os.mkdir(pyspark_wd)
 

@@ -1,4 +1,3 @@
-from __future__ import print_function
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -16,31 +15,30 @@ from __future__ import print_function
 # limitations under the License.
 #
 
+from __future__ import print_function
+
 import sys
-from random import random
 from operator import add
 
 from pyspark.sql import SparkSession
 
 
 if __name__ == "__main__":
-    """
-        Usage: pi [partitions]
-    """
+    if len(sys.argv) != 2:
+        print("Usage: wordcount <file>", file=sys.stderr)
+        exit(-1)
+
     spark = SparkSession\
         .builder\
-        .appName("PythonPi")\
+        .appName("PythonWordCount")\
         .getOrCreate()
 
-    partitions = int(sys.argv[1]) if len(sys.argv) > 1 else 2
-    n = 100000 * partitions
-
-    def f(_):
-        x = random() * 2 - 1
-        y = random() * 2 - 1
-        return 1 if x ** 2 + y ** 2 < 1 else 0
-
-    count = spark.sparkContext.parallelize(range(1, n + 1), partitions).map(f).reduce(add)
-    print("Pi is roughly %f" % (4.0 * count / n))
+    lines = spark.read.text(sys.argv[1]).rdd.map(lambda r: r[0])
+    counts = lines.flatMap(lambda x: x.split(' ')) \
+                  .map(lambda x: (x, 1)) \
+                  .reduceByKey(add)
+    output = counts.collect()
+    for (word, count) in output:
+        print("%s: %i" % (word, count))
 
     spark.stop()
