@@ -21,7 +21,6 @@ def execute(args: typing.NamedTuple):
     log.info('-------------------------------------------')
     log.info('spark cluster id:    {}'.format(args.cluster_id))
     log.info('username:            {}'.format(args.username))
-    log.info('password:            {}'.format(args.password))
     log.info('-------------------------------------------')
     password, ssh_key = clusterlib.create_user(
         args.cluster_id,

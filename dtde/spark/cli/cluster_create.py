@@ -39,7 +39,8 @@ def execute(args: typing.NamedTuple):
     log.info("path to custom script:   %s", args.custom_script)
     log.info("wait for cluster:        %s", args.wait)
     log.info("username:                %s", args.username)
-    log.info("password:                %s", args.password)
+    if args.password:
+        log.info("Password: %s", '*' * len(args.password))
     log.info("-------------------------------------------")
 
     # create spark cluster
