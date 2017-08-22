@@ -17,6 +17,18 @@ if [ -d "$custom_script_dir" ]; then
 else
     echo "Custom script dir '$custom_script_dir' doesn't exists. Will not run any custom scripts."
 fi
+
+storage_account_name=$STORAGE_ACCOUNT_NAME
+storage_account_key=$STORAGE_ACCOUNT_KEY
+storage_account_suffix=$STORAGE_ACCOUNT_SUFFIX
+
+if [ -n "$STORAGE_ACCOUNT_NAME" ] && [ -n "$STORAGE_ACCOUNT_KEY" ] && [ -n "$STORAGE_ACCOUNT_SUFFIX" ]; then
+    echo "Setting up WASB connection"
+    bash $(dirname $0)/setup_wasb.sh $storage_account_name $storage_account_key $storage_account_suffix
+else
+    echo "Storage credentials not set"
+fi
+
 echo "Starting setup using Docker"
 pip3 install -r $(dirname $0)/requirements.txt
 

@@ -48,6 +48,9 @@ def docker_run_cmd() -> str:
     cmd.add_option('-e', 'AZ_BATCH_ACCOUNT_NAME=$AZ_BATCH_ACCOUNT_NAME')
     cmd.add_option('-e', 'BATCH_ACCOUNT_KEY=$BATCH_ACCOUNT_KEY')
     cmd.add_option('-e', 'BATCH_ACCOUNT_URL=$BATCH_ACCOUNT_URL')
+    cmd.add_option('-e', 'STORAGE_ACCOUNT_NAME=$STORAGE_ACCOUNT_NAME')
+    cmd.add_option('-e', 'STORAGE_ACCOUNT_KEY=$STORAGE_ACCOUNT_KEY')
+    cmd.add_option('-e', 'STORAGE_ACCOUNT_SUFFIX=$STORAGE_ACCOUNT_SUFFIX')
     cmd.add_option('-e', 'AZ_BATCH_POOL_ID=$AZ_BATCH_POOL_ID')
     cmd.add_option('-e', 'AZ_BATCH_NODE_ID=$AZ_BATCH_NODE_ID')
     cmd.add_option(
@@ -93,11 +96,18 @@ def generate_cluster_start_task(
 
     # TODO use certificate
     batch_config = azure_api.get_batch_config()
+    blob_config = azure_api.get_blob_config()
     environment_settings = [
         batch_models.EnvironmentSetting(
             name="BATCH_ACCOUNT_KEY", value=batch_config.account_key),
         batch_models.EnvironmentSetting(
             name="BATCH_ACCOUNT_URL", value=batch_config.account_url),
+        batch_models.EnvironmentSetting(
+            name="STORAGE_ACCOUNT_NAME", value=blob_config.account_name),
+        batch_models.EnvironmentSetting(
+            name="STORAGE_ACCOUNT_KEY", value=blob_config.account_key),
+        batch_models.EnvironmentSetting(
+            name="STORAGE_ACCOUNT_SUFFIX", value=blob_config.account_suffix),
         batch_models.EnvironmentSetting(
             name="SPARK_MASTER_UI_PORT", value=spark_master_ui_port),
         batch_models.EnvironmentSetting(

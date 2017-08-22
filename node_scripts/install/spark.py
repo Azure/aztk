@@ -170,3 +170,5 @@ def start_spark_worker():
            "--webui-port", str(config.spark_worker_ui_port)]
     print("Connecting to master with '{0}'".format(" ".join(cmd)))
     call(cmd)
+
+

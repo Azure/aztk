@@ -9,6 +9,7 @@ global_config = None
 
 batch_client = None
 batch_config = None
+blob_config = None
 blob_client = None
 
 
@@ -23,6 +24,13 @@ class BatchConfig:
         self.account_url = account_url
 
 
+class BlobConfig:
+    def __init__(self, account_key: str, account_name: str, account_suffix: str):
+        self.account_key = account_key
+        self.account_name = account_name
+        self.account_suffix = account_suffix
+
+
 def get_batch_client():
     """
         :returns: the batch client singleton
@@ -34,7 +42,7 @@ def get_batch_client():
 
 def get_blob_client():
     """
-        :returns: the batch client singleton
+        :returns: the blob client singleton
     """
     if not blob_client:
         __load_blob_client()
@@ -129,9 +137,18 @@ def __load_batch_client():
         config.account_url)
 
 
-def __load_blob_client():
+
+def get_blob_config() -> BlobConfig:
+    if not blob_config:
+        __load_blob_config()
+
+    return blob_config
+
+
+def __load_blob_config():
     global_config = config.get()
-    global blob_client
+
+    global blob_config
 
     if not global_config.has_option('Storage', 'storageaccountkey'):
         raise AzureApiInitError("Storage account key is not set in config")
@@ -148,8 +165,21 @@ def __load_blob_client():
     storage_account_suffix = global_config.get(
         'Storage', 'storageaccountsuffix')
 
+    blob_config = BlobConfig(
+        account_key=storage_account_key,
+        account_name=storage_account_name,
+        account_suffix=storage_account_suffix)
+
+
+def __load_blob_client():
+    global blob_client
+
+    blob_config = get_blob_config()
+
     # create storage client
     blob_client = create_blob_client(
-        storage_account_key,
-        storage_account_name,
-        storage_account_suffix)
+        blob_config.account_key,
+        blob_config.account_name,
+        blob_config.account_suffix)
+
+

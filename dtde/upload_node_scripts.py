@@ -37,6 +37,8 @@ def __create_zip():
     ensure_dir(local_tmp_zipfile)
     zipf = zipfile.ZipFile(local_tmp_zipfile, 'w', zipfile.ZIP_DEFLATED)
     zipdir(os.path.join(root, "node_scripts"), zipf)
+
+    # zipf.write()
     zipf.close()
     logging.debug("Ziped file")
 

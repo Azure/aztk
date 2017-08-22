@@ -129,6 +129,22 @@ azb spark cluster ssh  \
     --jupyter <local-port>
 ```
 
+### Connect your cluster to Azure Blob Storage (WASB connection)
+
+Pre-built into this package is native support for connecting your spark cluster to Azure Blob Storage. To do so, make sure that the storage fields in your **secrets.cfg** file are properly filled out. 
+
+Even if you are just testing and have no need to connect with Azure Blob Storage, you still need to correctly fill out the storage fields in your **secrets.cfg** folder as it is a requirement for this package.
+
+Once you have correctly filled out the **secrets.cfg** with your storage credentials, you will be able to access said storage account from your Spark job. 
+
+Please note: If you want to access another Azure Blob Storage account, you will need to recreate your cluster with an updated **secrets.cfg** file with the appropriate storage credentials.
+
+Here's an example of how you may access your data in Blob Storage:
+
+``` python
+df = spark.read.csv("wasbs://<STORAGE_CONTAINER_NAME>@<STORAGE_ACCOUNT_NAME>.blob.core.windows.net/<BLOB_NAME>")
+```
+
 ### Manage your Spark cluster
 
 You can also see your clusters from the CLI:
