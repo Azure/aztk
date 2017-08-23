@@ -1,5 +1,5 @@
 # Clusters
-A Cluster in Azure Batch is primarily designed to run Spark jobs. This document describes how to create a cluster
+A Cluster in Thunderbolt is primarily designed to run Spark jobs. This document describes how to create a cluster
 to use for spark job submissions. Alternitavely for getting started and debugging you can also use the cluster
 in _interactive mode_ which will allow you to log into the master node, use Jupyter and view the Spark UI.
 

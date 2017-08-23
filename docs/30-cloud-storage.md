@@ -8,11 +8,11 @@ Reading and writing to and from Azure blobs is easily achieved by using the wasb
 
 ```python
 # read csv data into data
-dataframe = spark.read.csv('wasb://MY_CONTAINER@MY_STORAGE_ACCOUNt.blob.core.windows.net/MY_INPUT_DATA.csv')
+dataframe = spark.read.csv('wasbs://MY_CONTAINER@MY_STORAGE_ACCOUNt.blob.core.windows.net/MY_INPUT_DATA.csv')
 
 # print off the first 5 rows
 dataframe.show(5)
 
 # write the csv back to storage
-dataframe.write.csv('wasb://MY_CONTAINER@MY_STORAGE_ACCOUNt.blob.core.windows.net/MY_DATA.csv')
+dataframe.write.csv('wasbs://MY_CONTAINER@MY_STORAGE_ACCOUNt.blob.core.windows.net/MY_DATA.csv')
 ```

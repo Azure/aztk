@@ -1,11 +1,9 @@
-# Distributed Tools for Data Engineering (DTDE)
-A suite of distributed tools to help engineers scale their work into Azure.
-
-# Spark on DTDE
+# Azure Spark Thunderbolt
+A set of tools to help engineers deploy Spark clusters at scale in Azure.
 
 ## Setup
 1. Clone the repo
-2. Use pip to install required packages:
+2. Use pip to install required packages (requires python 3.5+ and pip 9.0.1+)
 ```bash
     pip install -r requirements.txt
 ```
@@ -13,16 +11,11 @@ A suite of distributed tools to help engineers scale their work into Azure.
 ```bash
     pip install -e .
 ```
-4. Rename 'secrets.cfg.template' to 'secrets.cfg' and fill in the fields for your Batch account and Storage account. These fields can be found in the Azure portal, and in the [Getting Started](./docs/00-getting-started.md) docs.
+4. Rename 'secrets.cfg.template' to 'secrets.cfg' and fill in the fields for your Batch account and Storage account.
 
-   To complete this step, you will need an Azure account that has a Batch account and Storage account:
-    - To create an Azure account: https://azure.microsoft.com/free/
-    - To create a Batch account: https://docs.microsoft.com/en-us/azure/batch/batch-account-create-portal
-    - To create a Storage account: https://docs.microsoft.com/en-us/azure/storage/storage-create-storage-account
+   Thunerbolt is built on top of two core Azure services, [Azure Batch](https://azure.microsoft.com/en-us/services/batch/) and [Azure Storage](https://azure.microsoft.com/en-us/services/storage/). Create those resources via the portal (see [Getting Started](./docs/00-getting-started.md)).
 
-
-
-## Getting Started
+## Quickstart Guide
 
 The entire experience of this package is centered around a few commands.
 
@@ -108,11 +101,11 @@ More information regarding using a cluster can be found in the [spark submit doc
 
 ### Connect your cluster to Azure Blob Storage (WASB connection)
 
-Pre-built into this package is native support for connecting your spark cluster to Azure Blob Storage. To do so, make sure that the storage fields in your **secrets.cfg** file are properly filled out. 
+Pre-built into this package is native support for connecting your spark cluster to Azure Blob Storage. To do so, make sure that the storage fields in your **secrets.cfg** file are properly filled out.
 
 Even if you are just testing and have no need to connect with Azure Blob Storage, you still need to correctly fill out the storage fields in your **secrets.cfg** folder as it is a requirement for this package.
 
-Once you have correctly filled out the **secrets.cfg** with your storage credentials, you will be able to access said storage account from your Spark job. 
+Once you have correctly filled out the **secrets.cfg** with your storage credentials, you will be able to access said storage account from your Spark job.
 
 Please note: If you want to access another Azure Blob Storage account, you will need to recreate your cluster with an updated **secrets.cfg** file with the appropriate storage credentials.
 

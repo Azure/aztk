@@ -1,18 +1,32 @@
-# Azure Batch with Spark Documentation
-Spark on Azure Batch in a project that enables submission of single or batch spark jobs to the cloud. Azure Batch
-will elastically scale and manage the compute resources required to run the jobs, and spin them down when no longer
-needed.
+# Azure Spark Thunderbolt
+Thunderbolt in a project that enables submission of single or batch spark jobs to the cloud. Clusters will elastically scale and manage the compute resources required to run the jobs, and spin them down when no longer needed. For production workloads data can be persisted to cloud storage services such as Azure Storage blobs.
 
 ## Getting Started
-The minimum requirements to get started with Spark on Azure Batch are:
+The minimum requirements to get started with Thunderbolt are:
+- Python 3.5+, pip 9.0.1+
 - An Azure account
 - An Azure Batch account
 - An Azure Storage account
 
+### Cloning and installing the project
+1. Clone the repo
+2. Make sure you are running python 3.5 or greater.
+    _If the default version on your machine is python 2 make sure to run the following commands with **pip3** instead of **pip**._
+
+2. Use pip to install required packages:
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+3. Use setuptools to install the required biaries locally:
+    ```bash
+    pip install -e .
+    ```
+
+
 ### Setting up your accounts
 1. Log into Azure
-If you do not already have an Azure account, go to [https://azure.microsoft.com/](https://azure.microsoft.com/) to get
-started for free today.
+If you do not already have an Azure account, go to [https://azure.microsoft.com/](https://azure.microsoft.com/) to get started for free today.
 
 Once you have one, simply log in and go to the [Azure Portal](https://portal.azure.com) to start creating the resources you'll need to get going.
 

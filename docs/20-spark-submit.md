@@ -1,5 +1,5 @@
 # Submitting a Job
-Submitting a job to your Spark cluster in Batch mimics the experience of a typical standalone cluster. A spark job will be submitted to the system and run to completion.
+Submitting a job to your Spark cluster in Thunderbolt mimics the experience of a typical standalone cluster. A spark job will be submitted to the system and run to completion.
 
 ## Spark-Submit
 The spark-submit experience is mostly the same as any regular Spark cluster with a few minor differences. You can take a look at azb spark app --help for more detailed information and options.
