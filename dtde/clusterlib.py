@@ -422,7 +422,7 @@ def ssh_in_master(
         :param webui: Port for the spark web ui(Local port)
         :param jupyter: Port for jupyter(Local port)
         :param ports: an list of local and remote ports
-        :type ports: [[<local-port>, <remote-port>]]
+        :type ports: ["<local-port>:localhost:<remote-port>"]
     """
     batch_client = azure_api.get_batch_client()
 
@@ -457,8 +457,7 @@ def ssh_in_master(
 
     if ports is not None:
         for port in ports:
-            ssh_command.add_option(
-                "-L", "{0}:localhost:{1}".format(port[0], port[1]))
+            ssh_command.add_option("-L", port)
 
     user = username if username is not None else '<username>'
     ssh_command.add_argument(
