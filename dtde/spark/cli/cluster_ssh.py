@@ -14,8 +14,7 @@ def setup_parser(parser: argparse.ArgumentParser):
                         help='Local port to port jupyter to')
     parser.add_argument('-u', '--username',
                         help='Username to spark cluster')
-    parser.add_argument('-L', '--port',
-                        help='Port to forward')
+    parser.add_argument('-L', help='Port to forward', action="append", dest="ports")
     parser.add_argument('--no-connect', dest="connect",
                         action='store_false',
                         help='Do not create the ssh session. Only print out \
@@ -34,7 +33,6 @@ def execute(args: typing.NamedTuple):
     log.info("connect:             %s", args.connect)
     log.info("-------------------------------------------")
 
-    print("POrt", args.port)
     # get ssh command
     ssh_cmd = clusterlib.ssh_in_master(
         cluster_id=args.cluster_id,
@@ -42,7 +40,7 @@ def execute(args: typing.NamedTuple):
         webui=args.webui,
         jupyter=args.jupyter,
         username=args.username,
-        ports=[args.port],
+        ports=args.ports,
         connect=args.connect)
 
     if not args.connect:
