@@ -10,5 +10,5 @@ Add custom configuraiton scripts to your cluster.
 ## [Spark Submit](./20-spark-submit.md)
 Submit a Spark job to the cluster.
 
-## [Cloud Storage](./30-cloud-storage)
+## [Cloud Storage](./30-cloud-storage.md)
 Using cloud storage to load and save data to and from persisted data stores.
