@@ -78,7 +78,7 @@ azb spark cluster add-user \
 
 NOTE: The cluster id (--id) can only contain alphanumeric characters including hyphens and underscores, and cannot contain more than 64 characters.
 
-More information regarding using a cluster can be found in the [cluster documentation](./documentation/10%20-%20Clusters.md)
+More information regarding using a cluster can be found in the [cluster documentation](./docs/10%20-%20Clusters.md)
 
 
 ### Submit a Spark job
@@ -104,9 +104,9 @@ If you decided not to tail the log when submiting the job or want to read it aga
 azb spark app logs \
     --id <my-cluster-id> \
     -- name <my-job-name>
-    [--tail] # If you want it to tail the log if the task is still runing
+    [--tail] # If you want it to tail the log if the task is still running
 ```
-More information regarding using a cluster can be found in the [spark submit documentation](./documentation/20%20-%20Spark%20Submit.md)
+More information regarding using a cluster can be found in the [spark submit documentation](./docs/20%20-%20Spark%20Submit.md)
 
 ### Connect your cluster to Azure Blob Storage (WASB connection)
 

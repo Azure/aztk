@@ -38,7 +38,7 @@ azb spark cluster list
 To view details about a particular cluster run:
 
 ```sh
-asb spark cluster get --id <your_cluster_id>
+azb spark cluster get --id <your_cluster_id>
 ```
 
 Note that the cluster is not fully usable until a master node has been selected and it's state is 'idle'.
@@ -82,7 +82,7 @@ Alternatively, updating the secrets.cfg with a the SSH key or path to the SSH wi
 pick it up.
 
 ```sh
-asb spark clsuter add-user --id spark --username admin
+azb spark clsuter add-user --id spark --username admin
 ```
 
 Using a __password__
