@@ -106,7 +106,15 @@ Spark Jobs UI and the Jupyter notebook in the cluster:
 azb spark cluster ssh --id spark --username admin --masterui 8080 --webui 4040 --jupyter 8888
 ```
 
-_Additional ports can be forwarded using standard ssh port forwarding syntax._
+You can also forward any other ports the same way you would do with ssh
+
+```sh
+# This will forward the remote port 5678 to the local port 1234
+azb spark cluster ssh --id spark --username admin -L 1234:localhost:5678
+
+# You can use this option multiple time to forward multiple ports
+azb spark cluster ssh --id spark --username admin -L 1234:localhost:5678  -L 1235:localhost:5679
+```
 
 ### Interact with your Spark cluster
 
