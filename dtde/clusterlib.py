@@ -370,6 +370,12 @@ def print_cluster(cluster: Cluster):
         ip, port = util.get_connection_info(cluster.id, node.id)
         log.info(print_format.format(node.id, node.state.value, '{}:{}'.format(ip, port),
                                      '*' if node.id == cluster.master_node_id else ''))
+
+        for endpoint in node.endpoint_configuration.inbound_endpoints:
+            print(endpoint.public_ip_address)
+            print(endpoint.public_fqdn)
+            print(endpoint.name)
+            print(endpoint.frontend_port)
     log.info('')
 
 
