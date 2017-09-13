@@ -183,6 +183,55 @@ def create_cluster(
             pool_id, zip_resource_file, custom_script),
         enable_inter_node_communication=True,
         max_tasks_per_node=1,
+        network_configuration= batch_models.NetworkConfiguration(
+            endpoint_configuration=
+                batch_models.PoolEndpointConfiguration(
+                    inbound_nat_pools = [
+                        batch_models.InboundNATPool(
+                            backend_port=8080,
+                            frontend_port_range_start=8080,
+                            frontend_port_range_end=9080,
+                            name="master_ui",
+                            protocol="tcp",
+                            network_security_group_rules=[
+                                batch_models.NetworkSecurityGroupRule(
+                                    access="allow",
+                                    priority=150,
+                                    source_address_prefix="*"
+                                )
+                            ]
+                        ),
+                        batch_models.InboundNATPool(
+                            backend_port=4040,
+                            frontend_port_range_start=4040,
+                            frontend_port_range_end=5040,
+                            name="job_ui",
+                            protocol="tcp",
+                            network_security_group_rules=[
+                                batch_models.NetworkSecurityGroupRule(
+                                    access="allow",
+                                    priority=151,
+                                    source_address_prefix="*"
+                                )
+                            ]
+                        ),
+                        batch_models.InboundNATPool(
+                            backend_port=7777,
+                            frontend_port_range_start=7777,
+                            frontend_port_range_end=8077,
+                            name="jupyter",
+                            protocol="tcp",
+                            network_security_group_rules=[
+                                batch_models.NetworkSecurityGroupRule(
+                                    access="allow",
+                                    priority=152,
+                                    source_address_prefix="*"
+                                )
+                            ]
+                        )
+                    ]
+                )
+            ),
         metadata=[
             batch_models.MetadataItem(
                 name=constants.AZB_SOFTWARE_METADATA_KEY, value=Software.spark),

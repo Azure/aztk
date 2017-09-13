@@ -219,6 +219,7 @@ def create_pool_if_not_exist(pool, wait=True):
             return True
     except batch_models.BatchErrorException as e:
         if e.error.code != "PoolExists":
+            print_batch_exception(e)
             raise
         else:
             return False
@@ -397,7 +398,7 @@ def print_batch_exception(batch_exception):
             batch_exception.error.message.value:
         log.info(batch_exception.error.message.value)
         if batch_exception.error.values:
-            log.info()
+            log.info("")
             for mesg in batch_exception.error.values:
                 log.info("%s:\t%s", mesg.key, mesg.value)
     log.info("-------------------------------------------")
