@@ -190,7 +190,7 @@ def create_cluster(
                         batch_models.InboundNATPool(
                             backend_port=8080,
                             frontend_port_range_start=8080,
-                            frontend_port_range_end=9080,
+                            frontend_port_range_end=8880,
                             name="master_ui",
                             protocol="tcp",
                             network_security_group_rules=[
@@ -216,9 +216,9 @@ def create_cluster(
                             ]
                         ),
                         batch_models.InboundNATPool(
-                            backend_port=7777,
-                            frontend_port_range_start=7777,
-                            frontend_port_range_end=8077,
+                            backend_port=8888,
+                            frontend_port_range_start=8888,
+                            frontend_port_range_end=9800,
                             name="jupyter",
                             protocol="tcp",
                             network_security_group_rules=[
@@ -364,6 +364,11 @@ def print_cluster(cluster: Cluster):
     log.info(print_format.format("Nodes", "State", "IP:Port", "Master"))
     log.info(print_format_underline.format('', '', '', ''))
 
+    master_ip = None
+    master_ui_port = None
+    jobs_ui_port = None
+    jupyter_port = None
+
     if not cluster.nodes:
         return
     for node in cluster.nodes:
@@ -371,11 +376,25 @@ def print_cluster(cluster: Cluster):
         log.info(print_format.format(node.id, node.state.value, '{}:{}'.format(ip, port),
                                      '*' if node.id == cluster.master_node_id else ''))
 
-        for endpoint in node.endpoint_configuration.inbound_endpoints:
-            print(endpoint.public_ip_address)
-            print(endpoint.public_fqdn)
-            print(endpoint.name)
-            print(endpoint.frontend_port)
+        if node.id == cluster.master_node_id:
+            for endpoint in node.endpoint_configuration.inbound_endpoints:
+                master_ip = endpoint.public_ip_address
+
+                if endpoint.name.startswith('master'):
+                    master_ui_port = endpoint.frontend_port
+
+                if endpoint.name.startswith('job'):
+                    jobs_ui_port = endpoint.frontend_port
+
+                if endpoint.name.startswith('jupyter'):
+                    jupyter_port = endpoint.frontend_port
+
+                #print(endpoint.public_fqdn)
+
+    log.info('')
+    log.info('master at:  http://{}:{}'.format(master_ip, master_ui_port))
+    log.info('jobs at:    http://{}:{}'.format(master_ip, jobs_ui_port))
+    log.info('jupyter at: http://{}:{}'.format(master_ip, jupyter_port))
     log.info('')
 
 
