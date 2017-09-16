@@ -14,10 +14,11 @@ from install import pick_master
 
 batch_client = config.batch_client
 
-spark_home = "/home/spark-2.2.0-bin-hadoop2.7"
-pyspark_driver_python = "/usr/local/bin/jupyter"
-
+spark_home = "/home/spark-current"
+pyspark_driver_python = "/.pyenv/versions/{}/bin/jupyter" \
+                        .format(os.environ["USER_PYTHON_VERSION"])
 spark_conf_folder = os.path.join(spark_home, "conf")
+default_python_version = os.environ["USER_PYTHON_VERSION"]
 
 
 def get_pool() -> batchmodels.CloudPool:
@@ -63,7 +64,7 @@ def generate_jupyter_config():
         display_name="PySpark",
         language="python",
         argv=[
-            "/usr/bin/python3",
+            "python",
             "-m",
             "ipykernel",
             "-f",
@@ -71,9 +72,9 @@ def generate_jupyter_config():
         ],
         env=dict(
             SPARK_HOME=spark_home,
-            PYSPARK_PYTHON="/usr/bin/python3",
-            PYSPARK_SUBMIT_ARGS="--master spark://{0}:7077 pyspark-shell".format(
-                master_node_ip),
+            PYSPARK_PYTHON="python",
+            PYSPARK_SUBMIT_ARGS="--master spark://{0}:7077 pyspark-shell" \
+                    .format(master_node_ip),
         )
     )
 
@@ -84,7 +85,8 @@ def setup_jupyter():
     jupyter_config_file = os.path.join(os.path.expanduser(
         "~"), ".jupyter/jupyter_notebook_config.py")
     if os.path.isfile(jupyter_config_file):
-        print("Jupyter config is already set. Skipping setup. (Start task is probably reruning after reboot)")
+        print("Jupyter config is already set. Skipping setup. \
+               (Start task is probably reruning after reboot)")
         return
 
     generate_jupyter_config_cmd = ["jupyter", "notebook", "--generate-config"]
@@ -92,14 +94,17 @@ def setup_jupyter():
 
     call(generate_jupyter_config_cmd)
 
+    jupyter_kernels_path = '/.pyenv/versions/{}/share/jupyter/kernels'. \
+            format(default_python_version)
+
     with open(jupyter_config_file, "a") as config_file:
         config_file.write('\n')
         config_file.write('c.NotebookApp.token=""\n')
         config_file.write('c.NotebookApp.password=""\n')
-    shutil.rmtree('/usr/local/share/jupyter/kernels')
-    os.makedirs('/usr/local/share/jupyter/kernels/pyspark', exist_ok=True)
+    shutil.rmtree(jupyter_kernels_path)
+    os.makedirs(jupyter_kernels_path + '/pyspark', exist_ok=True)
 
-    with open('/usr/local/share/jupyter/kernels/pyspark/kernel.json', 'w') as outfile:
+    with open(jupyter_kernels_path + '/pyspark/kernel.json', 'w') as outfile:
         data = generate_jupyter_config()
         json.dump(data, outfile, indent=2)
 
@@ -107,8 +112,8 @@ def setup_jupyter():
 def start_jupyter():
     jupyter_port = config.spark_jupyter_port
 
-    pyspark_driver_python_opts = "notebook --no-browser --port='{0}'".format(
-        jupyter_port)
+    pyspark_driver_python_opts = "notebook --no-browser --port='{0}'" \
+            .format(jupyter_port)
     pyspark_driver_python_opts += " --allow-root"
 
     my_env = os.environ.copy()

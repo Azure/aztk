@@ -5,7 +5,7 @@ import os
 """
 CLI_EXE = 'azb'
 
-DOCKER_REPO_NAME = "jiata/spark-2.2.0:latest"
+DEFAULT_DOCKER_REPO = "jiata/thunderbolt:0.1.0-spark2.2.0-python3.5.4"
 DOCKER_SPARK_CONTAINER_NAME = "spark"
 
 # DOCKER
@@ -13,7 +13,7 @@ DOCKER_SPARK_MASTER_UI_PORT = 8080
 DOCKER_SPARK_WORKER_UI_PORT = 8081
 DOCKER_SPARK_JUPYTER_PORT = 8888
 DOCKER_SPARK_WEB_UI_PORT = 4040
-DOCKER_SPARK_HOME = "/home/spark-2.2.0-bin-hadoop2.7"
+DOCKER_SPARK_HOME = "/home/spark-current"
 
 """
     Root path of this repository

@@ -2,10 +2,14 @@
 
 # This file is the entry point of the docker container.
 # It will run the custom scripts if present and start spark.
+# This script uses the specificied user python version ($USER_PYTHON_VERSION)
 
 set -e
-export PATH=/usr/bin/python3:$PATH
+thunderbolt_python_version=3.6.2
 
+# --------------------
+# Setup custom scripts
+# --------------------
 custom_script_dir=$DOCKER_WORKING_DIR/custom-scripts
 
 if [ -d "$custom_script_dir" ]; then
@@ -18,6 +22,9 @@ else
     echo "Custom script dir '$custom_script_dir' doesn't exists. Will not run any custom scripts."
 fi
 
+# -----------------------
+# Preload jupyter samples 
+# -----------------------
 mkdir /jupyter
 mkdir /jupyter/samples
 
@@ -26,6 +33,9 @@ for file in $(dirname $0)/jupyter-samples/*; do
     cp $file /jupyter/samples
 done
 
+# --------------------
+# Setup WASB connector 
+# --------------------
 storage_account_name=$STORAGE_ACCOUNT_NAME
 storage_account_key=$STORAGE_ACCOUNT_KEY
 storage_account_suffix=$STORAGE_ACCOUNT_SUFFIX
@@ -37,11 +47,15 @@ else
     echo "Storage credentials not set"
 fi
 
+# ----------------------------
+# Run azb setup python scripts 
+# ----------------------------
+# use python v3.6.2 to run azb software
 echo "Starting setup using Docker"
-pip3 install -r $(dirname $0)/requirements.txt
+$(pyenv root)/versions/$thunderbolt_python_version/bin/pip install -r $(dirname $0)/requirements.txt
 
 echo "Running main.py script"
-python3 $(dirname $0)/main.py install
+$(pyenv root)/versions/$thunderbolt_python_version/bin/python $(dirname $0)/main.py install
 
 # sleep to keep container running
 while true; do sleep 1; done

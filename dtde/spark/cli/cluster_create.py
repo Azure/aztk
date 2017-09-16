@@ -17,13 +17,20 @@ def setup_parser(parser: argparse.ArgumentParser):
     parser.add_argument('--vm-size', required=True,
                         help='VM size for nodes in your cluster')
     parser.add_argument('--custom-script',
-                        help='Absolute path of custom bash script (.sh) to run on each node')
+                        help='Absolute path of custom bash script (.sh) to run \
+                              on each node')
     parser.add_argument('--username',
                         help='Username to access your cluster (required: --wait flag)')
     parser.add_argument('--password',
-                        help="The password to access your spark cluster's head node. If not provided will use ssh public key.")
+                        help="The password to access your spark cluster's head \
+                             node. If not provided will use ssh public key.")
     parser.add_argument('--ssh-key',
-                        help="The ssh public key to access your spark cluster\'s head node. You can also set the ssh-key in the configuration file.")
+                        help="The ssh public key to access your spark cluster\'s head \
+                             node. You can also set the ssh-key in the configuration file.")
+    parser.add_argument('--docker-repo',
+                        help='The location of the public docker image you want to use \
+                             (<my-username>/<my-repo>:<tag>)')
+
     parser.add_argument('--no-wait', dest='wait', action='store_false')
     parser.add_argument('--wait', dest='wait', action='store_true')
     parser.set_defaults(wait=False, size=0, size_low_pri=0)
@@ -37,6 +44,7 @@ def execute(args: typing.NamedTuple):
     log.info(">     low priority:      %s", args.size_low_pri)
     log.info("spark cluster vm size:   %s", args.vm_size)
     log.info("path to custom script:   %s", args.custom_script)
+    log.info("docker repo name:        %s", args.docker_repo)
     log.info("wait for cluster:        %s", args.wait)
     log.info("username:                %s", args.username)
     if args.password:
@@ -53,6 +61,7 @@ def execute(args: typing.NamedTuple):
         args.username,
         args.password,
         args.ssh_key,
+        args.docker_repo,
         args.wait)
 
     log.info("Cluster created successfully.")
