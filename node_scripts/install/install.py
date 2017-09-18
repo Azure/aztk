@@ -4,6 +4,8 @@ from install import pick_master, spark
 def setup_node():
     client = config.batch_client
 
+    spark.setup_conf()
+
     is_master = pick_master.find_master(client)
 
     if is_master:

@@ -1,5 +1,6 @@
 import argparse
 import typing
+from dtde.config import load_spark_config, cleanup_spark_config
 from dtde import clusterlib, log
 
 
@@ -37,6 +38,8 @@ def setup_parser(parser: argparse.ArgumentParser):
 
 
 def execute(args: typing.NamedTuple):
+    load_spark_config()
+
     log.info("-------------------------------------------")
     log.info("spark cluster id:        %s", args.cluster_id)
     log.info("spark cluster size:      %s", args.size + args.size_low_pri)
@@ -65,3 +68,5 @@ def execute(args: typing.NamedTuple):
         args.wait)
 
     log.info("Cluster created successfully.")
+
+    cleanup_spark_config()

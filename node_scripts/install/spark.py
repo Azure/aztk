@@ -177,3 +177,26 @@ def start_spark_worker():
     call(cmd)
 
 
+def setup_conf():
+    """
+        Copy spark conf files to spark_home if they were uplaoded
+    """
+    spark_env_path_src = os.path.join(os.environ['DOCKER_WORKING_DIR'], 'conf/spark-env.sh')
+    spark_env_path_dest = os.path.join(spark_home, 'conf/spark-env.sh')
+
+    try:
+        shutil.copyfile(spark_env_path_src, spark_env_path_dest)
+        file_stat = os.stat(spark_env_path_dest)
+        os.chmod(spark_env_path_dest, file_stat.st_mode | 0o777)
+    except Exception as e:
+        print("Failed to copy spark-env.sh file")
+        print(e)
+
+    spark_default_path_src = os.path.join(os.environ['DOCKER_WORKING_DIR'], 'conf/spark-defaults.conf')
+    spark_default_path_dest = os.path.join(spark_home, 'conf/spark-defaults.conf')
+
+    try:
+        shutil.copyfile(spark_default_path_src, spark_default_path_dest)
+    except Exception as e:
+        print("Failed to copy spark-defaults.conf file")
+        print(e)

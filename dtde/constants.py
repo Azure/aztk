@@ -24,6 +24,8 @@ ROOT_PATH = os.path.normpath(os.path.join(os.path.dirname(__file__), '..'))
     Path to the configuration file
 """
 DEFAULT_CONFIG_PATH = os.path.join(os.getcwd(), 'secrets.cfg')
+DEFAULT_SPARK_CONF_SOURCE = os.path.join(os.getcwd(), '.thunderbolt')
+DEFAULT_SPARK_CONF_DEST = os.path.join(os.getcwd(), 'node_scripts/conf')
 
 """
     Key of the metadata entry for the pool that is used to store the master node id
