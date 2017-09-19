@@ -188,9 +188,9 @@ def create_cluster(
                 batch_models.PoolEndpointConfiguration(
                     inbound_nat_pools = [
                         batch_models.InboundNATPool(
-                            backend_port=8080,
-                            frontend_port_range_start=8080,
-                            frontend_port_range_end=8880,
+                            backend_port=constants.DOCKER_SPARK_MASTER_UI_PORT,
+                            frontend_port_range_start=constants.DOCKER_SPARK_MASTER_UI_PORT,
+                            frontend_port_range_end=constants.DOCKER_SPARK_MASTER_UI_PORT + vm_count + vm_low_pri_count,
                             name="master_ui",
                             protocol="tcp",
                             network_security_group_rules=[
@@ -202,9 +202,9 @@ def create_cluster(
                             ]
                         ),
                         batch_models.InboundNATPool(
-                            backend_port=4040,
-                            frontend_port_range_start=4040,
-                            frontend_port_range_end=5040,
+                            backend_port=constants.DOCKER_SPARK_WEB_UI_PORT,
+                            frontend_port_range_start=constants.DOCKER_SPARK_WEB_UI_PORT,
+                            frontend_port_range_end=constants.DOCKER_SPARK_WEB_UI_PORT + vm_count + vm_low_pri_count,
                             name="job_ui",
                             protocol="tcp",
                             network_security_group_rules=[
@@ -216,9 +216,9 @@ def create_cluster(
                             ]
                         ),
                         batch_models.InboundNATPool(
-                            backend_port=8888,
-                            frontend_port_range_start=8888,
-                            frontend_port_range_end=9800,
+                            backend_port=constants.DOCKER_SPARK_JUPYTER_PORT,
+                            frontend_port_range_start=constants.DOCKER_SPARK_JUPYTER_PORT,
+                            frontend_port_range_end=constants.DOCKER_SPARK_JUPYTER_PORT + vm_count + vm_low_pri_count,
                             name="jupyter",
                             protocol="tcp",
                             network_security_group_rules=[

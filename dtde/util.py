@@ -219,7 +219,6 @@ def create_pool_if_not_exist(pool, wait=True):
             return True
     except batch_models.BatchErrorException as e:
         if e.error.code != "PoolExists":
-            print_batch_exception(e)
             raise
         else:
             return False
@@ -391,17 +390,17 @@ def print_batch_exception(batch_exception):
     Prints the contents of the specified Batch exception.
     :param batch_exception:
     """
-    log.info("-------------------------------------------")
-    log.info("Exception encountered:")
+
+    log.error("Exception encountered:")
     if batch_exception.error and \
             batch_exception.error.message and \
             batch_exception.error.message.value:
-        log.info(batch_exception.error.message.value)
+        log.error(batch_exception.error.message.value)
         if batch_exception.error.values:
-            log.info("")
+            log.error("")
             for mesg in batch_exception.error.values:
-                log.info("%s:\t%s", mesg.key, mesg.value)
-    log.info("-------------------------------------------")
+                log.error("%s:\t%s", mesg.key, mesg.value)
+    log.error("-------------------------------------------")
 
 
 def get_cluster_total_target_nodes(pool):
