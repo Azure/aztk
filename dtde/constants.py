@@ -21,9 +21,13 @@ DOCKER_SPARK_HOME = "/home/spark-current"
 ROOT_PATH = os.path.normpath(os.path.join(os.path.dirname(__file__), '..'))
 
 """
-    Path to the configuration file
+    Path to the secrets file
 """
-DEFAULT_CONFIG_PATH = os.path.join(os.getcwd(), 'secrets.cfg')
+DEFAULT_SECRETS_PATH = os.path.join(os.getcwd(), '.thunderbolt/secrets.yaml')
+"""
+    Paths to the cluster configuration files
+"""
+DEFAULT_CLUSTER_CONFIG_PATH = os.path.join(os.getcwd(), '.thunderbolt/cluster.yaml')
 DEFAULT_SPARK_CONF_SOURCE = os.path.join(os.getcwd(), '.thunderbolt')
 DEFAULT_SPARK_CONF_DEST = os.path.join(os.getcwd(), 'node_scripts/conf')
 

@@ -51,18 +51,18 @@ Once you have one, simply log in and go to the [Azure Portal](https://portal.azu
 
 ![](./misc/Batch_2.png)
 
-4. Save your account credentials into the secrets.cfg file
+4. Save your account credentials into the secrets.yaml file
 
-- Copy the secrets.cfg.template file to secrests.cfg
+- Copy the secrets.yaml.template file to secrests.cfg
 
 Windows
 ```sh
-copy secrets.cfg.template secrets.cfg
+copy secrets.yaml.template secrets.yaml
 ```
 
 Linux and Mac OS
 ```sh
-cp secrets.cfg.template secrets.cfg
+cp secrets.yaml.template secrets.yaml
 ```
 
 - Go to the accounts in the Azure portal and copy pase the account names, keys and other information needed into the

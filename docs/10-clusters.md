@@ -81,11 +81,11 @@ Using a __SSH key__
 azb spark cluster add-user --id spark --username admin --ssh-key <your_key_OR_path_to_key>
 ```
 
-Alternatively, updating the secrets.cfg with a the SSH key or path to the SSH will allow the tool to automatically
+Alternatively, updating the secrets.yaml with a the SSH key or path to the SSH will allow the tool to automatically
 pick it up.
 
 ```sh
-azb spark clsuter add-user --id spark --username admin
+azb spark cluster add-user --id spark --username admin
 ```
 
 Using a __password__

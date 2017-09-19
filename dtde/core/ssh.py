@@ -1,21 +1,20 @@
 import os
-from dtde import config
+from dtde.config import SecretsConfig
 
-
-def get_user_public_key(key_or_path: str = None) -> str:
+def get_user_public_key(key_or_path: str = None):
     """
         Return the ssh key.
         It will first check if the given argument is a ssh key or a path to one
         otherwise will check the configuration file.
     """
     if not key_or_path:
-        global_config = config.get()
+       secrets_conf = SecretsConfig()
+       secrets_conf.load_secrets_config()
 
-        if not global_config.has_option("Default", "ssh_pub_key"):
-            return None
+       if not secrets_conf.ssh_pub_key:
+           return None
 
-        key_or_path = global_config.get("Default", "ssh_pub_key")
-
+       key_or_path = secrets_conf.ssh_pub_key
     if not key_or_path:
         return None
 

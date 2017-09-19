@@ -1,6 +1,6 @@
 # custom
-secrets.cfg
 my-custom-scripts/
+.thunderbolt
 
 # Virtual environments
 ENV/
