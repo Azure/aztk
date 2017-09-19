@@ -87,7 +87,7 @@ More information regarding using a cluster can be found in the [cluster document
 
 Now you can submit jobs to run against the cluster:
 ```
-azb spark app submit \
+azb spark cluster submit \
     --id <my-cluster-id> \
     --name <my-job-name> \
     [options] \
@@ -103,7 +103,7 @@ The output of spark-submit will be streamed to the console. Use the `--no-wait` 
 If you decided not to tail the log when submiting the job or want to read it again you can use this command.
 
 ```bash
-azb spark app logs \
+azb spark cluster logs \
     --id <my-cluster-id> \
     -- name <my-job-name>
     [--tail] # If you want it to tail the log if the task is still running
