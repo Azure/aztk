@@ -13,16 +13,22 @@ The minimum requirements to get started with Thunderbolt are:
 2. Make sure you are running python 3.5 or greater.
     _If the default version on your machine is python 2 make sure to run the following commands with **pip3** instead of **pip**._
 
-2. Use pip to install required packages:
+3. Use pip to install required packages:
     ```bash
     pip install -r requirements.txt
     ```
 
-3. Use setuptools to install the required biaries locally:
+4. Use setuptools to install the required biaries locally:
     ```bash
     pip install -e .
     ```
-
+5. Initialize your environment:
+    
+    Navigate to the directory you wish to use as your spark development environment, and run:
+    ```bash
+    azb spark init
+    ```
+    This will copy the default configuration files in config/ into a .thunderbolt/ directory in your current working directory.
 
 ### Setting up your accounts
 1. Log into Azure
@@ -53,17 +59,7 @@ Once you have one, simply log in and go to the [Azure Portal](https://portal.azu
 
 4. Save your account credentials into the secrets.yaml file
 
-- Copy the secrets.yaml.template file to secrests.cfg
-
-Windows
-```sh
-copy secrets.yaml.template secrets.yaml
-```
-
-Linux and Mac OS
-```sh
-cp secrets.yaml.template secrets.yaml
-```
+- Open the secrets.yaml file in the .thunderbolt/ folder in your current working directory (if .thunderbolt/ doesn't exist, run `azb spark init`). Fill in all of the fields as described below.
 
 - Go to the accounts in the Azure portal and copy pase the account names, keys and other information needed into the
 secrets file.

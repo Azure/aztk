@@ -32,6 +32,12 @@ DEFAULT_SPARK_CONF_SOURCE = os.path.join(os.getcwd(), '.thunderbolt')
 DEFAULT_SPARK_CONF_DEST = os.path.join(os.getcwd(), 'node_scripts/conf')
 
 """
+    Source and destination paths for spark init
+"""
+INIT_DIRECTORY_SOURCE = os.path.join(os.path.normpath(os.path.join(os.path.dirname(__file__), '..')), 'config')
+INIT_DIRECTORY_DEST = os.path.join(os.getcwd(), '.thunderbolt')
+
+"""
     Key of the metadata entry for the pool that is used to store the master node id
 """
 MASTER_NODE_METADATA_KEY = "_spark_master_node"
