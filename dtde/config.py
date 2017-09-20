@@ -3,6 +3,7 @@ import yaml
 import typing
 from shutil import copyfile, rmtree
 from dtde import log
+from dtde import error
 from . import constants
 
 def load_spark_config():
@@ -19,6 +20,7 @@ def load_spark_config():
         log.info("Loaded spark-defaults.conf")
     except Exception as e:
         print(e)
+
     try:
         copyfile(
                 os.path.join(constants.DEFAULT_SPARK_CONF_SOURCE, 'spark-env.sh'),
@@ -55,7 +57,7 @@ class SecretsConfig:
             Loads the secrets.yaml file in the .thunderbolt directory
         """
         if not os.path.isfile(path):
-            raise Exception(
+            raise error.ThunderboltError(
                 "Secrets configuration file doesn't exists at {0}".format(path))
 
         with open(path, 'r') as stream:
@@ -94,14 +96,14 @@ class ClusterConfig:
             Reads the config file in the .thunderbolt/ directory (.thunderbolt/cluster.yaml)
         """
         if not os.path.isfile(path):
-            raise Exception(
+            raise error.ThunderboltError(
                     "Configuration file doesn't exist at {0}".format(path))
 
         with open(path, 'r') as stream:
             try:
                 config = yaml.load(stream)
             except yaml.YAMLError as err:
-                raise Exception(
+                raise error.ThunderboltError(
                     "Error in cluster.yaml: {0}".format(err))
             
             if config is None:
@@ -162,17 +164,17 @@ class ClusterConfig:
         )
 
         if self.uid is None:
-            raise Exception(
+            raise error.ThunderboltError(
                     "Please supply an id for the cluster either in the cluster.yaml configuration file or with a parameter (--id)")
 
         if self.size == 0 and self.size_low_pri == 0:
-            raise Exception(
+            raise error.ThunderboltError(
                     "Please supply a size or size_low_pri value either in the cluster.yaml configuration file or with a parameter (--size or --size-low-pri)")
 
         if self.vm_size is None:
-            raise Exception(
+            raise error.ThunderboltError(
                     "Please supply a vm_size in either the cluster.yaml configuration file or with a parameter (--vm-size)")
 
         if self.username is not None and self.wait is False:
-            raise Exception(
+            raise error.ThunderboltError(
                     "User {0} will not be created since wait is not set to true in either the cluster.yaml configuration file or with a parameter (--wait)".format(self.username))

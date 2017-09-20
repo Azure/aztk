@@ -1,6 +1,7 @@
 import azure.batch.batch_service_client as batch
 import azure.batch.batch_auth as batch_auth
 import azure.storage.blob as blob
+import dtde.error as error
 from . import config
 from .version import __version__
 
@@ -11,10 +12,6 @@ batch_client = None
 batch_config = None
 blob_config = None
 blob_client = None
-
-
-class AzureApiInitError(Exception):
-    pass
 
 
 class BatchConfig:
@@ -109,11 +106,11 @@ def __load_batch_config():
     global batch_config
 
     if secrets_config.batch_account_key is None:
-        raise AzureApiInitError("Batch account key is not set in secrets.yaml config")
+        raise error.AzureApiInitError("Batch account key is not set in secrets.yaml config")
     if secrets_config.batch_account_name is None:
-        raise AzureApiInitError("Batch account name is not set in secrets.yaml config")
+        raise error.AzureApiInitError("Batch account name is not set in secrets.yaml config")
     if secrets_config.batch_service_url is None:
-        raise AzureApiInitError("Batch service url is not set in secrets.yaml config")
+        raise error.AzureApiInitError("Batch service url is not set in secrets.yaml config")
 
     # Get configuration
     account_key = secrets_config.batch_account_key
@@ -149,11 +146,11 @@ def __load_blob_config():
     global blob_config
 
     if secrets_config.storage_account_key is None:
-        raise AzureApiInitError("Storage account key is not set in secrets.yaml config")
+        raise error.AzureApiInitError("Storage account key is not set in secrets.yaml config")
     if secrets_config.storage_account_name is None:
-        raise AzureApiInitError("Storage account name is not set in secrets.yaml config")
+        raise error.AzureApiInitError("Storage account name is not set in secrets.yaml config")
     if secrets_config.storage_account_suffix is None:
-        raise AzureApiInitError("Storage account suffix is not set in secrets.yaml config")
+        raise error.AzureApiInitError("Storage account suffix is not set in secrets.yaml config")
 
     # Get configuration
     storage_account_key = secrets_config.storage_account_key
