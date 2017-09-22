@@ -79,6 +79,7 @@ def execute(args: typing.NamedTuple):
         cluster_conf.username,
         cluster_conf.password,
         cluster_conf.ssh_key,
+        cluster_conf.ports,
         cluster_conf.docker_repo,
         cluster_conf.wait)
 

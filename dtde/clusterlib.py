@@ -17,9 +17,10 @@ POOL_ADMIN_USER_IDENTITY = batch_models.UserIdentity(
 
 def cluster_install_cmd(
         zip_resource_file: batch_models.ResourceFile,
-        docker_repo: str = None):
+        docker_repo: str = None,
+        ports: List[int] = []):
     """
-        For Docker on ubuntu 16.04 - return the command line 
+        For Docker on ubuntu 16.04 - return the command line
         to be run on the start task of the pool to setup spark.
     """
 
@@ -32,15 +33,15 @@ def cluster_install_cmd(
             zip_resource_file.file_path),
         'chmod 777 $AZ_BATCH_TASK_WORKING_DIR/setup_node.sh',
         '/bin/bash $AZ_BATCH_TASK_WORKING_DIR/setup_node.sh {0} {1} "{2}"'.format(
-            constants.DOCKER_SPARK_CONTAINER_NAME, 
-            constants.DEFAULT_DOCKER_REPO, 
-            docker_run_cmd(docker_repo)),
+            constants.DOCKER_SPARK_CONTAINER_NAME,
+            constants.DEFAULT_DOCKER_REPO,
+            docker_run_cmd(docker_repo, ports=ports)),
     ]
 
     return ret
 
 
-def docker_run_cmd(docker_repo: str = None) -> str:
+def docker_run_cmd(docker_repo: str = None, ports: List[int] = []) -> str:
     """
         Build the docker run command by setting up the environment variables
     """
@@ -72,6 +73,10 @@ def docker_run_cmd(docker_repo: str = None) -> str:
     cmd.add_option('-p', '7077:7077')
     cmd.add_option('-p', '4040:4040')
     cmd.add_option('-p', '8888:8888')
+
+    for port in ports:
+        cmd.add_option('-p', '{0}:{0}'.format(str(port)))
+
     cmd.add_option('-d', docker_repo)
     cmd.add_argument('/bin/bash /batch/startup/wd/docker_main.sh')
     return cmd.to_str()
@@ -81,7 +86,8 @@ def generate_cluster_start_task(
         cluster_id: str,
         zip_resource_file: batch_models.ResourceFile,
         custom_script: str = None,
-        docker_repo: str = None):
+        docker_repo: str = None,
+        ports: List[str] = []):
     """
         This will return the start task object for the pool to be created.
         :param cluster_id str: Id of the cluster(Used for uploading the resource files)
@@ -129,7 +135,7 @@ def generate_cluster_start_task(
     ]
 
     # start task command
-    command = cluster_install_cmd(zip_resource_file, docker_repo)
+    command = cluster_install_cmd(zip_resource_file, docker_repo, ports=ports)
 
     return batch_models.StartTask(
         command_line=util.wrap_commands_in_shell(command),
@@ -148,6 +154,7 @@ def create_cluster(
         username: str,
         password: str = None,
         ssh_key: str = None,
+        ports: List[int] = [],
         docker_repo: str = None,
         wait=True):
     """
@@ -191,7 +198,7 @@ def create_cluster(
         target_dedicated_nodes=vm_count,
         target_low_priority_nodes=vm_low_pri_count,
         start_task=generate_cluster_start_task(
-            pool_id, zip_resource_file, custom_script, docker_repo),
+            pool_id, zip_resource_file, custom_script, docker_repo, ports=ports),
         enable_inter_node_communication=True,
         max_tasks_per_node=1,
         metadata=[
