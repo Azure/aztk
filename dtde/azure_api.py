@@ -1,6 +1,7 @@
 import azure.batch.batch_service_client as batch
 import azure.batch.batch_auth as batch_auth
 import azure.storage.blob as blob
+import dtde.error as error
 from . import config
 from .version import __version__
 
@@ -11,10 +12,6 @@ batch_client = None
 batch_config = None
 blob_config = None
 blob_client = None
-
-
-class AzureApiInitError(Exception):
-    pass
 
 
 class BatchConfig:
@@ -103,23 +100,22 @@ def get_batch_config() -> BatchConfig:
 
 
 def __load_batch_config():
-    global_config = config.get()
+    secrets_config = config.SecretsConfig()
+    secrets_config.load_secrets_config()
 
     global batch_config
 
-    if not global_config.has_option('Batch', 'batchaccountkey'):
-        raise AzureApiInitError("Batch account key is not set in config")
-
-    if not global_config.has_option('Batch', 'batchaccountname'):
-        raise AzureApiInitError("Batch account name is not set in config")
-
-    if not global_config.has_option('Batch', 'batchserviceurl'):
-        raise AzureApiInitError("Batch account url is not set in config")
+    if secrets_config.batch_account_key is None:
+        raise error.AzureApiInitError("Batch account key is not set in secrets.yaml config")
+    if secrets_config.batch_account_name is None:
+        raise error.AzureApiInitError("Batch account name is not set in secrets.yaml config")
+    if secrets_config.batch_service_url is None:
+        raise error.AzureApiInitError("Batch service url is not set in secrets.yaml config")
 
     # Get configuration
-    account_key = global_config.get('Batch', 'batchaccountkey')
-    account_name = global_config.get('Batch', 'batchaccountname')
-    account_url = global_config.get('Batch', 'batchserviceurl')
+    account_key = secrets_config.batch_account_key
+    account_name = secrets_config.batch_account_name
+    account_url = secrets_config.batch_service_url
 
     batch_config = BatchConfig(
         account_key=account_key, account_name=account_name, account_url=account_url)
@@ -137,33 +133,29 @@ def __load_batch_client():
         config.account_url)
 
 
-
 def get_blob_config() -> BlobConfig:
     if not blob_config:
         __load_blob_config()
 
     return blob_config
 
-
 def __load_blob_config():
-    global_config = config.get()
+    secrets_config = config.SecretsConfig()
+    secrets_config.load_secrets_config()
 
     global blob_config
 
-    if not global_config.has_option('Storage', 'storageaccountkey'):
-        raise AzureApiInitError("Storage account key is not set in config")
-
-    if not global_config.has_option('Storage', 'storageaccountname'):
-        raise AzureApiInitError("Storage account name is not set in config")
-
-    if not global_config.has_option('Storage', 'storageaccountsuffix'):
-        raise AzureApiInitError("Storage account suffix is not set in config")
+    if secrets_config.storage_account_key is None:
+        raise error.AzureApiInitError("Storage account key is not set in secrets.yaml config")
+    if secrets_config.storage_account_name is None:
+        raise error.AzureApiInitError("Storage account name is not set in secrets.yaml config")
+    if secrets_config.storage_account_suffix is None:
+        raise error.AzureApiInitError("Storage account suffix is not set in secrets.yaml config")
 
     # Get configuration
-    storage_account_key = global_config.get('Storage', 'storageaccountkey')
-    storage_account_name = global_config.get('Storage', 'storageaccountname')
-    storage_account_suffix = global_config.get(
-        'Storage', 'storageaccountsuffix')
+    storage_account_key = secrets_config.storage_account_key
+    storage_account_name = secrets_config.storage_account_name
+    storage_account_suffix = secrets_config.storage_account_suffix
 
     blob_config = BlobConfig(
         account_key=storage_account_key,

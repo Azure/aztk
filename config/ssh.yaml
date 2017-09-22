@@ -1,0 +1,18 @@
+# ssh configuration
+
+# cluster_id: <id of the cluster to connect to, reccommended to specify with --id command line parameter>
+
+# username: <name of the user account to ssh into>
+username: spark
+
+# job_ui_port: <local port where the job ui is forwarded to>
+job_ui_port: 4040
+
+# web_ui_port: <local port where the spark master web ui is forwarded to>
+web_ui_port: 8080
+
+# jupyter_port: <local port which where jupyter is forwarded to>
+jupyter_port: 8888
+
+# connect: <true/false, connect to spark master or print connection string (--no-connect)> 
+connect: true

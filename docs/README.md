@@ -7,6 +7,9 @@ Create, manage and interact with a cluster. Also learn about connecting to the m
 ## [Custom Scripts](./11-custom-scripts.md)
 Add custom configuraiton scripts to your cluster.
 
+## [Docker Image](./12-docker-image.md)
+Learn about setting a custom docker image or how you can use Docker to manage versioning.
+
 ## [Spark Submit](./20-spark-submit.md)
 Submit a Spark job to the cluster.
 

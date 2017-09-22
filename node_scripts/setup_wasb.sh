@@ -8,7 +8,7 @@ storage_account_name=$1
 storage_account_key=$2 
 storage_account_suffix=$3
 
-spark_home=/home/spark-2.2.0-bin-hadoop2.7
+spark_home=/home/spark-current
 cd $spark_home/conf
 
 cp spark-defaults.conf.template spark-defaults.conf

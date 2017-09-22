@@ -15,9 +15,12 @@ POOL_ADMIN_USER_IDENTITY = batch_models.UserIdentity(
         elevation_level=batch_models.ElevationLevel.admin))
 
 
-def cluster_install_cmd(zip_resource_file: batch_models.ResourceFile):
+def cluster_install_cmd(
+        zip_resource_file: batch_models.ResourceFile,
+        docker_repo: str = None):
     """
-        For Docker on ubuntu 16.04 - return the command line to be run on the start task of the pool to setup spark.
+        For Docker on ubuntu 16.04 - return the command line 
+        to be run on the start task of the pool to setup spark.
     """
 
     ret = [
@@ -29,16 +32,22 @@ def cluster_install_cmd(zip_resource_file: batch_models.ResourceFile):
             zip_resource_file.file_path),
         'chmod 777 $AZ_BATCH_TASK_WORKING_DIR/setup_node.sh',
         '/bin/bash $AZ_BATCH_TASK_WORKING_DIR/setup_node.sh {0} {1} "{2}"'.format(
-            constants.DOCKER_SPARK_CONTAINER_NAME, constants.DOCKER_REPO_NAME, docker_run_cmd()),
+            constants.DOCKER_SPARK_CONTAINER_NAME, 
+            constants.DEFAULT_DOCKER_REPO, 
+            docker_run_cmd(docker_repo)),
     ]
 
     return ret
 
 
-def docker_run_cmd() -> str:
+def docker_run_cmd(docker_repo: str = None) -> str:
     """
         Build the docker run command by setting up the environment variables
     """
+
+    docker_repo = docker_repo if docker_repo != None \
+            else constants.DEFAULT_DOCKER_REPO
+
     cmd = CommandBuilder('docker run')
     cmd.add_option('--net', 'host')
     cmd.add_option('--name', constants.DOCKER_SPARK_CONTAINER_NAME)
@@ -63,7 +72,7 @@ def docker_run_cmd() -> str:
     cmd.add_option('-p', '7077:7077')
     cmd.add_option('-p', '4040:4040')
     cmd.add_option('-p', '8888:8888')
-    cmd.add_option('-d', constants.DOCKER_REPO_NAME)
+    cmd.add_option('-d', docker_repo)
     cmd.add_argument('/bin/bash /batch/startup/wd/docker_main.sh')
     return cmd.to_str()
 
@@ -71,7 +80,8 @@ def docker_run_cmd() -> str:
 def generate_cluster_start_task(
         cluster_id: str,
         zip_resource_file: batch_models.ResourceFile,
-        custom_script: str=None):
+        custom_script: str = None,
+        docker_repo: str = None):
     """
         This will return the start task object for the pool to be created.
         :param cluster_id str: Id of the cluster(Used for uploading the resource files)
@@ -119,7 +129,7 @@ def generate_cluster_start_task(
     ]
 
     # start task command
-    command = cluster_install_cmd(zip_resource_file)
+    command = cluster_install_cmd(zip_resource_file, docker_repo)
 
     return batch_models.StartTask(
         command_line=util.wrap_commands_in_shell(command),
@@ -138,6 +148,7 @@ def create_cluster(
         username: str,
         password: str = None,
         ssh_key: str = None,
+        docker_repo: str = None,
         wait=True):
     """
         Create a spark cluster
@@ -180,7 +191,7 @@ def create_cluster(
         target_dedicated_nodes=vm_count,
         target_low_priority_nodes=vm_low_pri_count,
         start_task=generate_cluster_start_task(
-            pool_id, zip_resource_file, custom_script),
+            pool_id, zip_resource_file, custom_script, docker_repo),
         enable_inter_node_communication=True,
         max_tasks_per_node=1,
         metadata=[
@@ -409,8 +420,8 @@ def delete_cluster(cluster_id: str) -> bool:
 def ssh_in_master(
         cluster_id: str,
         username: str=None,
-        masterui: str=None,
         webui: str=None,
+        jobui: str=None,
         jupyter: str=None,
         ports=None,
         connect: bool=True):
@@ -418,8 +429,8 @@ def ssh_in_master(
         SSH into head node of spark-app
         :param cluster_id: Id of the cluster to ssh in
         :param username: Username to use to ssh
-        :param masterui: Port for the master ui(Local port)
-        :param webui: Port for the spark web ui(Local port)
+        :param webui: Port for the spark master web ui (Local port)
+        :param jobui: Port for the job web ui (Local port)
         :param jupyter: Port for jupyter(Local port)
         :param ports: an list of local and remote ports
         :type ports: ["<local-port>:localhost:<remote-port>"]
@@ -449,9 +460,9 @@ def ssh_in_master(
     ssh_command = CommandBuilder('ssh')
 
     ssh_command.add_option("-L", "{0}:localhost:{1}".format(
-        masterui,  spark_master_ui_port), enable=bool(masterui))
+        webui,  spark_master_ui_port), enable=bool(webui))
     ssh_command.add_option("-L", "{0}:localhost:{1}".format(
-        webui, spark_web_ui_port), enable=bool(webui))
+        jobui, spark_web_ui_port), enable=bool(jobui))
     ssh_command.add_option("-L", "{0}:localhost:{1}".format(
         jupyter, spark_jupyter_port), enable=bool(jupyter))
 

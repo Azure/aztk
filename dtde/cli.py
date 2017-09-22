@@ -6,7 +6,9 @@
 """
 import argparse
 from typing import NamedTuple
+import azure.batch.models.batch_error as batch_error
 from dtde import constants, version, logger, log
+import dtde.error as error
 from dtde.spark.cli import spark
 from dtde.models import Software
 
@@ -25,7 +27,13 @@ def main():
     args = parser.parse_args()
 
     parse_common_args(args)
-    run_software(args)
+
+    try:
+        run_software(args)
+    except batch_error.BatchErrorException as e:
+        log.error(e.message.value)
+    except error.ThunderboltError as e:
+        log.error(e.message)
 
 
 def setup_common_args(parser: argparse.ArgumentParser):

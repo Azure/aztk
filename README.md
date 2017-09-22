@@ -1,10 +1,12 @@
 # Azure Thunderbolt
-Azure Thunderbolt is a python CLI application for provisioning multi-node Spark clusters in Azure. This package is built on top of Azure Batch but does not require any Azure Batch knowledge to use. 
+Azure Thunderbolt is a python CLI application for provisioning dockerized Spark clusters in Azure. This package is built on top of Azure Batch but does not require any Azure Batch knowledge to use. 
 
 Azure Thunderbolt is designed to run batch Spark jobs that require additional on-demand compute. This package is not ideal for long-standing clusters for applications such as Spark streaming.
 
 ## Notable Features
 - Spark cluster provision time of 3-5 minutes on average
+- Azure Thunderbolt clusters run in Docker containers
+- Users can bring their own Docker image
 - Ability to use low-priority VMs for an 80% discount
 - Built in support for Azure Blob Storage connection
 - Built in Jupyter notebook for interactive experience
@@ -78,14 +80,14 @@ azb spark cluster add-user \
 
 NOTE: The cluster id (--id) can only contain alphanumeric characters including hyphens and underscores, and cannot contain more than 64 characters.
 
-More information regarding using a cluster can be found in the [cluster documentation](./documentation/10%20-%20Clusters.md)
+More information regarding using a cluster can be found in the [cluster documentation](./docs/10%20-%20Clusters.md)
 
 
 ### Submit a Spark job
 
 Now you can submit jobs to run against the cluster:
 ```
-azb spark app submit \
+azb spark cluster submit \
     --id <my-cluster-id> \
     --name <my-job-name> \
     [options] \
@@ -101,12 +103,12 @@ The output of spark-submit will be streamed to the console. Use the `--no-wait` 
 If you decided not to tail the log when submiting the job or want to read it again you can use this command.
 
 ```bash
-azb spark app logs \
+azb spark cluster logs \
     --id <my-cluster-id> \
     -- name <my-job-name>
-    [--tail] # If you want it to tail the log if the task is still runing
+    [--tail] # If you want it to tail the log if the task is still running
 ```
-More information regarding using a cluster can be found in the [spark submit documentation](./documentation/20%20-%20Spark%20Submit.md)
+More information regarding using a cluster can be found in the [spark submit documentation](./docs/20%20-%20Spark%20Submit.md)
 
 ### Connect your cluster to Azure Blob Storage (WASB connection)
 

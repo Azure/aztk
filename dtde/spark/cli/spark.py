@@ -2,9 +2,7 @@ import argparse
 import typing
 
 from . import cluster
-from . import submit
-from . import app
-
+from . import init
 
 def setup_parser(parser: argparse.ArgumentParser):
     subparsers = parser.add_subparsers(
@@ -13,17 +11,16 @@ def setup_parser(parser: argparse.ArgumentParser):
 
     cluster_parser = subparsers.add_parser(
         "cluster", help="Commands to manage a cluster")
-    app_parser = subparsers.add_parser(
-        "app", help="Action on an app")
+    init_parser = subparsers.add_parser(
+        "init", help="Initialize your environment")
 
     cluster.setup_parser(cluster_parser)
-    app.setup_parser(app_parser)
-
+    init.setup_parser(init_parser)
 
 def execute(args: typing.NamedTuple):
     actions = dict(
         cluster=cluster.execute,
-        app=app.execute,
+        init=init.execute
     )
     func = actions[args.action]
     func(args)

@@ -27,6 +27,9 @@ NOTE: The cluster id (--id) can only contain alphanumeric characters including h
 #### Low priority nodes
 You can create your cluster with [low-priority](https://docs.microsoft.com/en-us/azure/batch/batch-low-pri-vms) VMs at an 80% discount by using **--size-low-pri** instead of **--size**. Note that these are great for experimental use, but can be taken away at any time. We recommend against this option when doing long running jobs or for critical workloads.
 
+#### Setting your Spark and/or Python versions
+By default, Azure Thunderbolt will use **Spark v2.2.0** and **Python v3.5.4**. However, you can set your Spark and/or Python versions by [configuring the Docker image that is used by Azure Thunderbolt](./12-docker-image.md).
+
 ### Listing clusters
 You can list all clusters currently running in your account by running
 
@@ -38,7 +41,7 @@ azb spark cluster list
 To view details about a particular cluster run:
 
 ```sh
-asb spark cluster get --id <your_cluster_id>
+azb spark cluster get --id <your_cluster_id>
 ```
 
 Note that the cluster is not fully usable until a master node has been selected and it's state is 'idle'.
@@ -78,11 +81,11 @@ Using a __SSH key__
 azb spark cluster add-user --id spark --username admin --ssh-key <your_key_OR_path_to_key>
 ```
 
-Alternatively, updating the secrets.cfg with a the SSH key or path to the SSH will allow the tool to automatically
+Alternatively, updating the secrets.yaml with a the SSH key or path to the SSH will allow the tool to automatically
 pick it up.
 
 ```sh
-asb spark clsuter add-user --id spark --username admin
+azb spark cluster add-user --id spark --username admin
 ```
 
 Using a __password__
@@ -129,3 +132,4 @@ deleted.
 ## Next Steps
 - [Run a Spark job](./20-spark-submit.md)
 - [Configure the Spark cluster using custom commands](./11-custom-scripts.md)
+- [Bring your own Docker image or choose between a variety of our supported base images to manage your Spark and Python versions](./12-docker-image.md)
