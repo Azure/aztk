@@ -420,8 +420,8 @@ def delete_cluster(cluster_id: str) -> bool:
 def ssh_in_master(
         cluster_id: str,
         username: str=None,
-        masterui: str=None,
         webui: str=None,
+        jobui: str=None,
         jupyter: str=None,
         ports=None,
         connect: bool=True):
@@ -429,8 +429,8 @@ def ssh_in_master(
         SSH into head node of spark-app
         :param cluster_id: Id of the cluster to ssh in
         :param username: Username to use to ssh
-        :param masterui: Port for the master ui(Local port)
-        :param webui: Port for the spark web ui(Local port)
+        :param webui: Port for the spark master web ui (Local port)
+        :param jobui: Port for the job web ui (Local port)
         :param jupyter: Port for jupyter(Local port)
         :param ports: an list of local and remote ports
         :type ports: [[<local-port>, <remote-port>]]
@@ -460,9 +460,9 @@ def ssh_in_master(
     ssh_command = CommandBuilder('ssh')
 
     ssh_command.add_option("-L", "{0}:localhost:{1}".format(
-        masterui,  spark_master_ui_port), enable=bool(masterui))
+        webui,  spark_master_ui_port), enable=bool(webui))
     ssh_command.add_option("-L", "{0}:localhost:{1}".format(
-        webui, spark_web_ui_port), enable=bool(webui))
+        jobui, spark_web_ui_port), enable=bool(jobui))
     ssh_command.add_option("-L", "{0}:localhost:{1}".format(
         jupyter, spark_jupyter_port), enable=bool(jupyter))
 

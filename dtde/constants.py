@@ -24,9 +24,11 @@ ROOT_PATH = os.path.normpath(os.path.join(os.path.dirname(__file__), '..'))
     Path to the secrets file
 """
 DEFAULT_SECRETS_PATH = os.path.join(os.getcwd(), '.thunderbolt/secrets.yaml')
+
 """
     Paths to the cluster configuration files
 """
+DEFAULT_SSH_CONFIG_PATH = os.path.join(os.getcwd(), '.thunderbolt/ssh.yaml')
 DEFAULT_CLUSTER_CONFIG_PATH = os.path.join(os.getcwd(), '.thunderbolt/cluster.yaml')
 DEFAULT_SPARK_CONF_SOURCE = os.path.join(os.getcwd(), '.thunderbolt')
 DEFAULT_SPARK_CONF_DEST = os.path.join(os.getcwd(), 'node_scripts/conf')

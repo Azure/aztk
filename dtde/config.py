@@ -174,7 +174,84 @@ class ClusterConfig:
         if self.vm_size is None:
             raise error.ThunderboltError(
                     "Please supply a vm_size in either the cluster.yaml configuration file or with a parameter (--vm-size)")
-
+            
         if self.username is not None and self.wait is False:
             raise error.ThunderboltError(
                     "User {0} will not be created since wait is not set to true in either the cluster.yaml configuration file or with a parameter (--wait)".format(self.username))
+
+
+class SshConfig:
+
+    def __init__(self):
+        self.username = None
+        self.cluster_id = None
+        self.job_ui_port = None
+        self.web_ui_port = None
+        self.jupyter_port = None
+        self.connect = True
+
+
+    def _read_config_file(self, path: str=constants.DEFAULT_SSH_CONFIG_PATH):
+        """
+            Reads the config file in the .thunderbolt/ directory (.thunderbolt/cluster.yaml)
+        """
+        if not os.path.isfile(path):
+            raise Exception(
+                    "SSH Configuration file doesn't exist at {0}".format(path))
+
+        with open(path, 'r') as stream:
+            try:
+               config = yaml.load(stream)
+            except yaml.YAMLError as err:
+                raise Exception(
+                    "Error in ssh.yaml: {0}".format(err))
+
+            if config is None:
+               return
+
+            self._merge_dict(config)
+
+    
+    def _merge_dict(self, config):
+        if 'username' in config and config['username'] is not None:
+            self.username = config['username']
+
+        if 'cluster_id' in config and config['cluster_id'] is not None:
+            self.cluster_id = config['cluster_id']
+
+        if 'job_ui_port' in config and config['job_ui_port'] is not None:
+            self.job_ui_port = config['job_ui_port']
+
+        if 'web_ui_port' in config and config['web_ui_port'] is not None:
+            self.web_ui_port = config['web_ui_port']
+        
+        if 'jupyter_port' in config and config['jupyter_port'] is not None:
+            self.jupyter_port = config['jupyter_port']
+
+        if 'connect' in config and config['connect'] is False:
+            self.connect = False        
+
+
+    def merge(self, cluster_id, username, job_ui_port, web_ui_port, jupyter_port, connect):
+        """
+            Merges fields with args object
+        """
+        self._read_config_file()
+        self._merge_dict(
+            dict(
+                cluster_id = cluster_id,
+                username = username,
+                job_ui_port = job_ui_port,
+                web_ui_port = web_ui_port,
+                jupyter_port = jupyter_port,
+                connect = connect
+            )
+        )
+
+        if self.cluster_id is None:
+            raise Exception(
+                "Please supply an id for the cluster either in the ssh.yaml configuration file or with a parameter (--id)")
+        
+        if self.username is None:
+            raise Exception(
+                "Please supply a username either in the ssh.yaml configuration file or with a parameter (--username)")
