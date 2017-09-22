@@ -34,6 +34,7 @@ def execute(args: typing.NamedTuple):
         job_ui_port=args.jobui,
         web_ui_port=args.webui,
         jupyter_port=args.jupyter,
+        ports=args.ports,
         connect=args.connect
     )
 
@@ -52,7 +53,7 @@ def execute(args: typing.NamedTuple):
         webui=ssh_conf.web_ui_port,
         jobui=ssh_conf.job_ui_port,
         jupyter=ssh_conf.jupyter_port,
-        ports=args.ports,
+        ports=ssh_conf.ports,
         username=ssh_conf.username,
         connect=ssh_conf.connect)
 

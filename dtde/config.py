@@ -190,6 +190,7 @@ class SshConfig:
         self.web_ui_port = None
         self.jupyter_port = None
         self.connect = True
+        self.ports = []
 
     def _read_config_file(self, path: str=constants.DEFAULT_SSH_CONFIG_PATH):
         """
@@ -230,7 +231,11 @@ class SshConfig:
         if 'connect' in config and config['connect'] is False:
             self.connect = False
 
-    def merge(self, cluster_id, username, job_ui_port, web_ui_port, jupyter_port, connect):
+        if 'ports' in config:
+            self.ports += config['ports'] or []
+
+
+    def merge(self, cluster_id, username, job_ui_port, web_ui_port, jupyter_port, ports, connect):
         """
             Merges fields with args object
         """
@@ -242,6 +247,7 @@ class SshConfig:
                 job_ui_port=job_ui_port,
                 web_ui_port=web_ui_port,
                 jupyter_port=jupyter_port,
+                ports=ports,
                 connect=connect
             )
         )
