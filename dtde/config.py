@@ -19,7 +19,7 @@ def load_spark_config():
                 os.path.join(constants.DEFAULT_SPARK_CONF_DEST, 'spark-defaults.conf'))
         log.info("Loaded spark-defaults.conf")
     except Exception as e:
-        print(e)
+        pass
 
     try:
         copyfile(
@@ -27,7 +27,7 @@ def load_spark_config():
                 os.path.join(constants.DEFAULT_SPARK_CONF_DEST, 'spark-env.sh'))
         log.info("Loaded spark-env.sh")
     except Exception as e:
-        print(e)
+        pass
 
 
 def cleanup_spark_config():
