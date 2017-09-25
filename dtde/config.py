@@ -63,17 +63,25 @@ class SecretsConfig:
         with open(path, 'r') as stream:
             try:
                 secrets_config = yaml.load(stream)
-                self.batch_account_name = secrets_config['batch']['batchaccountname']
-                self.batch_account_key = secrets_config['batch']['batchaccountkey']
-                self.batch_service_url = secrets_config['batch']['batchserviceurl']
-
-                self.storage_account_name = secrets_config['storage']['storageaccountname']
-                self.storage_account_key = secrets_config['storage']['storageaccountkey']
-                self.storage_account_suffix = secrets_config['storage']['storageaccountsuffix']
-
-                self.ssh_pub_key = secrets_config['default']['ssh_pub_key']
             except yaml.YAMLError as err:
                 print(err)
+            
+            self._merge_dict(secrets_config)
+
+
+    def _merge_dict(self, secrets_config):
+        self.batch_account_name = secrets_config['batch']['batchaccountname']
+        self.batch_account_key = secrets_config['batch']['batchaccountkey']
+        self.batch_service_url = secrets_config['batch']['batchserviceurl']
+
+        self.storage_account_name = secrets_config['storage']['storageaccountname']
+        self.storage_account_key = secrets_config['storage']['storageaccountkey']
+        self.storage_account_suffix = secrets_config['storage']['storageaccountsuffix']
+
+        try:
+            self.ssh_pub_key = secrets_config['default']['ssh_pub_key']
+        except (KeyError, TypeError) as e:
+            pass
 
 
 class ClusterConfig:
