@@ -244,7 +244,7 @@ def wait_for_all_nodes_state(pool, node_state):
         if pool.resize_errors is not None:
             raise RuntimeError(
                 'resize error encountered for pool {}: {!r}'.format(
-                    pool.id, pool.resize_error))
+                    pool.id, pool.resize_errors))
         nodes = list(batch_client.compute_node.list(pool.id))
 
         totalNodes = pool.target_dedicated_nodes + pool.target_low_priority_nodes
