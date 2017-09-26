@@ -31,7 +31,7 @@ DEFAULT_SECRETS_PATH = os.path.join(os.getcwd(), '.thunderbolt/secrets.yaml')
 DEFAULT_SSH_CONFIG_PATH = os.path.join(os.getcwd(), '.thunderbolt/ssh.yaml')
 DEFAULT_CLUSTER_CONFIG_PATH = os.path.join(os.getcwd(), '.thunderbolt/cluster.yaml')
 DEFAULT_SPARK_CONF_SOURCE = os.path.join(os.getcwd(), '.thunderbolt')
-DEFAULT_SPARK_CONF_DEST = os.path.join(os.getcwd(), 'node_scripts/conf')
+DEFAULT_SPARK_CONF_DEST = os.path.join(ROOT_PATH, 'node_scripts/conf')
 
 """
     Source and destination paths for spark init
