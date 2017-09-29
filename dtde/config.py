@@ -64,7 +64,8 @@ class SecretsConfig:
             try:
                 secrets_config = yaml.load(stream)
             except yaml.YAMLError as err:
-                print(err)
+                raise error.ThunderboltError(
+                    "Error in cluster.yaml: {0}".format(err))
             
             self._merge_dict(secrets_config)
 
