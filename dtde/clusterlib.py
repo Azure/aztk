@@ -6,8 +6,9 @@ from typing import List
 from dtde.models import Software
 import azure.batch.models as batch_models
 from . import azure_api, constants, upload_node_scripts, util, log
-from dtde.error import ClusterNotReadyError, InvalidUserCredentialsError
+from dtde.error import ClusterNotReadyError, ThunderboltError
 from collections import namedtuple
+import getpass
 
 POOL_ADMIN_USER_IDENTITY = batch_models.UserIdentity(
     auto_user=batch_models.AutoUserSpecification(
@@ -198,6 +199,17 @@ def create_cluster(
             batch_models.MetadataItem(
                 name=constants.AZB_SOFTWARE_METADATA_KEY, value=Software.spark),
         ])
+    
+    # Get user ssh key, prompt for password if necessary
+    ssh_key = ssh.get_user_public_key(ssh_key)
+    if username is not None and password is None and ssh_key is None:
+        password = getpass.getpass("Please input a password for user {0}: ".format(username))
+        confirm_password = getpass.getpass("Please confirm your password for user {0}: ".format(username))
+        if password != confirm_password:
+            raise ThunderboltError("Password confirmation did not match, please try again.")
+        if not password:
+            raise ThunderboltError(
+                "Password is empty, cannot add user to cluster. Provide a ssh public key in .thunderbolt/secrets.yaml. Or provide an ssh-key or password with commnad line parameters (--ssh-key or --password).")
 
     # Create the pool + create user for the pool
     util.create_pool_if_not_exist(
@@ -232,12 +244,6 @@ def create_user(
         :param password: password of the user to add
     """
     batch_client = azure_api.get_batch_client()
-    if password is None:
-        ssh_key = ssh.get_user_public_key(ssh_key)
-
-    if not password and not ssh_key:
-        raise InvalidUserCredentialsError(
-            "Cannot add user to cluster. Need to provide a ssh public key or password.")
 
     # Create new ssh user for the master node
     batch_client.compute_node.add_user(
@@ -458,6 +464,11 @@ def ssh_in_master(
     spark_web_ui_port = constants.DOCKER_SPARK_WEB_UI_PORT
 
     ssh_command = CommandBuilder('ssh')
+
+    # get ssh private key path if specified
+    ssh_priv_key = ssh.get_user_private_key_path()
+    if ssh_priv_key is not None:
+        ssh_command.add_option("-i", ssh_priv_key)
 
     ssh_command.add_option("-L", "{0}:localhost:{1}".format(
         webui,  spark_master_ui_port), enable=bool(webui))

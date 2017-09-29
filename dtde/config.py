@@ -50,6 +50,7 @@ class SecretsConfig:
         self.storage_account_suffix = None
 
         self.ssh_pub_key = None
+        self.ssh_priv_key = None
 
 
     def load_secrets_config(self, path: str=constants.DEFAULT_SECRETS_PATH):
@@ -71,14 +72,38 @@ class SecretsConfig:
 
 
     def _merge_dict(self, secrets_config):
-        self.batch_account_name = secrets_config['batch']['batchaccountname']
-        self.batch_account_key = secrets_config['batch']['batchaccountkey']
-        self.batch_service_url = secrets_config['batch']['batchserviceurl']
+        # Ensure all necessary fields are provided
+        try:
+            self.batch_account_name = secrets_config['batch']['batchaccountname']
+        except KeyError:
+            raise error.ThunderboltError("Please specify a batch account name in your .thunderbolt/secrets.yaml file")
+        try:
+            self.batch_account_key = secrets_config['batch']['batchaccountkey']
+        except KeyError:
+            raise error.ThunderboltError("Please specify a batch account key in your .thunderbolt/secrets.yaml file")
+        try:
+            self.batch_service_url = secrets_config['batch']['batchserviceurl']
+        except KeyError:
+            raise error.ThunderboltError("Please specify a batch service in your .thunderbolt/secrets.yaml file")
 
-        self.storage_account_name = secrets_config['storage']['storageaccountname']
-        self.storage_account_key = secrets_config['storage']['storageaccountkey']
-        self.storage_account_suffix = secrets_config['storage']['storageaccountsuffix']
+        try:
+            self.storage_account_name = secrets_config['storage']['storageaccountname']
+        except KeyError:
+            raise error.ThunderboltError("Please specify a storage account name in your .thunderbolt/secrets.yaml file")
+        try:
+            self.storage_account_key = secrets_config['storage']['storageaccountkey']
+        except KeyError:
+            raise error.ThunderboltError("Please specify a storage account key in your .thunderbolt/secrets.yaml file")
+        try:
+            self.storage_account_suffix = secrets_config['storage']['storageaccountsuffix']
+        except KeyError:
+            raise error.ThunderboltError("Please specify a storage account suffix in your .thunderbolt/secrets.yaml file")
 
+        # Check for ssh keys if they are provided
+        try:
+            self.ssh_priv_key = secrets_config['default']['ssh_priv_key']
+        except (KeyError, TypeError) as e:
+            pass
         try:
             self.ssh_pub_key = secrets_config['default']['ssh_pub_key']
         except (KeyError, TypeError) as e:

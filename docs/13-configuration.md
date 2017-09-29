@@ -24,6 +24,16 @@ azb spark cluster create --id spark --vm-szie standard_a2 --size 4 --username sp
 
 A template file for necessary secrets is given in config/secrets.yaml.template. After running `azb spark init`, this file will be copied to a .thunderbolt/ directory in your current working directory. Copy or rename the file to .thunderbolt/secrets.yaml and fill in the proper values for your Batch and Storage accounts. See [Getting Started] (./00-getting-started.md) for more information.   
 
+Please note that if you use ssh keys and a have a non-standard ssh key file name or path, you will need to specify the location of your ssh public and private keys. To do so, set them as shown below:
+```yaml
+default:
+    # SSH keys used to create a user and connect to a server.
+    # The public key can either be the public key itself(ssh-rsa ...) or the path to the ssh key.
+    # The private key must be the path to the key.
+    ssh_pub_key: ~/.ssh/my-public-key.pub
+    ssh_priv_key: ~/.ssh/my-private-key
+```
+
 ## SSH Configuration
 
 The SSH connection settings can be configured in the ssh.yaml file. Once you have set your desired values in ssh.yaml, you can connect to the master of your cluster using the command `azb spark cluster ssh`. 

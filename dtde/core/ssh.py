@@ -26,6 +26,15 @@ def get_user_public_key(key_or_path: str = None):
 
     return key
 
+def get_user_private_key_path():
+    """
+        Return the path to the ssh private key if given.
+        It check the configuration file secrets.yaml.
+    """
+    secrets_conf = SecretsConfig()
+    secrets_conf.load_secrets_config()
+    return secrets_conf.ssh_priv_key
+
 
 def __read_ssh_key_from_file(path: str) -> str:
     """
