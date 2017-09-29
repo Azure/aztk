@@ -58,3 +58,23 @@ jupyter_port: 8088
 Running the command `azb spark cluster ssh --id <cluster_id>` will attempt to ssh into the cluster which has the id specified with the username 'spark'. It will forward the Spark Job UI to localhost:4040, the Spark master's web UI to localhost:8080 and Jupyter to localhost:8088.
 
 Note that all of the settings in ssh.yaml will be overrided by parameters passed on the command line.
+
+## Spark Configuration
+
+The repository comes with default Spark configuration files which provision your Spark cluster just the same as you would locally. After running `azb spark init` to initialize your working environment, you can view and edit these files at `.thunderbolt/spark-defaults.conf` and `.thunderbolt/spark-env.sh`. Please note that you can bring your own Spark configuration files by copying your `spark-defaults.conf` and `spark-env.sh` into your `.thunderbolt/` direcotry.
+
+The following settings available in `spark-defaults.conf` and `spark-env.sh` are not supported in Thunderbolt:
+
+`spark-env.sh`:
+- SPARK\_LOCAL\_IP
+- SPARK\_PUBLIC\_DNS
+- SPARK\_MASTER\_HOST
+- SPARK\_MASTER\_PORT
+- SPARK\_WORKER\_PORT
+- SPARK\_MASTER\_WEBUI\_PORT
+- Any options related to YARN client mode or Mesos
+
+`spark-defaults.conf`:
+- spark.master
+
+Also note that Thunderbolt pre-loads wasb jars, so loading them elsewhere is not necessary.

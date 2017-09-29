@@ -8,6 +8,7 @@ import azure.batch.models as batch_models
 from . import azure_api, constants, upload_node_scripts, util, log
 from dtde.error import ClusterNotReadyError, ThunderboltError
 from collections import namedtuple
+import dtde.config as config
 import getpass
 
 POOL_ADMIN_USER_IDENTITY = batch_models.UserIdentity(
@@ -162,9 +163,14 @@ def create_cluster(
         :param password: Optional password of user to add to the pool when ready(Need wait to be True)
         :param wait: If this function should wait for the cluster to be ready(Master and all slave booted)
     """
+    # Copy spark conf files if they exist
+    config.load_spark_config()
 
     # Upload start task scripts
     zip_resource_file = upload_node_scripts.zip_and_upload()
+
+    # Clean up spark conf files
+    config.cleanup_spark_config()
 
     batch_client = azure_api.get_batch_client()
 

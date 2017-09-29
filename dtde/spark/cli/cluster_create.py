@@ -53,8 +53,6 @@ def execute(args: typing.NamedTuple):
             ssh_key = args.ssh_key,
             docker_repo = args.docker_repo)
 
-    load_spark_config()
-
     log.info("-------------------------------------------")
     log.info("spark cluster id:        %s", cluster_conf.uid)
     log.info("spark cluster size:      %s", cluster_conf.size + cluster_conf.size_low_pri)
@@ -83,5 +81,3 @@ def execute(args: typing.NamedTuple):
         cluster_conf.wait)
 
     log.info("Cluster created successfully.")
-
-    cleanup_spark_config()
