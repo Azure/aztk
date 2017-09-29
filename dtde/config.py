@@ -171,7 +171,7 @@ class ClusterConfig:
         if 'docker_repo' in config and config['docker_repo'] is not None:
             self.docker_repo = config['docker_repo']
 
-        if 'wait' in config and config['wait'] is not False:
+        if 'wait' in config:
             self.wait = config['wait']
 
 
