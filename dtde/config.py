@@ -127,10 +127,10 @@ class ClusterConfig:
         if 'vm_size' in config and config['vm_size'] is not None:
             self.vm_size = config['vm_size']
 
-        if 'size' in config and config['size'] is not 0:
+        if 'size' in config and config['size'] is not None:
             self.size = config['size']
 
-        if 'size_low_pri' in config and config['size_low_pri'] is not 0:
+        if 'size_low_pri' in config and config['size_low_pri'] is not None:
             self.size_low_pri = config['size_low_pri']
 
         if 'username' in config and config['username'] is not None:
@@ -177,7 +177,7 @@ class ClusterConfig:
 
         if self.size == 0 and self.size_low_pri == 0:
             raise error.ThunderboltError(
-                    "Please supply a size or size_low_pri value either in the cluster.yaml configuration file or with a parameter (--size or --size-low-pri)")
+                    "Please supply a valid (greater than 0) size or size_low_pri value either in the cluster.yaml configuration file or with a parameter (--size or --size-low-pri)")
 
         if self.vm_size is None:
             raise error.ThunderboltError(

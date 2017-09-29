@@ -34,7 +34,7 @@ def setup_parser(parser: argparse.ArgumentParser):
 
     parser.add_argument('--no-wait', dest='wait', action='store_false')
     parser.add_argument('--wait', dest='wait', action='store_true')
-    parser.set_defaults(wait=False, size=0, size_low_pri=0)
+    parser.set_defaults(wait=False, size=None, size_low_pri=None)
 
 
 def execute(args: typing.NamedTuple):
