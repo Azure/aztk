@@ -422,6 +422,7 @@ def normalize_path(path: str)-> str:
     Convert a path in a path that will work well with blob storage and unix
     It will replace \ with / and remove relative .
     """
+    path = os.path.abspath(os.path.expanduser(path))
     path = path.replace('\\', '/')
     if path.startswith('./'):
         return path[2:]
