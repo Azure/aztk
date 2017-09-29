@@ -8,6 +8,7 @@ import argparse
 from typing import NamedTuple
 import azure.batch.models.batch_error as batch_error
 from dtde import constants, version, logger, log
+import dtde.util as util
 import dtde.error as error
 from dtde.spark.cli import spark
 from dtde.models import Software
@@ -31,7 +32,7 @@ def main():
     try:
         run_software(args)
     except batch_error.BatchErrorException as e:
-        log.error(e.message.value)
+        util.print_batch_exception(e)
     except error.ThunderboltError as e:
         log.error(e.message)
 
