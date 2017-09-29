@@ -1,7 +1,6 @@
 ##  cluster settings
 
-# id: <id of the cluster to be created>
-id: spark_cluster
+# id: <id of the cluster to be created, reccommended to specify with --id command line parameter>
 
 # vm_size: <vm-size, see available options here: https://azure.microsoft.com/en-us/pricing/details/virtual-machines/linux/>
 vm_size: standard_a2

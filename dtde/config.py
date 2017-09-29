@@ -174,7 +174,7 @@ class ClusterConfig:
 
         if self.uid is None:
             raise error.ThunderboltError(
-                    "Please supply an id for the cluster either in the cluster.yaml configuration file or with a parameter (--id)")
+                    "Please supply an id for the cluster with a parameter (--id)")
 
         if self.size == 0 and self.size_low_pri == 0:
             raise error.ThunderboltError(
