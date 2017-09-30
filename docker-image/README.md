@@ -1,5 +1,5 @@
 # Docker Image Gallery
-Azure Thunderbolt uses Docker containers to run Spark. 
+Azure Distributed Data Engineering Toolkit uses Docker containers to run Spark. 
 
 Please refer to the docs for details [how to select a docker-repo at cluster creation time](../docs/12-docker-image.md).
 
@@ -11,19 +11,19 @@ We support several base images:
 - [Docker Hub] jiata/thunderbolt:<image-version>-spark2.1.0-python2.7.13
 - [Docker Hub] jiata/thunderbolt:<image-version>-spark1.6.3-python2.7.13
 
-NOTE: Replace **<image-version>** with the version of the thunderbolt image that maps to the version of Azure Thunderbolt that you are using. For example: **jiata/thunderbolt:0.1.0-spark2.2.0-python3.5.4**
+NOTE: Replace **<image-version>** with the version of the image you wish to use. For example: **jiata/thunderbolt:0.1.0-spark2.2.0-python3.5.4**
 
 ### Gallery of 3rd Party Images
-Since Azure Thunderbolt is built with Docker containers, users can bring their own images to use with Azure Thunderbolt:
+Since this toolkit uses Docker containers to run Spark, users can bring their own images. Here's a list of 3rd party images:
 - *coming soon*
 
-(See below for a how-to guide on building your own images for Azure Thunderbolt)
+(See below for a how-to guide on building your own images for the Azure Distributed Data Engineering Toolkit)
 
-# How to use my own Docker Image with Azure Thunderbolt
-This section is for users who want to build their own docker images for Azure Thunderbolt.
+# How to use my own Docker Image
+This section is for users who want to build their own docker images.
 
 ## Base Docker Images to build with
-By default, Azure Thunderbolt uses **Spark2.2.0-Python3.5.4** as its base image. However, you can build from any of the following supported base images:
+By default, the Azure Distributed Data Engineering Toolkit uses **Spark2.2.0-Python3.5.4** as its base image. However, you can build from any of the following supported base images:
 
 - Spark2.2.0 and Hadoop2.7 and Python3.5.4
 - Spark2.1.0 and Hadoop2.7 and Python3.5.4
@@ -38,7 +38,7 @@ Currently, the images are hosted on [Docker Hub (jiata/thunderbolt)](https://hub
 If you have requests to add to the list of supported base images, please file a new Github issue.
 
 ## Building Your Own Docker Image
-Azure Thunderbolt supports custom Docker images. To guarantee that your Spark deployment works with Azure Thunderbolt, you can either build your own Docker image on top or beneath one of our supported base images _OR_ you can modify this supported Dockerfile and build your own image.
+Azure Distributed Data Engineering Toolkit supports custom Docker images. To guarantee that your Spark deployment works, you can either build your own Docker image on top or beneath one of our supported base images _OR_ you can modify this supported Dockerfile and build your own image.
 
 ### Building on top 
 You can choose to build on top of one of our base images by using the **FROM** keyword in your Dockerfile:
@@ -63,7 +63,7 @@ FROM my_username/my_repo:latest
 NOTE: Currently, we do not supported private Docker repos.
 
 ## About the Dockerfile
-The Dockerfile is used to build the Docker images used by Azure Thunderbolt. 
+The Dockerfile is used to build the Docker images used by this toolkit. 
 
 You can modify this Dockerfile to build your own image. If you plan to do so, please continue reading the below sections.
 
@@ -94,7 +94,7 @@ NOTE: Do not include the '.tgz' suffix as part of the Spark version key.
 NOTE: Most version of Python will work. However, when selecting your Python version, please make sure that the it is compatible with your selected version of Spark. Today, it is also a requirement that your selected verion of Python can run Jupyter Notebook.
 
 ### Required Environment Variables
-When layering your own Docker image, make sure your image does not intefere with the environment variables set in this Dockerfile, otherwise Azure Thunderbolt may not work.
+When layering your own Docker image, make sure your image does not intefere with the environment variables set in this Dockerfile, otherwise it may not work.
 
 If you want to use your own version of Spark, please make sure that the following environment variables are set. 
 

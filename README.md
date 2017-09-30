@@ -1,7 +1,7 @@
 # Azure Distributed Data Engineering Toolkit
-Azure Distributed Data Engineering Toolkit is a python CLI application for provisioning on-demand Spark on Docker clusters in Azure. This package is built on top of Azure Batch but does not require any Azure Batch knowledge to use. 
+Azure Distributed Data Engineering Toolkit is a python CLI application for provisioning on-demand Spark on Docker clusters in Azure. This toolkit is built on top of Azure Batch but does not require any Azure Batch knowledge to use. 
 
-This toolkit is designed to run batch Spark jobs that require additional on-demand compute.
+Currently, this toolkit is designed to run batch Spark jobs that require additional on-demand compute. Eventually we plan to support other distributed data engineering frameworks in a similar vein. Please let us know which frameworks you'd like for us to support in the future. 
 
 ## Notable Features
 - Spark cluster provision time of 5 minutes on average
@@ -128,6 +128,7 @@ aztk spark cluster delete --id <my_cluster_id>
 ## FAQs
 - [How do I connect to Azure Storage (WASB)?](./docs/30-cloud-storage.md)
 - [I want to use a different version of Spark / Python](./docs/12-docker-image.md)
+- [How do I SSH into my Spark cluster's master node?](./docs/10-clusters.md#ssh-and-port-forwarding)
 - [How do I interact with my Spark cluster using a password instead of an SSH-key?](./docs/10-clusters.md#interactive-mode)
 - [How do I change my cluster default settings?](./docs/13-configuration.md)
 - [How do I modify my *spark-env.sh* or *spark-defaults.conf* files?](./docs/13-configuration.md)

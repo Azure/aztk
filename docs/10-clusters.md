@@ -26,7 +26,7 @@ NOTE: The cluster id (`--id`) can only contain alphanumeric characters including
 You can create your cluster with [low-priority](https://docs.microsoft.com/en-us/azure/batch/batch-low-pri-vms) VMs at an 80% discount by using `--size-low-pri` instead of `--size`. Note that these are great for experimental use, but can be taken away at any time. We recommend against this option when doing long running jobs or for critical workloads.
 
 #### Setting your Spark and/or Python versions
-By default, Azure Thunderbolt will use **Spark v2.2.0** and **Python v3.5.4**. However, you can set your Spark and/or Python versions by [configuring the Docker image that is used by Azure Thunderbolt](./12-docker-image.md).
+By default, the Azure Distributed Data Engineering Toolkit will use **Spark v2.2.0** and **Python v3.5.4**. However, you can set your Spark and/or Python versions by [configuring the base Docker image used by this package](./12-docker-image.md).
 
 ### Listing clusters
 You can list all clusters currently running in your account by running
@@ -97,9 +97,19 @@ After a user has been created, SSH into the master node with:
 ```sh
 aztk spark cluster ssh --id spark --username admin
 ```
-By default, we port forward the Spark Web UI to *localhost:8080*, Spark Jobs UI to *localhost:4040*, and Jupyter to your *locahost:8888*. This can be [configured in *.thunderbolt/ssh.yaml*](../docs/13-configuration.md##sshyaml).
+
+Because we run Spark on Docker, you have to access the running Docker image to enter your Spark environment. Do to that, you can run the following:
+```sh
+sudo docker exec -it spark /bin/bash
+```
+
+Now that you're in, you can change directory to your familiar `$SPARK_HOME`
+```sh
+cd $SPARK_HOME
+```
 
 ### Interact with your Spark cluster
+By default, the `aztk spark cluster ssh` command port forwards the Spark Web UI to *localhost:8080*, Spark Jobs UI to *localhost:4040*, and Jupyter to your *locahost:8888*. This can be [configured in *.aztb/ssh.yaml*](../docs/13-configuration.md##sshyaml).
 
 ### Jupyter
 Once the appropriate ports have been forwarded, simply navigate to the local ports for viewing. In this case, if you used port 8888 (the default) for Jupyter then navigate to [http://localhost:8888.](http://localhost:8888)
