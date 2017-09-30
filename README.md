@@ -1,11 +1,11 @@
-# Azure Thunderbolt
-Azure Thunderbolt is a python CLI application for provisioning dockerized Spark clusters in Azure. This package is built on top of Azure Batch but does not require any Azure Batch knowledge to use. 
+# Azure Distributed Data Engineering Toolkit
+Azure Distributed Data Engineering Toolkit is a python CLI application for provisioning on-demand Spark on Docker clusters in Azure. This package is built on top of Azure Batch but does not require any Azure Batch knowledge to use. 
 
-Azure Thunderbolt is designed to run batch Spark jobs that require additional on-demand compute. This package is not ideal for long-standing clusters for applications such as Spark streaming.
+This toolkit is designed to run batch Spark jobs that require additional on-demand compute.
 
 ## Notable Features
-- Spark cluster provision time of 3-5 minutes on average
-- Azure Thunderbolt clusters run in Docker containers
+- Spark cluster provision time of 5 minutes on average
+- Spark clusters run in Docker containers
 - Users can bring their own Docker image
 - Ability to use low-priority VMs for an 80% discount
 - Built in support for Azure Blob Storage connection
@@ -22,130 +22,115 @@ Azure Thunderbolt is designed to run batch Spark jobs that require additional on
 ```bash
     pip install -e .
 ```
-4. Rename 'secrets.cfg.template' to 'secrets.cfg' and fill in the fields for your Batch account and Storage account.
+4. Initialize the project in a directory [This will automatically create a *.aztk* folder with config files in your working directory]:
+```bash
+    aztk spark init
+```
+5. Fill in the fields for your Batch account and Storage account in your *.aztk/secrets.yaml* file. (We'd also recommend that you enter SSH key info in this file)
 
-   Thunerbolt is built on top of two core Azure services, [Azure Batch](https://azure.microsoft.com/en-us/services/batch/) and [Azure Storage](https://azure.microsoft.com/en-us/services/storage/). Create those resources via the portal (see [Getting Started](./docs/00-getting-started.md)).
+   This package is built on top of two core Azure services, [Azure Batch](https://azure.microsoft.com/en-us/services/batch/) and [Azure Storage](https://azure.microsoft.com/en-us/services/storage/). Create those resources via the portal (see [Getting Started](./docs/00-getting-started.md)).
 
 ## Quickstart Guide
 
-The entire experience of this package is centered around a few commands.
+The core experience of this package is centered around a few commands.
+
+```sh
+# create your cluster
+aztk spark cluster create
+```
+```sh
+# monitor and manage your clusters
+aztk spark cluster get
+aztk spark cluster list
+aztk spark cluster delete
+```
+```sh
+# login and submit jobs to your cluster
+aztk spark cluster ssh
+aztk spark cluster submit
+```
 
 ### Create and setup your cluster
 
 First, create your cluster:
 ```bash
-azb spark cluster create \
-    --id <my-cluster-id> \
-    --size <number of nodes> \
-    --vm-size <vm-size> \
-    --custom-script <path to custom bash script to run on each node> (optional) \
-    --wait/--no-wait (optional)
+aztk spark cluster create \
+    --id <my_cluster_id> \
+    --size <number_of_nodes> \
+    --vm-size <vm_size>
+```
+You can find more information on VM sizes [here.](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/sizes) Please note that you must use the official SKU name when setting your VM size - they usually come in the form: "standard_d2_v2". 
+
+You can also create your cluster with [low-priority](https://docs.microsoft.com/en-us/azure/batch/batch-low-pri-vms) VMs at an 80% discount by using `--size-low-pri` instead of `--size` (we have to set `--size 0` as we currently do not support mixed low-priority and dedicated VMs):
+```
+aztk spark cluster create \
+    --id <my_cluster_id> \
+    --size 0 \
+    --size-low-pri <number_of_low-pri_nodes> \
+    --vm-size <vm_size>
 ```
 
-You can also create your cluster with [low-priority](https://docs.microsoft.com/en-us/azure/batch/batch-low-pri-vms) VMs at an 80% discount by using **--size-low-pri** instead of **--size**:
-```
-azb spark cluster create \
-    --id <my-cluster-id> \
-    --size-low-pri <number of low-pri nodes> \
-    --vm-size <vm-size>
-```
+By default, this package runs Spark 2.2.0 with Python 3.5 on an Ubuntu16.04 Docker image. More info on this image can be found in the [docker-images](/docker-image) folder in this repo.
 
-By default, this package runs Spark in docker from an ubuntu16.04 base image on a ubuntu16.04 VM. More info on this image can be found in the **docker-images** folder in this repo.
+NOTE: The cluster id (`--id`) can only contain alphanumeric characters including hyphens and underscores, and cannot contain more than 64 characters.
 
-You can also add a user directly in this command using the same inputs as the `add-user` command described bellow.
+More information regarding using a cluster can be found in the [cluster documentation](./docs/10-clusters.md)
 
-#### Add a user to your cluster to connect
-When your cluster is ready, create a user for your cluster (if you didn't already do so when creating your cluster):
+### Check on your cluster status
+To check your cluster status, use the `get` command:
 ```bash
-# **Recommended usage**
-# Add a user with a ssh public key. It will use the value specified in the secrets.cfg (Either path to the file or the actual key)
-azb spark cluster add-user \
-    --id <my-cluster-id> \
-    --username <username>
-
-# You can also explicity specify the ssh public key(Path or actual key)
-azb spark cluster add-user \
-    --id <my-cluster-id> \
-    --username <username> \
-    --ssh-key ~/.ssh/id_rsa.pub
-
-# **Not recommended**
-# You can also just specify a password
-azb spark cluster add-user \
-    --id <my-cluster-id> \
-    --username <username> \
-    --password <password>
-
+aztk spark cluster get --id <my_cluster_id>
 ```
-
-NOTE: The cluster id (--id) can only contain alphanumeric characters including hyphens and underscores, and cannot contain more than 64 characters.
-
-More information regarding using a cluster can be found in the [cluster documentation](./docs/10%20-%20Clusters.md)
-
 
 ### Submit a Spark job
 
-Now you can submit jobs to run against the cluster:
-```
-azb spark cluster submit \
-    --id <my-cluster-id> \
-    --name <my-job-name> \
+When your cluster is up, you can submit jobs to run against the cluster:
+```bash
+aztk spark cluster submit \
+    --id <my_cluste_id> \
+    --name <my_job_name> \
     [options] \
     <app jar | python file> \
     [app arguments]
 ```
-NOTE: The job name (--name) must be atleast 3 characters long, can only contain alphanumeric characters including hyphens but excluding underscores, and cannot contain uppercase letters.
+NOTE: The job name (`--name`) must be atleast 3 characters long, can only contain alphanumeric characters including hyphens but excluding underscores, and cannot contain uppercase letters. Each job you submit **must** have a unique name.
 
-The output of spark-submit will be streamed to the console. Use the `--no-wait` option to return immediately.
+The output of spark-submit will be streamed to the console. Use the `--no-wait` option to return immediately. More information regarding monitoring your job can be found in the [spark submit documentation.](./docs/20-spark-submit.md)
 
-### Read the output of your spark job.
+To start testing this package, you can start by trying out a Spark job from the [./examples](./examples) folder. The examples are a curated list of samples from Spark-2.2.0.
 
-If you decided not to tail the log when submiting the job or want to read it again you can use this command.
-
+### Log in and Interact with your Spark Cluster
+Most users will want to work interactively with their Spark clusters. With the `aztk spark cluster ssh` command, you can SSH into the cluster's master node. This command also helps you port-forward your Spark Web UI and Spark Jobs UI to your local machine:
 ```bash
-azb spark cluster logs \
-    --id <my-cluster-id> \
-    -- name <my-job-name>
-    [--tail] # If you want it to tail the log if the task is still running
+aztk spark cluster ssh --id <my_cluster_id>
 ```
-More information regarding using a cluster can be found in the [spark submit documentation](./docs/20%20-%20Spark%20Submit.md)
+By default, we port forward the Spark Web UI to *localhost:8080*, Spark Jobs UI to *localhost:4040*, and Jupyter to *localhost:8888*.
 
-### Connect your cluster to Azure Blob Storage (WASB connection)
-
-Pre-built into this package is native support for connecting your spark cluster to Azure Blob Storage. To do so, make sure that the storage fields in your **secrets.cfg** file are properly filled out.
-
-Even if you are just testing and have no need to connect with Azure Blob Storage, you still need to correctly fill out the storage fields in your **secrets.cfg** folder as it is a requirement for this package.
-
-Once you have correctly filled out the **secrets.cfg** with your storage credentials, you will be able to access said storage account from your Spark job.
-
-Please note: If you want to access another Azure Blob Storage account, you will need to recreate your cluster with an updated **secrets.cfg** file with the appropriate storage credentials.
-
-Here's an example of how you may access your data in Blob Storage:
-
-``` python
-df = spark.read.csv("wasbs://<STORAGE_CONTAINER_NAME>@<STORAGE_ACCOUNT_NAME>.blob.core.windows.net/<BLOB_NAME>")
-```
+You can configure these settings in the *.aztk/ssh.yaml* file.
 
 ### Manage your Spark cluster
 
 You can also see your clusters from the CLI:
 ```
-azb spark cluster list
+aztk spark cluster list
 ```
 
 And get the state of any specified cluster:
 ```
-azb spark cluster get --id <my-cluster-id>
+aztk spark cluster get --id <my_cluster_id>
 ```
 
 Finally, you can delete any specified cluster:
 ```
-azb spark cluster delete --id <my-cluster-id>
+aztk spark cluster delete --id <my_cluster_id>
 ```
 
-### Examples
-
-Please see the samples folder for a curated list of samples from Spark-2.2.0.
+## FAQs
+- [How do I connect to Azure Storage (WASB)?](./docs/30-cloud-storage.md)
+- [I want to use a different version of Spark / Python](./docs/12-docker-image.md)
+- [How do I interact with my Spark cluster using a password instead of an SSH-key?](./docs/10-clusters.md#interactive-mode)
+- [How do I change my cluster default settings?](./docs/13-configuration.md)
+- [How do I modify my *spark-env.sh* or *spark-defaults.conf* files?](./docs/13-configuration.md)
 
 ## Next Steps
 You can find more documentation [here](./docs)

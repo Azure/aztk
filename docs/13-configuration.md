@@ -1,47 +1,48 @@
 # Configuration Files
+This section refers to the files in the directory *.aztk* that are generated from the `aztk spark init` command.
 
-## Cluster Configuration
+## *cluster.yaml*
 
-The core settings for a cluster are configured in the cluster.yaml file. Once you have set your desired values in cluster.yaml, you can create a cluster using `azb spark cluster create`. 
+The core settings for a cluster are configured in the *cluster.yaml* file. Once you have set your desired values in *.aztk/cluster.yaml*, you can create a cluster using `aztk spark cluster create`. 
 
-For example, with the default cluster configuration:
+This is the default cluster configuration:
 
 ```yaml
-id: my_spark_cluster
+# id: <id of the cluster to be created>
+id: spark_cluster
+
+# vm_size: <vm-size, see available options here: https://azure.microsoft.com/en-us/pricing/details/virtual-machines/linux/>
 vm_size: standard_a2
+
+# size: <number of dedicated nodes in the cluster, not that clusters must contain all dedicated or all low priority nodes>
 size: 2
+
+# size_low_pri: <number of low priority nodes in the cluster, mutually exclusive with size setting>
+
+# username: <username for the linux user to be created> (optional)
 username: spark
+
+# docker_repo: <name of docker image repo (for more information, see https://github.com/Azure/thunderbolt/blob/master/docs/12-docker-image.md)>
+docker_repo: jiata/thunderbolt:0.1.0-spark2.2.0-python3.5.4
+
+# custom_script: <path to custom script to run on each node> (optional)
+
+# wait: <true/false>
 wait: true
 ```
 
-Running `azb spark cluster create` will create a cluster of 4 Standard\_A2 nodes called 'my\_spark\_cluster' with a linux user named 'spark'. This is equivalent to running the command
+Running `aztk spark cluster create` will create a cluster of 4 **Standard\_A2** nodes called 'spark\_cluster' with a linux user named 'spark'. This is equivalent to running the command
 
 ```sh
-azb spark cluster create --id spark --vm-szie standard_a2 --size 4 --username spark --wait
+azb spark cluster create --id spark --vm-size standard_a2 --size 4 --username spark --wait
 ```
 
-## Secrets Configuration
+NOTE: This assumes that your SSH-key is configured in the *.aztk/secrets.yaml* file. 
 
-A template file for necessary secrets is given in config/secrets.yaml.template. After running `azb spark init`, this file will be copied to a .thunderbolt/ directory in your current working directory. Copy or rename the file to .thunderbolt/secrets.yaml and fill in the proper values for your Batch and Storage accounts. See [Getting Started] (./00-getting-started.md) for more information.   
+## *ssh.yaml*
 
-Please note that if you use ssh keys and a have a non-standard ssh key file name or path, you will need to specify the location of your ssh public and private keys. To do so, set them as shown below:
+This is the default ssh cluster configuration:
 ```yaml
-default:
-    # SSH keys used to create a user and connect to a server.
-    # The public key can either be the public key itself(ssh-rsa ...) or the path to the ssh key.
-    # The private key must be the path to the key.
-    ssh_pub_key: ~/.ssh/my-public-key.pub
-    ssh_priv_key: ~/.ssh/my-private-key
-```
-
-## SSH Configuration
-
-The SSH connection settings can be configured in the ssh.yaml file. Once you have set your desired values in ssh.yaml, you can connect to the master of your cluster using the command `azb spark cluster ssh`. 
-
-For example, with the default ssh cluster configuration:
-```yaml
-# ssh configuration
-
 # username: <name of the user account to ssh into>
 username: spark
 
@@ -55,7 +56,7 @@ web_ui_port: 8080
 jupyter_port: 8088
 ```
 
-Running the command `azb spark cluster ssh --id <cluster_id>` will attempt to ssh into the cluster which has the id specified with the username 'spark'. It will forward the Spark Job UI to localhost:4040, the Spark master's web UI to localhost:8080 and Jupyter to localhost:8088.
+Running the command `aztk spark cluster ssh --id <cluster_id>` will ssh into the master node of the Spark cluster. It will also forward the Spark Job UI to localhost:4040, the Spark master's web UI to localhost:8080, and Jupyter to localhost:8888.
 
 Note that all of the settings in ssh.yaml will be overrided by parameters passed on the command line.
 

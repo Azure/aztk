@@ -1,31 +1,29 @@
 # Clusters
-A Cluster in Thunderbolt is primarily designed to run Spark jobs. This document describes how to create a cluster
-to use for spark job submissions. Alternitavely for getting started and debugging you can also use the cluster
-in _interactive mode_ which will allow you to log into the master node, use Jupyter and view the Spark UI.
+In the Azure Distributed Data Engineering Toolkit, a cluster is primarily designed to run Spark jobs. This document describes how to create a cluster to use for Spark jobs. Alternitavely for getting started and debugging you can also use the cluster in _interactive mode_ which will allow you to log into the master node, use Jupyter and view the Spark UI.
 
 ## Creating a Cluster
-Create a spark cluster only takes a few simple steps after which you will be
-able to log into the master node of the cluster an interact with Spark in a
-Jupyter notebook, view the Spark UI on you local machine or submit a job.
+Creating a Spark cluster only takes a few simple steps after which you will be able to SSH into the master node of the cluster and interact with Spark. You will be able to view the Spark Web UI, Spark Jobs UI, submit Spark jobs (with *spark-submit*), and even interact with Spark in a Jupyter notebook.
+
+For the advanced user, please note that the default cluster settings are preconfigured in the *.aztk/cluster.yaml* file that is generated when you run `aztk spark init`. More information on cluster config [here.](../13-configuration.md)
 
 ### Commands
-Create a cluster:
+Create a Spark cluster:
 
 ```sh
-azb spark cluster create --id <your_cluster_id> --vm-size <vm_size_name> --size <number_of_nodes>
+aztk spark cluster create --id <your_cluster_id> --vm-size <vm_size_name> --size <number_of_nodes>
 ```
 
-For example, to create a cluster of 4 Standard_A2 nodes called 'spark' you can run:
+For example, to create a cluster of 4 *Standard_A2* nodes called 'spark' you can run:
 ```sh
-azb spark cluster create --id spark --vm-size standard_a2 --size 4
+aztk spark cluster create --id spark --vm-size standard_a2 --size 4
 ```
 
-You can find more information on VM sizes [here](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/sizes)
+You can find more information on VM sizes [here.](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/sizes) Please note that you must use the official SKU name when setting your VM size - they usually come in the form: "standard_d2_v2". 
 
-NOTE: The cluster id (--id) can only contain alphanumeric characters including hyphens and underscores, and cannot contain more than 64 characters.
+NOTE: The cluster id (`--id`) can only contain alphanumeric characters including hyphens and underscores, and cannot contain more than 64 characters. Each cluster **must** have a unique cluster id.
 
 #### Low priority nodes
-You can create your cluster with [low-priority](https://docs.microsoft.com/en-us/azure/batch/batch-low-pri-vms) VMs at an 80% discount by using **--size-low-pri** instead of **--size**. Note that these are great for experimental use, but can be taken away at any time. We recommend against this option when doing long running jobs or for critical workloads.
+You can create your cluster with [low-priority](https://docs.microsoft.com/en-us/azure/batch/batch-low-pri-vms) VMs at an 80% discount by using `--size-low-pri` instead of `--size`. Note that these are great for experimental use, but can be taken away at any time. We recommend against this option when doing long running jobs or for critical workloads.
 
 #### Setting your Spark and/or Python versions
 By default, Azure Thunderbolt will use **Spark v2.2.0** and **Python v3.5.4**. However, you can set your Spark and/or Python versions by [configuring the Docker image that is used by Azure Thunderbolt](./12-docker-image.md).
@@ -34,19 +32,19 @@ By default, Azure Thunderbolt will use **Spark v2.2.0** and **Python v3.5.4**. H
 You can list all clusters currently running in your account by running
 
 ```sh
-azb spark cluster list
+aztk spark cluster list
 ```
 
 ### Viewing a cluster
 To view details about a particular cluster run:
 
 ```sh
-azb spark cluster get --id <your_cluster_id>
+aztk spark cluster get --id <your_cluster_id>
 ```
 
-Note that the cluster is not fully usable until a master node has been selected and it's state is 'idle'.
+Note that the cluster is not fully usable until a master node has been selected and it's state is `idle`.
 
-For example here cluster 'spark' has 2 nodes and node tvm-257509324_2-20170820t200959z is the mastesr and ready to run a job.
+For example here cluster 'spark' has 2 nodes and node `tvm-257509324_2-20170820t200959z` is the mastesr and ready to run a job.
 
 ```sh
 Cluster         spark
@@ -67,59 +65,46 @@ tvm-257509324_2-20170820t200959z    | idle            | 40.83.254.90:50000   | *
 To delete a cluster run:
 
 ```sh
-azb spark cluster delete --id <your_cluster_id>
+aztk spark cluster delete --id <your_cluster_id>
 ```
 
 __You are charged for the cluster as long as the nodes are provisioned in your account.__ Make sure to delete any clusters you are not using to avoid unwanted costs.
 
 ### Interactive Mode
-All interaction to the cluster is done via SSH and SSH tunneling. The first step to enable this is to add
-a user to the master node.
+All interaction to the cluster is done via SSH and SSH tunneling. If you didn't create a user during cluster create (`aztk spark cluster create`), the first step is to enable to add a user to the master node.
 
-Using a __SSH key__
-```sh
-azb spark cluster add-user --id spark --username admin --ssh-key <your_key_OR_path_to_key>
-```
-
-Alternatively, updating the secrets.yaml with a the SSH key or path to the SSH will allow the tool to automatically
-pick it up.
+Make sure that the *.aztk/secrets.yaml* file has your SSH key (or path to the SSH key), and it will automatically use it to make the SSH connection.
 
 ```sh
-azb spark cluster add-user --id spark --username admin
+aztk spark cluster add-user --id spark --username admin
 ```
 
-Using a __password__
+Alternatively, you can add the SSH key as a parameter when running the `add-user` command.
 ```sh
-azb spark cluster add-user --id spark --username admin --password my_password
+aztk spark cluster add-user --id spark --username admin --ssh-key <your_key_OR_path_to_key>
 ```
 
-_Using passwords is discouraged over using a SSH key._
+You can also use a __password__ to create your user:
+```sh
+aztk spark cluster add-user --id spark --username admin --password <my_password>
+```
+
+_Using a SSH key is the recommended method._
 
 ### SSH and Port Forwarding
 After a user has been created, SSH into the master node with:
 
 ```sh
-azb spark cluster ssh --id spark --username admin
+aztk spark cluster ssh --id spark --username admin
 ```
-
-For interactive use with the cluster, port forwarding of certain ports is required to enable viewing the Spark Master UI,
-Spark Jobs UI and the Jupyter notebook in the cluster:
-
-```sh
-azb spark cluster ssh --id spark --username admin --masterui 8080 --webui 4040 --jupyter 8888
-```
-
-_Additional ports can be forwarded using standard ssh port forwarding syntax._
+By default, we port forward the Spark Web UI to *localhost:8080*, Spark Jobs UI to *localhost:4040*, and Jupyter to your *locahost:8888*. This can be [configured in *.thunderbolt/ssh.yaml*](../docs/13-configuration.md##sshyaml).
 
 ### Interact with your Spark cluster
 
 ### Jupyter
-Once the appropriate ports have been forwarded, simply navigate to the local ports for viewing. In
-this case, if you used port 8888 for Jupyter then navigate to [http://localhost:8888.](http://localhost:8888)
+Once the appropriate ports have been forwarded, simply navigate to the local ports for viewing. In this case, if you used port 8888 (the default) for Jupyter then navigate to [http://localhost:8888.](http://localhost:8888)
 
-__The notebooks will only be persisted to the local cluster.__ Once the cluster is deleted, all notebooks
-will be deleted with them. We recommend saving off the notebooks elsewhere if you do not want them
-deleted.
+__The notebooks will only be persisted to the local cluster.__ Once the cluster is deleted, all notebooks will be deleted with them. We recommend saving the notebooks elsewhere if you do not want them deleted.
 
 ## Next Steps
 - [Run a Spark job](./20-spark-submit.md)
