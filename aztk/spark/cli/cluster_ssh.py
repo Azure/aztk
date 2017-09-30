@@ -1,7 +1,7 @@
 import argparse
 import typing
-from dtde import clusterlib, log
-from dtde.config import SshConfig
+from aztk import clusterlib, log
+from aztk.config import SshConfig
 
 
 def setup_parser(parser: argparse.ArgumentParser):

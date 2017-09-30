@@ -1,5 +1,5 @@
 import os
-from dtde.config import SecretsConfig
+from aztk.config import SecretsConfig
 
 def get_user_public_key(key_or_path: str = None):
     """

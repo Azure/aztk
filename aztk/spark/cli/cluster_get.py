@@ -1,6 +1,6 @@
 import argparse
 import typing
-from dtde import clusterlib
+from aztk import clusterlib
 
 
 def setup_parser(parser: argparse.ArgumentParser):

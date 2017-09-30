@@ -1,14 +1,14 @@
 import os
 from datetime import datetime, timedelta
-from dtde.core import CommandBuilder, ssh
+from aztk.core import CommandBuilder, ssh
 from subprocess import call
 from typing import List
-from dtde.models import Software
+from aztk.models import Software
 import azure.batch.models as batch_models
 from . import azure_api, constants, upload_node_scripts, util, log
-from dtde.error import ClusterNotReadyError, ThunderboltError
+from aztk.error import ClusterNotReadyError, AztkError
 from collections import namedtuple
-import dtde.config as config
+import aztk.config as config
 import getpass
 
 POOL_ADMIN_USER_IDENTITY = batch_models.UserIdentity(
@@ -203,7 +203,7 @@ def create_cluster(
         max_tasks_per_node=1,
         metadata=[
             batch_models.MetadataItem(
-                name=constants.AZB_SOFTWARE_METADATA_KEY, value=Software.spark),
+                name=constants.AZTK_SOFTWARE_METADATA_KEY, value=Software.spark),
         ])
     
     # Get user ssh key, prompt for password if necessary
@@ -212,10 +212,10 @@ def create_cluster(
         password = getpass.getpass("Please input a password for user {0}: ".format(username))
         confirm_password = getpass.getpass("Please confirm your password for user {0}: ".format(username))
         if password != confirm_password:
-            raise ThunderboltError("Password confirmation did not match, please try again.")
+            raise AztkError("Password confirmation did not match, please try again.")
         if not password:
-            raise ThunderboltError(
-                "Password is empty, cannot add user to cluster. Provide a ssh public key in .thunderbolt/secrets.yaml. Or provide an ssh-key or password with commnad line parameters (--ssh-key or --password).")
+            raise AztkError(
+                "Password is empty, cannot add user to cluster. Provide a ssh public key in .aztk/secrets.yaml. Or provide an ssh-key or password with commnad line parameters (--ssh-key or --password).")
 
     # Create the pool + create user for the pool
     util.create_pool_if_not_exist(
@@ -367,7 +367,7 @@ def is_pool_running_spark(pool: batch_models.CloudPool):
         return False
 
     for metadata in pool.metadata:
-        if metadata.name == constants.AZB_SOFTWARE_METADATA_KEY:
+        if metadata.name == constants.AZTK_SOFTWARE_METADATA_KEY:
             return metadata.value == Software.spark
 
     return False

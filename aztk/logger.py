@@ -1,7 +1,7 @@
 import logging
 import platform
 
-root = logging.getLogger("dtde")
+root = logging.getLogger("aztk")
 
 DEFAULT_FORMAT = '%(message)s'
 VERBOSE_FORMAT = '%(asctime)s: %(levelname)s: %(message)s'

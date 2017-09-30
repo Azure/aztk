@@ -2,13 +2,13 @@ import os
 import yaml
 import typing
 from shutil import copyfile, rmtree
-from dtde import log
-from dtde import error
+from aztk import log
+from aztk import error
 from . import constants
 
 def load_spark_config():
     """
-        Copies the spark-defautls.conf and spark-env.sh in the .thunderbolt/ diretory
+        Copies the spark-defautls.conf and spark-env.sh in the .aztk/ diretory
     """
     if not os.path.exists(constants.DEFAULT_SPARK_CONF_DEST):
         os.mkdir(constants.DEFAULT_SPARK_CONF_DEST)
@@ -55,17 +55,17 @@ class SecretsConfig:
 
     def load_secrets_config(self, path: str=constants.DEFAULT_SECRETS_PATH):
         """
-            Loads the secrets.yaml file in the .thunderbolt directory
+            Loads the secrets.yaml file in the .aztk directory
         """
         if not os.path.isfile(path):
-            raise error.ThunderboltError(
+            raise error.AztkError(
                 "Secrets configuration file doesn't exists at {0}".format(path))
 
         with open(path, 'r') as stream:
             try:
                 secrets_config = yaml.load(stream)
             except yaml.YAMLError as err:
-                raise error.ThunderboltError(
+                raise error.AztkError(
                     "Error in cluster.yaml: {0}".format(err))
             
             self._merge_dict(secrets_config)
@@ -76,28 +76,28 @@ class SecretsConfig:
         try:
             self.batch_account_name = secrets_config['batch']['batchaccountname']
         except KeyError:
-            raise error.ThunderboltError("Please specify a batch account name in your .thunderbolt/secrets.yaml file")
+            raise error.AztkError("Please specify a batch account name in your .aztk/secrets.yaml file")
         try:
             self.batch_account_key = secrets_config['batch']['batchaccountkey']
         except KeyError:
-            raise error.ThunderboltError("Please specify a batch account key in your .thunderbolt/secrets.yaml file")
+            raise error.AztkError("Please specify a batch account key in your .aztk/secrets.yaml file")
         try:
             self.batch_service_url = secrets_config['batch']['batchserviceurl']
         except KeyError:
-            raise error.ThunderboltError("Please specify a batch service in your .thunderbolt/secrets.yaml file")
+            raise error.AztkError("Please specify a batch service in your .aztk/secrets.yaml file")
 
         try:
             self.storage_account_name = secrets_config['storage']['storageaccountname']
         except KeyError:
-            raise error.ThunderboltError("Please specify a storage account name in your .thunderbolt/secrets.yaml file")
+            raise error.AztkError("Please specify a storage account name in your .aztk/secrets.yaml file")
         try:
             self.storage_account_key = secrets_config['storage']['storageaccountkey']
         except KeyError:
-            raise error.ThunderboltError("Please specify a storage account key in your .thunderbolt/secrets.yaml file")
+            raise error.AztkError("Please specify a storage account key in your .aztk/secrets.yaml file")
         try:
             self.storage_account_suffix = secrets_config['storage']['storageaccountsuffix']
         except KeyError:
-            raise error.ThunderboltError("Please specify a storage account suffix in your .thunderbolt/secrets.yaml file")
+            raise error.AztkError("Please specify a storage account suffix in your .aztk/secrets.yaml file")
 
         # Check for ssh keys if they are provided
         try:
@@ -122,22 +122,22 @@ class ClusterConfig:
         self.ssh_key = None
         self.custom_script = None
         self.docker_repo = None
-        self.wait = False
+        self.wait = None
 
 
     def _read_config_file(self, path: str=constants.DEFAULT_CLUSTER_CONFIG_PATH):
         """
-            Reads the config file in the .thunderbolt/ directory (.thunderbolt/cluster.yaml)
+            Reads the config file in the .aztk/ directory (.aztk/cluster.yaml)
         """
         if not os.path.isfile(path):
-            raise error.ThunderboltError(
+            raise error.AztkError(
                     "Configuration file doesn't exist at {0}".format(path))
 
         with open(path, 'r') as stream:
             try:
                 config = yaml.load(stream)
             except yaml.YAMLError as err:
-                raise error.ThunderboltError(
+                raise error.AztkError(
                     "Error in cluster.yaml: {0}".format(err))
             
             if config is None:
@@ -171,7 +171,7 @@ class ClusterConfig:
         if 'docker_repo' in config and config['docker_repo'] is not None:
             self.docker_repo = config['docker_repo']
 
-        if 'wait' in config:
+        if 'wait' in config and config['wait'] is not None:
             self.wait = config['wait']
 
 
@@ -198,19 +198,23 @@ class ClusterConfig:
         )
 
         if self.uid is None:
-            raise error.ThunderboltError(
+            raise error.AztkError(
                     "Please supply an id for the cluster with a parameter (--id)")
 
         if self.size == 0 and self.size_low_pri == 0:
-            raise error.ThunderboltError(
+            raise error.AztkError(
                     "Please supply a valid (greater than 0) size or size_low_pri value either in the cluster.yaml configuration file or with a parameter (--size or --size-low-pri)")
 
         if self.vm_size is None:
-            raise error.ThunderboltError(
+            raise error.AztkError(
                     "Please supply a vm_size in either the cluster.yaml configuration file or with a parameter (--vm-size)")
+        
+        if self.wait is None:
+            raise error.AztkError(
+                "Please supply a value for wait in either the cluster.yaml configuration file or with a parameter (--wait or --no-wait)")
             
         if self.username is not None and self.wait is False:
-            raise error.ThunderboltError(
+            raise error.AztkError(
                     "User {0} will not be created since wait is not set to true in either the cluster.yaml configuration file or with a parameter (--wait)".format(self.username))
 
 
@@ -227,17 +231,17 @@ class SshConfig:
 
     def _read_config_file(self, path: str=constants.DEFAULT_SSH_CONFIG_PATH):
         """
-            Reads the config file in the .thunderbolt/ directory (.thunderbolt/cluster.yaml)
+            Reads the config file in the .aztk/ directory (.aztk/cluster.yaml)
         """
         if not os.path.isfile(path):
-            raise Exception(
+            raise error.AztkError(
                     "SSH Configuration file doesn't exist at {0}".format(path))
 
         with open(path, 'r') as stream:
             try:
                config = yaml.load(stream)
             except yaml.YAMLError as err:
-                raise Exception(
+                raise error.AztkError(
                     "Error in ssh.yaml: {0}".format(err))
 
             if config is None:
@@ -283,9 +287,9 @@ class SshConfig:
         )
 
         if self.cluster_id is None:
-            raise Exception(
+            raise error.AztkError(
                 "Please supply an id for the cluster either in the ssh.yaml configuration file or with a parameter (--id)")
         
         if self.username is None:
-            raise Exception(
+            raise error.AztkError(
                 "Please supply a username either in the ssh.yaml configuration file or with a parameter (--username)")

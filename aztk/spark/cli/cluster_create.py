@@ -1,8 +1,8 @@
 import argparse
 import typing
-from dtde.config import load_spark_config, cleanup_spark_config
-from dtde import clusterlib, log
-from dtde.config import ClusterConfig
+from aztk.config import load_spark_config, cleanup_spark_config
+from aztk import clusterlib, log
+from aztk.config import ClusterConfig
 
 def setup_parser(parser: argparse.ArgumentParser):
     parser.add_argument('--id', dest='cluster_id',
@@ -34,7 +34,7 @@ def setup_parser(parser: argparse.ArgumentParser):
 
     parser.add_argument('--no-wait', dest='wait', action='store_false')
     parser.add_argument('--wait', dest='wait', action='store_true')
-    parser.set_defaults(wait=False, size=None, size_low_pri=None)
+    parser.set_defaults(wait=None, size=None, size_low_pri=None)
 
 
 def execute(args: typing.NamedTuple):

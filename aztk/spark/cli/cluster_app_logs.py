@@ -1,6 +1,6 @@
 import argparse
 import typing
-from dtde import joblib
+from aztk import joblib
 
 
 def setup_parser(parser: argparse.ArgumentParser):

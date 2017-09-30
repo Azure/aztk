@@ -1,7 +1,7 @@
 import time
 import io
 from typing import List
-from dtde.core import CommandBuilder
+from aztk.core import CommandBuilder
 import azure.batch.models as batch_models
 import azure.batch.models.batch_error as batch_error
 from . import azure_api, util, log, constants

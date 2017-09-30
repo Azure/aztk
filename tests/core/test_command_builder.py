@@ -1,4 +1,4 @@
-from dtde.core.command_builder import CommandBuilder
+from aztk.core.command_builder import CommandBuilder
 
 
 def test_only_command():

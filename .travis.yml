@@ -9,7 +9,7 @@ install:
 
 script:
   - pytest
-  - pylint -E dtde
+  - pylint -E aztk
 
 branches:
   only:

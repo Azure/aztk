@@ -1,7 +1,7 @@
 import azure.batch.batch_service_client as batch
 import azure.batch.batch_auth as batch_auth
 import azure.storage.blob as blob
-import dtde.error as error
+import aztk.error as error
 from . import config
 from .version import __version__
 
@@ -68,7 +68,7 @@ def create_batch_client(
 
     # Set retry policy
     batch_client.config.retry_policy.retries = 5
-    batch_client.config.add_user_agent('dtde/{}'.format(__version__))
+    batch_client.config.add_user_agent('aztk/{}'.format(__version__))
 
     return batch_client
 

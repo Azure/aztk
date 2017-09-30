@@ -3,7 +3,7 @@ import os
 """
     Name of the executable
 """
-CLI_EXE = 'azb'
+CLI_EXE = 'aztk'
 
 DEFAULT_DOCKER_REPO = "jiata/thunderbolt:0.1.0-spark2.2.0-python3.5.4"
 DOCKER_SPARK_CONTAINER_NAME = "spark"
@@ -23,21 +23,21 @@ ROOT_PATH = os.path.normpath(os.path.join(os.path.dirname(__file__), '..'))
 """
     Path to the secrets file
 """
-DEFAULT_SECRETS_PATH = os.path.join(os.getcwd(), '.thunderbolt/secrets.yaml')
+DEFAULT_SECRETS_PATH = os.path.join(os.getcwd(), '.aztk/secrets.yaml')
 
 """
     Paths to the cluster configuration files
 """
-DEFAULT_SSH_CONFIG_PATH = os.path.join(os.getcwd(), '.thunderbolt/ssh.yaml')
-DEFAULT_CLUSTER_CONFIG_PATH = os.path.join(os.getcwd(), '.thunderbolt/cluster.yaml')
-DEFAULT_SPARK_CONF_SOURCE = os.path.join(os.getcwd(), '.thunderbolt')
+DEFAULT_SSH_CONFIG_PATH = os.path.join(os.getcwd(), '.aztk/ssh.yaml')
+DEFAULT_CLUSTER_CONFIG_PATH = os.path.join(os.getcwd(), '.aztk/cluster.yaml')
+DEFAULT_SPARK_CONF_SOURCE = os.path.join(os.getcwd(), '.aztk')
 DEFAULT_SPARK_CONF_DEST = os.path.join(ROOT_PATH, 'node_scripts/conf')
 
 """
     Source and destination paths for spark init
 """
 INIT_DIRECTORY_SOURCE = os.path.join(os.path.normpath(os.path.join(os.path.dirname(__file__), '..')), 'config')
-INIT_DIRECTORY_DEST = os.path.join(os.getcwd(), '.thunderbolt')
+INIT_DIRECTORY_DEST = os.path.join(os.getcwd(), '.aztk')
 
 """
     Key of the metadata entry for the pool that is used to store the master node id
@@ -51,7 +51,7 @@ MASTER_NODE_METADATA_KEY = "_spark_master_node"
 WAIT_FOR_MASTER_TIMEOUT = 60 * 20
 
 
-AZB_SOFTWARE_METADATA_KEY = "_azb_software"
+AZTK_SOFTWARE_METADATA_KEY = "_aztk_software"
 
 TASK_WORKING_DIR = "wd"
 SPARK_SUBMIT_LOGS_FILE = "output.log"

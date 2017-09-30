@@ -48,9 +48,9 @@ else
 fi
 
 # ----------------------------
-# Run azb setup python scripts 
+# Run aztk setup python scripts 
 # ----------------------------
-# use python v3.6.2 to run azb software
+# use python v3.6.2 to run aztk software
 echo "Starting setup using Docker"
 $(pyenv root)/versions/$thunderbolt_python_version/bin/pip install -r $(dirname $0)/requirements.txt
 
