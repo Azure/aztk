@@ -5,13 +5,13 @@ Please refer to the docs for details [how to select a docker-repo at cluster cre
 
 ### Supported Base Images
 We support several base images:
-- [Docker Hub] jiata/thunderbolt:<image-version>-spark2.2.0-python3.5.4
-- [Docker Hub] jiata/thunderbolt:<image-version>-spark2.1.0-python3.5.4
-- [Docker Hub] jiata/thunderbolt:<image-version>-spark1.6.3-python3.5.4
-- [Docker Hub] jiata/thunderbolt:<image-version>-spark2.1.0-python2.7.13
-- [Docker Hub] jiata/thunderbolt:<image-version>-spark1.6.3-python2.7.13
+- [Docker Hub] jiata/aztk:<image-version>-spark2.2.0-python3.5.4
+- [Docker Hub] jiata/aztk:<image-version>-spark2.1.0-python3.5.4
+- [Docker Hub] jiata/aztk:<image-version>-spark1.6.3-python3.5.4
+- [Docker Hub] jiata/aztk:<image-version>-spark2.1.0-python2.7.13
+- [Docker Hub] jiata/aztk:<image-version>-spark1.6.3-python2.7.13
 
-NOTE: Replace **<image-version>** with the version of the image you wish to use. For example: **jiata/thunderbolt:0.1.0-spark2.2.0-python3.5.4**
+NOTE: Replace **<image-version>** with the version of the image you wish to use. For example: **jiata/aztk:0.1.0-spark2.2.0-python3.5.4**
 
 ### Gallery of 3rd Party Images
 Since this toolkit uses Docker containers to run Spark, users can bring their own images. Here's a list of 3rd party images:
@@ -33,7 +33,7 @@ By default, the Azure Distributed Data Engineering Toolkit uses **Spark2.2.0-Pyt
 
 All the base images above are built on a vanilla ubuntu16.04-LTS image and comes pre-baked with Jupyter Notebook and a connection to Azure Blob Storage (WASB).
 
-Currently, the images are hosted on [Docker Hub (jiata/thunderbolt)](https://hub.docker.com/r/jiata/thunderbolt).
+Currently, the images are hosted on [Docker Hub (jiata/aztk)](https://hub.docker.com/r/jiata/aztk).
 
 If you have requests to add to the list of supported base images, please file a new Github issue.
 
@@ -45,7 +45,7 @@ You can choose to build on top of one of our base images by using the **FROM** k
 ```python
 # Your custom Dockerfile
 
-FROM jiata/thunderbolt:<thunderbolt-version>-spark2.2.0-python3.5.4
+FROM jiata/aztk:<aztk-image-version>-spark2.2.0-python3.5.4
 ...
 
 ```

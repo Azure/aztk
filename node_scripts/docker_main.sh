@@ -5,7 +5,7 @@
 # This script uses the specificied user python version ($USER_PYTHON_VERSION)
 
 set -e
-thunderbolt_python_version=3.6.2
+aztk_python_version=3.5.4
 
 # --------------------
 # Setup custom scripts
@@ -50,12 +50,12 @@ fi
 # ----------------------------
 # Run aztk setup python scripts 
 # ----------------------------
-# use python v3.6.2 to run aztk software
+# use python v3.5.4 to run aztk software
 echo "Starting setup using Docker"
-$(pyenv root)/versions/$thunderbolt_python_version/bin/pip install -r $(dirname $0)/requirements.txt
+$(pyenv root)/versions/$aztk_python_version/bin/pip install -r $(dirname $0)/requirements.txt
 
 echo "Running main.py script"
-$(pyenv root)/versions/$thunderbolt_python_version/bin/python $(dirname $0)/main.py install
+$(pyenv root)/versions/$aztk_python_version/bin/python $(dirname $0)/main.py install
 
 # sleep to keep container running
 while true; do sleep 1; done

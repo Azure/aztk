@@ -2,31 +2,25 @@
 FROM ubuntu:16.04
 
 # set version of python required for thunderbolt application
-ENV THUNDERBOLT_PYTHON_VERSION=3.6.2
+ENV AZTK_PYTHON_VERSION=3.5.4
 
 # modify these ARGs on build time to specify your desired versions of Spark/Hadoop and Python
 ARG SPARK_VERSION_KEY=spark-2.1.0-bin-hadoop2.7
-ARG PYTHON_VERSION=3.6.2
+ARG PYTHON_VERSION=3.5.4
 
 # set up apt-get
 RUN apt-get update -y && \
-    apt-get install -y make build-essential libssl-dev zlib1g-dev libbz2-dev \
-    libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev \
-    xz-utils tk-dev
+    apt-get install -y --no-install-recommends make build-essential libssl-dev zlib1g-dev \
+    libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm git libncurses5-dev \
+    libncursesw5-dev xz-utils tk-dev 
 
 # installing [software-properties-common] so that we can use [apt-add-repository] to add the repository [ppa:webupd8team/java] form which we install Java8
-RUN apt-get install software-properties-common -y && \
+RUN apt-get install -y --no-install-recommends software-properties-common && \
     apt-add-repository ppa:webupd8team/java -y && \
     apt-get update -y
- 
+
 # installing java
-RUN apt-get install -y default-jdk
-
-# install common tools
-RUN apt-get install -y git
-
-# install curl
-RUN apt-get install -y curl 
+RUN apt-get install -y --no-install-recommends default-jdk
 
 # install and setup pyenv
 RUN git clone git://github.com/yyuu/pyenv.git .pyenv
@@ -38,7 +32,7 @@ RUN eval "$(pyenv init -)"
 RUN echo 'export "$(pyenv init -)"' >> ~/.bashrc
 
 # install thunderbolt required python version & the user specified version of python
-RUN pyenv install -f $THUNDERBOLT_PYTHON_VERSION && \
+RUN pyenv install -f $AZTK_PYTHON_VERSION && \
     pyenv install -s $PYTHON_VERSION
 RUN pyenv global $PYTHON_VERSION
 
