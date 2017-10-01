@@ -209,8 +209,8 @@ def create_cluster(
     # Get user ssh key, prompt for password if necessary
     ssh_key = ssh.get_user_public_key(ssh_key)
     if username is not None and password is None and ssh_key is None:
-        password = getpass.getpass("Please input a password for user {0}: ".format(username))
-        confirm_password = getpass.getpass("Please confirm your password for user {0}: ".format(username))
+        password = getpass.getpass("Please input a password for user '{0}': ".format(username))
+        confirm_password = getpass.getpass("Please confirm your password for user '{0}': ".format(username))
         if password != confirm_password:
             raise AztkError("Password confirmation did not match, please try again.")
         if not password:

@@ -211,11 +211,11 @@ class ClusterConfig:
         
         if self.wait is None:
             raise error.AztkError(
-                "Please supply a value for wait in either the cluster.yaml configuration file or with a parameter (--wait or --no-wait)")
+                    "Please supply a value for wait in either the cluster.yaml configuration file or with a parameter (--wait or --no-wait)")
             
         if self.username is not None and self.wait is False:
             raise error.AztkError(
-                    "User {0} will not be created since wait is not set to true in either the cluster.yaml configuration file or with a parameter (--wait)".format(self.username))
+                    "You cannot create a user '{0}' if wait is set to true. By default, we create a user in the cluster.yaml file. Please either the configure your cluster.yaml file or set the parameter (--wait)".format(self.username))
 
 
 class SshConfig:
