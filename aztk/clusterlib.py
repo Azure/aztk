@@ -1,9 +1,14 @@
 import os
+import yaml
+import pathlib
+from distutils.dir_util import copy_tree
 from datetime import datetime, timedelta
 from aztk.core import CommandBuilder, ssh
 from subprocess import call
 from typing import List
+from shutil import copy, rmtree
 from aztk.models import Software
+import aztk.error as error
 import azure.batch.models as batch_models
 from . import azure_api, constants, upload_node_scripts, util, log
 from aztk.error import ClusterNotReadyError, AztkError
@@ -80,26 +85,16 @@ def docker_run_cmd(docker_repo: str = None) -> str:
 
 
 def generate_cluster_start_task(
-        cluster_id: str,
         zip_resource_file: batch_models.ResourceFile,
-        custom_script: str = None,
         docker_repo: str = None):
     """
         This will return the start task object for the pool to be created.
         :param cluster_id str: Id of the cluster(Used for uploading the resource files)
         :param zip_resource_file: Resource file object pointing to the zip file containing scripts to run on the node
-        :param custom_script str: Path to a local file to be uploaded to storage and run after spark started.
+        :param custom_script str: List of paths to local files to be uploaded to storage and run after spark started.
     """
 
     resource_files = [zip_resource_file]
-
-    # Upload custom script file if given
-    if custom_script is not None:
-        resource_files.append(
-            util.upload_shell_script_to_container(
-                container_name=cluster_id,
-                file_path=custom_script,
-                node_path="custom-scripts/{0}".format(os.path.basename(custom_script))))
 
     spark_master_ui_port = constants.DOCKER_SPARK_MASTER_UI_PORT
     spark_worker_ui_port = constants.DOCKER_SPARK_WORKER_UI_PORT
@@ -140,9 +135,47 @@ def generate_cluster_start_task(
         user_identity=POOL_ADMIN_USER_IDENTITY,
         wait_for_success=True)
 
+def upload_custom_script_config(custom_scripts=None):
+    with open(os.path.join(constants.CUSTOM_SCRIPTS_DEST, 'custom-scripts.yaml'), 'w+') as f:
+        f.write(yaml.dump(custom_scripts, default_flow_style = False))
+
+
+def move_custom_scripts(custom_scripts=None):
+    if custom_scripts is None:
+        return
+    
+    # remove lingering custom_scripts from a previous cluster create
+    clean_up_custom_scripts()
+
+    os.mkdir(os.path.join(constants.ROOT_PATH, 'node_scripts', 'custom-scripts'))
+    custom_scripts_dir = os.path.join(constants.ROOT_PATH, 'node_scripts', 'custom-scripts')
+
+    for index, custom_script in enumerate(custom_scripts):
+        '''
+            custom_script: {script: str, runOn: str}
+        '''
+        path = pathlib.Path(custom_script['script'])
+        dest_file = pathlib.Path(custom_scripts_dir, path.name)
+        new_file_name = str(index) + '_' + dest_file.name
+        src = str(path.absolute())
+        dest = str(pathlib.Path(dest_file.with_name(new_file_name)).absolute())
+
+        if path.is_dir():
+            copy_tree(src, dest)
+        else:
+            copy(src, dest)
+        
+        custom_scripts[index]['script'] = dest_file.with_name(new_file_name).name
+    
+    upload_custom_script_config(custom_scripts)
+
+
+def clean_up_custom_scripts():
+    if os.path.exists(os.path.join(constants.ROOT_PATH, constants.CUSTOM_SCRIPTS_DEST)):
+        rmtree(constants.CUSTOM_SCRIPTS_DEST)
 
 def create_cluster(
-        custom_script: str,
+        custom_scripts: List[object],
         cluster_id: str,
         vm_count,
         vm_low_pri_count,
@@ -154,7 +187,7 @@ def create_cluster(
         wait=True):
     """
         Create a spark cluster
-        :param custom_script: Path to a custom script to run on all the node of the cluster
+        :param custom_scripts: List of objects containing each scripts path and execution location (master/worker/all-nodes)
         :parm cluster_id: Id of the cluster
         :param vm_count: Number of node in the cluster
         :param vm_low_pri_count: Number of low pri node in the cluster
@@ -163,14 +196,14 @@ def create_cluster(
         :param password: Optional password of user to add to the pool when ready(Need wait to be True)
         :param wait: If this function should wait for the cluster to be ready(Master and all slave booted)
     """
-    # Copy spark conf files if they exist
-    config.load_spark_config()
+    # move custom scripts to node_scripts/ for upload
+    move_custom_scripts(custom_scripts)
 
     # Upload start task scripts
     zip_resource_file = upload_node_scripts.zip_and_upload()
 
-    # Clean up spark conf files
-    config.cleanup_spark_config()
+    # clean up custom scripts
+    clean_up_custom_scripts()
 
     batch_client = azure_api.get_batch_client()
 
@@ -198,7 +231,7 @@ def create_cluster(
         target_dedicated_nodes=vm_count,
         target_low_priority_nodes=vm_low_pri_count,
         start_task=generate_cluster_start_task(
-            pool_id, zip_resource_file, custom_script, docker_repo),
+            zip_resource_file, docker_repo),
         enable_inter_node_communication=True,
         max_tasks_per_node=1,
         metadata=[

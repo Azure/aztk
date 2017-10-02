@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # This file is the entry point of the docker container.
-# It will run the custom scripts if present and start spark.
+# It will setup WASB and start Spark.
+# This script uses the storage account configured in .thunderbolt/secrets.yaml
 # This script uses the specificied user python version ($USER_PYTHON_VERSION)
 
 set -e
@@ -11,16 +12,6 @@ aztk_python_version=3.5.4
 # Setup custom scripts
 # --------------------
 custom_script_dir=$DOCKER_WORKING_DIR/custom-scripts
-
-if [ -d "$custom_script_dir" ]; then
-    echo "Custom script dir '$custom_script_dir' exists. Running all script there."
-    for script in  $custom_script_dir/*.sh; do
-        echo "Running custom script $script"
-        bash $script
-    done
-else
-    echo "Custom script dir '$custom_script_dir' doesn't exists. Will not run any custom scripts."
-fi
 
 # -----------------------
 # Preload jupyter samples 

@@ -120,48 +120,6 @@ def upload_file_to_container(container_name, file_path, use_full_path=False, nod
                                      blob_source=sas_url)
 
 
-def upload_text_to_container(container_name: str, content: str, local_path: str) -> batch_models.ResourceFile:
-    local_path = normalize_path(local_path)
-    blob_name = local_path
-    block_blob_client = azure_api.get_blob_client()
-    block_blob_client.create_container(container_name, fail_on_exist=False)
-    block_blob_client.create_blob_from_text(container_name,
-                                            blob_name,
-                                            content)
-
-    sas_token = block_blob_client.generate_blob_shared_access_signature(
-        container_name,
-        blob_name,
-        permission=blob.BlobPermissions.READ,
-        expiry=datetime.datetime.utcnow() + datetime.timedelta(hours=24))
-
-    sas_url = block_blob_client.make_blob_url(container_name,
-                                              blob_name,
-                                              sas_token=sas_token)
-
-    return batch_models.ResourceFile(file_path=blob_name,
-                                     blob_source=sas_url)
-
-
-def upload_shell_script_to_container(
-        container_name: str,
-        file_path: str,
-        node_path: str=None) -> batch_models.ResourceFile:
-    """
-    Upload a shell(.sh) file to the container.
-    It will make sure the windows line ending are replaced with unix line ending to prevent execution errors
-    :param container_name: Azure blob container
-    :param file_path: Local file path
-    :param node_path: Optional path on the node. By default will use the same as the file_path
-    """
-    if not node_path:
-        node_path = normalize_path(file_path)
-
-    with io.open(file_path, 'r') as f:
-        content = f.read().replace('\r\n', '\n')
-        return upload_text_to_container(container_name, content, node_path)
-
-
 def print_configuration(config):
     """
     Prints the configuration being used as a dictionary

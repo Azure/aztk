@@ -33,6 +33,8 @@ DEFAULT_CLUSTER_CONFIG_PATH = os.path.join(os.getcwd(), '.aztk/cluster.yaml')
 DEFAULT_SPARK_CONF_SOURCE = os.path.join(os.getcwd(), '.aztk')
 DEFAULT_SPARK_CONF_DEST = os.path.join(ROOT_PATH, 'node_scripts/conf')
 
+CUSTOM_SCRIPTS_DEST = os.path.join(ROOT_PATH, 'node_scripts', 'custom-scripts')
+
 """
     Source and destination paths for spark init
 """

@@ -17,9 +17,6 @@ def setup_parser(parser: argparse.ArgumentParser):
                             help='Number of low priority vms in your cluster')
     parser.add_argument('--vm-size',
                         help='VM size for nodes in your cluster')
-    parser.add_argument('--custom-script',
-                        help='Absolute path of custom bash script (.sh) to run \
-                              on each node')
     parser.add_argument('--username',
                         help='Username to access your cluster (required: --wait flag)')
     parser.add_argument('--password',
@@ -46,7 +43,6 @@ def execute(args: typing.NamedTuple):
             size = args.size,
             size_low_pri = args.size_low_pri,
             vm_size = args.vm_size,
-            custom_script = args.custom_script,
             wait = args.wait,
             username = args.username,
             password = args.password,
@@ -59,7 +55,7 @@ def execute(args: typing.NamedTuple):
     log.info(">        dedicated:      %s", cluster_conf.size)
     log.info(">     low priority:      %s", cluster_conf.size_low_pri)
     log.info("spark cluster vm size:   %s", cluster_conf.vm_size)
-    log.info("path to custom script:   %s", cluster_conf.custom_script)
+    log.info("custom scripts:          %s", cluster_conf.custom_scripts)
     log.info("docker repo name:        %s", cluster_conf.docker_repo)
     log.info("wait for cluster:        %s", cluster_conf.wait)
     log.info("username:                %s", cluster_conf.username)
@@ -69,7 +65,7 @@ def execute(args: typing.NamedTuple):
 
     # create spark cluster
     clusterlib.create_cluster(
-        cluster_conf.custom_script,
+        cluster_conf.custom_scripts,
         cluster_conf.uid,
         cluster_conf.size,
         cluster_conf.size_low_pri,

@@ -108,7 +108,7 @@ class SecretsConfig:
             self.ssh_pub_key = secrets_config['default']['ssh_pub_key']
         except (KeyError, TypeError) as e:
             pass
-
+            
 
 class ClusterConfig:
 
@@ -120,7 +120,7 @@ class ClusterConfig:
         self.username = None
         self.password = None
         self.ssh_key = None
-        self.custom_script = None
+        self.custom_scripts = None
         self.docker_repo = None
         self.wait = None
 
@@ -165,8 +165,8 @@ class ClusterConfig:
         if 'password' in config and config['password'] is not None:
             self.password = config['password']
 
-        if 'custom_script' in config and config['custom_script'] is not None:
-            self.custom_script = config['custom_script']
+        if 'custom_scripts' in config and config['custom_scripts'] not in [[None], None]:
+            self.custom_scripts = config['custom_scripts']
 
         if 'docker_repo' in config and config['docker_repo'] is not None:
             self.docker_repo = config['docker_repo']
@@ -175,7 +175,7 @@ class ClusterConfig:
             self.wait = config['wait']
 
 
-    def merge(self, uid, username, size, size_low_pri, vm_size, ssh_key, password, wait, custom_script, docker_repo):
+    def merge(self, uid, username, size, size_low_pri, vm_size, ssh_key, password, wait, docker_repo):
         """
             Reads configuration file (cluster.yaml), merges with command line parameters,
             checks for errors with configuration
@@ -192,7 +192,7 @@ class ClusterConfig:
                 ssh_key = ssh_key,
                 password = password,
                 wait = wait,
-                custom_script = custom_script, 
+                custom_scripts = None, 
                 docker_repo = docker_repo
             )
         )
