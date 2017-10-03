@@ -6,6 +6,7 @@ from aztk.config import ClusterConfig
 from aztk.aztklib import Aztk
 
 
+
 def setup_parser(parser: argparse.ArgumentParser):
     parser.add_argument('--id', dest='cluster_id',
                         help='The unique id of your spark cluster')
@@ -43,15 +44,15 @@ def execute(args: typing.NamedTuple):
     cluster_conf = ClusterConfig()
 
     cluster_conf.merge(
-            uid = args.cluster_id,
-            size = args.size,
-            size_low_pri = args.size_low_pri,
-            vm_size = args.vm_size,
-            wait = args.wait,
-            username = args.username,
-            password = args.password,
-            ssh_key = args.ssh_key,
-            docker_repo = args.docker_repo)
+        uid=args.cluster_id,
+        size=args.size,
+        size_low_pri=args.size_low_pri,
+        vm_size=args.vm_size,
+        wait=args.wait,
+        username=args.username,
+        password=args.password,
+        ssh_key=args.ssh_key,
+        docker_repo=args.docker_repo)
 
     log.info("-------------------------------------------")
     log.info("spark cluster id:        %s", cluster_conf.uid)
@@ -80,4 +81,7 @@ def execute(args: typing.NamedTuple):
         cluster_conf.docker_repo,
         cluster_conf.wait)
 
-    log.info("Cluster created successfully.")
+    if cluster_conf.wait:
+        log.info("Cluster %s created successfully.", cluster_conf.uid)
+    else:
+        log.info("Cluster %s is being provisioned.", cluster_conf.uid)
