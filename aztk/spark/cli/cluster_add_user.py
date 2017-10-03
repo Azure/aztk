@@ -1,7 +1,7 @@
 import argparse
 import typing
-from aztk import clusterlib, log
-
+from aztk import log
+from aztk.aztklib import Aztk
 
 def setup_parser(parser: argparse.ArgumentParser):
     parser.add_argument('--id', dest='cluster_id', required=True,
@@ -18,11 +18,12 @@ def setup_parser(parser: argparse.ArgumentParser):
 
 
 def execute(args: typing.NamedTuple):
+    aztk = Aztk()
     log.info('-------------------------------------------')
     log.info('spark cluster id:    {}'.format(args.cluster_id))
     log.info('username:            {}'.format(args.username))
     log.info('-------------------------------------------')
-    password, ssh_key = clusterlib.create_user(
+    password, ssh_key = aztk.cluster.create_user(
         args.cluster_id,
         args.username,
         args.password,

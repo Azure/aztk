@@ -1,8 +1,10 @@
 import argparse
 import typing
 from aztk.config import load_spark_config, cleanup_spark_config
-from aztk import clusterlib, log
+from aztk import log
 from aztk.config import ClusterConfig
+from aztk.aztklib import Aztk
+
 
 def setup_parser(parser: argparse.ArgumentParser):
     parser.add_argument('--id', dest='cluster_id',
@@ -35,6 +37,8 @@ def setup_parser(parser: argparse.ArgumentParser):
 
 
 def execute(args: typing.NamedTuple):
+    aztk = Aztk()
+
     # read cluster.yaml configuartion file, overwrite values with args
     cluster_conf = ClusterConfig()
 
@@ -64,7 +68,7 @@ def execute(args: typing.NamedTuple):
     log.info("-------------------------------------------")
 
     # create spark cluster
-    clusterlib.create_cluster(
+    aztk.cluster.create_cluster(
         cluster_conf.custom_scripts,
         cluster_conf.uid,
         cluster_conf.size,

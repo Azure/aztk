@@ -43,14 +43,15 @@ def __create_zip():
     logging.debug("Ziped file")
 
 
-def __upload():
+def __upload(blob_client):
     logging.debug("Uploading node scripts...")
     return util.upload_file_to_container(
         container_name="spark-node-scripts",
         file_path=local_tmp_zipfile,
+        blob_client=blob_client,
         use_full_path=False)
 
 
-def zip_and_upload():
+def zip_and_upload(blob_client):
     __create_zip()
-    return __upload()
+    return __upload(blob_client)

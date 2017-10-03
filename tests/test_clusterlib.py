@@ -1,6 +1,7 @@
-from aztk import clusterlib
+from aztk.clusterlib import Cluster
 import azure.batch.models as batch_models
 
+clusterlib = Cluster(None, None, None, None, None)
 
 def create_mock_cluster(
         pool_id='test',
@@ -22,7 +23,7 @@ def create_mock_cluster(
         state=state,
         allocation_state=allocation_state
     )
-    cluster = clusterlib.Cluster(pool)
+    cluster = clusterlib.ClusterModel(pool)
     return cluster
 
 

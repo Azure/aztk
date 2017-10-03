@@ -1,7 +1,7 @@
 import argparse
 import typing
-from aztk import joblib, log
-
+from aztk import log
+from aztk.aztklib import Aztk
 
 def setup_parser(parser: argparse.ArgumentParser):
     parser.add_argument('--id', dest='cluster_id', required=True,
@@ -67,6 +67,7 @@ def setup_parser(parser: argparse.ArgumentParser):
 
 
 def execute(args: typing.NamedTuple):
+    aztk = Aztk()
     jars = []
     py_files = []
     files = []
@@ -110,7 +111,7 @@ def execute(args: typing.NamedTuple):
     log.info("Application arguments:   %s", args.app_args)
     log.info("-------------------------------------------")
 
-    joblib.submit_app(
+    aztk.job.submit_app(
         cluster_id=args.cluster_id,
         name=args.name,
         app=args.app,

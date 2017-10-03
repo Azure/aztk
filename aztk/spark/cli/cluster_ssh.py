@@ -1,8 +1,8 @@
 import argparse
 import typing
-from aztk import clusterlib, log
+from aztk import log
 from aztk.config import SshConfig
-
+from aztk.aztklib import Aztk
 
 def setup_parser(parser: argparse.ArgumentParser):
     parser.add_argument('--id', dest="cluster_id",
@@ -24,6 +24,7 @@ def setup_parser(parser: argparse.ArgumentParser):
 
 
 def execute(args: typing.NamedTuple):
+    aztk = Aztk()
     ssh_conf = SshConfig()
 
     ssh_conf.merge(
@@ -45,7 +46,7 @@ def execute(args: typing.NamedTuple):
     log.info("-------------------------------------------")
 
     # get ssh command
-    ssh_cmd = clusterlib.ssh_in_master(
+    ssh_cmd = aztk.cluster.ssh_in_master(
         cluster_id=ssh_conf.cluster_id,
         webui=ssh_conf.web_ui_port,
         jobui=ssh_conf.job_ui_port,

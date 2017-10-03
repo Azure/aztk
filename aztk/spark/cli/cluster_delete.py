@@ -1,6 +1,7 @@
 import argparse
 import typing
-from aztk import clusterlib, log
+from aztk import log
+from aztk.aztklib import Aztk
 
 
 def setup_parser(parser: argparse.ArgumentParser):
@@ -15,7 +16,9 @@ def setup_parser(parser: argparse.ArgumentParser):
                         help='Do not prompt for confirmation, force deletion of cluster.')
     parser.set_defaults(force=False)
 
+    
 def execute(args: typing.NamedTuple):
+    aztk = Aztk()
     cluster_id = args.cluster_id
 
     if not args.force:
@@ -25,7 +28,7 @@ def execute(args: typing.NamedTuple):
             log.error("Confirmation cluster id does not match. Please try again.")
             return
 
-    if clusterlib.delete_cluster(cluster_id):
+    if aztk.cluster.delete_cluster(cluster_id):
         log.info("Deleting cluster %s", cluster_id)
     else:
         log.error("Cluster with id '%s' doesn't exist or was already deleted.", cluster_id)
