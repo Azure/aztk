@@ -47,7 +47,7 @@ class MasterInvalidStateError(Exception):
 def wait_for_master_to_be_ready(cluster_id: str):
     batch_client = azure_api.get_batch_client()
     master_node_id = None
-
+    log.info("Waiting for spark master to be ready")
     start_time = datetime.datetime.now()
     while True:
         if not master_node_id:
@@ -153,7 +153,7 @@ def get_master_node_id(pool_id):
     return get_master_node_id_from_pool(batch_client.pool.get(pool_id))
 
 
-def create_pool_if_not_exist(pool, wait=True):
+def create_pool_if_not_exist(pool):
     """
     Creates the specified pool if it doesn't already exist
     :param batch_client: The batch client to use.
@@ -166,15 +166,7 @@ def create_pool_if_not_exist(pool, wait=True):
 
     try:
         batch_client.pool.add(pool)
-        if wait:
-            wait_for_all_nodes_state(pool, frozenset(
-                (batch_models.ComputeNodeState.start_task_failed,
-                 batch_models.ComputeNodeState.unusable,
-                 batch_models.ComputeNodeState.idle)
-            ))
-            return True
-        else:
-            return True
+        return True
     except batch_models.BatchErrorException as e:
         if e.error.code != "PoolExists":
             raise

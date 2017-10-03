@@ -20,7 +20,21 @@ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 apt-get -y update
 apt-get -y install docker-ce
-docker pull container_name
+
+if [ -z "$DOCKER_USERNAME" ]; then
+    echo "No Credentials provided. No need to login to dockerhub $DOCKER_USERNAME $DOCKER_PASSWORD"
+else
+    echo "Docker credentials provided. Login in."
+    docker login $docker_endpoint --username $DOCKER_USERNAME --password $DOCKER_PASSWORD
+fi
+
+if [ -z "$DOCKER_ENDPOINT" ]; then
+    echo "Pulling $repo_name from dockerhub"
+    docker pull $repo_name
+else
+    echo "Pulling $container_name from $DOCKER_ENDPOINT"
+    docker pull $DOCKER_ENDPOINT/$repo_name
+fi
 
 # Unzip resource files and set permissions
 apt-get -y install unzip

@@ -26,9 +26,11 @@ def cluster_install_cmd(
         zip_resource_file: batch_models.ResourceFile,
         docker_repo: str = None):
     """
-        For Docker on ubuntu 16.04 - return the command line 
+        For Docker on ubuntu 16.04 - return the command line
         to be run on the start task of the pool to setup spark.
     """
+
+    docker_repo = docker_repo or constants.DEFAULT_DOCKER_REPO
 
     ret = [
         'apt-get -y clean',
@@ -39,8 +41,8 @@ def cluster_install_cmd(
             zip_resource_file.file_path),
         'chmod 777 $AZ_BATCH_TASK_WORKING_DIR/setup_node.sh',
         '/bin/bash $AZ_BATCH_TASK_WORKING_DIR/setup_node.sh {0} {1} "{2}"'.format(
-            constants.DOCKER_SPARK_CONTAINER_NAME, 
-            constants.DEFAULT_DOCKER_REPO, 
+            constants.DOCKER_SPARK_CONTAINER_NAME,
+            docker_repo,
             docker_run_cmd(docker_repo)),
     ]
 
@@ -51,9 +53,6 @@ def docker_run_cmd(docker_repo: str = None) -> str:
     """
         Build the docker run command by setting up the environment variables
     """
-
-    docker_repo = docker_repo if docker_repo != None \
-            else constants.DEFAULT_DOCKER_REPO
 
     cmd = CommandBuilder('docker run')
     cmd.add_option('--net', 'host')
@@ -104,6 +103,7 @@ def generate_cluster_start_task(
     # TODO use certificate
     batch_config = azure_api.get_batch_config()
     blob_config = azure_api.get_blob_config()
+
     environment_settings = [
         batch_models.EnvironmentSetting(
             name="BATCH_ACCOUNT_KEY", value=batch_config.account_key),
@@ -123,7 +123,7 @@ def generate_cluster_start_task(
             name="SPARK_JUPYTER_PORT", value=spark_jupyter_port),
         batch_models.EnvironmentSetting(
             name="SPARK_WEB_UI_PORT", value=spark_web_ui_port),
-    ]
+    ] + get_docker_credentials()
 
     # start task command
     command = cluster_install_cmd(zip_resource_file, docker_repo)
@@ -143,7 +143,7 @@ def upload_custom_script_config(custom_scripts=None):
 def move_custom_scripts(custom_scripts=None):
     if custom_scripts is None:
         return
-    
+
     # remove lingering custom_scripts from a previous cluster create
     clean_up_custom_scripts()
 
@@ -164,15 +164,34 @@ def move_custom_scripts(custom_scripts=None):
             copy_tree(src, dest)
         else:
             copy(src, dest)
-        
+
         custom_scripts[index]['script'] = dest_file.with_name(new_file_name).name
-    
+
     upload_custom_script_config(custom_scripts)
 
 
 def clean_up_custom_scripts():
     if os.path.exists(os.path.join(constants.ROOT_PATH, constants.CUSTOM_SCRIPTS_DEST)):
         rmtree(constants.CUSTOM_SCRIPTS_DEST)
+
+def get_docker_credentials():
+    creds = []
+
+    secrets_config = config.SecretsConfig()
+    secrets_config.load_secrets_config()
+
+    if secrets_config.docker_endpoint:
+        creds.append(batch_models.EnvironmentSetting(
+            name="DOCKER_ENDPOINT", value=secrets_config.docker_endpoint))
+    if secrets_config.docker_username:
+        creds.append(batch_models.EnvironmentSetting(
+            name="DOCKER_USERNAME", value=secrets_config.docker_username))
+    if secrets_config.docker_password:
+        creds.append(batch_models.EnvironmentSetting(
+            name="DOCKER_PASSWORD", value=secrets_config.docker_password))
+
+    return creds
+
 
 def create_cluster(
         custom_scripts: List[object],
@@ -238,7 +257,7 @@ def create_cluster(
             batch_models.MetadataItem(
                 name=constants.AZTK_SOFTWARE_METADATA_KEY, value=Software.spark),
         ])
-    
+
     # Get user ssh key, prompt for password if necessary
     ssh_key = ssh.get_user_public_key(ssh_key)
     if username is not None and password is None and ssh_key is None:
@@ -251,9 +270,7 @@ def create_cluster(
                 "Password is empty, cannot add user to cluster. Provide a ssh public key in .aztk/secrets.yaml. Or provide an ssh-key or password with commnad line parameters (--ssh-key or --password).")
 
     # Create the pool + create user for the pool
-    util.create_pool_if_not_exist(
-        pool,
-        wait)
+    util.create_pool_if_not_exist(pool)
 
     # Create job
     job = batch_models.JobAddParameter(
@@ -332,9 +349,9 @@ def pretty_node_count(cluster: Cluster) -> str:
 
 
 def pretty_dedicated_node_count(cluster: Cluster)-> str:
-    if (cluster.pool.allocation_state is batch_models.AllocationState.resizing\
-        or cluster.pool.state is batch_models.PoolState.deleting)\
-        and cluster.dedicated_nodes != cluster.target_dedicated_nodes:
+    if (cluster.pool.allocation_state is batch_models.AllocationState.resizing
+            or cluster.pool.state is batch_models.PoolState.deleting)\
+            and cluster.dedicated_nodes != cluster.target_dedicated_nodes:
         return '{} -> {}'.format(
             cluster.dedicated_nodes,
             cluster.target_dedicated_nodes)
@@ -343,9 +360,9 @@ def pretty_dedicated_node_count(cluster: Cluster)-> str:
 
 
 def pretty_low_pri_node_count(cluster: Cluster)-> str:
-    if (cluster.pool.allocation_state is batch_models.AllocationState.resizing\
-        or cluster.pool.state is batch_models.PoolState.deleting)\
-        and cluster.low_pri_nodes != cluster.target_low_pri_nodes:
+    if (cluster.pool.allocation_state is batch_models.AllocationState.resizing
+            or cluster.pool.state is batch_models.PoolState.deleting)\
+            and cluster.low_pri_nodes != cluster.target_low_pri_nodes:
         return '{} -> {}'.format(
             cluster.low_pri_nodes,
             cluster.target_low_pri_nodes)

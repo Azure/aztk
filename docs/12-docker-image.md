@@ -1,10 +1,10 @@
 # Docker
-Azure Distributed Data Engineering Toolkit runs Spark on Docker. 
+Azure Distributed Data Engineering Toolkit runs Spark on Docker.
 
 Supported Azure Distributed Data Engineering Toolkit images are hosted publicly on [Docker Hub](https://hub.docker.com/r/jiata/thunderbolt/tags).
 
-## Versioning with Docker 
-The default base image that this package uses is a Docker image with **Spark v2.2.0** and **Python v2.7.13**. 
+## Versioning with Docker
+The default base image that this package uses is a Docker image with **Spark v2.2.0** and **Python v2.7.13**.
 
 However, the Azure Distributed Data Engineering Toolkit supports several base images that you can toggle between:
 - Spark v2.2.0 and Python v3.5.4 (default)
@@ -29,7 +29,7 @@ aztk spark cluster create ... --docker-repo jiata/thunderbolt:0.1.0-spark1.6.3-p
 ## Using a custom Docker Image
 What if I wanted to use my own Docker image? _What if I want to use Spark v2.0.1 with Python v3.6.2?_
 
-You can build your own Docker image on top or beneath one of our supported base images _OR_ you can modify the [supported Dockerfile](../docker-image) and build your own image that way. 
+You can build your own Docker image on top or beneath one of our supported base images _OR_ you can modify the [supported Dockerfile](../docker-image) and build your own image that way.
 
 Please refer to ['../docker-image'](../docker-image) for more information on building your own image.
 
@@ -37,4 +37,19 @@ Once you have your Docker image built and hosted publicly, you can then use the 
 
 ## Using a custom Docker Image that is Privately Hosted
 
-_Coming soon_
+To use a private docker image you will need to provide a docker username and password that have access to the repository you want to use.
+
+In `.thunderbolt/secrets.yaml` setup your docker config
+```yaml
+docker:
+    username: <myusername>
+    password: <mypassword>
+```
+
+If your private repository is not on docker hub (Azure container registry for example) you can provide the endpoint here too
+```yaml
+docker:
+    username: <myusername>
+    password: <mypassword>
+    endpoint: <https://my-custom-docker-endpoint.com>
+```
