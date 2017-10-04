@@ -192,6 +192,19 @@ class Cluster:
 
         return creds
 
+    def _get_ssh_key_or_prompt(self, ssh_key, username, password):
+        # Get user ssh key, prompt for password if necessary
+        ssh_key = ssh.get_user_public_key(ssh_key, self.secrets_config)
+        if username is not None and password is None and ssh_key is None:
+            password = getpass.getpass("Please input a password for user '{0}': ".format(username))
+            confirm_password = getpass.getpass("Please confirm your password for user '{0}': ".format(username))
+            if password != confirm_password:
+                raise AztkError("Password confirmation did not match, please try again.")
+            if not password:
+                raise AztkError(
+                    "Password is empty, cannot add user to cluster. Provide a ssh public key in .aztk/secrets.yaml. Or provide an ssh-key or password with commnad line parameters (--ssh-key or --password).")
+        return ssh_key, password
+
     def create_cluster(
             self,
             custom_scripts: List[object],
@@ -262,16 +275,8 @@ class Cluster:
                     name=constants.AZTK_SOFTWARE_METADATA_KEY, value=Software.spark),
             ])
 
-        # Get user ssh key, prompt for password if necessary
-        ssh_key = ssh.get_user_public_key(ssh_key, self.secrets_config)
-        if username is not None and password is None and ssh_key is None:
-            password = getpass.getpass("Please input a password for user '{0}': ".format(username))
-            confirm_password = getpass.getpass("Please confirm your password for user '{0}': ".format(username))
-            if password != confirm_password:
-                raise AztkError("Password confirmation did not match, please try again.")
-            if not password:
-                raise AztkError(
-                    "Password is empty, cannot add user to cluster. Provide a ssh public key in .aztk/secrets.yaml. Or provide an ssh-key or password with commnad line parameters (--ssh-key or --password).")
+        # Check for ssh key, if None, prompt for password
+        ssh_key, passowrd = self._get_ssh_key_or_prompt(username=username, ssh_key=ssh_key, password=password)
 
         # Create the pool + create user for the pool
         util.create_pool_if_not_exist(pool, self.batch_client)
@@ -303,6 +308,8 @@ class Cluster:
             :param username: username of the user to add
             :param password: password of the user to add
         """
+        # Check for ssh key, if None, prompt for password
+        ssh_key, password = self._get_ssh_key_or_prompt(username=username, ssh_key=ssh_key, password=password)
 
         # Create new ssh user for the master node
         self.batch_client.compute_node.add_user(
@@ -359,7 +366,7 @@ class Cluster:
             return '{}'.format(cluster.dedicated_nodes)
 
     def pretty_low_pri_node_count(self, cluster: ClusterModel)-> str:
-        if (cluster.pool.allocation_state is batch_models.AllocationState.resizing\
+        if (cluster.pool.allocation_state is batch_models.AllocationState.resizing
                 or cluster.pool.state is batch_models.PoolState.deleting)\
                 and cluster.low_pri_nodes != cluster.target_low_pri_nodes:
             return '{} -> {}'.format(
