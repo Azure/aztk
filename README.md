@@ -1,5 +1,7 @@
 # Azure Distributed Data Engineering Toolkit
-Azure Distributed Data Engineering Toolkit is a python CLI application for provisioning on-demand Spark on Docker clusters in Azure. This toolkit is built on top of Azure Batch but does not require any Azure Batch knowledge to use. 
+Azure Distributed Data Engineering Toolkit is a python CLI application for provisioning on-demand Spark on Docker clusters in Azure. It's a cheap and easy way to get up and running with a Spark cluster, and a great tool for Spark users who want to experiment and start testing at scale. 
+
+This toolkit is built on top of Azure Batch but does not require any Azure Batch knowledge to use. 
 
 Currently, this toolkit is designed to run batch Spark jobs that require additional on-demand compute. Eventually we plan to support other distributed data engineering frameworks in a similar vein. Please let us know which frameworks you'd like for us to support in the future. 
 
