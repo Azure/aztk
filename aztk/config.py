@@ -157,31 +157,31 @@ class ClusterConfig:
             self._merge_dict(config)
 
     def _merge_dict(self, config):
-        if 'id' in config and config['id'] is not None:
+        if config.get('id') is not None:
             self.uid = config['id']
 
-        if 'vm_size' in config and config['vm_size'] is not None:
+        if config.get('vm_size') is not None:
             self.vm_size = config['vm_size']
 
-        if 'size' in config and config['size'] is not None:
+        if config.get('size') is not None:
             self.size = config['size']
 
-        if 'size_low_pri' in config and config['size_low_pri'] is not None:
+        if config.get('size_low_pri') is not None:
             self.size_low_pri = config['size_low_pri']
 
-        if 'username' in config and config['username'] is not None:
+        if config.get('username') is not None:
             self.username = config['username']
 
-        if 'password' in config and config['password'] is not None:
+        if config.get('password') is not None:
             self.password = config['password']
 
-        if 'custom_scripts' in config and config['custom_scripts'] not in [[None], None]:
+        if config.get('custom_scripts') not in [[None], None]:
             self.custom_scripts = config['custom_scripts']
 
-        if 'docker_repo' in config and config['docker_repo'] is not None:
+        if config.get('docker_repo') is not None:
             self.docker_repo = config['docker_repo']
 
-        if 'wait' in config and config['wait'] is not None:
+        if config.get('wait') is not None:
             self.wait = config['wait']
 
     def merge(self, uid, username, size, size_low_pri, vm_size, ssh_key, password, wait, docker_repo):
@@ -235,6 +235,7 @@ class SshConfig:
         self.job_ui_port = None
         self.web_ui_port = None
         self.jupyter_port = None
+        self.host = False
         self.connect = True
 
     def _read_config_file(self, path: str=constants.DEFAULT_SSH_CONFIG_PATH):
@@ -258,25 +259,28 @@ class SshConfig:
             self._merge_dict(config)
 
     def _merge_dict(self, config):
-        if 'username' in config and config['username'] is not None:
+        if config.get('username') is not None:
             self.username = config['username']
 
-        if 'cluster_id' in config and config['cluster_id'] is not None:
+        if config.get('cluster_id') is not None:
             self.cluster_id = config['cluster_id']
 
-        if 'job_ui_port' in config and config['job_ui_port'] is not None:
+        if config.get('job_ui_port') is not None:
             self.job_ui_port = config['job_ui_port']
 
-        if 'web_ui_port' in config and config['web_ui_port'] is not None:
+        if config.get('web_ui_port') is not None:
             self.web_ui_port = config['web_ui_port']
 
-        if 'jupyter_port' in config and config['jupyter_port'] is not None:
+        if config.get('jupyter_port') is not None:
             self.jupyter_port = config['jupyter_port']
 
-        if 'connect' in config and config['connect'] is False:
-            self.connect = False
+        if config.get('host') is not None:
+            self.host = config['host']
 
-    def merge(self, cluster_id, username, job_ui_port, web_ui_port, jupyter_port, connect):
+        if config.get('connect') is not None:
+            self.connect = config['connect']
+
+    def merge(self, cluster_id, username, job_ui_port, web_ui_port, jupyter_port, host, connect):
         """
             Merges fields with args object
         """
@@ -288,6 +292,7 @@ class SshConfig:
                 job_ui_port=job_ui_port,
                 web_ui_port=web_ui_port,
                 jupyter_port=jupyter_port,
+                host=host,
                 connect=connect
             )
         )

@@ -92,13 +92,19 @@ aztk spark cluster add-user --id spark --username admin --password <my_password>
 _Using a SSH key is the recommended method._
 
 ### SSH and Port Forwarding
-After a user has been created, SSH into the master node with:
+After a user has been created, SSH into the Spark container on the master node with:
 
 ```sh
 aztk spark cluster ssh --id spark --username admin
 ```
 
-Because we run Spark on Docker, you have to access the running Docker image to enter your Spark environment. Do to that, you can run the following:
+If you would like to ssh into the host instead of the Spark container on it, run:
+
+```sh
+aztk spark cluster ssh --id spark --username admin --host
+```
+
+If you ssh into the host and wish to access the running Docker Spark environment, you can run the following:
 ```sh
 sudo docker exec -it spark /bin/bash
 ```
