@@ -1,6 +1,6 @@
 import argparse
 import typing
-from aztk import clusterlib
+from aztk.aztklib import Aztk
 
 
 def setup_parser(_: argparse.ArgumentParser):
@@ -9,5 +9,6 @@ def setup_parser(_: argparse.ArgumentParser):
 
 
 def execute(_: typing.NamedTuple):
-    clusters = clusterlib.list_clusters()
-    clusterlib.print_clusters(clusters)
+    aztk = Aztk()
+    clusters = aztk.cluster.list_clusters()
+    aztk.cluster.print_clusters(clusters)

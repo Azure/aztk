@@ -14,6 +14,12 @@ Currently, this toolkit is designed to run batch Spark jobs that require additio
 
 ## Setup
 1. Clone the repo
+```bash
+    git clone -b stable https://www.github.com/azure/aztk
+    
+    # You can also clone directly from master to get the latest bits
+    git clone https://www.github.com/azure/aztk
+```
 2. Use pip to install required packages (requires python 3.5+ and pip 9.0.1+)
 ```bash
     pip install -r requirements.txt

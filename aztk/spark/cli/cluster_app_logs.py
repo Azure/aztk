@@ -1,6 +1,6 @@
 import argparse
 import typing
-from aztk import joblib
+from aztk.aztklib import Aztk
 
 
 def setup_parser(parser: argparse.ArgumentParser):
@@ -17,7 +17,8 @@ def setup_parser(parser: argparse.ArgumentParser):
 
 
 def execute(args: typing.NamedTuple):
+    aztk = Aztk()
     cluster_id = args.cluster_id
     app_name = args.app_name
     tail = args.tail
-    joblib.read_log(cluster_id, app_name, tail=tail)
+    aztk.job.read_log(cluster_id, app_name, tail=tail)

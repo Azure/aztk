@@ -8,14 +8,14 @@ import azure.batch.batch_auth as batch_auth
 import azure.batch.models as batch_models
 import azure.storage.blob as blob
 from .version import __version__
-from . import azure_api, constants, log
+from . import constants, log
 
 
 _STANDARD_OUT_FILE_NAME = 'stdout.txt'
 _STANDARD_ERROR_FILE_NAME = 'stderr.txt'
 
 
-def wait_for_tasks_to_complete(job_id, timeout):
+def wait_for_tasks_to_complete(job_id, timeout, batch_client):
     """
     Waits for all the tasks in a particular job to complete.
     :param batch_client: The batch client to use.
@@ -24,8 +24,6 @@ def wait_for_tasks_to_complete(job_id, timeout):
     :param timeout: The maximum amount of time to wait.
     :type timeout: `datetime.timedelta`
     """
-    batch_client = azure_api.get_batch_client()
-
     time_to_timeout_at = datetime.datetime.now() + timeout
 
     while datetime.datetime.now() < time_to_timeout_at:
@@ -44,14 +42,13 @@ class MasterInvalidStateError(Exception):
     pass
 
 
-def wait_for_master_to_be_ready(cluster_id: str):
-    batch_client = azure_api.get_batch_client()
+def wait_for_master_to_be_ready(cluster_id: str, batch_client):
     master_node_id = None
     log.info("Waiting for spark master to be ready")
     start_time = datetime.datetime.now()
     while True:
         if not master_node_id:
-            master_node_id = get_master_node_id(cluster_id)
+            master_node_id = get_master_node_id(cluster_id, batch_client)
             if not master_node_id:
                 time.sleep(5)
                 continue
@@ -76,11 +73,11 @@ def wait_for_master_to_be_ready(cluster_id: str):
     time.sleep(5)
 
 
-def upload_file_to_container(container_name, file_path, use_full_path=False, node_path=None) -> batch_models.ResourceFile:
+def upload_file_to_container(container_name, file_path, blob_client=None, use_full_path=False, node_path=None) -> batch_models.ResourceFile:
     """
     Uploads a local file to an Azure Blob storage container.
-    :param block_blob_client: A blob service client.
-    :type block_blob_client: `azure.storage.blob.BlockBlobService`
+    :param blob_client: A blob service client.
+    :type blocblob_clientk_blob_client: `azure.storage.blob.BlockBlobService`
     :param str container_name: The name of the Azure Blob storage container.
     :param str file_path: The local path to the file.
     :param str node_path: Path on the local node. By default will be the same as file_path
@@ -88,7 +85,6 @@ def upload_file_to_container(container_name, file_path, use_full_path=False, nod
     :return: A ResourceFile initialized with a SAS URL appropriate for Batch
     tasks.
     """
-    block_blob_client = azure_api.get_blob_client()
     file_path = normalize_path(file_path)
     blob_name = None
     if use_full_path:
@@ -99,20 +95,20 @@ def upload_file_to_container(container_name, file_path, use_full_path=False, nod
     if not node_path:
         node_path = blob_name
 
-    block_blob_client.create_container(container_name,
+    blob_client.create_container(container_name,
                                        fail_on_exist=False)
 
-    block_blob_client.create_blob_from_path(container_name,
+    blob_client.create_blob_from_path(container_name,
                                             blob_name,
                                             file_path)
 
-    sas_token = block_blob_client.generate_blob_shared_access_signature(
+    sas_token = blob_client.generate_blob_shared_access_signature(
         container_name,
         blob_name,
         permission=blob.BlobPermissions.READ,
         expiry=datetime.datetime.utcnow() + datetime.timedelta(hours=2))
 
-    sas_url = block_blob_client.make_blob_url(container_name,
+    sas_url = blob_client.make_blob_url(container_name,
                                               blob_name,
                                               sas_token=sas_token)
 
@@ -148,12 +144,11 @@ def get_master_node_id_from_pool(pool: batch_models.CloudPool):
     return None
 
 
-def get_master_node_id(pool_id):
-    batch_client = azure_api.get_batch_client()
+def get_master_node_id(pool_id, batch_client):
     return get_master_node_id_from_pool(batch_client.pool.get(pool_id))
 
 
-def create_pool_if_not_exist(pool):
+def create_pool_if_not_exist(pool, batch_client):
     """
     Creates the specified pool if it doesn't already exist
     :param batch_client: The batch client to use.
@@ -161,9 +156,6 @@ def create_pool_if_not_exist(pool):
     :param pool: The pool to create.
     :type pool: `batchserviceclient.models.PoolAddParameter`
     """
-
-    batch_client = azure_api.get_batch_client()
-
     try:
         batch_client.pool.add(pool)
         return True
@@ -174,7 +166,7 @@ def create_pool_if_not_exist(pool):
             return False
 
 
-def wait_for_all_nodes_state(pool, node_state):
+def wait_for_all_nodes_state(pool, node_state, batch_client):
     """
     Waits for all nodes in pool to reach any specified state in set
     :param batch_client: The batch client to use.
@@ -185,8 +177,6 @@ def wait_for_all_nodes_state(pool, node_state):
     :rtype: list
     :return: list of `batchserviceclient.models.ComputeNode`
     """
-    batch_client = azure_api.get_batch_client()
-
     log.info('Waiting for all nodes in pool %s to reach desired state...', pool.id)
     while True:
         # refresh pool to ensure that there is no resize error
@@ -205,7 +195,7 @@ def wait_for_all_nodes_state(pool, node_state):
 
 
 def select_latest_verified_vm_image_with_node_agent_sku(
-        publisher, offer, sku_starts_with):
+        publisher, offer, sku_starts_with, batch_client):
     """
     Select the latest verified image that Azure Batch supports given
     a publisher, offer and sku (starts with filter).
@@ -217,8 +207,6 @@ def select_latest_verified_vm_image_with_node_agent_sku(
     :rtype: tuple
     :return: (node agent sku id to use, vm image ref to use)
     """
-    batch_client = azure_api.get_batch_client()
-
     # get verified vm image list and node agent sku ids from service
     node_agent_skus = batch_client.account.list_node_agent_skus()
 
@@ -237,12 +225,12 @@ def select_latest_verified_vm_image_with_node_agent_sku(
 
 
 def create_sas_token(
-        container_name, blob_name, permission, expiry=None,
+        container_name, blob_name, permission, blob_client, expiry=None,
         timeout=None):
     """
     Create a blob sas token
-    :param block_blob_client: The storage block blob client to use.
-    :type block_blob_client: `azure.storage.blob.BlockBlobService`
+    :param blob_client: The storage block blob client to use.
+    :type blob_client: `azure.storage.blob.BlockBlobService`
     :param str container_name: The name of the container to upload the blob to.
     :param str blob_name: The name of the blob to upload the local file to.
     :param expiry: The SAS expiry time.
@@ -252,24 +240,22 @@ def create_sas_token(
     :return: A SAS token
     :rtype: str
     """
-    block_blob_client = azure_api.get_blob_client()
-
     if expiry is None:
         if timeout is None:
             timeout = 30
         expiry = datetime.datetime.utcnow() + datetime.timedelta(
             minutes=timeout)
-    return block_blob_client.generate_blob_shared_access_signature(
+    return blob_client.generate_blob_shared_access_signature(
         container_name, blob_name, permission=permission, expiry=expiry)
 
 
 def upload_blob_and_create_sas(
-        container_name, blob_name, file_name, expiry,
+        container_name, blob_name, file_name, expiry, blob_client,
         timeout=None):
     """
     Uploads a file from local disk to Azure Storage and creates a SAS for it.
-    :param block_blob_client: The storage block blob client to use.
-    :type block_blob_client: `azure.storage.blob.BlockBlobService`
+    :param blob_client: The storage block blob client to use.
+    :type blob_client: `azure.storage.blob.BlockBlobService`
     :param str container_name: The name of the container to upload the blob to.
     :param str blob_name: The name of the blob to upload the local file to.
     :param str file_name: The name of the local file to upload.
@@ -280,13 +266,11 @@ def upload_blob_and_create_sas(
     :return: A SAS URL to the blob with the specified expiry time.
     :rtype: str
     """
-    block_blob_client = azure_api.get_blob_client()
-
-    block_blob_client.create_container(
+    blob_client.create_container(
         container_name,
         fail_on_exist=False)
 
-    block_blob_client.create_blob_from_path(
+    blob_client.create_blob_from_path(
         container_name,
         blob_name,
         file_name)
@@ -295,10 +279,11 @@ def upload_blob_and_create_sas(
         container_name,
         blob_name,
         permission=blob.BlobPermissions.READ,
+        blob_client = None,
         expiry=expiry,
         timeout=timeout)
 
-    sas_url = block_blob_client.make_blob_url(
+    sas_url = blob_client.make_blob_url(
         container_name,
         blob_name,
         sas_token=sas_token)
@@ -318,7 +303,7 @@ def wrap_commands_in_shell(commands):
         ';'.join(commands))
 
 
-def get_connection_info(pool_id, node_id):
+def get_connection_info(pool_id, node_id, batch_client):
     """
     Get connection info of specified node in pool
     :param batch_client: The batch client to use.
@@ -326,8 +311,6 @@ def get_connection_info(pool_id, node_id):
     :param str pool_id: The pool id to look up
     :param str node_id: The node id to look up
     """
-    batch_client = azure_api.get_batch_client()
-
     rls = batch_client.compute_node.get_remote_login_settings(
         pool_id, node_id)
     remote_ip = rls.remote_login_ip_address
@@ -380,9 +363,7 @@ def normalize_path(path: str)-> str:
         return path
 
 
-def get_file_properties(job_id: str, task_id: str, file_path: str):
-    batch_client = azure_api.get_batch_client()
-
+def get_file_properties(job_id: str, task_id: str, file_path: str, batch_client):
     raw = batch_client.file.get_properties_from_task(
         job_id, task_id, file_path, raw=True)
 

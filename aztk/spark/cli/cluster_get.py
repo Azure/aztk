@@ -1,7 +1,6 @@
 import argparse
 import typing
-from aztk import clusterlib
-
+from aztk.aztklib import Aztk
 
 def setup_parser(parser: argparse.ArgumentParser):
     parser.add_argument('--id',
@@ -11,6 +10,7 @@ def setup_parser(parser: argparse.ArgumentParser):
 
 
 def execute(args: typing.NamedTuple):
+    aztk = Aztk()
     cluster_id = args.cluster_id
-    cluster = clusterlib.get_cluster(cluster_id)
-    clusterlib.print_cluster(cluster)
+    cluster = aztk.cluster.get_cluster(cluster_id)
+    aztk.cluster.print_cluster(cluster)
