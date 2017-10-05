@@ -1,9 +1,8 @@
 # Custom scripts
 Custom scripts allow for additional cluster setup steps when the cluster is being provisioned. This is useful
-when you want to modify the default cluster configuration for things such as modifying spark.conf, adding jars
-or downloading any files you need in the cluster.
+if you want to install additional software, and if you need to modify the default cluster configuration for things such as modifying spark.conf, adding jars or downloading any files you need in the cluster.
 
-You can specify the location of custom scripts on your local machine in `.thundebolt/cluster.yaml`. If you do not have a `.thunderbolt/` directory in you current working directory, run `azb spark init` or see [Getting Started](./00-getting-started). Note that the path can be absolute or relative to your current working directory.
+You can specify the location of custom scripts on your local machine in `.aztk/cluster.yaml`. If you do not have a `.aztk/` directory in you current working directory, run `aztk spark init` or see [Getting Started](./00-getting-started). Note that the path can be absolute or relative to your current working directory.
 
 The custom scripts can be configured to run on the Spark master only, the Spark workers only, or all nodes in the cluster (Please note that by default, the Spark master node is also a Spark worker). For example, the following custom-script configuration will run 3 custom scripts in the order they are provided:
 
@@ -19,7 +18,7 @@ custom-scripts:
 
 The first script, simple.sh, will run on all nodes and will be executed first. The next script, master-only.sh will run only on nodes that are Spark masters and after simple.sh. The next script, worker-only.sh, will run last and only on nodes that are Spark workers.
 
-Directories may also be provided in the custom-scripts section of `.thunderbolt/cluster.yaml`. 
+Directories may also be provided in the custom-scripts section of `.aztk/cluster.yaml`. 
 
 ```yaml
 custom-scripts:

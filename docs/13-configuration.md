@@ -22,8 +22,8 @@ size: 2
 # username: <username for the linux user to be created> (optional)
 username: spark
 
-# docker_repo: <name of docker image repo (for more information, see https://github.com/Azure/thunderbolt/blob/master/docs/12-docker-image.md)>
-docker_repo: jiata/thunderbolt:0.1.0-spark2.2.0-python3.5.4
+# docker_repo: <name of docker image repo (for more information, see https://github.com/Azure/aztk/blob/master/docs/12-docker-image.md)>
+docker_repo: jiata/aztk:0.1.0-spark2.2.0-python3.5.4
 
 # custom_script: <path to custom script to run on each node> (optional)
 
@@ -34,7 +34,7 @@ wait: true
 Running `aztk spark cluster create` will create a cluster of 4 **Standard\_A2** nodes called 'spark\_cluster' with a linux user named 'spark'. This is equivalent to running the command
 
 ```sh
-azb spark cluster create --id spark --vm-size standard_a2 --size 4 --username spark --wait
+aztk spark cluster create --id spark --vm-size standard_a2 --size 4 --username spark --wait
 ```
 
 NOTE: This assumes that your SSH-key is configured in the *.aztk/secrets.yaml* file. 
@@ -62,9 +62,9 @@ Note that all of the settings in ssh.yaml will be overrided by parameters passed
 
 ## Spark Configuration
 
-The repository comes with default Spark configuration files which provision your Spark cluster just the same as you would locally. After running `azb spark init` to initialize your working environment, you can view and edit these files at `.thunderbolt/spark-defaults.conf` and `.thunderbolt/spark-env.sh`. Please note that you can bring your own Spark configuration files by copying your `spark-defaults.conf` and `spark-env.sh` into your `.thunderbolt/` direcotry.
+The repository comes with default Spark configuration files which provision your Spark cluster just the same as you would locally. After running `aztk spark init` to initialize your working environment, you can view and edit these files at `.aztk/spark-defaults.conf` and `.aztk/spark-env.sh`. Please note that you can bring your own Spark configuration files by copying your `spark-defaults.conf` and `spark-env.sh` into your `.aztk/` direcotry.
 
-The following settings available in `spark-defaults.conf` and `spark-env.sh` are not supported in Thunderbolt:
+The following settings available in `spark-defaults.conf` and `spark-env.sh` are not supported:
 
 `spark-env.sh`:
 - SPARK\_LOCAL\_IP
@@ -78,4 +78,4 @@ The following settings available in `spark-defaults.conf` and `spark-env.sh` are
 `spark-defaults.conf`:
 - spark.master
 
-Also note that Thunderbolt pre-loads wasb jars, so loading them elsewhere is not necessary.
+Also note that this toolkit pre-loads wasb jars, so loading them elsewhere is not necessary.

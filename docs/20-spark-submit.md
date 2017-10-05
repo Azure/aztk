@@ -2,7 +2,7 @@
 Submitting a job to your Spark cluster in this package mimics the experience of a typical standalone cluster. A spark job will be submitted to the system and run to completion.
 
 ## Spark-Submit
-The spark-submit experience is mostly the same as any regular Spark cluster with a few minor differences. You can take a look at azb spark cluster --help for more detailed information and options.
+The spark-submit experience is mostly the same as any regular Spark cluster with a few minor differences. You can take a look at `aztk spark cluster --help` for more detailed information and options.
 
 Run a Spark job:
 ```sh
