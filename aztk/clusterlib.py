@@ -543,8 +543,7 @@ class Cluster:
             ssh_command.add_argument("\'sudo docker exec -it spark /bin/bash\'")
 
         command = ssh_command.to_str()
-        ssh_command_array = command.split()
 
         if connect:
-            call(ssh_command_array)
+            call(command, shell=True)
         return '\n\t{}\n'.format(command)
