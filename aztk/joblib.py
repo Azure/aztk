@@ -99,7 +99,7 @@ class Job():
 
         resource_files = []
 
-        app_resource_file = util.upload_file_to_container(container_name=name, file_path=app, blob_client=self.blob_client, use_full_path=True)
+        app_resource_file = util.upload_file_to_container(container_name=name, file_path=app, blob_client=self.blob_client, use_full_path=False)
         # Upload application file
         resource_files.append(app_resource_file)
 
