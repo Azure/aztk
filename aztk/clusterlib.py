@@ -276,7 +276,7 @@ class Cluster:
             ])
 
         # Check for ssh key, if None, prompt for password
-        ssh_key, passowrd = self._get_ssh_key_or_prompt(username=username, ssh_key=ssh_key, password=password)
+        ssh_key, password = self._get_ssh_key_or_prompt(username=username, ssh_key=ssh_key, password=password)
 
         # Create the pool + create user for the pool
         util.create_pool_if_not_exist(pool, self.batch_client)

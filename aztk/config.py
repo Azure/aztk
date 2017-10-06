@@ -90,7 +90,7 @@ class SecretsConfig:
             self.batch_service_url = secrets_config['batch']['batchserviceurl']
         except KeyError:
             raise error.AztkError(
-                "Please specify a batch service in your .aztk/secrets.yaml file")
+                "Please specify a batch service url in your .aztk/secrets.yaml file")
 
         try:
             self.storage_account_name = secrets_config['storage']['storageaccountname']
