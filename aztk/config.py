@@ -165,9 +165,11 @@ class ClusterConfig:
 
         if config.get('size') is not None:
             self.size = config['size']
+            self.size_low_pri = 0
 
         if config.get('size_low_pri') is not None:
             self.size_low_pri = config['size_low_pri']
+            self.size = 0
 
         if config.get('username') is not None:
             self.username = config['username']
