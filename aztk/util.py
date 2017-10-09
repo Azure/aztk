@@ -8,7 +8,7 @@ import azure.batch.batch_auth as batch_auth
 import azure.batch.models as batch_models
 import azure.storage.blob as blob
 from .version import __version__
-from . import constants, log
+from . import constants, log, error
 
 
 _STANDARD_OUT_FILE_NAME = 'stdout.txt'
@@ -96,11 +96,11 @@ def upload_file_to_container(container_name, file_path, blob_client=None, use_fu
         node_path = blob_name
 
     blob_client.create_container(container_name,
-                                       fail_on_exist=False)
+                                 fail_on_exist=False)
 
     blob_client.create_blob_from_path(container_name,
-                                            blob_name,
-                                            file_path)
+                                      blob_name,
+                                      file_path)
 
     sas_token = blob_client.generate_blob_shared_access_signature(
         container_name,
@@ -109,8 +109,8 @@ def upload_file_to_container(container_name, file_path, blob_client=None, use_fu
         expiry=datetime.datetime.utcnow() + datetime.timedelta(hours=2))
 
     sas_url = blob_client.make_blob_url(container_name,
-                                              blob_name,
-                                              sas_token=sas_token)
+                                        blob_name,
+                                        sas_token=sas_token)
 
     return batch_models.ResourceFile(file_path=node_path,
                                      blob_source=sas_url)
@@ -158,12 +158,12 @@ def create_pool_if_not_exist(pool, batch_client):
     """
     try:
         batch_client.pool.add(pool)
-        return True
     except batch_models.BatchErrorException as e:
-        if e.error.code != "PoolExists":
-            raise
+        if e.error.code == "PoolExists":
+            raise error.AztkError("A cluster with the same id already exists. Use a different id or delete the existing cluster by running \'aztk spark cluster delete --id {0}\'".format(pool.id))
         else:
-            return False
+            raise
+    return True
 
 
 def wait_for_all_nodes_state(pool, node_state, batch_client):
@@ -279,7 +279,7 @@ def upload_blob_and_create_sas(
         container_name,
         blob_name,
         permission=blob.BlobPermissions.READ,
-        blob_client = None,
+        blob_client=None,
         expiry=expiry,
         timeout=timeout)
 
