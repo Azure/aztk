@@ -153,7 +153,7 @@ def start_spark_master():
     master_ip = get_node(config.node_id).ip_address
     exe = os.path.join(spark_home, "sbin", "start-master.sh")
     cmd = [exe, "-h", master_ip, "--webui-port",
-           str(config.spark_master_ui_port)]
+           str(config.spark_web_ui_port)]
     print("Starting master with '{0}'".format(" ".join(cmd)))
     call(cmd)
 

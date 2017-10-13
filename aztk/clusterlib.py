@@ -76,10 +76,10 @@ class Cluster:
         cmd.add_option('-e', 'AZ_BATCH_NODE_ID=$AZ_BATCH_NODE_ID')
         cmd.add_option(
             '-e', 'AZ_BATCH_NODE_IS_DEDICATED=$AZ_BATCH_NODE_IS_DEDICATED')
-        cmd.add_option('-e', 'SPARK_MASTER_UI_PORT=$SPARK_MASTER_UI_PORT')
+        cmd.add_option('-e', 'SPARK_WEB_UI_PORT=$SPARK_WEB_UI_PORT')
         cmd.add_option('-e', 'SPARK_WORKER_UI_PORT=$SPARK_WORKER_UI_PORT')
         cmd.add_option('-e', 'SPARK_JUPYTER_PORT=$SPARK_JUPYTER_PORT')
-        cmd.add_option('-e', 'SPARK_WEB_UI_PORT=$SPARK_WEB_UI_PORT')
+        cmd.add_option('-e', 'SPARK_JOB_UI_PORT=$SPARK_JOB_UI_PORT')
         cmd.add_option('-p', '8080:8080')
         cmd.add_option('-p', '7077:7077')
         cmd.add_option('-p', '4040:4040')
@@ -100,10 +100,10 @@ class Cluster:
 
         resource_files = [zip_resource_file]
 
-        spark_master_ui_port = constants.DOCKER_SPARK_MASTER_UI_PORT
+        spark_web_ui_port = constants.DOCKER_SPARK_WEB_UI_PORT
         spark_worker_ui_port = constants.DOCKER_SPARK_WORKER_UI_PORT
         spark_jupyter_port = constants.DOCKER_SPARK_JUPYTER_PORT
-        spark_web_ui_port = constants.DOCKER_SPARK_WEB_UI_PORT
+        spark_job_ui_port = constants.DOCKER_SPARK_JOB_UI_PORT
 
         # TODO use certificate
         environment_settings = [
@@ -118,13 +118,13 @@ class Cluster:
             batch_models.EnvironmentSetting(
                 name="STORAGE_ACCOUNT_SUFFIX", value=self.blob_config.account_suffix),
             batch_models.EnvironmentSetting(
-                name="SPARK_MASTER_UI_PORT", value=spark_master_ui_port),
+                name="SPARK_WEB_UI_PORT", value=spark_web_ui_port),
             batch_models.EnvironmentSetting(
                 name="SPARK_WORKER_UI_PORT", value=spark_worker_ui_port),
             batch_models.EnvironmentSetting(
                 name="SPARK_JUPYTER_PORT", value=spark_jupyter_port),
             batch_models.EnvironmentSetting(
-                name="SPARK_WEB_UI_PORT", value=spark_web_ui_port),
+                name="SPARK_JOB_UI_PORT", value=spark_job_ui_port),
         ] + self.get_docker_credentials()
 
         # start task command
@@ -510,10 +510,10 @@ class Cluster:
 
         pool = self.batch_client.pool.get(cluster_id)
 
-        spark_master_ui_port = constants.DOCKER_SPARK_MASTER_UI_PORT
+        spark_web_ui_port = constants.DOCKER_SPARK_WEB_UI_PORT
         spark_worker_ui_port = constants.DOCKER_SPARK_WORKER_UI_PORT
         spark_jupyter_port = constants.DOCKER_SPARK_JUPYTER_PORT
-        spark_web_ui_port = constants.DOCKER_SPARK_WEB_UI_PORT
+        spark_job_ui_port = constants.DOCKER_SPARK_JOB_UI_PORT
 
         ssh_command = CommandBuilder('ssh')
 
@@ -524,9 +524,9 @@ class Cluster:
         
         ssh_command.add_argument("-t")
         ssh_command.add_option("-L", "{0}:localhost:{1}".format(
-            webui,  spark_master_ui_port), enable=bool(webui))
+            webui,  spark_web_ui_port), enable=bool(webui))
         ssh_command.add_option("-L", "{0}:localhost:{1}".format(
-            jobui, spark_web_ui_port), enable=bool(jobui))
+            jobui, spark_job_ui_port), enable=bool(jobui))
         ssh_command.add_option("-L", "{0}:localhost:{1}".format(
             jupyter, spark_jupyter_port), enable=bool(jupyter))
 

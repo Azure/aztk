@@ -11,10 +11,10 @@ pool_id = os.environ["AZ_BATCH_POOL_ID"]
 node_id = os.environ["AZ_BATCH_NODE_ID"]
 is_dedicated = os.environ["AZ_BATCH_NODE_IS_DEDICATED"]
 
-spark_master_ui_port = os.environ["SPARK_MASTER_UI_PORT"]
+spark_web_ui_port = os.environ["SPARK_WEB_UI_PORT"]
 spark_worker_ui_port = os.environ["SPARK_WORKER_UI_PORT"]
 spark_jupyter_port = os.environ["SPARK_JUPYTER_PORT"]
-spark_web_ui_port = os.environ["SPARK_WEB_UI_PORT"]
+spark_job_ui_port = os.environ["SPARK_JOB_UI_PORT"]
 
 def get_client() -> batch.BatchServiceClient:
     credentials = batchauth.SharedKeyCredentials(
