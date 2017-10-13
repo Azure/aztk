@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 from aztk import constants
 
 setup(name='aztk',
@@ -8,7 +8,7 @@ setup(name='aztk',
       author='Microsoft',
       author_email='jiata@microsoft.com',
       license='MIT',
-      packages=['aztk'],
+      packages=find_packages(),
       scripts=[
       #     'bin/aztk',
       ],
