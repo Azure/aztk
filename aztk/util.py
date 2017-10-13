@@ -88,7 +88,7 @@ def upload_file_to_container(container_name, file_path, blob_client=None, use_fu
     file_path = normalize_path(file_path)
     blob_name = None
     if use_full_path:
-        blob_name = file_path
+        blob_name = file_path.strip("/")
     else:
         blob_name = os.path.basename(file_path)
 
