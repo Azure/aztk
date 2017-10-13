@@ -18,7 +18,7 @@ username: spark
 docker_repo: jiata/aztk:0.1.0-spark2.2.0-python3.5.4
 
 # # optional custom scripts to run on the Spark master, Spark worker or all nodes in the cluster
-# custom_script: 
+# custom_scripts: 
 #   - script: </path/to/script.sh or /path/to/script/directory/>
 #     runOn: <master/worker/all-nodes>
 #   - script: <./relative/path/to/other/script.sh or ./relative/path/to/other/script/directory/>
