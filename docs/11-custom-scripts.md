@@ -4,10 +4,10 @@ if you want to install additional software, and if you need to modify the defaul
 
 You can specify the location of custom scripts on your local machine in `.aztk/cluster.yaml`. If you do not have a `.aztk/` directory in you current working directory, run `aztk spark init` or see [Getting Started](./00-getting-started). Note that the path can be absolute or relative to your current working directory.
 
-The custom scripts can be configured to run on the Spark master only, the Spark workers only, or all nodes in the cluster (Please note that by default, the Spark master node is also a Spark worker). For example, the following custom-script configuration will run 3 custom scripts in the order they are provided:
+The custom scripts can be configured to run on the Spark master only, the Spark workers only, or all nodes in the cluster (Please note that by default, the Spark master node is also a Spark worker). For example, the following custom script configuration will run 3 custom scripts in the order they are provided:
 
 ```yaml
-custom-scripts:
+custom_scripts:
     - script: ./custom-scripts/simple.sh
       runOn: all-nodes
     - script: ./custom-scripts/master-only.sh
@@ -18,10 +18,10 @@ custom-scripts:
 
 The first script, simple.sh, will run on all nodes and will be executed first. The next script, master-only.sh will run only on nodes that are Spark masters and after simple.sh. The next script, worker-only.sh, will run last and only on nodes that are Spark workers.
 
-Directories may also be provided in the custom-scripts section of `.aztk/cluster.yaml`. 
+Directories may also be provided in the custom_scripts section of `.aztk/cluster.yaml`. 
 
 ```yaml
-custom-scripts:
+custom_scripts:
     - script: /custom-scripts/
       runOn: all-nodes
 ```
