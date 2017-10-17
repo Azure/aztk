@@ -39,7 +39,6 @@ fi
 # Unzip resource files and set permissions
 apt-get -y install unzip
 chmod 777 $AZ_BATCH_TASK_WORKING_DIR/docker_main.sh
-chmod -R 777 $AZ_BATCH_TASK_WORKING_DIR/custom-scripts
 
 # Check docker is running
 docker info > /dev/null 2>&1
