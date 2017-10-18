@@ -57,13 +57,12 @@ class SecretsConfig:
         self.ssh_pub_key = None
         self.ssh_priv_key = None
 
-    def load_secrets_config(self, path: str=constants.DEFAULT_SECRETS_PATH):
+    def _load_secrets_config(self, path: str=constants.DEFAULT_SECRETS_PATH):
         """
             Loads the secrets.yaml file in the .aztk directory
         """
         if not os.path.isfile(path):
-            raise error.AztkError(
-                "Secrets configuration file doesn't exists at {0}".format(path))
+            return
 
         with open(path, 'r') as stream:
             try:
@@ -76,37 +75,17 @@ class SecretsConfig:
 
     def _merge_dict(self, secrets_config):
         # Ensure all necessary fields are provided
-        try:
-            self.batch_account_name = secrets_config['batch']['batchaccountname']
-        except KeyError:
-            raise error.AztkError(
-                "Please specify a batch account name in your .aztk/secrets.yaml file")
-        try:
-            self.batch_account_key = secrets_config['batch']['batchaccountkey']
-        except KeyError:
-            raise error.AztkError(
-                "Please specify a batch account key in your .aztk/secrets.yaml file")
-        try:
-            self.batch_service_url = secrets_config['batch']['batchserviceurl']
-        except KeyError:
-            raise error.AztkError(
-                "Please specify a batch service url in your .aztk/secrets.yaml file")
-
-        try:
-            self.storage_account_name = secrets_config['storage']['storageaccountname']
-        except KeyError:
-            raise error.AztkError(
-                "Please specify a storage account name in your .aztk/secrets.yaml file")
-        try:
-            self.storage_account_key = secrets_config['storage']['storageaccountkey']
-        except KeyError:
-            raise error.AztkError(
-                "Please specify a storage account key in your .aztk/secrets.yaml file")
-        try:
-            self.storage_account_suffix = secrets_config['storage']['storageaccountsuffix']
-        except KeyError:
-            raise error.AztkError(
-                "Please specify a storage account suffix in your .aztk/secrets.yaml file")
+        batch = secrets_config.get('batch')
+        if batch:
+            self.batch_account_name = batch.get('batchaccountname')
+            self.batch_account_key = batch.get('batchaccountkey')
+            self.batch_service_url = batch.get('batchserviceurl')
+        
+        storage = secrets_config.get('storage')
+        if storage:
+            self.storage_account_name = storage.get('storageaccountname')
+            self.storage_account_key = storage.get('storageaccountkey')
+            self.storage_account_suffix = storage.get('storageaccountsuffix')
 
         docker_config = secrets_config.get('docker')
         if docker_config:
@@ -115,12 +94,16 @@ class SecretsConfig:
             self.docker_password = docker_config.get('password')
 
         default_config = secrets_config.get('default')
-
         # Check for ssh keys if they are provided
         if default_config:
             self.ssh_priv_key = default_config.get('ssh_priv_key')
             self.ssh_pub_key = default_config.get('ssh_pub_key')
 
+    def load(self):
+        # read global ~/secrets.yaml
+        self._load_secrets_config(os.path.join(constants.HOME_DIRECTORY_PATH, '.aztk', 'ssh.yaml'))
+        # read current working directory secrets.yaml
+        self._load_secrets_config()
 
 class ClusterConfig:
 
@@ -141,8 +124,7 @@ class ClusterConfig:
             Reads the config file in the .aztk/ directory (.aztk/cluster.yaml)
         """
         if not os.path.isfile(path):
-            raise error.AztkError(
-                "Configuration file doesn't exist at {0}".format(path))
+            return
 
         with open(path, 'r') as stream:
             try:
@@ -191,6 +173,7 @@ class ClusterConfig:
             Reads configuration file (cluster.yaml), merges with command line parameters,
             checks for errors with configuration
         """
+        self._read_config_file(os.path.join(constants.HOME_DIRECTORY_PATH, '.aztk', 'cluster.yaml'))
         self._read_config_file()
 
         self._merge_dict(
@@ -287,6 +270,7 @@ class SshConfig:
             Merges fields with args object
         """
         self._read_config_file()
+        self._read_config_file(os.path.join(constants.HOME_DIRECTORY_PATH, '.aztk', 'cluster.yaml'))
         self._merge_dict(
             dict(
                 cluster_id=cluster_id,

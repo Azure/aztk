@@ -8,7 +8,7 @@ import aztk.error as error
 class Aztk:
     def __init__(self):
         secrets_config = config.SecretsConfig()
-        secrets_config.load_secrets_config()
+        secrets_config.load()
 
         blob_config = azure_api.BlobConfig(
             account_key=secrets_config.storage_account_key,

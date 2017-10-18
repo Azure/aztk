@@ -177,18 +177,15 @@ class Cluster:
     def get_docker_credentials(self):
         creds = []
 
-        secrets_config = config.SecretsConfig()
-        secrets_config.load_secrets_config()
-
-        if secrets_config.docker_endpoint:
+        if self.secrets_config.docker_endpoint:
             creds.append(batch_models.EnvironmentSetting(
-                name="DOCKER_ENDPOINT", value=secrets_config.docker_endpoint))
-        if secrets_config.docker_username:
+                name="DOCKER_ENDPOINT", value=self.secrets_config.docker_endpoint))
+        if self.secrets_config.docker_username:
             creds.append(batch_models.EnvironmentSetting(
-                name="DOCKER_USERNAME", value=secrets_config.docker_username))
-        if secrets_config.docker_password:
+                name="DOCKER_USERNAME", value=self.secrets_config.docker_username))
+        if self.secrets_config.docker_password:
             creds.append(batch_models.EnvironmentSetting(
-                name="DOCKER_PASSWORD", value=secrets_config.docker_password))
+                name="DOCKER_PASSWORD", value=self.secrets_config.docker_password))
 
         return creds
 

@@ -30,6 +30,13 @@ The minimum requirements to get started with this package are:
     ```
     This will create a *.aztk* folder with preset configuration files in your current working directory.
 
+    If you wish to have global configuration files that will be read regardless of your current working directory, run:
+    ```bash
+    aztk spark init --global
+    ```
+    This will put default configuration files in your home directory, *~/*. Please note that configuration files in your current working directory will take precident over global configuration files in your home directory.
+
+
 ### Setting up your accounts
 To finish setting up, you need to fill out your Azure Batch and Azure Storage secrets in *.aztk/secrets.yaml*. We'd also recommend that you enter SSH key info in this file too.
 

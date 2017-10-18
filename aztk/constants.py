@@ -21,6 +21,11 @@ DOCKER_SPARK_HOME = "/home/spark-current"
 ROOT_PATH = os.path.normpath(os.path.join(os.path.dirname(__file__), '..'))
 
 """
+    User home directory path
+"""
+HOME_DIRECTORY_PATH = os.path.expanduser('~')
+
+"""
     Path to the secrets file
 """
 DEFAULT_SECRETS_PATH = os.path.join(os.getcwd(), '.aztk/secrets.yaml')
@@ -39,7 +44,8 @@ CUSTOM_SCRIPTS_DEST = os.path.join(ROOT_PATH, 'node_scripts', 'custom-scripts')
     Source and destination paths for spark init
 """
 INIT_DIRECTORY_SOURCE = os.path.join(os.path.normpath(os.path.join(os.path.dirname(__file__), '..')), 'config')
-INIT_DIRECTORY_DEST = os.path.join(os.getcwd(), '.aztk')
+LOCAL_INIT_DIRECTORY_DEST = os.path.join(os.getcwd(), '.aztk')
+GLOBAL_INIT_DIRECTORY_DEST = os.path.join(HOME_DIRECTORY_PATH, '.aztk')
 
 """
     Key of the metadata entry for the pool that is used to store the master node id
