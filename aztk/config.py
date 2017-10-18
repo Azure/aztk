@@ -119,7 +119,7 @@ class ClusterConfig:
         self.docker_repo = None
         self.wait = None
 
-    def _read_config_file(self, path: str=constants.DEFAULT_CLUSTER_CONFIG_PATH):
+    def _read_config_file(self, path: str = constants.DEFAULT_CLUSTER_CONFIG_PATH):
         """
             Reads the config file in the .aztk/ directory (.aztk/cluster.yaml)
         """
@@ -173,7 +173,7 @@ class ClusterConfig:
             Reads configuration file (cluster.yaml), merges with command line parameters,
             checks for errors with configuration
         """
-        self._read_config_file(os.path.join(constants.HOME_DIRECTORY_PATH, '.aztk', 'cluster.yaml'))
+        self._read_config_file(os.path.join(constants.HOME_DIRECTORY_PATH, '.aztk', 'ssh.yaml'))
         self._read_config_file()
 
         self._merge_dict(
@@ -228,8 +228,7 @@ class SshConfig:
             Reads the config file in the .aztk/ directory (.aztk/cluster.yaml)
         """
         if not os.path.isfile(path):
-            raise error.AztkError(
-                "SSH Configuration file doesn't exist at {0}".format(path))
+            return
 
         with open(path, 'r') as stream:
             try:
