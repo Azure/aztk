@@ -181,6 +181,11 @@ def setup_conf():
     """
         Copy spark conf files to spark_home if they were uplaoded
     """
+    copy_spark_env()
+    copy_core_site()
+    copy_jars()
+
+def copy_spark_env():
     spark_env_path_src = os.path.join(os.environ['DOCKER_WORKING_DIR'], 'conf/spark-env.sh')
     spark_env_path_dest = os.path.join(spark_home, 'conf/spark-env.sh')
 
@@ -192,6 +197,7 @@ def setup_conf():
         print("Failed to copy spark-env.sh file")
         print(e)
 
+def copy_core_site():
     spark_default_path_src = os.path.join(os.environ['DOCKER_WORKING_DIR'], 'conf/spark-defaults.conf')
     spark_default_path_dest = os.path.join(spark_home, 'conf/spark-defaults.conf')
 
@@ -199,4 +205,30 @@ def setup_conf():
         shutil.copyfile(spark_default_path_src, spark_default_path_dest)
     except Exception as e:
         print("Failed to copy spark-defaults.conf file")
+        print(e)
+
+
+    spark_default_path_src = os.path.join(os.environ['DOCKER_WORKING_DIR'], 'conf/core-site.xml')
+    spark_default_path_dest = os.path.join(spark_home, 'conf/core-site.xml')
+
+    try:
+        shutil.copyfile(spark_default_path_src, spark_default_path_dest)
+    except Exception as e:
+        print("Failed to copy spark-defaults.conf file")
+        print(e)
+
+def copy_jars():
+    # Copy jars to $SPARK_HOME/jars
+    spark_default_path_src = os.path.join(os.environ['DOCKER_WORKING_DIR'], 'jars')
+    spark_default_path_dest = os.path.join(spark_home, 'jars')
+
+    try:
+        jar_files = os.listdir(spark_default_path_src)
+        for jar in jar_files:
+            src = os.path.join(spark_default_path_src, jar)
+            dest = os.path.join(spark_default_path_dest, jar)
+            print("copy {} to {}".format(src, dest))
+            shutil.copyfile(src, dest)
+    except Exception as e:
+        print("Failed to copy jar files")
         print(e)

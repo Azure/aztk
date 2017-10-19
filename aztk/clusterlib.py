@@ -518,7 +518,7 @@ class Cluster:
         ssh_priv_key = self.secrets_config.ssh_priv_key
         if ssh_priv_key is not None:
             ssh_command.add_option("-i", ssh_priv_key)
-        
+
         ssh_command.add_argument("-t")
         ssh_command.add_option("-L", "{0}:localhost:{1}".format(
             webui,  spark_web_ui_port), enable=bool(webui))
@@ -535,7 +535,7 @@ class Cluster:
         user = username if username is not None else '<username>'
         ssh_command.add_argument(
             "{0}@{1} -p {2}".format(user, master_node_ip, master_node_port))
-        
+
         if host is False:
             ssh_command.add_argument("\'sudo docker exec -it spark /bin/bash\'")
 

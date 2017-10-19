@@ -1,9 +1,9 @@
 # Azure Distributed Data Engineering Toolkit
-Azure Distributed Data Engineering Toolkit is a python CLI application for provisioning on-demand Spark on Docker clusters in Azure. It's a cheap and easy way to get up and running with a Spark cluster, and a great tool for Spark users who want to experiment and start testing at scale. 
+Azure Distributed Data Engineering Toolkit is a python CLI application for provisioning on-demand Spark on Docker clusters in Azure. It's a cheap and easy way to get up and running with a Spark cluster, and a great tool for Spark users who want to experiment and start testing at scale.
 
-This toolkit is built on top of Azure Batch but does not require any Azure Batch knowledge to use. 
+This toolkit is built on top of Azure Batch but does not require any Azure Batch knowledge to use.
 
-Currently, this toolkit is designed to run batch Spark jobs that require additional on-demand compute. Eventually we plan to support other distributed data engineering frameworks in a similar vein. Please let us know which frameworks you'd like for us to support in the future. 
+Currently, this toolkit is designed to run batch Spark jobs that require additional on-demand compute. Eventually we plan to support other distributed data engineering frameworks in a similar vein. Please let us know which frameworks you'd like for us to support in the future.
 
 ## Notable Features
 - Spark cluster provision time of 5 minutes on average
@@ -18,7 +18,7 @@ Currently, this toolkit is designed to run batch Spark jobs that require additio
 1. Clone the repo
 ```bash
     git clone -b stable https://www.github.com/azure/aztk
-    
+
     # You can also clone directly from master to get the latest bits
     git clone https://www.github.com/azure/aztk
 ```
@@ -67,7 +67,7 @@ aztk spark cluster create \
     --size <number_of_nodes> \
     --vm-size <vm_size>
 ```
-You can find more information on VM sizes [here.](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/sizes) Please note that you must use the official SKU name when setting your VM size - they usually come in the form: "standard_d2_v2". 
+You can find more information on VM sizes [here.](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/sizes) Please note that you must use the official SKU name when setting your VM size - they usually come in the form: "standard_d2_v2".
 
 You can also create your cluster with [low-priority](https://docs.microsoft.com/en-us/azure/batch/batch-low-pri-vms) VMs at an 80% discount by using `--size-low-pri` instead of `--size` (we have to set `--size 0` as we currently do not support mixed low-priority and dedicated VMs):
 ```
@@ -139,7 +139,7 @@ aztk spark cluster delete --id <my_cluster_id>
 - [How do I SSH into my Spark cluster's master node?](./docs/10-clusters.md#ssh-and-port-forwarding)
 - [How do I interact with my Spark cluster using a password instead of an SSH-key?](./docs/10-clusters.md#interactive-mode)
 - [How do I change my cluster default settings?](./docs/13-configuration.md)
-- [How do I modify my *spark-env.sh* or *spark-defaults.conf* files?](./docs/13-configuration.md)
+- [How do I modify my *spark-env.sh*, *spark-defaults.conf* or *core-site.xml* files?](./docs/13-configuration.md)
 
 ## Next Steps
 You can find more documentation [here](./docs)

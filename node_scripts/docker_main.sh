@@ -14,7 +14,7 @@ aztk_python_version=3.5.4
 custom_script_dir=$DOCKER_WORKING_DIR/custom-scripts
 
 # -----------------------
-# Preload jupyter samples 
+# Preload jupyter samples
 # -----------------------
 mkdir /jupyter
 mkdir /jupyter/samples
@@ -24,22 +24,8 @@ for file in $(dirname $0)/jupyter-samples/*; do
     cp $file /jupyter/samples
 done
 
-# --------------------
-# Setup WASB connector 
-# --------------------
-storage_account_name=$STORAGE_ACCOUNT_NAME
-storage_account_key=$STORAGE_ACCOUNT_KEY
-storage_account_suffix=$STORAGE_ACCOUNT_SUFFIX
-
-if [ -n "$STORAGE_ACCOUNT_NAME" ] && [ -n "$STORAGE_ACCOUNT_KEY" ] && [ -n "$STORAGE_ACCOUNT_SUFFIX" ]; then
-    echo "Setting up WASB connection"
-    bash $(dirname $0)/setup_wasb.sh $storage_account_name $storage_account_key $storage_account_suffix
-else
-    echo "Storage credentials not set"
-fi
-
 # ----------------------------
-# Run aztk setup python scripts 
+# Run aztk setup python scripts
 # ----------------------------
 # use python v3.5.4 to run aztk software
 echo "Starting setup using Docker"

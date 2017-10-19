@@ -1,7 +1,7 @@
 import os
 import yaml
 import typing
-from shutil import copyfile, rmtree
+from shutil import copyfile, copytree, rmtree
 from aztk import log
 from aztk import error
 from . import constants
@@ -9,7 +9,7 @@ from . import constants
 
 def load_spark_config():
     """
-        Copies the spark-defautls.conf and spark-env.sh in the .aztk/ diretory
+        Copies the spark-defautls.conf, spark-env.sh and core-site.xml in the .aztk/ diretory
     """
     if not os.path.exists(constants.DEFAULT_SPARK_CONF_DEST):
         os.mkdir(constants.DEFAULT_SPARK_CONF_DEST)
@@ -31,6 +31,27 @@ def load_spark_config():
     except Exception as e:
         pass
 
+    try:
+        copyfile(
+            os.path.join(constants.DEFAULT_SPARK_CONF_SOURCE, 'core-site.xml'),
+            os.path.join(constants.DEFAULT_SPARK_CONF_DEST, 'core-site.xml'))
+        log.info("Loaded core-site.xml")
+    except Exception as e:
+        pass
+
+    try:
+        # copytree expects destination to be empty, otherwise it will not copy
+        # force delete the content of this directoy to make sure newer files
+        # are copied over
+        if os.path.exists(constants.DEFAULT_SPARK_JARS_DEST):
+            rmtree(constants.DEFAULT_SPARK_JARS_DEST)
+
+        copytree(
+            constants.DEFAULT_SPARK_JARS_SOURCE,
+            constants.DEFAULT_SPARK_JARS_DEST)
+        log.info("Loaded jars")
+    except Exception as e:
+        pass
 
 def cleanup_spark_config():
     """
@@ -38,6 +59,9 @@ def cleanup_spark_config():
     """
     if os.path.exists(constants.DEFAULT_SPARK_CONF_DEST):
         rmtree(constants.DEFAULT_SPARK_CONF_DEST)
+
+    if os.path.exists(constants.DEFAULT_SPARK_JARS_DEST):
+        rmtree(constants.DEFAULT_SPARK_JARS_DEST)
 
 
 class SecretsConfig:

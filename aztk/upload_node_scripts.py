@@ -24,8 +24,11 @@ def zipdir(path, ziph):
         relative_folder = os.path.relpath(base, path)
         for file in files:
             if __includeFile(file):
-                with io.open(os.path.join(base, file), 'r') as f:
-                    ziph.writestr(os.path.join(relative_folder, file), f.read().replace('\r\n', '\n'))
+                if (file.endswith(".jar")):
+                    ziph.write(os.path.join(base, file), os.path.join(relative_folder, file))
+                else:
+                    with io.open(os.path.join(base, file), 'r') as f:
+                        ziph.writestr(os.path.join(relative_folder, file), f.read().replace('\r\n', '\n'))
 
 def __includeFile(filename: str) -> bool:
     if fnmatch.fnmatch(filename, '*.pyc'):

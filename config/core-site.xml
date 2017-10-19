@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+
+<!-- WASB (Azure Storage) Configuration  -->
+<!-- More information about WASB can be foudn at https://docs.microsoft.com/azure/hdinsight/hdinsight-hadoop-use-blob-storage> -->
+<!-- <property>
+  <name>fs.AbstractFileSystem.wasb.Impl</name>
+  <value>org.apache.hadoop.fs.azure.Wasb</value>
+</property>
+<property>
+  <name>fs.azure.account.key.MY_STORAGE_ACCOUNT_NAME.blob.MY_STORAGE_ACCOUNT_SUFFIX</name>
+  <value>MY_STORAGE_ACCOUNT_KEY</value>
+</property> -->
+
+<!-- ADL (Azure Data Lake) Configuration -->
+<!-- More information about ADL can be foudn at https://docs.microsoft.com/azure/hdinsight/hdinsight-hadoop-use-data-lake-store> -->
+<!-- <property>
+  <name>fs.adl.impl</name>
+  <value>org.apache.hadoop.fs.adl.AdlFileSystem</value>
+</property>
+<property>
+  <name>fs.AbstractFileSystem.adl.impl</name>
+  <value>org.apache.hadoop.fs.adl.Adl</value>
+</property>
+<property>
+  <name>dfs.adls.oauth2.access.token.provider.type</name>
+  <value>ClientCredential</value>
+</property>
+
+<property>
+  <name>dfs.adls.oauth2.refresh.url</name>
+  <value>https://login.microsoftonline.com/MY_AAD_TENANT_ID/oauth2/token</value>
+</property>
+<property>
+  <name>dfs.adls.oauth2.client.id</name>
+  <value>MY_AAD_CLIENT_ID</value>
+</property>
+<property>
+  <name>dfs.adls.oauth2.credential</name>
+  <value>MY_AAD_CREDENTIAL</value>
+</property> -->
+
+</configuration>

@@ -37,6 +37,8 @@ DEFAULT_SSH_CONFIG_PATH = os.path.join(os.getcwd(), '.aztk/ssh.yaml')
 DEFAULT_CLUSTER_CONFIG_PATH = os.path.join(os.getcwd(), '.aztk/cluster.yaml')
 DEFAULT_SPARK_CONF_SOURCE = os.path.join(os.getcwd(), '.aztk')
 DEFAULT_SPARK_CONF_DEST = os.path.join(ROOT_PATH, 'node_scripts/conf')
+DEFAULT_SPARK_JARS_SOURCE = os.path.join(os.getcwd(), '.aztk/jars/')
+DEFAULT_SPARK_JARS_DEST = os.path.join(ROOT_PATH, 'node_scripts/jars/')
 
 CUSTOM_SCRIPTS_DEST = os.path.join(ROOT_PATH, 'node_scripts', 'custom-scripts')
 
