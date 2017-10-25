@@ -9,6 +9,7 @@
 #  - jiata/aztk-python:0.1.0-spark1.6.3-anaconda3-5.0.0 (python3.6.2)
 
 if  [ "$IS_MASTER" = "1" ]; then
+
     PYSPARK_DRIVER_PYTHON="/.pyenv/versions/${USER_PYTHON_VERSION}/bin/jupyter"
     JUPYTER_KERNELS="/.pyenv/versions/${USER_PYTHON_VERSION}/share/jupyter/kernels"
 

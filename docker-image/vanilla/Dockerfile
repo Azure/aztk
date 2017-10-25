@@ -46,7 +46,7 @@ RUN apt-get clean \
     # install & setup pyenv
     && eval "$(pyenv init -)" \
     && echo "$(pyenv init -)" >> ~/.bashrc \
-    # install thunderbolt required python version & the user specified version of python
+    # install aztk required python version 
     && pyenv install -f $AZTK_PYTHON_VERSION \
     && pyenv global $AZTK_PYTHON_VERSION \
     # install spark & setup symlink to SPARK_HOME
