@@ -69,50 +69,8 @@ FROM my_username/my_repo:latest
 NOTE: See [here](https://github.com/Azure/aztk/blob/master/docs/12-docker-image.md#using-a-custom-docker-image-that-is-privately-hosted) to learn more about using privately hosted Docker Images.
 
 ## About the Dockerfiles
-The Dockerfiles in this directory are used to build the Docker images used by this toolkit. 
-
-You can modify these Dockerfiles to build your own image. If you plan to do so, please continue reading the below sections.
-
-### Specifying Spark and Python Version
-This Dockerfile takes in a few variables at build time that allow you to specify your desired Spark and Python versions: **PYTHON_VERSION** and **SPARK_VERSION_KEY**.
-
-```sh
-# For example, if I want to use Python 2.7.13 with Spark 1.6.3 I would build the image as follows:
-docker build \
-    --build-arg PYTHON_VERSION=2.7.13 \
-    --build-arg SPARK_VERSION_KEY=spark-1.6.3-bin-hadoop2.6 \
-    -t <my_image_tag> .
-```
-
-**SPARK_VERSION_KEY** is used to locate which version of Spark to download. These are the values that have been tested:
-- spark-1.6.3-bin-hadoop2.6
-- spark-2.1.0-bin-hadoop2.7
-- spark-2.2.0-bin-hadoop2.7
-
-For a full list of supported keys, please see this [page](https://d3kbcqa49mib13.cloudfront.net)
-
-NOTE: Do not include the '.tgz' suffix as part of the Spark version key.
-
-**PYTHON_VERSION** is used to set the version of Python for your cluster. These are the values that have been tested:
-- 3.5.4
-- 2.7.13
-
-NOTE: Most version of Python will work. However, when selecting your Python version, please make sure that the it is compatible with your selected version of Spark.
-
-### Required Environment Variables
-When layering your own Docker image, make sure your image does not intefere with the environment variables set in this Dockerfile, otherwise it may not work.
-
-If you want to use your own version of Spark, please make sure that the following environment variables are set. 
-
-``` sh
-# An example of required environment variables
-ENV JAVA_HOME /usr/lib/jvm/java-1.8.0-openjdk-amd64
-ENV SPARK_HOME /home/spark-current
-ENV PYSPARK_PYTHON python
-ENV USER_PYTHON_VERSION $PYTHON_VERSION
-ENV PATH $SPARK_HOME/bin:$PATH
-```
-
-If you are using your own version of Spark, make that it is symlinked by "/home/spark-current". **$SPARK_HOME**, must also point to "/home/spark-current".
+The Dockerfiles in this directory are used to build the Docker images used by this toolkit. Please reference the individual Dockerfiles for more information on them:
+- [Vanilla](./vanilla)
+- [Python](./python)
 
 
