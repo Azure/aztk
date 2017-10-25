@@ -72,5 +72,6 @@ NOTE: See [here](https://github.com/Azure/aztk/blob/master/docs/12-docker-image.
 The Dockerfiles in this directory are used to build the Docker images used by this toolkit. Please reference the individual Dockerfiles for more information on them:
 - [Vanilla](./vanilla)
 - [Python](./python)
+- TODO: R
 
 
