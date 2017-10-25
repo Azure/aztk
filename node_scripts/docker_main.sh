@@ -1,12 +1,8 @@
 #!/bin/bash
 
 # This file is the entry point of the docker container.
-# It will setup WASB and start Spark.
-# This script uses the storage account configured in .thunderbolt/secrets.yaml
-# This script uses the specificied user python version ($USER_PYTHON_VERSION)
 
 set -e
-aztk_python_version=3.5.4
 
 # --------------------
 # Setup custom scripts
@@ -15,6 +11,7 @@ custom_script_dir=$DOCKER_WORKING_DIR/custom-scripts
 
 # -----------------------
 # Preload jupyter samples
+# TODO: remove when we support uploading random (non-executable) files as part custom-scripts
 # -----------------------
 mkdir /jupyter
 mkdir /jupyter/samples
@@ -29,10 +26,10 @@ done
 # ----------------------------
 # use python v3.5.4 to run aztk software
 echo "Starting setup using Docker"
-$(pyenv root)/versions/$aztk_python_version/bin/pip install -r $(dirname $0)/requirements.txt
+$(pyenv root)/versions/$AZTK_PYTHON_VERSION/bin/pip install -r $(dirname $0)/requirements.txt
 
 echo "Running main.py script"
-$(pyenv root)/versions/$aztk_python_version/bin/python $(dirname $0)/main.py install
+$(pyenv root)/versions/$AZTK_PYTHON_VERSION/bin/python $(dirname $0)/main.py install
 
 # sleep to keep container running
 while true; do sleep 1; done

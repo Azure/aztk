@@ -1,17 +1,13 @@
 # Docker Image Gallery
 Azure Distributed Data Engineering Toolkit uses Docker containers to run Spark. 
 
-Please refer to the docs for details [how to select a docker-repo at cluster creation time](../docs/12-docker-image.md).
+Please refer to the docs for details on [how to select a docker-repo at cluster creation time](../docs/12-docker-image.md).
 
-### Supported Base Images
-We support several base images:
-- [Docker Hub] jiata/aztk:<image-version>-spark2.2.0-python3.5.4
-- [Docker Hub] jiata/aztk:<image-version>-spark2.1.0-python3.5.4
-- [Docker Hub] jiata/aztk:<image-version>-spark1.6.3-python3.5.4
-- [Docker Hub] jiata/aztk:<image-version>-spark2.1.0-python2.7.13
-- [Docker Hub] jiata/aztk:<image-version>-spark1.6.3-python2.7.13
-
-NOTE: Replace **<image-version>** with the version of the image you wish to use. For example: **jiata/aztk:0.1.0-spark2.2.0-python3.5.4**
+### Supported Images
+We support 3 primary docker image types, each geared towards specific user types:
+- Vanilla Spark (Java, Scala)
+- Pyspark (Python)
+- SparklyR (R)
 
 ### Gallery of 3rd Party Images
 Since this toolkit uses Docker containers to run Spark, users can bring their own images. Here's a list of 3rd party images:
@@ -101,12 +97,12 @@ If you want to use your own version of Spark, please make sure that the followin
 ``` sh
 # An example of required environment variables
 ENV JAVA_HOME /usr/lib/jvm/java-1.8.0-openjdk-amd64
-ENV SPARK_HOME /home/spark-current
+ENV SPARK_HOME /opt/spark-current
 ENV PYSPARK_PYTHON python
 ENV USER_PYTHON_VERSION $PYTHON_VERSION
 ENV PATH $SPARK_HOME/bin:$PATH
 ```
 
-If you are using your own version of Spark, make that it is symlinked by "/home/spark-current". **$SPARK_HOME**, must also point to "/home/spark-current".
+If you are using your own version of Spark, make that it is symlinked by "/opt/spark-current". **$SPARK_HOME**, must also point to "/opt/spark-current".
 
 

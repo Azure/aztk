@@ -15,11 +15,7 @@ from install import pick_master
 batch_client = config.batch_client
 
 spark_home = "/home/spark-current"
-pyspark_driver_python = "/.pyenv/versions/{}/bin/jupyter" \
-                        .format(os.environ["USER_PYTHON_VERSION"])
 spark_conf_folder = os.path.join(spark_home, "conf")
-default_python_version = os.environ["USER_PYTHON_VERSION"]
-
 
 def get_pool() -> batchmodels.CloudPool:
     return batch_client.pool.get(config.pool_id)
@@ -56,81 +52,6 @@ def setup_connection():
     master_file.close()
 
 
-def generate_jupyter_config():
-    master_node = get_node(config.node_id)
-    master_node_ip = master_node.ip_address
-
-    return dict(
-        display_name="PySpark",
-        language="python",
-        argv=[
-            "python",
-            "-m",
-            "ipykernel",
-            "-f",
-            "{connection_file}",
-        ],
-        env=dict(
-            SPARK_HOME=spark_home,
-            PYSPARK_PYTHON="python",
-            PYSPARK_SUBMIT_ARGS="--master spark://{0}:7077 pyspark-shell" \
-                    .format(master_node_ip),
-        )
-    )
-
-
-def setup_jupyter():
-    print("Setting up jupyter.")
-
-    jupyter_config_file = os.path.join(os.path.expanduser(
-        "~"), ".jupyter/jupyter_notebook_config.py")
-    if os.path.isfile(jupyter_config_file):
-        print("Jupyter config is already set. Skipping setup. \
-               (Start task is probably reruning after reboot)")
-        return
-
-    generate_jupyter_config_cmd = ["jupyter", "notebook", "--generate-config"]
-    generate_jupyter_config_cmd.append("--allow-root")
-
-    call(generate_jupyter_config_cmd)
-
-    jupyter_kernels_path = '/.pyenv/versions/{}/share/jupyter/kernels'. \
-            format(default_python_version)
-
-    with open(jupyter_config_file, "a") as config_file:
-        config_file.write('\n')
-        config_file.write('c.NotebookApp.token=""\n')
-        config_file.write('c.NotebookApp.password=""\n')
-    shutil.rmtree(jupyter_kernels_path)
-    os.makedirs(jupyter_kernels_path + '/pyspark', exist_ok=True)
-
-    with open(jupyter_kernels_path + '/pyspark/kernel.json', 'w') as outfile:
-        data = generate_jupyter_config()
-        json.dump(data, outfile, indent=2)
-
-
-def start_jupyter():
-    jupyter_port = config.spark_jupyter_port
-
-    pyspark_driver_python_opts = "notebook --no-browser --port='{0}'" \
-            .format(jupyter_port)
-    pyspark_driver_python_opts += " --allow-root"
-
-    my_env = os.environ.copy()
-    my_env["PYSPARK_DRIVER_PYTHON"] = pyspark_driver_python
-    my_env["PYSPARK_DRIVER_PYTHON_OPTS"] = pyspark_driver_python_opts
-
-    pyspark_wd = os.path.join(os.getcwd(), "jupyter")
-    if not os.path.exists(pyspark_wd):
-        os.mkdir(pyspark_wd)
-
-    print("Starting pyspark")
-    process = Popen([
-        os.path.join(spark_home, "bin/pyspark")
-    ], env=my_env, cwd=pyspark_wd)
-    print("Started pyspark with pid {0}".format(process.pid))
-
-
 def wait_for_master():
     print("Waiting for master to be ready.")
     master_node_id = pick_master.get_master_node_id(
@@ -157,9 +78,6 @@ def start_spark_master():
     print("Starting master with '{0}'".format(" ".join(cmd)))
     call(cmd)
 
-    setup_jupyter()
-    start_jupyter()
-
 
 def start_spark_worker():
     wait_for_master()
@@ -185,6 +103,7 @@ def setup_conf():
     copy_core_site()
     copy_jars()
 
+
 def copy_spark_env():
     spark_env_path_src = os.path.join(os.environ['DOCKER_WORKING_DIR'], 'conf/spark-env.sh')
     spark_env_path_dest = os.path.join(spark_home, 'conf/spark-env.sh')
@@ -196,6 +115,7 @@ def copy_spark_env():
     except Exception as e:
         print("Failed to copy spark-env.sh file")
         print(e)
+
 
 def copy_core_site():
     spark_default_path_src = os.path.join(os.environ['DOCKER_WORKING_DIR'], 'conf/spark-defaults.conf')
@@ -216,6 +136,7 @@ def copy_core_site():
     except Exception as e:
         print("Failed to copy spark-defaults.conf file")
         print(e)
+
 
 def copy_jars():
     # Copy jars to $SPARK_HOME/jars
