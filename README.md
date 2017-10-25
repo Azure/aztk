@@ -10,8 +10,10 @@ Currently, this toolkit is designed to run batch Spark jobs that require additio
 - Spark clusters run in Docker containers
 - Users can bring their own Docker image
 - Ability to use low-priority VMs for an 80% discount
-- Built in support for Azure Blob Storage connection
-- Built in Jupyter notebook for interactive experience
+- Built in support for Azure Blob Storage and Azure Data Lake connection
+- Optional Jupyter Notebook for pythonic interactive experience
+- Optional RStudio Server for an interactive experience in R
+- Tailored Docker images for SparklyR and PySpark
 - Ability to run _spark submit_ directly from your local machine's CLI
 
 ## Setup
@@ -112,7 +114,7 @@ Most users will want to work interactively with their Spark clusters. With the `
 ```bash
 aztk spark cluster ssh --id <my_cluster_id>
 ```
-By default, we port forward the Spark Web UI to *localhost:8080*, Spark Jobs UI to *localhost:4040*, and Jupyter to *localhost:8888*.
+By default, we port forward the Spark Web UI to *localhost:8080* and Spark Jobs UI to *localhost:4040*.
 
 You can configure these settings in the *.aztk/ssh.yaml* file.
 
@@ -135,7 +137,7 @@ aztk spark cluster delete --id <my_cluster_id>
 
 ## FAQs
 - [How do I connect to Azure Storage (WASB)?](./docs/30-cloud-storage.md)
-- [I want to use a different version of Spark / Python](./docs/12-docker-image.md)
+- [I want to use a different version of Spark](./docs/12-docker-image.md)
 - [How do I SSH into my Spark cluster's master node?](./docs/10-clusters.md#ssh-and-port-forwarding)
 - [How do I interact with my Spark cluster using a password instead of an SSH-key?](./docs/10-clusters.md#interactive-mode)
 - [How do I change my cluster default settings?](./docs/13-configuration.md)
