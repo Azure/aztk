@@ -3,7 +3,6 @@ Azure Distributed Data Engineering Toolkit uses Docker containers to run Spark.
 
 Please refer to the docs for details on [how to select a docker-repo at cluster creation time](../docs/12-docker-image.md).
 
-### Supported Images
 We support 3 primary docker image types, each geared towards specific user types:
 
 Docker Image | Image Type | User Language(s) | What's Included? 
@@ -12,7 +11,7 @@ Docker Image | Image Type | User Language(s) | What's Included?
 [jiata/aztk-python](https://hub.docker.com/r/jiata/aztk-python/) | Pyspark | Python | `Anaconda`</br>`Jupyter Notebooks` 
 [jiata/aztk-r](https://hub.docker.com/r/jiata/aztk-r/) | SparklyR | R | `MRO or CRAN`</br>`RStudio Server`</br>`R Client` 
 
-#### Matrix of supported container images:
+### Supported Container Images:
 
 Docker Repo (hosted on Docker Hub) | Spark Version | Python Version | R Version
 :-- | :-- | :-- | :--
