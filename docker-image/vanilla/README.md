@@ -24,3 +24,18 @@ docker build \
 For a full list of supported keys, please see this [page](https://d3kbcqa49mib13.cloudfront.net)
 
 NOTE: Do not include the '.tgz' suffix as part of the Spark version key.
+
+
+## Required Environment Variables
+When layering your own Docker image, make sure your image does not intefere with the environment variables set in this Dockerfile, otherwise it may not work.
+
+If you want to modify this Dockerfile, please make sure that the following environment variables are set: 
+
+``` sh
+# Required environment variables
+ENV JAVA_HOME 
+ENV SPARK_HOME 
+ENV PYSPARK_PYTHON 
+```
+
+If you are using your own version of Spark, make that it is symlinked by "/home/spark-current". **$SPARK_HOME**, must also point to "/home/spark-current".
