@@ -12,7 +12,7 @@ Currently, this toolkit is designed to run batch Spark jobs that require additio
 - Ability to use low-priority VMs for an 80% discount
 - Built in support for Azure Blob Storage and Azure Data Lake connection
 - Optional Jupyter Notebook for pythonic interactive experience
-- Optional RStudio Server for an interactive experience for in R
+- Optional RStudio Server for an interactive experience in R
 - Tailored Docker images for SparklyR and PySpark
 - Ability to run _spark submit_ directly from your local machine's CLI
 
