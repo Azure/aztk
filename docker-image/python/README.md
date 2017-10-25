@@ -30,3 +30,19 @@ NOTE: Do not include the '.tgz' suffix as part of the Spark version key.
 **ANACONDA_VERSION** is used to set the version of Anaconda for your cluster. When selecting your desired version of Anaconda, please verify that the version of Python is greater than v3.4 as this is a requirement for AZTK.
 
 NOTE: Most version of Python will work. However, when selecting your Python version, please make sure that the it is compatible with your selected version of Spark. 
+
+
+## Required Environment Variables
+When layering your own Docker image, make sure your image does not intefere with the environment variables set in this Dockerfile, otherwise it may not work.
+
+If you want to modify this Dockerfile, please make sure that the following environment variables are set: 
+
+``` sh
+# Required environment variables
+ENV JAVA_HOME 
+ENV SPARK_HOME 
+ENV PYSPARK_PYTHON 
+ENV USER_PYTHON_VERSION
+```
+
+If you are using your own version of Spark, make that it is symlinked by "/home/spark-current". **$SPARK_HOME**, must also point to "/home/spark-current".
