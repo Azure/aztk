@@ -1,4 +1,4 @@
-# Vanilla
+# Vanilla (Base Docker image)
 
 This Dockerfile is used to build the Vanilla Spark Docker image used by this toolkit. This is the Docker image type that is selected by AZTK by default.
 
