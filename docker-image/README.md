@@ -14,25 +14,27 @@ Docker Image | Image Type | User Language(s) | What's Included?
 [aztk-python](https://hub.docker.com/r/jiata/aztk-python/) | Pyspark | Python | `Anaconda`</br>`Jupyter Notebooks` </br> `PySpark`
 [aztk-r](https://hub.docker.com/r/jiata/aztk-r/) | SparklyR | R | `CRAN`</br>`RStudio Server`</br>`SparklyR and SparkR`
 
-It is also worth noting that the __aztk-python__ and __aztk-r__ images are built on top of the __aztk-vanilla__ image.
+__aztk-python__ and __aztk-r__ images are built on top of the __aztk-vanilla__ image.
+
+Today, all the AZTK images are hosted on Docker Hub under [jiata](https://hub.docker.com/r/jiata).
 
 ### Matrix of Supported Container Images:
 
-Docker Repo (hosted on Docker Hub) | Spark Version | Python Version | R Version | AZTK default
-:-- | :-- | :-- | :-- | --- 
-jiata/aztk-vanilla:0.1.0-spark2.2.0 | v2.2.0 | -- | -- | *
-jiata/aztk-vanilla:0.1.0-spark2.1.0 | v2.1.0 | -- | -- | 
-jiata/aztk-vanilla:0.1.0-spark1.6.3 | v1.6.3 | -- | -- | 
-jiata/aztk-python:0.1.0-spark2.2.0-anaconda3-5.0.0 | v2.2.0 | v3.6.2 | -- | 
-jiata/aztk-python:0.1.0-spark2.1.0-anaconda3-5.0.0 | v2.1.0 | v3.6.2 | -- | 
-jiata/aztk-python:0.1.0-spark1.6.3-anaconda3-5.0.0 | v1.6.3 | v3.6.2 | -- | 
-jiata/aztk-r:0.1.0-spark2.2.0-r3.4.1 | v2.2.0 | -- | v3.4.1 | 
-jiata/aztk-r:0.1.0-spark2.1.0-r3.4.1 | v2.1.0 | -- | v3.4.1 | 
-jiata/aztk-r:0.1.0-spark1.6.3-r3.4.1 | v1.6.3 | -- | v3.4.1 | 
+Docker Repo (hosted on Docker Hub) | Spark Version | Python Version | R Version 
+:-- | :-- | :-- | :-- 
+jiata/aztk-vanilla:0.1.0-spark2.2.0 __(defaul)__ | v2.2.0 | -- | -- 
+jiata/aztk-vanilla:0.1.0-spark2.1.0 | v2.1.0 | -- | -- 
+jiata/aztk-vanilla:0.1.0-spark1.6.3 | v1.6.3 | -- | -- 
+jiata/aztk-python:0.1.0-spark2.2.0-anaconda3-5.0.0 | v2.2.0 | v3.6.2 | -- 
+jiata/aztk-python:0.1.0-spark2.1.0-anaconda3-5.0.0 | v2.1.0 | v3.6.2 | -- 
+jiata/aztk-python:0.1.0-spark1.6.3-anaconda3-5.0.0 | v1.6.3 | v3.6.2 | -- 
+jiata/aztk-r:0.1.0-spark2.2.0-r3.4.1 | v2.2.0 | -- | v3.4.1 
+jiata/aztk-r:0.1.0-spark2.1.0-r3.4.1 | v2.1.0 | -- | v3.4.1 
+jiata/aztk-r:0.1.0-spark1.6.3-r3.4.1 | v1.6.3 | -- | v3.4.1 
 
 If you have requests to add to the list of supported images, please file a Github issue.
 
-NOTE: Spark clusters that use the __aztk-python__and __aztk-r__ images take longer to provision because these Docker images are significantly larger than the Vanilla Spark image. 
+NOTE: Spark clusters that use the __aztk-python__ and __aztk-r__ images take longer to provision because these Docker images are significantly larger than the __aztk-vanilla__ image. 
 
 ### Gallery of 3rd Party Images
 Since this toolkit uses Docker containers to run Spark, users can bring their own images. Here's a list of 3rd party images:
@@ -90,6 +92,8 @@ ENV JAVA_HOME /usr/lib/jvm/java-1.8.0-openjdk-amd64
 ENV SPARK_HOME /home/spark-current
 ENV PATH $SPARK_HOME/bin:$PATH
 ```
+
+If you are using your own version of Spark, make that it is symlinked by "/home/spark-current". **$SPARK_HOME**, must also point to "/home/spark-current".
 
 ## Hosting your Docker Image
 By default, this toolkit assumes that your Docker images are publicly hosted on Docker Hub. However, we also support hosting your images privately.
