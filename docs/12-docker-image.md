@@ -4,16 +4,22 @@ Azure Distributed Data Engineering Toolkit runs Spark on Docker.
 Supported Azure Distributed Data Engineering Toolkit images are hosted publicly on [Docker Hub](https://hub.docker.com/r/jiata/aztk/tags).
 
 ## Versioning with Docker
-The default base image that this package uses is a Docker image with **Spark v2.2.0** and **Python v2.7.13**.
+The default image that this package uses is a the __aztk-vanilla__ Docker image that comes with **Spark v2.2.0**.
 
-However, the Azure Distributed Data Engineering Toolkit supports several base images that you can toggle between:
-- Spark v2.2.0 and Python v3.5.4 (default)
-- Spark v2.1.0 and Python v3.5.4
-- Spark v2.1.0 and Python v2.7.13
-- Spark v1.6.3 and Python v3.5.4
-- Spark v1.6.3 and Python v2.7.13
+You can use several versions of the __aztk-vanilla__ image:
+- Spark 2.2.0 - jiata/aztk-vanilla:0.1.0-spark2.2.0 (default)
+- Spark 2.1.0 - jiata/aztk-vanilla:0.1.0-spark2.1.0
+- Spark 1.6.3 - jiata/aztk-vanilla:0.1.0-spark1.6.3
 
-*Today, these supported base images are hosted on Docker Hub under the repo ["jiata/aztk:<tag>"](https://hub.docker.com/r/jiata/aztk/tags).*
+We also provide two other image types tailored for the Python and R users: __aztk-r__ and __aztk-python__. You can choose between the following:
+- Anaconda3-5.0.0 (Python 3.6.2) / Spark 2.2.0 - jiata/aztk-python:0.1.0-spark2.2.0-anaconda3-5.0.0
+- Anaconda3-5.0.0 (Python 3.6.2) / Spark 2.1.0 - jiata/aztk-python:0.1.0-spark2.1.0-anaconda3-5.0.0
+- Anaconda3-5.0.0 (Python 3.6.2) / Spark 1.6.3 - jiata/aztk-python:0.1.0-spark1.6.3-anaconda3-5.0.0
+- R 3.4.0 / Spark v2.2.0 - jiata/aztk-r:0.1.0-spark2.2.0-r3.4.0
+- R 3.4.0 / Spark v2.1.0 - jiata/aztk-r:0.1.0-spark2.1.0-r3.4.0
+- R 3.4.0 / Spark v1.6.3 - jiata/aztk-r:0.1.0-spark1.6.3-r3.4.0
+
+*Today, these supported images are hosted on Docker Hub under the repo ["jiata/aztk-vanilla/r/python:<tag>"](https://hub.docker.com/r/jiata).*
 
 To select an image other than the default, you can set your Docker image at cluster creation time with the optional **--docker-repo** parameter:
 
@@ -21,13 +27,13 @@ To select an image other than the default, you can set your Docker image at clus
 aztk spark cluster create ... --docker-repo <name_of_docker_image_repo>
 ```
 
-For example, if I am using the image version 0.1.0, and wanted to use Spark v1.6.3 with Python v2.7.13, I could run the following cluster create command:
+For example, if I am using the image version 0.1.0, and wanted to use Spark v1.6.3, I could run the following cluster create command:
 ```sh
-aztk spark cluster create ... --docker-repo jiata/aztk:0.1.0-spark1.6.3-python3.5.4
+aztk spark cluster create ... --docker-repo jiata/aztk:0.1.0-spark1.6.3
 ```
 
 ## Using a custom Docker Image
-What if I wanted to use my own Docker image? _What if I want to use Spark v2.0.1 with Python v3.6.2?_
+What if I wanted to use my own Docker image?
 
 You can build your own Docker image on top or beneath one of our supported base images _OR_ you can modify the [supported Dockerfile](../docker-image) and build your own image that way.
 
