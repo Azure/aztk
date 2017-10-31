@@ -1,8 +1,11 @@
 import argparse
 import typing
 from aztk import log
+from aztk import utils
 from aztk.config import SshConfig
 from aztk.aztklib import Aztk
+import aztk_sdk
+import azure.batch.models.batch_error as batch_error
 
 
 def setup_parser(parser: argparse.ArgumentParser):
@@ -51,16 +54,24 @@ def execute(args: typing.NamedTuple):
     log.info("-------------------------------------------")
 
     # get ssh command
-    ssh_cmd = aztk.cluster.ssh_in_master(
-        cluster_id=ssh_conf.cluster_id,
-        webui=ssh_conf.web_ui_port,
-        jobui=ssh_conf.job_ui_port,
-        jupyter=ssh_conf.jupyter_port,
-        username=ssh_conf.username,
-        host=ssh_conf.host,
-        connect=ssh_conf.connect)
+    try:
+        ssh_cmd = utils.ssh_in_master(
+            client=aztk.client,
+            cluster_id=ssh_conf.cluster_id,
+            webui=ssh_conf.web_ui_port,
+            jobui=ssh_conf.job_ui_port,
+            jupyter=ssh_conf.jupyter_port,
+            username=ssh_conf.username,
+            host=ssh_conf.host,
+            connect=ssh_conf.connect)
 
-    if not ssh_conf.connect:
-        log.info("")
-        log.info("Use the following command to connect to your spark head node:")
-        log.info("\t%s", ssh_cmd)
+        if not ssh_conf.connect:
+            log.info("")
+            log.info("Use the following command to connect to your spark head node:")
+            log.info("\t%s", ssh_cmd)
+
+    except batch_error.BatchErrorException as e:
+        if e.error.code == "PoolNotFound":
+            raise aztk_sdk.error.AztkError("The cluster you are trying to connect to does not exist.")
+        else:
+            raise

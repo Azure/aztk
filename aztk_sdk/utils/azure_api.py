@@ -1,9 +1,8 @@
 import azure.batch.batch_service_client as batch
 import azure.batch.batch_auth as batch_auth
 import azure.storage.blob as blob
-import aztk.error as error
-from . import config
-from .version import __version__
+from aztk_sdk import error
+from aztk_sdk.version import __version__
 
 
 class BatchConfig:
@@ -21,7 +20,6 @@ class BlobConfig:
 
 
 def _validate_batch_config(batch_config: BatchConfig):
-    
     if batch_config.account_key is None:
         raise error.AzureApiInitError("Batch account key is not set in secrets.yaml config")
     if batch_config.account_name is None:

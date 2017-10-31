@@ -1,7 +1,6 @@
 import os
-from aztk.config import SecretsConfig
 
-def get_user_public_key(key_or_path: str = None, secrets_config: SecretsConfig = None):
+def get_user_public_key(key_or_path: str = None, secrets_config=None):
     """
         Return the ssh key.
         It will first check if the given argument is a ssh key or a path to one

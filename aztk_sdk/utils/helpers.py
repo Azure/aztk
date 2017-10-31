@@ -7,26 +7,30 @@ import azure.batch.batch_service_client as batch
 import azure.batch.batch_auth as batch_auth
 import azure.batch.models as batch_models
 import azure.storage.blob as blob
-from .version import __version__
-from . import constants, log, error
-
+from aztk_sdk.version import __version__
+from aztk_sdk.utils import constants
+from aztk_sdk import error
+import aztk_sdk.models
 
 _STANDARD_OUT_FILE_NAME = 'stdout.txt'
 _STANDARD_ERROR_FILE_NAME = 'stderr.txt'
 
 
-def wait_for_tasks_to_complete(job_id, timeout, batch_client):
+def get_cluster(cluster_id, batch_client):
+    pool = batch_client.pool.get(cluster_id)
+    nodes = batch_client.compute_node.list(pool_id=cluster_id)
+
+    return aztk_sdk.models.Cluster(pool, nodes)
+
+
+def wait_for_tasks_to_complete(job_id, batch_client):
     """
     Waits for all the tasks in a particular job to complete.
     :param batch_client: The batch client to use.
     :type batch_client: `batchserviceclient.BatchServiceClient`
     :param str job_id: The id of the job to monitor.
-    :param timeout: The maximum amount of time to wait.
-    :type timeout: `datetime.timedelta`
     """
-    time_to_timeout_at = datetime.datetime.now() + timeout
-
-    while datetime.datetime.now() < time_to_timeout_at:
+    while True:
         tasks = batch_client.task.list(job_id)
 
         incomplete_tasks = [task for task in tasks if
@@ -35,42 +39,21 @@ def wait_for_tasks_to_complete(job_id, timeout, batch_client):
             return
         time.sleep(5)
 
-    raise TimeoutError("Timed out waiting for tasks to complete")
 
-
-class MasterInvalidStateError(Exception):
-    pass
-
-
-def wait_for_master_to_be_ready(cluster_id: str, batch_client):
-    master_node_id = None
-    log.info("Waiting for spark master to be ready")
-    start_time = datetime.datetime.now()
+def wait_for_task_to_complete(job_id: str, task_id: str, batch_client):
+    """
+    Waits for a particular task in a job to complete.
+    :param batch_client: The batch client to use.
+    :type batch_client: `batchserviceclient.BatchServiceClient`
+    :param str job_id: The id of the job to monitor.
+    :param str job_id: The id of the task to monitor.
+    """
     while True:
-        if not master_node_id:
-            master_node_id = get_master_node_id(cluster_id, batch_client)
-            if not master_node_id:
-                time.sleep(5)
-                continue
-
-        master_node = batch_client.compute_node.get(cluster_id, master_node_id)
-
-        if master_node.state in [batch_models.ComputeNodeState.idle,  batch_models.ComputeNodeState.running]:
-            break
-        elif master_node.state is batch_models.ComputeNodeState.start_task_failed:
-            raise MasterInvalidStateError("Start task failed on master")
-        elif master_node.state in [batch_models.ComputeNodeState.unknown, batch_models.ComputeNodeState.unusable]:
-            raise MasterInvalidStateError("Master is in an invalid state")
+        task = batch_client.task.get(job_id=job_id, task_id=task_id)
+        if task.state != batch_models.TaskState.completed:
+            time.sleep(5)
         else:
-            now = datetime.datetime.now()
-
-            delta = now - start_time
-            if delta.total_seconds() > constants.WAIT_FOR_MASTER_TIMEOUT:
-                raise MasterInvalidStateError(
-                    "Master didn't become ready before timeout.")
-
-            time.sleep(10)
-    time.sleep(5)
+            return
 
 
 def upload_file_to_container(container_name, file_path, blob_client=None, use_full_path=False, node_path=None) -> batch_models.ResourceFile:
@@ -116,38 +99,6 @@ def upload_file_to_container(container_name, file_path, blob_client=None, use_fu
                                      blob_source=sas_url)
 
 
-def print_configuration(config):
-    """
-    Prints the configuration being used as a dictionary
-    :param config: The configuration.
-    :type config: `configparser.ConfigParser`
-    """
-    configuration_dict = {s: dict(config.items(s)) for s in
-                          config.sections() + ['DEFAULT']}
-
-    log.info("")
-    log.info("Configuration is:")
-    log.info(configuration_dict)
-
-
-def get_master_node_id_from_pool(pool: batch_models.CloudPool):
-    """
-        :returns: the id of the node that is the assigned master of this pool
-    """
-    if pool.metadata is None:
-        return None
-
-    for metadata in pool.metadata:
-        if metadata.name == constants.MASTER_NODE_METADATA_KEY:
-            return metadata.value
-
-    return None
-
-
-def get_master_node_id(pool_id, batch_client):
-    return get_master_node_id_from_pool(batch_client.pool.get(pool_id))
-
-
 def create_pool_if_not_exist(pool, batch_client):
     """
     Creates the specified pool if it doesn't already exist
@@ -160,7 +111,7 @@ def create_pool_if_not_exist(pool, batch_client):
         batch_client.pool.add(pool)
     except batch_models.BatchErrorException as e:
         if e.error.code == "PoolExists":
-            raise error.AztkError("A cluster with the same id already exists. Use a different id or delete the existing cluster by running \'aztk spark cluster delete --id {0}\'".format(pool.id))
+            raise error.AztkError("A cluster with the same id already exists. Use a different id or delete the existing cluster")
         else:
             raise
     return True
@@ -177,7 +128,6 @@ def wait_for_all_nodes_state(pool, node_state, batch_client):
     :rtype: list
     :return: list of `batchserviceclient.models.ComputeNode`
     """
-    log.info('Waiting for all nodes in pool %s to reach desired state...', pool.id)
     while True:
         # refresh pool to ensure that there is no resize error
         pool = batch_client.pool.get(pool.id)
@@ -318,24 +268,6 @@ def get_connection_info(pool_id, node_id, batch_client):
     return (remote_ip, ssh_port)
 
 
-def print_batch_exception(batch_exception):
-    """
-    Prints the contents of the specified Batch exception.
-    :param batch_exception:
-    """
-    log.error("-------------------------------------------")
-    log.error("Exception encountered:")
-    if batch_exception.error and \
-            batch_exception.error.message and \
-            batch_exception.error.message.value:
-        log.error(batch_exception.error.message.value)
-        if batch_exception.error.values:
-            log.error('')
-            for mesg in batch_exception.error.values:
-                log.error("%s:\t%s", mesg.key, mesg.value)
-    log.error("-------------------------------------------")
-
-
 def get_cluster_total_target_nodes(pool):
     """
     Get the total number of target nodes (dedicated + low pri) for the pool
@@ -391,3 +323,23 @@ def read_stream_as_string(stream, encoding="utf-8"):
     finally:
         output.close()
     raise RuntimeError('could not write data to stream or decode bytes')
+
+
+def format_batch_exception(batch_exception):
+    """
+    Returns the contents of the specified Batch exception.
+    :param batch_exception:
+    """
+    l = []
+    l.append("-------------------------------------------")
+    if batch_exception.error and \
+            batch_exception.error.message and \
+            batch_exception.error.message.value:
+        l.append(batch_exception.error.message.value)
+        if batch_exception.error.values:
+            l.append('')
+            for mesg in batch_exception.error.values:
+                l.append("{0}:\t{1}".format(mesg.key, mesg.value))
+    l.append("-------------------------------------------")
+
+    return '\n'.join(l)

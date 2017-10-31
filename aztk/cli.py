@@ -7,11 +7,10 @@
 import argparse
 from typing import NamedTuple
 import azure.batch.models.batch_error as batch_error
-from aztk import constants, version, logger, log
-import aztk.util as util
-import aztk.error as error
+import aztk_sdk
+from aztk import logger, log, utils, constants
 from aztk.spark.cli import spark
-from aztk.models import Software
+
 
 def main():
     parser = argparse.ArgumentParser(prog=constants.CLI_EXE)
@@ -32,14 +31,14 @@ def main():
     try:
         run_software(args)
     except batch_error.BatchErrorException as e:
-        util.print_batch_exception(e)
-    except error.AztkError as e:
+        utils.print_batch_exception(e)
+    except aztk_sdk.error.AztkError as e:
         log.error(e.message)
 
 
 def setup_common_args(parser: argparse.ArgumentParser):
     parser.add_argument('--version', action='version',
-                        version=version.__version__)
+                        version=aztk_sdk.version.__version__)
     parser.add_argument("--verbose", action='store_true',
                         help="Enable verbose logging.")
 
@@ -54,7 +53,7 @@ def parse_common_args(args: NamedTuple):
 
 def run_software(args: NamedTuple):
     softwares = {}
-    softwares[Software.spark] = spark.execute
+    softwares[aztk_sdk.models.Software.spark] = spark.execute
 
     func = softwares[args.software]
     func(args)

@@ -1,10 +1,11 @@
+import os
 import argparse
 import typing
-from aztk.config import load_spark_config, cleanup_spark_config
+import aztk_sdk.spark
 from aztk import log
 from aztk.config import ClusterConfig
 from aztk.aztklib import Aztk
-
+from aztk import utils
 
 
 def setup_parser(parser: argparse.ArgumentParser):
@@ -25,9 +26,6 @@ def setup_parser(parser: argparse.ArgumentParser):
     parser.add_argument('--password',
                         help="The password to access your spark cluster's head \
                              node. If not provided will use ssh public key.")
-    parser.add_argument('--ssh-key',
-                        help="The ssh public key to access your spark cluster\'s head \
-                             node. You can also set the ssh-key in the configuration file.")
     parser.add_argument('--docker-repo',
                         help='The location of the public docker image you want to use \
                              (<my-username>/<my-repo>:<tag>)')
@@ -51,12 +49,72 @@ def execute(args: typing.NamedTuple):
         wait=args.wait,
         username=args.username,
         password=args.password,
-        ssh_key=args.ssh_key,
         docker_repo=args.docker_repo)
 
+    print_cluster_conf(cluster_conf)
+
+    if cluster_conf.custom_scripts:
+        custom_scripts = []
+        for custom_script in cluster_conf.custom_scripts:
+            custom_scripts.append(
+                aztk_sdk.spark.models.CustomScript(
+                    script=custom_script['script'],
+                    run_on=custom_script['runOn']
+                )
+            )
+    else:
+        custom_scripts = None
+
+    jars_src = aztk_sdk.utils.constants.DEFAULT_SPARK_JARS_SOURCE
+
+    # create spark cluster
+    cluster = aztk.client.create_cluster(
+        aztk_sdk.spark.models.ClusterConfiguration(
+            cluster_id=cluster_conf.uid,
+            vm_count=cluster_conf.size,
+            vm_low_pri_count=cluster_conf.size_low_pri,
+            vm_size=cluster_conf.vm_size,
+            custom_scripts=custom_scripts,
+            docker_repo=cluster_conf.docker_repo,
+            spark_configuration=aztk_sdk.spark.models.SparkConfiguration(
+                spark_defaults_conf=os.path.join(
+                    aztk_sdk.utils.constants.DEFAULT_SPARK_CONF_SOURCE, 'spark-defaults.conf'),
+                spark_env_sh=os.path.join(
+                    aztk_sdk.utils.constants.DEFAULT_SPARK_CONF_SOURCE, 'spark-env.sh'),
+                core_site_xml=os.path.join(
+                    aztk_sdk.utils.constants.DEFAULT_SPARK_CONF_SOURCE, 'core-site.xml'),
+                jars=[
+                    os.path.join(jars_src, path) for path in os.listdir(jars_src)
+                ]
+            )
+        ),
+        wait=cluster_conf.wait
+    )
+
+    if cluster_conf.username:
+        ssh_key = aztk.client.secrets_config.ssh_pub_key
+
+        ssh_key, password = utils.get_ssh_key_or_prompt(
+            ssh_key, args.username, args.password, aztk.client.secrets_config)
+
+        aztk.client.create_user(
+            cluster_id=cluster_conf.uid,
+            username=cluster_conf.username,
+            password=password,
+            ssh_key=ssh_key
+        )
+
+    if cluster_conf.wait:
+        log.info("Cluster %s created successfully.", cluster.id)
+    else:
+        log.info("Cluster %s is being provisioned.", cluster.id)
+
+
+def print_cluster_conf(cluster_conf):
     log.info("-------------------------------------------")
     log.info("spark cluster id:        %s", cluster_conf.uid)
-    log.info("spark cluster size:      %s", cluster_conf.size + cluster_conf.size_low_pri)
+    log.info("spark cluster size:      %s",
+             cluster_conf.size + cluster_conf.size_low_pri)
     log.info(">        dedicated:      %s", cluster_conf.size)
     log.info(">     low priority:      %s", cluster_conf.size_low_pri)
     log.info("spark cluster vm size:   %s", cluster_conf.vm_size)
@@ -64,24 +122,6 @@ def execute(args: typing.NamedTuple):
     log.info("docker repo name:        %s", cluster_conf.docker_repo)
     log.info("wait for cluster:        %s", cluster_conf.wait)
     log.info("username:                %s", cluster_conf.username)
-    if args.password:
+    if cluster_conf.password:
         log.info("Password: %s", '*' * len(cluster_conf.password))
     log.info("-------------------------------------------")
-
-    # create spark cluster
-    aztk.cluster.create_cluster(
-        cluster_conf.custom_scripts,
-        cluster_conf.uid,
-        cluster_conf.size,
-        cluster_conf.size_low_pri,
-        cluster_conf.vm_size,
-        cluster_conf.username,
-        cluster_conf.password,
-        cluster_conf.ssh_key,
-        cluster_conf.docker_repo,
-        cluster_conf.wait)
-
-    if cluster_conf.wait:
-        log.info("Cluster %s created successfully.", cluster_conf.uid)
-    else:
-        log.info("Cluster %s is being provisioned.", cluster_conf.uid)

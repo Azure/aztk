@@ -1,8 +1,10 @@
 from setuptools import setup, find_packages
 from aztk import constants
+from aztk_sdk import version
+
 
 setup(name='aztk',
-      version='0.1',
+      version=version.__version__,
       description='Utility for data engineers or platform developers to Run distributed jobs in Azure',
       url='<tbd>',
       author='Microsoft',

@@ -1,7 +1,8 @@
 import argparse
 import typing
+import time
 from aztk.aztklib import Aztk
-
+from aztk import utils
 
 def setup_parser(parser: argparse.ArgumentParser):
     parser.add_argument('--id',
@@ -18,7 +19,9 @@ def setup_parser(parser: argparse.ArgumentParser):
 
 def execute(args: typing.NamedTuple):
     aztk = Aztk()
-    cluster_id = args.cluster_id
-    app_name = args.app_name
-    tail = args.tail
-    aztk.job.read_log(cluster_id, app_name, tail=tail)
+
+    if args.tail:
+        utils.stream_logs(client=aztk.client, cluster_id=args.cluster_id, application_name=args.app_name)
+    else:
+        app_logs = aztk.client.get_application_log(cluster_id=args.cluster_id, application_name=args.app_name)
+        print(app_logs.log)

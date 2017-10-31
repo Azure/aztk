@@ -28,7 +28,7 @@ def execute(args: typing.NamedTuple):
             log.error("Confirmation cluster id does not match. Please try again.")
             return
 
-    if aztk.cluster.delete_cluster(cluster_id):
+    if aztk.client.delete_cluster(cluster_id):
         log.info("Deleting cluster %s", cluster_id)
     else:
         log.error("Cluster with id '%s' doesn't exist or was already deleted.", cluster_id)

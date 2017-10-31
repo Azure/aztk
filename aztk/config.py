@@ -1,67 +1,8 @@
 import os
 import yaml
 import typing
-from shutil import copyfile, copytree, rmtree
 from aztk import log
-from aztk import error
-from . import constants
-
-
-def load_spark_config():
-    """
-        Copies the spark-defautls.conf, spark-env.sh and core-site.xml in the .aztk/ diretory
-    """
-    if not os.path.exists(constants.DEFAULT_SPARK_CONF_DEST):
-        os.mkdir(constants.DEFAULT_SPARK_CONF_DEST)
-
-    try:
-        copyfile(
-            os.path.join(constants.DEFAULT_SPARK_CONF_SOURCE,
-                         'spark-defaults.conf'),
-            os.path.join(constants.DEFAULT_SPARK_CONF_DEST, 'spark-defaults.conf'))
-        log.info("Loaded spark-defaults.conf")
-    except Exception as e:
-        pass
-
-    try:
-        copyfile(
-            os.path.join(constants.DEFAULT_SPARK_CONF_SOURCE, 'spark-env.sh'),
-            os.path.join(constants.DEFAULT_SPARK_CONF_DEST, 'spark-env.sh'))
-        log.info("Loaded spark-env.sh")
-    except Exception as e:
-        pass
-
-    try:
-        copyfile(
-            os.path.join(constants.DEFAULT_SPARK_CONF_SOURCE, 'core-site.xml'),
-            os.path.join(constants.DEFAULT_SPARK_CONF_DEST, 'core-site.xml'))
-        log.info("Loaded core-site.xml")
-    except Exception as e:
-        pass
-
-    try:
-        # copytree expects destination to be empty, otherwise it will not copy
-        # force delete the content of this directoy to make sure newer files
-        # are copied over
-        if os.path.exists(constants.DEFAULT_SPARK_JARS_DEST):
-            rmtree(constants.DEFAULT_SPARK_JARS_DEST)
-
-        copytree(
-            constants.DEFAULT_SPARK_JARS_SOURCE,
-            constants.DEFAULT_SPARK_JARS_DEST)
-        log.info("Loaded jars")
-    except Exception as e:
-        pass
-
-def cleanup_spark_config():
-    """
-        Removes copied remaining spark config files after they have been uploaded
-    """
-    if os.path.exists(constants.DEFAULT_SPARK_CONF_DEST):
-        rmtree(constants.DEFAULT_SPARK_CONF_DEST)
-
-    if os.path.exists(constants.DEFAULT_SPARK_JARS_DEST):
-        rmtree(constants.DEFAULT_SPARK_JARS_DEST)
+import aztk_sdk.spark
 
 
 class SecretsConfig:
@@ -81,7 +22,7 @@ class SecretsConfig:
         self.ssh_pub_key = None
         self.ssh_priv_key = None
 
-    def _load_secrets_config(self, path: str=constants.DEFAULT_SECRETS_PATH):
+    def _load_secrets_config(self, path: str=aztk_sdk.utils.constants.DEFAULT_SECRETS_PATH):
         """
             Loads the secrets.yaml file in the .aztk directory
         """
@@ -92,7 +33,7 @@ class SecretsConfig:
             try:
                 secrets_config = yaml.load(stream)
             except yaml.YAMLError as err:
-                raise error.AztkError(
+                raise aztk_sdk.error.AztkError(
                     "Error in cluster.yaml: {0}".format(err))
 
             self._merge_dict(secrets_config)
@@ -125,7 +66,7 @@ class SecretsConfig:
 
     def load(self):
         # read global ~/secrets.yaml
-        self._load_secrets_config(os.path.join(constants.HOME_DIRECTORY_PATH, '.aztk', 'ssh.yaml'))
+        self._load_secrets_config(os.path.join(aztk_sdk.utils.constants.HOME_DIRECTORY_PATH, '.aztk', 'ssh.yaml'))
         # read current working directory secrets.yaml
         self._load_secrets_config()
 
@@ -138,12 +79,11 @@ class ClusterConfig:
         self.size_low_pri = 0
         self.username = None
         self.password = None
-        self.ssh_key = None
         self.custom_scripts = None
         self.docker_repo = None
         self.wait = None
 
-    def _read_config_file(self, path: str = constants.DEFAULT_CLUSTER_CONFIG_PATH):
+    def _read_config_file(self, path: str = aztk_sdk.utils.constants.DEFAULT_CLUSTER_CONFIG_PATH):
         """
             Reads the config file in the .aztk/ directory (.aztk/cluster.yaml)
         """
@@ -154,7 +94,7 @@ class ClusterConfig:
             try:
                 config = yaml.load(stream)
             except yaml.YAMLError as err:
-                raise error.AztkError(
+                raise aztk_sdk.error.AztkError(
                     "Error in cluster.yaml: {0}".format(err))
 
             if config is None:
@@ -192,12 +132,12 @@ class ClusterConfig:
         if config.get('wait') is not None:
             self.wait = config['wait']
 
-    def merge(self, uid, username, size, size_low_pri, vm_size, ssh_key, password, wait, docker_repo):
+    def merge(self, uid, username, size, size_low_pri, vm_size, password, wait, docker_repo):
         """
             Reads configuration file (cluster.yaml), merges with command line parameters,
             checks for errors with configuration
         """
-        self._read_config_file(os.path.join(constants.HOME_DIRECTORY_PATH, '.aztk', 'ssh.yaml'))
+        self._read_config_file(os.path.join(aztk_sdk.utils.constants.HOME_DIRECTORY_PATH, '.aztk', 'cluster.yaml'))
         self._read_config_file()
 
         self._merge_dict(
@@ -207,7 +147,6 @@ class ClusterConfig:
                 size=size,
                 size_low_pri=size_low_pri,
                 vm_size=vm_size,
-                ssh_key=ssh_key,
                 password=password,
                 wait=wait,
                 custom_scripts=None,
@@ -216,23 +155,23 @@ class ClusterConfig:
         )
 
         if self.uid is None:
-            raise error.AztkError(
+                raise aztk_sdk.error.AztkError(
                 "Please supply an id for the cluster with a parameter (--id)")
 
         if self.size == 0 and self.size_low_pri == 0:
-            raise error.AztkError(
+                raise aztk_sdk.error.AztkError(
                 "Please supply a valid (greater than 0) size or size_low_pri value either in the cluster.yaml configuration file or with a parameter (--size or --size-low-pri)")
 
         if self.vm_size is None:
-            raise error.AztkError(
+                raise aztk_sdk.error.AztkError(
                 "Please supply a vm_size in either the cluster.yaml configuration file or with a parameter (--vm-size)")
 
         if self.wait is None:
-            raise error.AztkError(
+                raise aztk_sdk.error.AztkError(
                 "Please supply a value for wait in either the cluster.yaml configuration file or with a parameter (--wait or --no-wait)")
 
         if self.username is not None and self.wait is False:
-            raise error.AztkError(
+                raise aztk_sdk.error.AztkError(
                 "You cannot create a user '{0}' if wait is set to false. By default, we create a user in the cluster.yaml file. Please either the configure your cluster.yaml file or set the parameter (--wait)".format(self.username))
 
 
@@ -247,7 +186,7 @@ class SshConfig:
         self.host = False
         self.connect = True
 
-    def _read_config_file(self, path: str=constants.DEFAULT_SSH_CONFIG_PATH):
+    def _read_config_file(self, path: str = aztk_sdk.utils.constants.DEFAULT_SSH_CONFIG_PATH):
         """
             Reads the config file in the .aztk/ directory (.aztk/cluster.yaml)
         """
@@ -258,7 +197,7 @@ class SshConfig:
             try:
                 config = yaml.load(stream)
             except yaml.YAMLError as err:
-                raise error.AztkError(
+                raise aztk_sdk.error.AztkError(
                     "Error in ssh.yaml: {0}".format(err))
 
             if config is None:
@@ -293,7 +232,7 @@ class SshConfig:
             Merges fields with args object
         """
         self._read_config_file()
-        self._read_config_file(os.path.join(constants.HOME_DIRECTORY_PATH, '.aztk', 'cluster.yaml'))
+        self._read_config_file(os.path.join(aztk_sdk.utils.constants.HOME_DIRECTORY_PATH, '.aztk', 'ssh.yaml'))
         self._merge_dict(
             dict(
                 cluster_id=cluster_id,
@@ -307,9 +246,9 @@ class SshConfig:
         )
 
         if self.cluster_id is None:
-            raise error.AztkError(
+                raise aztk_sdk.error.AztkError(
                 "Please supply an id for the cluster either in the ssh.yaml configuration file or with a parameter (--id)")
 
         if self.username is None:
-            raise error.AztkError(
+                raise aztk_sdk.error.AztkError(
                 "Please supply a username either in the ssh.yaml configuration file or with a parameter (--username)")

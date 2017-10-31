@@ -1,8 +1,5 @@
-from aztk.clusterlib import Cluster
-from aztk.joblib import Job
-import aztk.azure_api as azure_api
 import aztk.config as config
-import aztk.error as error
+import aztk_sdk.spark
 
 
 class Aztk:
@@ -10,28 +7,15 @@ class Aztk:
         secrets_config = config.SecretsConfig()
         secrets_config.load()
 
-        blob_config = azure_api.BlobConfig(
-            account_key=secrets_config.storage_account_key,
-            account_name=secrets_config.storage_account_name,
-            account_suffix=secrets_config.storage_account_suffix
-        )
-        batch_config = azure_api.BatchConfig(
-            account_key=secrets_config.batch_account_key,
-            account_name=secrets_config.batch_account_name,
-            account_url=secrets_config.batch_service_url
-        )
-
-        self.batch_client = azure_api.make_batch_client(batch_config)
-        self.blob_client = azure_api.make_blob_client(blob_config)
-
-        self.cluster = Cluster(
-            batch_client=self.batch_client,
-            blob_client=self.blob_client,
-            batch_config=batch_config,
-            blob_config=blob_config,
-            secrets_config=secrets_config
-        )
-        self.job = Job(
-            batch_client=self.batch_client,
-            blob_client=self.blob_client
+        self.client = aztk_sdk.spark.Client(
+            aztk_sdk.spark.models.SecretsConfiguration(
+                batch_account_name=secrets_config.batch_account_name,
+                batch_account_key=secrets_config.batch_account_key,
+                batch_service_url=secrets_config.batch_service_url,
+                storage_account_name=secrets_config.storage_account_name,
+                storage_account_key=secrets_config.storage_account_key,
+                storage_account_suffix=secrets_config.storage_account_suffix,
+                ssh_pub_key=secrets_config.ssh_pub_key,
+                ssh_priv_key=secrets_config.ssh_priv_key
+            )
         )

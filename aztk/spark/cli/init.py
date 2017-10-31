@@ -2,7 +2,7 @@ import os
 import argparse
 import typing
 from distutils.dir_util import copy_tree
-import aztk.constants as constants
+import aztk_sdk.utils.constants as constants
 
 
 def setup_parser(parser: argparse.ArgumentParser):

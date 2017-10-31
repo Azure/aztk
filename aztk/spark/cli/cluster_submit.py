@@ -1,7 +1,10 @@
 import argparse
 import typing
 from aztk import log
+from aztk import utils
 from aztk.aztklib import Aztk
+import aztk_sdk.spark
+
 
 def setup_parser(parser: argparse.ArgumentParser):
     parser.add_argument('--id', dest='cluster_id', required=True,
@@ -111,20 +114,27 @@ def execute(args: typing.NamedTuple):
     log.info("Application arguments:   %s", args.app_args)
     log.info("-------------------------------------------")
 
-    aztk.job.submit_app(
+
+    aztk.client.submit(
         cluster_id=args.cluster_id,
-        name=args.name,
-        app=args.app,
-        app_args=args.app_args,
-        wait=args.wait,
-        main_class=args.main_class,
-        jars=jars,
-        py_files=py_files,
-        files=files,
-        driver_java_options=args.driver_java_options,
-        driver_library_path=args.driver_library_path,
-        driver_class_path=args.driver_class_path,
-        driver_memory=args.driver_memory,
-        executor_memory=args.executor_memory,
-        driver_cores=args.driver_cores,
-        executor_cores=args.executor_cores)
+        application = aztk_sdk.spark.models.AppModel(
+            name=args.name,
+            application=args.app,
+            application_args=args.app_args,
+            main_class=args.main_class,
+            jars=jars,
+            py_files=py_files,
+            files=files,
+            driver_java_options=args.driver_java_options,
+            driver_library_path=args.driver_library_path,
+            driver_class_path=args.driver_class_path,
+            driver_memory=args.driver_memory,
+            executor_memory=args.executor_memory,
+            driver_cores=args.driver_cores,
+            executor_cores=args.executor_cores
+        ),
+        wait=False
+    )
+
+    if args.wait:
+        utils.stream_logs(client=aztk.client, cluster_id=args.cluster_id, application_name=args.name)
