@@ -82,7 +82,7 @@ def execute(args: typing.NamedTuple):
         py_files = args.py_files.replace(' ', '').split(',')
 
     if args.files is not None:
-        files = args.py_files.replace(' ', '').split(',')
+        files = args.files.replace(' ', '').split(',')
 
     log.info("-------------------------------------------")
     log.info("Spark cluster id:        %s", args.cluster_id)
