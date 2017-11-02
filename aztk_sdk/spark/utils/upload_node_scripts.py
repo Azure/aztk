@@ -31,18 +31,19 @@ def zipdir(path, ziph):
                     ziph.writestr(os.path.join(relative_folder, file), f.read().replace('\r\n', '\n'))
 
 
-def zip_file_to_dir(file, directory, zipf, binary: bool = False):
+def zip_file_to_dir(file: str, directory: str, zipf: str, binary: bool = False):
     """
         Zip the given file into the given a directory of the zip file
     """
     if not zipf:
         zipf = zipfile.ZipFile(local_tmp_zipfile, "w", zipfile.ZIP_DEFLATED)
 
+    full_file_path = Path(file)
     with io.open(file, 'r') as f:
         if binary:
-            zipf.write(file, os.path.join(directory, file.name))
+            zipf.write(file, os.path.join(directory, full_file_path.name))
         else:
-            zipf.writestr(os.path.join(directory, file.name), f.read().replace('\r\n', '\n'))
+            zipf.writestr(os.path.join(directory, full_file_path.name), f.read().replace('\r\n', '\n'))
 
     return zipf
 
@@ -88,7 +89,7 @@ def __add_custom_scripts(zipf, custom_scripts):
 def __add_file_to_zip(zipf, file_path, zip_file_path, binary):
     if not file_path:
         return
-    zipf = zip_file_to_dir(Path(file_path), zip_file_path, zipf, binary)
+    zipf = zip_file_to_dir(file_path, zip_file_path, zipf, binary)
     return zipf
 
 
