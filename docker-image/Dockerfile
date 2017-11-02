@@ -29,7 +29,7 @@ ENV HOME /
 ENV PYENV_ROOT $HOME/.pyenv
 ENV PATH $PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH
 RUN eval "$(pyenv init -)"
-RUN echo "$(pyenv init -)" >> ~/.bashrc
+RUN echo 'eval "$(pyenv init -)"' >> ~/.bashrc
 
 # install thunderbolt required python version & the user specified version of python
 RUN pyenv install -f $AZTK_PYTHON_VERSION && \
