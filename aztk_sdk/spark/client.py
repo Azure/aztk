@@ -1,5 +1,6 @@
 from typing import List
 import azure.batch.models.batch_error as batch_error
+import aztk_sdk
 from aztk_sdk import error
 from aztk_sdk.client import Client as BaseClient
 from aztk_sdk.spark import models
@@ -61,7 +62,7 @@ class Client(BaseClient):
     
     def list_clusters(self):
         try:
-            return [models.Cluster(pool) for pool in self.__list_clusters()]
+            return [models.Cluster(pool) for pool in self.__list_clusters(aztk_sdk.models.Software.spark)]
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 

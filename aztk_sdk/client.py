@@ -116,13 +116,18 @@ class Client:
         nodes = self.batch_client.compute_node.list(pool_id=cluster_id)
         return pool, nodes
 
-    def __list_clusters(self):
+    def __list_clusters(self, software_metadata_key):
         """
             List all the cluster on your account.
         """
         pools = self.batch_client.pool.list()
-
-        return [pool for pool in pools]
+        software_metadata = (constants.AZTK_SOFTWARE_METADATA_KEY, software_metadata_key)
+        
+        aztk_pools = []
+        for pool in [pool for pool in pools if pool.metadata]:
+            if software_metadata in [(metadata.name, metadata.value) for metadata in pool.metadata]:
+                aztk_pools.append(pool)
+        return aztk_pools
     
     def __create_user(self, pool_id: str, node_id: str, username: str, password: str = None, ssh_key: str = None) -> str:
         """
