@@ -15,6 +15,9 @@ class Aztk:
                 storage_account_name=secrets_config.storage_account_name,
                 storage_account_key=secrets_config.storage_account_key,
                 storage_account_suffix=secrets_config.storage_account_suffix,
+                docker_endpoint=secrets_config.docker_endpoint,
+                docker_password=secrets_config.docker_password,
+                docker_username=secrets_config.docker_username,
                 ssh_pub_key=secrets_config.ssh_pub_key,
                 ssh_priv_key=secrets_config.ssh_priv_key
             )
