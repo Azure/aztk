@@ -67,7 +67,6 @@ class Job():
             app + ' ' + ' '.join(app_args))
 
         docker_exec_cmd = CommandBuilder('sudo docker exec')
-        docker_exec_cmd.add_option('-e', 'PYSPARK_PYTHON=/usr/bin/python3')
         docker_exec_cmd.add_option('-i', constants.DOCKER_SPARK_CONTAINER_NAME)
         docker_exec_cmd.add_argument(spark_submit_cmd.to_str())
 
