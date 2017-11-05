@@ -4,7 +4,7 @@ Azure Distributed Data Engineering Toolkit uses Docker containers to run Spark.
 Please refer to the docs for details on [how to select a docker-repo at cluster creation time](../docs/12-docker-image.md).
 
 ## Supported Images
-By default, this toolkit will use the Vanilla Spark image, __aztk-vanilla__. This image contains the bare mininum to get Spark up and running in Standalone mode.
+By default, this toolkit will use the Vanilla Spark image, __aztk-base__. This image contains the bare mininum to get Spark up and running in Standalone mode.
 
 On top of that, we also provide two flavors of Spark images, one geared towards the Python user (PySpark), and the other geared towards the R user (SparklyR or SparkR).
 
@@ -14,7 +14,7 @@ Docker Image | Image Type | User Language(s) | What's Included?
 [aztk-python](https://hub.docker.com/r/jiata/aztk-python/) | Pyspark | Python | `Anaconda`</br>`Jupyter Notebooks` </br> `PySpark`
 [aztk-r](https://hub.docker.com/r/jiata/aztk-r/) | SparklyR | R | `CRAN`</br>`RStudio Server`</br>`SparklyR and SparkR`
 
-__aztk-python__ and __aztk-r__ images are built on top of the __aztk-vanilla__ image.
+__aztk-python__ and __aztk-r__ images are built on top of the __aztk-base__ image.
 
 Today, all the AZTK images are hosted on Docker Hub under [jiata](https://hub.docker.com/r/jiata).
 
@@ -34,7 +34,7 @@ jiata/aztk-r:0.1.0-spark1.6.3-r3.4.1 | v1.6.3 | -- | v3.4.1
 
 If you have requests to add to the list of supported images, please file a Github issue.
 
-NOTE: Spark clusters that use the __aztk-python__ and __aztk-r__ images take longer to provision because these Docker images are significantly larger than the __aztk-vanilla__ image. 
+NOTE: Spark clusters that use the __aztk-python__ and __aztk-r__ images take longer to provision because these Docker images are significantly larger than the __aztk-base__ image. 
 
 ### Gallery of 3rd Party Images
 Since this toolkit uses Docker containers to run Spark, users can bring their own images. Here's a list of 3rd party images:
@@ -48,22 +48,22 @@ Building your own Docker Image to use with this toolkit has many advantages for 
 This section is for users who want to build their own docker images.
 
 ## Building Your Own Docker Image
-The Azure Distributed Data Engineering Toolkit supports custom Docker images. To guarantee that your Spark deployment works, we recommend that you build on top of one of our __aztk-vanilla__ images. You can also build on top of our __aztk-python__ or __aztk-r__ images, but note that they are also built on top of the __aztk_vanilla__ image.
+The Azure Distributed Data Engineering Toolkit supports custom Docker images. To guarantee that your Spark deployment works, we recommend that you build on top of one of our __aztk-base__ images. You can also build on top of our __aztk-python__ or __aztk-r__ images, but note that they are also built on top of the __aztk_base__ image.
 
 To build your own image, can either build _on top_ or _beneath_ one of our supported images _OR_ you can just modify one of the supported Dockerfiles to build your own.
 
 ### Building on top 
-You can build on top of our images by referencing the __aztk_vanilla__ image in the **FROM** keyword of your Dockerfile:
+You can build on top of our images by referencing the __aztk_base__ image in the **FROM** keyword of your Dockerfile:
 ```sh
 # Your custom Dockerfile
 
-FROM jiata/aztk-vanilla:0.1.0-spark2.2.0
+FROM jiata/aztk-base:0.1.0-spark2.2.0
 ...
 
 ```
 
 ### Building beneath 
-To build beneath one of our images, modify one of our Dockerfiles so that the **FROM** keyword pulls from your Docker image's location (as opposed to the default which is a vanilla Ubuntu image):
+To build beneath one of our images, modify one of our Dockerfiles so that the **FROM** keyword pulls from your Docker image's location (as opposed to the default which is a base Ubuntu image):
 ```sh
 # One of the Dockerfiles that AZTK supports
 # Change the FROM statement to point to your hosted image repo
@@ -75,7 +75,7 @@ FROM my_username/my_repo:latest
 Please note that for this method to work, your Docker image must have been built on Ubuntu.
 
 ## Required Environment Variables
-When layering your own Docker image, make sure your image does not intefere with the environment variables set in the __aztk_vanilla__ Dockerfile, otherwise it may not work on AZTK.
+When layering your own Docker image, make sure your image does not intefere with the environment variables set in the __aztk_base__ Dockerfile, otherwise it may not work on AZTK.
 
 Please make sure that the following environment variables are set: 
 - AZTK_PYTHON_VERSION
@@ -102,7 +102,7 @@ See [here](https://github.com/Azure/aztk/blob/master/docs/12-docker-image.md#usi
 
 ## Learn More 
 The Dockerfiles in this directory are used to build the Docker images used by this toolkit. Please reference the individual directories for more information on each Dockerfile:
-- [Vanilla](./vanilla)
+- [Base](./base)
 - [Python](./python)
 - TODO: R
 

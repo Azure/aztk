@@ -1,6 +1,6 @@
-# Vanilla (Base Docker image)
+# Base AZTK Docker image
 
-This Dockerfile is used to build the __aztk-vanilla__ image used by this toolkit. This Dockerfile produces the Docker image that is selected by AZTK by default.
+This Dockerfile is used to build the __aztk-base__ image used by this toolkit. This Dockerfile produces the Docker image that is selected by AZTK by default.
 
 You can modify this Dockerfile to build your own image. 
 

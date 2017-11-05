@@ -5,7 +5,8 @@ FROM jiata/aztk-vanilla:0.1.0-spark1.6.3
 ARG ANACONDA_VERSION=anaconda3-5.0.0
 
 # install user specificed version of anaconda
-RUN pyenv install -f $ANACONDA_VERSION 
+RUN pyenv install -f $ANACONDA_VERSION \
+    && pyenv global $ANACONDA_VERSION
 
 # set env vars
 ENV USER_PYTHON_VERSION $ANACONDA_VERSION
