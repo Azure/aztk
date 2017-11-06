@@ -1,5 +1,5 @@
-# Azure Distributed Data Engineering Toolkit
-Azure Distributed Data Engineering Toolkit is a python CLI application for provisioning on-demand Spark on Docker clusters in Azure. It's a cheap and easy way to get up and running with a Spark cluster, and a great tool for Spark users who want to experiment and start testing at scale.
+# Azure Distributed Data Engineering Toolkit (AZTK)
+Azure Distributed Data Engineering Toolkit (AZTK) is a python CLI application for provisioning on-demand Spark on Docker clusters in Azure. It's a cheap and easy way to get up and running with a Spark cluster, and a great tool for Spark users who want to experiment and start testing at scale.
 
 This toolkit is built on top of Azure Batch but does not require any Azure Batch knowledge to use.
 
@@ -80,7 +80,7 @@ aztk spark cluster create \
     --vm-size <vm_size>
 ```
 
-By default, this package runs Spark 2.2.0 with Python 3.5 on an Ubuntu16.04 Docker image. More info on this image can be found in the [docker-images](/docker-image) folder in this repo.
+By default, this package runs Spark 2.2.0 on an Ubuntu16.04 Docker image. More info on this image can be found in the [docker-images](/docker-image) folder in this repo.
 
 NOTE: The cluster id (`--id`) can only contain alphanumeric characters including hyphens and underscores, and cannot contain more than 64 characters.
 
