@@ -45,7 +45,7 @@ RUN apt-get clean \
     && git clone https://github.com/yyuu/pyenv-virtualenv.git ~/.pyenv/plugins/pyenv-virtualenv \
     # install & setup pyenv
     && eval "$(pyenv init -)" \
-    && echo 'eval "$(pyenv init -)"' >> ~/.bashrc
+    && echo 'eval "$(pyenv init -)"' >> ~/.bashrc \
     # install aztk required python version 
     && pyenv install -f $AZTK_PYTHON_VERSION \
     && pyenv global $AZTK_PYTHON_VERSION \
