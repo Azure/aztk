@@ -5,7 +5,7 @@ import os
 """
 CLI_EXE = 'aztk'
 
-DEFAULT_DOCKER_REPO = "jiata/aztk-vanilla:0.1.0-spark2.2.0"
+DEFAULT_DOCKER_REPO = "jiata/aztk-base:0.1.0-spark2.2.0"
 DOCKER_SPARK_CONTAINER_NAME = "spark"
 
 # DOCKER

@@ -3,9 +3,9 @@
 # This custom script only works on images where jupyter is pre-installed on the Docker image
 # 
 # This custom script has been tested to work on the following docker images:
-#  - jiata/aztk-python:0.1.0-spark2.2.0-anaconda3-5.0.0 (python3.6.2)
-#  - jiata/aztk-python:0.1.0-spark2.1.0-anaconda3-5.0.0 (python3.6.2)
-#  - jiata/aztk-python:0.1.0-spark1.6.3-anaconda3-5.0.0 (python3.6.2)
+#  - jiata/aztk-python:0.1.0-spark2.2.0-python3.6.2
+#  - jiata/aztk-python:0.1.0-spark2.1.0-python3.6.2
+#  - jiata/aztk-python:0.1.0-spark1.6.3-python3.6.2
 
 if  [ "$IS_MASTER" = "1" ]; then
 

@@ -1,7 +1,7 @@
 # Python
 This Dockerfile is used to build the __aztk-python__ Docker image used by this toolkit. This image uses Anaconda, providing access to a wide range of popular python packages.
 
-You can modify these Dockerfiles to build your own image. However, in mose cases, building on top of the __aztk-vanilla__ image is recommended.
+You can modify these Dockerfiles to build your own image. However, in mose cases, building on top of the __aztk-base__ image is recommended.
 
 NOTE: If you plan to use Jupyter Notebooks with your Spark cluster, we recommend using this image as Jupyter Notebook comes pre-installed with Anaconda. 
 
