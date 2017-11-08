@@ -60,7 +60,7 @@ def __app_submit_cmd(
 
     spark_submit_cmd.add_argument(
         '/batch/workitems/{0}/{1}/{2}/wd/'.format(cluster_id, "job-1", name) +
-        app + ' ' + ' '.join(app_args if app_args else []))
+        app + ' ' + ' '.join(['\'' + app_arg + '\'' for app_arg in app_args if app_args]))
 
     docker_exec_cmd = CommandBuilder('sudo docker exec')
     docker_exec_cmd.add_option('-i', constants.DOCKER_SPARK_CONTAINER_NAME)
