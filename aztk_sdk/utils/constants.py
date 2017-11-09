@@ -3,7 +3,7 @@ import os
 """
     DOCKER
 """
-DEFAULT_DOCKER_REPO = "jiata/aztk:0.1.0-spark2.2.0-python3.5.4"
+DEFAULT_DOCKER_REPO = "jiata/aztk-base:0.1.0-spark2.2.0"
 DOCKER_SPARK_CONTAINER_NAME = "spark"
 
 # DOCKER

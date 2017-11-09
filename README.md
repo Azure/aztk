@@ -1,5 +1,5 @@
-# Azure Distributed Data Engineering Toolkit
-Azure Distributed Data Engineering Toolkit is a python CLI application for provisioning on-demand Spark on Docker clusters in Azure. It's a cheap and easy way to get up and running with a Spark cluster, and a great tool for Spark users who want to experiment and start testing at scale.
+# Azure Distributed Data Engineering Toolkit (AZTK)
+Azure Distributed Data Engineering Toolkit (AZTK) is a python CLI application for provisioning on-demand Spark on Docker clusters in Azure. It's a cheap and easy way to get up and running with a Spark cluster, and a great tool for Spark users who want to experiment and start testing at scale.
 
 This toolkit is built on top of Azure Batch but does not require any Azure Batch knowledge to use.
 
@@ -10,8 +10,10 @@ Currently, this toolkit is designed to run batch Spark jobs that require additio
 - Spark clusters run in Docker containers
 - Users can bring their own Docker image
 - Ability to use low-priority VMs for an 80% discount
-- Built in support for Azure Blob Storage connection
-- Built in Jupyter notebook for interactive experience
+- Built in support for Azure Blob Storage and Azure Data Lake connection
+- Optional Jupyter Notebook for pythonic interactive experience
+- [coming soon] Optional RStudio Server for an interactive experience in R
+- Tailored Docker image for PySpark and [coming soon] SparklyR
 - Ability to run _spark submit_ directly from your local machine's CLI
 
 ## Setup
@@ -78,7 +80,7 @@ aztk spark cluster create \
     --vm-size <vm_size>
 ```
 
-By default, this package runs Spark 2.2.0 with Python 3.5 on an Ubuntu16.04 Docker image. More info on this image can be found in the [docker-images](/docker-image) folder in this repo.
+By default, this package runs Spark 2.2.0 on an Ubuntu16.04 Docker image. More info on this image can be found in the [docker-images](/docker-image) folder in this repo.
 
 NOTE: The cluster id (`--id`) can only contain alphanumeric characters including hyphens and underscores, and cannot contain more than 64 characters.
 
@@ -112,7 +114,7 @@ Most users will want to work interactively with their Spark clusters. With the `
 ```bash
 aztk spark cluster ssh --id <my_cluster_id>
 ```
-By default, we port forward the Spark Web UI to *localhost:8080*, Spark Jobs UI to *localhost:4040*, and Jupyter to *localhost:8888*.
+By default, we port forward the Spark Web UI to *localhost:8080*, Spark Jobs UI to *localhost:4040*, and the Spark History Server to *localhost:18080*.
 
 You can configure these settings in the *.aztk/ssh.yaml* file.
 
@@ -135,7 +137,7 @@ aztk spark cluster delete --id <my_cluster_id>
 
 ## FAQs
 - [How do I connect to Azure Storage (WASB)?](./docs/30-cloud-storage.md)
-- [I want to use a different version of Spark / Python](./docs/12-docker-image.md)
+- [I want to use a different version of Spark](./docs/12-docker-image.md)
 - [How do I SSH into my Spark cluster's master node?](./docs/10-clusters.md#ssh-and-port-forwarding)
 - [How do I interact with my Spark cluster using a password instead of an SSH-key?](./docs/10-clusters.md#interactive-mode)
 - [How do I change my cluster default settings?](./docs/13-configuration.md)
