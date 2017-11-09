@@ -159,6 +159,25 @@ def start_spark_master():
 
     setup_jupyter()
     start_jupyter()
+    start_history_server()
+
+
+def start_history_server():
+    # configure the history server
+    spark_event_log_enabled_key = 'spark.eventLog.enabled'
+    spark_event_log_directory_key = 'spark.eventLog.dir'
+    path_to_spark_defaults_conf = os.path.join(spark_home, 'conf/spark-defaults.conf')
+    properties = parse_configuration_file(path_to_spark_defaults_conf)
+
+    # only enable the history server if it was enabled in the configuration file
+    if spark_event_log_enabled_key in properties:
+        if spark_event_log_directory_key in properties:
+            configure_history_server_log_path(properties[spark_event_log_directory_key])
+
+        exe = os.path.join(spark_home, "sbin", "start-history-server.sh")
+        cmd = [exe]
+        print("Starting history server")
+        call(cmd)
 
 
 def start_spark_worker():
@@ -185,6 +204,7 @@ def setup_conf():
     copy_core_site()
     copy_jars()
 
+
 def copy_spark_env():
     spark_env_path_src = os.path.join(os.environ['DOCKER_WORKING_DIR'], 'conf/spark-env.sh')
     spark_env_path_dest = os.path.join(spark_home, 'conf/spark-env.sh')
@@ -196,6 +216,7 @@ def copy_spark_env():
     except Exception as e:
         print("Failed to copy spark-env.sh file")
         print(e)
+
 
 def copy_core_site():
     spark_default_path_src = os.path.join(os.environ['DOCKER_WORKING_DIR'], 'conf/spark-defaults.conf')
@@ -214,8 +235,9 @@ def copy_core_site():
     try:
         shutil.copyfile(spark_default_path_src, spark_default_path_dest)
     except Exception as e:
-        print("Failed to copy spark-defaults.conf file")
+        print("Failed to copy core-site.xml file")
         print(e)
+
 
 def copy_jars():
     # Copy jars to $SPARK_HOME/jars
@@ -232,3 +254,29 @@ def copy_jars():
     except Exception as e:
         print("Failed to copy jar files")
         print(e)
+
+
+def parse_configuration_file(path_to_file: str):
+        file = open(path_to_file, 'r')
+        properties = {}
+        for line in file:
+            if (not line.startswith('#') and len(line) > 1):
+                split = line.split()
+                properties[split[0]] = split[1]
+        return properties
+
+
+def configure_history_server_log_path(path_to_log_file):
+        # Check if the file path starts with a local file extension
+        # If so, create the path on disk otherwise ignore
+        print('Configuring spark history server log directory {}.'.format(path_to_log_file))
+        if path_to_log_file.startswith('file:/'):
+            # create the local path on disk
+            directory = path_to_log_file.replace('file:', '')
+            if os.path.exists(directory):
+                print('Skipping. Directory {} already exists.'.format(directory))
+            else:
+                print('Create direcotory {}.'.format(directory))
+                os.makedirs(directory)
+        else:
+            print('Skipping. The eventLog directory is not local.')

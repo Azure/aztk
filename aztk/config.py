@@ -45,7 +45,7 @@ class SecretsConfig:
             self.batch_account_name = batch.get('batchaccountname')
             self.batch_account_key = batch.get('batchaccountkey')
             self.batch_service_url = batch.get('batchserviceurl')
-        
+
         storage = secrets_config.get('storage')
         if storage:
             self.storage_account_name = storage.get('storageaccountname')
@@ -181,6 +181,7 @@ class SshConfig:
         self.username = None
         self.cluster_id = None
         self.job_ui_port = None
+        self.job_history_ui_port = None
         self.web_ui_port = None
         self.jupyter_port = None
         self.host = False
@@ -215,6 +216,9 @@ class SshConfig:
         if config.get('job_ui_port') is not None:
             self.job_ui_port = config['job_ui_port']
 
+        if config.get('job_history_ui_port') is not None:
+            self.job_history_ui_port = config['job_history_ui_port']
+
         if config.get('web_ui_port') is not None:
             self.web_ui_port = config['web_ui_port']
 
@@ -227,7 +231,7 @@ class SshConfig:
         if config.get('connect') is not None:
             self.connect = config['connect']
 
-    def merge(self, cluster_id, username, job_ui_port, web_ui_port, jupyter_port, host, connect):
+    def merge(self, cluster_id, username, job_ui_port, job_history_ui_port, web_ui_port, jupyter_port, host, connect):
         """
             Merges fields with args object
         """
@@ -238,6 +242,7 @@ class SshConfig:
                 cluster_id=cluster_id,
                 username=username,
                 job_ui_port=job_ui_port,
+                job_history_ui_port=job_history_ui_port,
                 web_ui_port=web_ui_port,
                 jupyter_port=jupyter_port,
                 host=host,

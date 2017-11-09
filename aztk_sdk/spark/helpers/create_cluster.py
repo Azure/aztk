@@ -35,10 +35,12 @@ def __docker_run_cmd(docker_repo: str = None) -> str:
     cmd.add_option('-e', 'SPARK_WORKER_UI_PORT=$SPARK_WORKER_UI_PORT')
     cmd.add_option('-e', 'SPARK_JUPYTER_PORT=$SPARK_JUPYTER_PORT')
     cmd.add_option('-e', 'SPARK_JOB_UI_PORT=$SPARK_JOB_UI_PORT')
-    cmd.add_option('-p', '8080:8080')
-    cmd.add_option('-p', '7077:7077')
-    cmd.add_option('-p', '4040:4040')
-    cmd.add_option('-p', '8888:8888')
+    cmd.add_option('-p', '8080:8080')       # Spark Master UI
+    cmd.add_option('-p', '7077:7077')       # Spark Master
+    cmd.add_option('-p', '4040:4040')       # Job UI
+    cmd.add_option('-p', '8888:8888')       # Jupyter UI
+    cmd.add_option('-p', '18080:18080')     # Spark History Server UI
+
     cmd.add_option('-d', docker_repo)
     cmd.add_argument('/bin/bash /batch/startup/wd/docker_main.sh')
     return cmd.to_str()

@@ -18,7 +18,7 @@ class MasterInvalidStateError(Exception):
 
 
 def wait_for_master_to_be_ready(client, cluster_id: str):
-    
+
     master_node_id = None
     start_time = datetime.datetime.now()
     while True:
