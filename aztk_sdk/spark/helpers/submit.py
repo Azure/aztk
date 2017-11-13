@@ -7,6 +7,8 @@ from aztk_sdk.utils.command_builder import CommandBuilder
 '''
 Submit helper methods
 '''
+
+
 def __get_node(spark_client, node_id: str, cluster_id: str) -> batch_models.ComputeNode:
     return spark_client.batch_client.compute_node.get(cluster_id, node_id)
 
@@ -42,7 +44,7 @@ def __app_submit_cmd(
 
     # 2>&1 redirect stdout and stderr to be in the same file
     spark_submit_cmd = CommandBuilder(
-        '{0}/bin/spark-submit >> {1} 2>&1'.format(spark_home, constants.SPARK_SUBMIT_LOGS_FILE))
+        '{0}/bin/spark-submit'.format(spark_home))
     spark_submit_cmd.add_option(
         '--master', 'spark://{0}:7077'.format(master_ip))
     spark_submit_cmd.add_option('--name', name)
@@ -64,7 +66,8 @@ def __app_submit_cmd(
 
     docker_exec_cmd = CommandBuilder('sudo docker exec')
     docker_exec_cmd.add_option('-i', constants.DOCKER_SPARK_CONTAINER_NAME)
-    docker_exec_cmd.add_argument(spark_submit_cmd.to_str())
+    docker_exec_cmd.add_argument('/bin/bash  >> {0} 2>&1 -c \"cd '.format(
+        constants.SPARK_SUBMIT_LOGS_FILE) + files_path + '; ' + spark_submit_cmd.to_str() + '\"')
 
     return [
         docker_exec_cmd.to_str()
