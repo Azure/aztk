@@ -47,12 +47,13 @@ def execute(args: typing.NamedTuple):
         connect=args.connect
     )
 
+    http_prefix = 'http://localhost:'
     log.info("-------------------------------------------")
     log.info("spark cluster id:    %s", ssh_conf.cluster_id)
-    log.info("open webui:          %s", ssh_conf.web_ui_port)
-    log.info("open jobui:          %s", ssh_conf.job_ui_port)
-    log.info("open jobhistoryui:   %s", ssh_conf.job_history_ui_port)
-    log.info("open jupyter:        %s", ssh_conf.jupyter_port)
+    log.info("open webui:          %s%s", http_prefix, ssh_conf.web_ui_port)
+    log.info("open jobui:          %s%s", http_prefix, ssh_conf.job_ui_port)
+    log.info("open jobhistoryui:   %s%s", http_prefix, ssh_conf.job_history_ui_port)
+    log.info("open jupyter:        %s%s", http_prefix, ssh_conf.jupyter_port)
     log.info("ssh username:        %s", ssh_conf.username)
     log.info("connect:             %s", ssh_conf.connect)
     log.info("-------------------------------------------")

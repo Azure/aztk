@@ -180,12 +180,15 @@ class SshConfig:
     def __init__(self):
         self.username = None
         self.cluster_id = None
-        self.job_ui_port = None
-        self.job_history_ui_port = None
-        self.web_ui_port = None
-        self.jupyter_port = None
         self.host = False
         self.connect = True
+
+        # Set up ports with default values
+        self.job_ui_port = '4040'
+        self.job_history_ui_port = '18080'
+        self.web_ui_port = '8080'
+        self.jupyter_port = '8888'
+
 
     def _read_config_file(self, path: str = aztk_sdk.utils.constants.DEFAULT_SSH_CONFIG_PATH):
         """
