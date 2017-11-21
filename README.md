@@ -71,11 +71,10 @@ aztk spark cluster create \
 ```
 You can find more information on VM sizes [here.](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/sizes) Please note that you must use the official SKU name when setting your VM size - they usually come in the form: "standard_d2_v2".
 
-You can also create your cluster with [low-priority](https://docs.microsoft.com/en-us/azure/batch/batch-low-pri-vms) VMs at an 80% discount by using `--size-low-pri` instead of `--size` (we have to set `--size 0` as we currently do not support mixed low-priority and dedicated VMs):
+You can also create your cluster with [low-priority](https://docs.microsoft.com/en-us/azure/batch/batch-low-pri-vms) VMs at an 80% discount by using `--size-low-pri` instead of `--size` (we currently do not support mixed low-priority and dedicated VMs):
 ```
 aztk spark cluster create \
     --id <my_cluster_id> \
-    --size 0 \
     --size-low-pri <number_of_low-pri_nodes> \
     --vm-size <vm_size>
 ```
