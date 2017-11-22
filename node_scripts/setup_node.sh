@@ -30,10 +30,10 @@ fi
 
 if [ -z "$DOCKER_ENDPOINT" ]; then
     echo "Pulling $repo_name from dockerhub"
-    docker pull $repo_name
+    (time docker pull $repo_name) 2>&1
 else
     echo "Pulling $container_name from $DOCKER_ENDPOINT"
-    docker pull $DOCKER_ENDPOINT/$repo_name
+    (time docker pull $DOCKER_ENDPOINT/$repo_name) 2>&1
 fi
 
 # Unzip resource files and set permissions
