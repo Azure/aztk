@@ -92,6 +92,11 @@ def __add_file_to_zip(zipf, file_path, zip_file_path, binary):
     zipf = zip_file_to_dir(file_path, zip_file_path, zipf, binary)
     return zipf
 
+def __add_str_to_zip(zipf, payload, zipf_file_path=None):
+    if not payload:
+        return
+    zipf.writestr(zipf_file_path, payload)
+    return zipf
 
 def zip_scripts(blob_client, custom_scripts, spark_conf):
     zipf = __create_zip()
@@ -102,6 +107,9 @@ def zip_scripts(blob_client, custom_scripts, spark_conf):
         zipf = __add_file_to_zip(zipf, spark_conf.spark_defaults_conf, 'conf', binary=False)
         zipf = __add_file_to_zip(zipf, spark_conf.spark_env_sh, 'conf', binary=False)
         zipf = __add_file_to_zip(zipf, spark_conf.core_site_xml, 'conf', binary=False)
+        # add ssh keys for hdfs
+        zipf = __add_str_to_zip(zipf, spark_conf.ssh_key_pair['pub_key'], 'id_rsa.pub')
+        zipf = __add_str_to_zip(zipf, spark_conf.ssh_key_pair['priv_key'], 'id_rsa')
         if spark_conf.jars:
             for jar in spark_conf.jars:
                 zipf = __add_file_to_zip(zipf, jar, 'jars', binary=True)

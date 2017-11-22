@@ -19,6 +19,8 @@ def setup_parser(parser: argparse.ArgumentParser):
                         help='Local port to port spark\'s job history UI to')
     parser.add_argument('--jupyter',
                         help='Local port to port jupyter to')
+    parser.add_argument('--namenodeui',
+                        help='Local port to port HDFS NameNode UI to')
     parser.add_argument('-u', '--username',
                         help='Username to spark cluster')
     parser.add_argument('--host', dest="host",
@@ -43,6 +45,7 @@ def execute(args: typing.NamedTuple):
         job_history_ui_port=args.jobhistoryui,
         web_ui_port=args.webui,
         jupyter_port=args.jupyter,
+        name_node_ui_port=args.namenodeui,
         host=args.host,
         connect=args.connect
     )
@@ -54,6 +57,7 @@ def execute(args: typing.NamedTuple):
     log.info("open jobui:          %s%s", http_prefix, ssh_conf.job_ui_port)
     log.info("open jobhistoryui:   %s%s", http_prefix, ssh_conf.job_history_ui_port)
     log.info("open jupyter:        %s%s", http_prefix, ssh_conf.jupyter_port)
+    log.info("open jupyter:        %s%s", http_prefix, ssh_conf.name_node_ui_port)
     log.info("ssh username:        %s", ssh_conf.username)
     log.info("connect:             %s", ssh_conf.connect)
     log.info("-------------------------------------------")
@@ -66,6 +70,7 @@ def execute(args: typing.NamedTuple):
             webui=ssh_conf.web_ui_port,
             jobui=ssh_conf.job_ui_port,
             jobhistoryui=ssh_conf.job_history_ui_port,
+            namenodeui=ssh_conf.name_node_ui_port,
             jupyter=ssh_conf.jupyter_port,
             username=ssh_conf.username,
             host=ssh_conf.host,

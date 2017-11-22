@@ -66,6 +66,8 @@ def _run_scripts_dir(root: str = None):
 def run_custom_scripts(is_master: bool = False):
     if is_master:
         os.environ["IS_MASTER"] = "1"
+    else:
+        os.environ["IS_MASTER"] = "0"
     
     custom_scripts_dir = os.path.join(os.environ['DOCKER_WORKING_DIR'], 'custom-scripts')
 

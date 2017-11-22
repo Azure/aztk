@@ -121,6 +121,7 @@ def ssh_in_master(
         jobui: str = None,
         jobhistoryui: str = None,
         jupyter: str = None,
+        namenodeui: str = None,
         ports=None,
         host: bool = False,
         connect: bool = True):
@@ -152,7 +153,7 @@ def ssh_in_master(
     spark_jupyter_port = aztk_sdk.utils.constants.DOCKER_SPARK_JUPYTER_PORT
     spark_job_ui_port = aztk_sdk.utils.constants.DOCKER_SPARK_JOB_UI_PORT
     spark_job_history_ui_port = aztk_sdk.utils.constants.DOCKER_SPARK_JOB_UI_HISTORY_PORT
-
+    spark_namenode_ui_port = aztk_sdk.utils.constants.DOCKER_SPARK_NAMENODE_UI_PORT
 
     ssh_command = aztk_sdk.utils.command_builder.CommandBuilder('ssh')
 
@@ -170,6 +171,8 @@ def ssh_in_master(
         jobhistoryui, spark_job_history_ui_port), enable=bool(jobui))
     ssh_command.add_option("-L", "{0}:localhost:{1}".format(
         jupyter, spark_jupyter_port), enable=bool(jupyter))
+    ssh_command.add_option("-L", "{0}:localhost:{1}".format(
+        namenodeui, spark_namenode_ui_port), enable=bool(namenodeui))
 
     if ports is not None:
         for port in ports:

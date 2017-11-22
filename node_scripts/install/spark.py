@@ -106,13 +106,20 @@ def start_spark_worker():
         batch_client.pool.get(config.pool_id))
     master_node = get_node(master_node_id)
 
-    my_env = os.environ.copy()
-    my_env["SPARK_MASTER_IP"] = master_node.ip_address
-
     cmd = [exe, "spark://{0}:7077".format(master_node.ip_address),
            "--webui-port", str(config.spark_worker_ui_port)]
     print("Connecting to master with '{0}'".format(" ".join(cmd)))
     call(cmd)
+
+
+def copyfile(src, dest):
+    try:
+        shutil.copyfile(src, dest)
+        file_stat = os.stat(dest)
+        os.chmod(dest, file_stat.st_mode | 0o777)
+    except Exception as e:
+        print("Failed to copy", src)
+        print(e)
 
 
 def setup_conf():
@@ -121,41 +128,39 @@ def setup_conf():
     """
     copy_spark_env()
     copy_core_site()
+    copy_spark_defaults()
     copy_jars()
+    setup_ssh_keys()
+
+
+def setup_ssh_keys():
+    pub_key_path_src = os.path.join(os.environ['DOCKER_WORKING_DIR'], 'id_rsa.pub')
+    priv_key_path_src = os.path.join(os.environ['DOCKER_WORKING_DIR'], 'id_rsa')
+    ssh_key_dest = '/root/.ssh'
+
+    if not os.path.exists(ssh_key_dest):
+        os.mkdir(ssh_key_dest)
+
+    copyfile(pub_key_path_src, os.path.join(ssh_key_dest, os.path.basename(pub_key_path_src)))
+    copyfile(priv_key_path_src, os.path.join(ssh_key_dest, os.path.basename(priv_key_path_src)))
 
 
 def copy_spark_env():
     spark_env_path_src = os.path.join(os.environ['DOCKER_WORKING_DIR'], 'conf/spark-env.sh')
     spark_env_path_dest = os.path.join(spark_home, 'conf/spark-env.sh')
+    copyfile(spark_env_path_src, spark_env_path_dest)
 
-    try:
-        shutil.copyfile(spark_env_path_src, spark_env_path_dest)
-        file_stat = os.stat(spark_env_path_dest)
-        os.chmod(spark_env_path_dest, file_stat.st_mode | 0o777)
-    except Exception as e:
-        print("Failed to copy spark-env.sh file")
-        print(e)
+    
+def copy_spark_defaults():
+    spark_default_path_src = os.path.join(os.environ['DOCKER_WORKING_DIR'], 'conf/spark-defaults.conf')
+    spark_default_path_dest = os.path.join(spark_home, 'conf/spark-defaults.conf')
+    copyfile(spark_default_path_src, spark_default_path_dest)
 
 
 def copy_core_site():
-    spark_default_path_src = os.path.join(os.environ['DOCKER_WORKING_DIR'], 'conf/spark-defaults.conf')
-    spark_default_path_dest = os.path.join(spark_home, 'conf/spark-defaults.conf')
-
-    try:
-        shutil.copyfile(spark_default_path_src, spark_default_path_dest)
-    except Exception as e:
-        print("Failed to copy spark-defaults.conf file")
-        print(e)
-
-
-    spark_default_path_src = os.path.join(os.environ['DOCKER_WORKING_DIR'], 'conf/core-site.xml')
-    spark_default_path_dest = os.path.join(spark_home, 'conf/core-site.xml')
-
-    try:
-        shutil.copyfile(spark_default_path_src, spark_default_path_dest)
-    except Exception as e:
-        print("Failed to copy core-site.xml file")
-        print(e)
+    spark_core_site_src = os.path.join(os.environ['DOCKER_WORKING_DIR'], 'conf/core-site.xml')
+    spark_core_site_dest = os.path.join(spark_home, 'conf/core-site.xml')
+    copyfile(spark_core_site_src, spark_core_site_dest)
 
 
 def copy_jars():

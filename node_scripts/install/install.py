@@ -9,6 +9,11 @@ def setup_node():
 
     is_master = pick_master.find_master(client)
 
+    master_node_id = pick_master.get_master_node_id(config.batch_client.pool.get(config.pool_id))
+    master_node = config.batch_client.compute_node.get(config.pool_id, master_node_id)
+
+    os.environ["MASTER_IP"] = master_node.ip_address
+
     if is_master:
         setup_as_master()
         scripts.run_custom_scripts(is_master = True)

@@ -1,3 +1,4 @@
+from Crypto.PublicKey import RSA
 from typing import List
 import aztk_sdk.models
 from aztk_sdk.utils import constants
@@ -42,6 +43,13 @@ class SparkConfiguration():
         self.spark_env_sh = spark_env_sh
         self.core_site_xml = core_site_xml
         self.jars = jars
+        self.ssh_key_pair = self.__generate_ssh_key_pair()
+
+    def __generate_ssh_key_pair(self):
+        key = RSA.generate(2048)
+        priv_key = key.exportKey('PEM')
+        pub_key = key.publickey().exportKey('OpenSSH')
+        return {'pub_key': pub_key, 'priv_key': priv_key}
 
 
 class CustomScript(aztk_sdk.models.CustomScript):

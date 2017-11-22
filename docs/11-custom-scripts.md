@@ -40,3 +40,21 @@ The above configuration takes the absolute path `/custom-scripts/` and uploads e
 - The environment variable $SPARK_HOME points to the root Spark directory.
 - The environment variable $IS\_MASTER identifies if this is the node running the master role. The node running the master role _also_ runs a worker role on it.
 - The Spark cluster is set up using Standalone Mode
+
+## Provided Custom Scripts
+
+### HDFS
+
+A custom-script to install HDFS (2.8.2) is provided at `custom-scripts/hdfs.sh` directory. This will install and provision HDFS for your cluster.
+
+To enable HDFS, add this snippet to the custom_scripts section of your `.aztk/cluster.yaml` configuration file:
+
+```yaml
+custom_scripts: 
+  - script: ./custom-scripts/hdfs.sh
+    runOn: all-nodes
+```
+
+When SSHing into the cluster, you will have access to the Namenode UI at the default port 50070. This port can be changed in the ssh.yaml file in your `.aztk/` directory, or by passing the `--namenodeui` flag to the `aztk spark cluster ssh` command. 
+
+When enabled on the cluster, HDFS can be used to read or write data locally during program execution.
