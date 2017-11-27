@@ -95,7 +95,7 @@ def execute(args: typing.NamedTuple):
         ssh_key = aztk.client.secrets_config.ssh_pub_key
 
         ssh_key, password = utils.get_ssh_key_or_prompt(
-            ssh_key, args.username, args.password, aztk.client.secrets_config)
+            ssh_key, cluster_conf.username, cluster_conf.password, aztk.client.secrets_config)
 
         aztk.client.create_user(
             cluster_id=cluster_conf.uid,
