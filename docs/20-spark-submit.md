@@ -28,5 +28,5 @@ aztk spark cluster submit --id spark --name pipy --no-wait examples/src/main/pyt
 ```
 
 ```sh
-aztk spark app logs --id spark --name pipy --tail
+aztk spark cluster app-logs --id spark --name pipy --tail
 ```
