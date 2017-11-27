@@ -115,7 +115,7 @@ cd $SPARK_HOME
 ```
 
 ### Interact with your Spark cluster
-By default, the `aztk spark cluster ssh` command port forwards the Spark Web UI to *localhost:8080*, Spark Jobs UI to *localhost:4040*, and Spark History Server to your *locahost:18080*. This can be [configured in *.aztb/ssh.yaml*](../docs/13-configuration.md##sshyaml).
+By default, the `aztk spark cluster ssh` command port forwards the Spark Web UI to *localhost:8080*, Spark Jobs UI to *localhost:4040*, and Spark History Server to your *locahost:18080*. This can be [configured in *.aztk/ssh.yaml*](../docs/13-configuration.md##sshyaml).
 
 ### Jupyter
 Once the appropriate ports have been forwarded, simply navigate to the local ports for viewing. In this case, if you used port 8888 (the default) for Jupyter then navigate to [http://localhost:8888.](http://localhost:8888)
