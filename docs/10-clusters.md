@@ -4,7 +4,7 @@ In the Azure Distributed Data Engineering Toolkit, a cluster is primarily design
 ## Creating a Cluster
 Creating a Spark cluster only takes a few simple steps after which you will be able to SSH into the master node of the cluster and interact with Spark. You will be able to view the Spark Web UI, Spark Jobs UI, submit Spark jobs (with *spark-submit*), and even interact with Spark in a Jupyter notebook.
 
-For the advanced user, please note that the default cluster settings are preconfigured in the *.aztk/cluster.yaml* file that is generated when you run `aztk spark init`. More information on cluster config [here.](../13-configuration.md)
+For the advanced user, please note that the default cluster settings are preconfigured in the *.aztk/cluster.yaml* file that is generated when you run `aztk spark init`. More information on cluster config [here.](./13-configuration.md)
 
 ### Commands
 Create a Spark cluster:
