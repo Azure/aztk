@@ -21,7 +21,10 @@ class Client(BaseClient):
     def create_cluster(self, cluster_conf: models.ClusterConfiguration, wait: bool = False):
         try:
             zip_resource_files = upload_node_scripts.zip_scripts(self.blob_client, cluster_conf.custom_scripts, cluster_conf.spark_configuration)
-            start_task = create_cluster_helper.generate_cluster_start_task(self, zip_resource_files, cluster_conf.docker_repo)
+            start_task = create_cluster_helper.generate_cluster_start_task(self,
+                                                                           zip_resource_files,
+                                                                           cluster_conf.docker_repo,
+                                                                           cluster_conf.file_shares)
 
             software_metadata_key = "spark"
 
@@ -32,17 +35,17 @@ class Client(BaseClient):
 
             cluster = self.__create_pool_and_job(
                 cluster_conf, software_metadata_key, start_task, vm_image)
-            
+
             # Wait for the master to be ready
             if wait:
                 util.wait_for_master_to_be_ready(self, cluster.id)
                 cluster = self.get_cluster(cluster.id)
-            
+
             return cluster
-        
+
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
-    
+
     def create_clusters_in_parallel(self, cluster_confs):
         for cluster_conf in cluster_confs:
             self.create_cluster(cluster_conf)
@@ -59,7 +62,7 @@ class Client(BaseClient):
             return models.Cluster(pool, nodes)
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
-    
+
     def list_clusters(self):
         try:
             return [models.Cluster(pool) for pool in self.__list_clusters(aztk_sdk.models.Software.spark)]
@@ -77,11 +80,11 @@ class Client(BaseClient):
             submit_helper.submit_application(self, cluster_id, application, wait)
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
-    
+
     def submit_all_applications(self, cluster_id: str, applications):
         for application in applications:
             self.submit(cluster_id, application)
-    
+
     def wait_until_application_done(self, cluster_id: str, task_id: str):
         try:
             helpers.wait_for_task_to_complete(job_id=cluster_id, task_id=task_id, batch_client=self.batch_client)
@@ -102,7 +105,7 @@ class Client(BaseClient):
             return models.Cluster(pool, nodes)
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
-    
+
     def wait_until_all_clusters_are_ready(self, clusters: List[str]):
         for cluster_id in clusters:
             self.wait_until_cluster_is_ready(cluster_id)

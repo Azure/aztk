@@ -60,6 +60,7 @@ class ClusterConfiguration(aztk_sdk.models.ClusterConfiguration):
     def __init__(
             self,
             custom_scripts: List[CustomScript] = None,
+            file_shares: List[aztk_sdk.models.FileShare] = None,
             cluster_id: str = None,
             vm_count=None,
             vm_low_pri_count=None,
@@ -71,7 +72,8 @@ class ClusterConfiguration(aztk_sdk.models.ClusterConfiguration):
               vm_count=vm_count,
               vm_low_pri_count=vm_low_pri_count,
               vm_size=vm_size,
-              docker_repo=docker_repo
+              docker_repo=docker_repo,
+              file_shares=file_shares
         )
         self.spark_configuration = spark_configuration
 

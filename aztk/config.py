@@ -80,6 +80,7 @@ class ClusterConfig:
         self.username = None
         self.password = None
         self.custom_scripts = None
+        self.file_shares = None
         self.docker_repo = None
         self.wait = None
 
@@ -125,6 +126,9 @@ class ClusterConfig:
 
         if config.get('custom_scripts') not in [[None], None]:
             self.custom_scripts = config['custom_scripts']
+
+        if config.get('azure_files') not in [[None], None]:
+            self.file_shares = config['azure_files']
 
         if config.get('docker_repo') is not None:
             self.docker_repo = config['docker_repo']

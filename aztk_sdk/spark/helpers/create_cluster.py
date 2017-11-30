@@ -1,6 +1,8 @@
+from typing import List
 from aztk_sdk.utils.command_builder import CommandBuilder
-from aztk_sdk.utils import helpers
-from aztk_sdk.utils import constants
+from aztk_sdk.utils import constants, helpers
+from aztk_sdk import models as aztk_models
+
 import azure.batch.models as batch_models
 POOL_ADMIN_USER_IDENTITY = batch_models.UserIdentity(
     auto_user=batch_models.AutoUserSpecification(
@@ -10,7 +12,7 @@ POOL_ADMIN_USER_IDENTITY = batch_models.UserIdentity(
 '''
 Cluster create helper methods
 '''
-def __docker_run_cmd(docker_repo: str = None) -> str:
+def __docker_run_cmd(docker_repo: str = None, file_mounts = []) -> str:
     """
         Build the docker run command by setting up the environment variables
     """
@@ -19,6 +21,10 @@ def __docker_run_cmd(docker_repo: str = None) -> str:
     cmd.add_option('--net', 'host')
     cmd.add_option('--name', constants.DOCKER_SPARK_CONTAINER_NAME)
     cmd.add_option('-v', '/mnt/batch/tasks:/batch')
+
+    if file_mounts:
+        for mount in file_mounts:
+            cmd.add_option('-v', '{0}:{0}'.format(mount.mount_path))
 
     cmd.add_option('-e', 'DOCKER_WORKING_DIR=/batch/startup/wd')
     cmd.add_option('-e', 'AZ_BATCH_ACCOUNT_NAME=$AZ_BATCH_ACCOUNT_NAME')
@@ -69,14 +75,30 @@ def __get_docker_credentials(spark_client):
     return creds
 
 def __cluster_install_cmd(zip_resource_file: batch_models.ResourceFile,
-                            docker_repo: str = None):
+                            docker_repo: str = None,
+                            file_mounts = []):
     """
         For Docker on ubuntu 16.04 - return the command line
         to be run on the start task of the pool to setup spark.
     """
     docker_repo = docker_repo or constants.DEFAULT_DOCKER_REPO
 
-    ret = [
+    shares = []
+
+    if file_mounts:
+        for mount in file_mounts:
+            # Create the directory on the node
+            shares.append('mkdir -p {0}'.format(mount.mount_path))
+
+            # Mount the file share
+            shares.append('mount -t cifs //{0}.file.core.windows.net/{2} {3} -o vers=3.0,username={0},password={1},dir_mode=0777,file_mode=0777,sec=ntlmssp'.format(
+                mount.storage_account_name,
+                mount.storage_account_key,
+                mount.file_share_path,
+                mount.mount_path
+            ))
+
+    setup = [
         'apt-get -y clean',
         'apt-get -y update',
         'apt-get install --fix-missing',
@@ -87,15 +109,17 @@ def __cluster_install_cmd(zip_resource_file: batch_models.ResourceFile,
         '/bin/bash $AZ_BATCH_TASK_WORKING_DIR/setup_node.sh {0} {1} "{2}"'.format(
             constants.DOCKER_SPARK_CONTAINER_NAME,
             docker_repo,
-            __docker_run_cmd(docker_repo)),
+            __docker_run_cmd(docker_repo, file_mounts)),
     ]
 
-    return ret
+    commands = shares + setup
+    return commands
 
 def generate_cluster_start_task(
         spark_client,
         zip_resource_file: batch_models.ResourceFile,
-        docker_repo: str = None):
+        docker_repo: str = None,
+        file_shares: List[aztk_models.FileShare] = None):
     """
         This will return the start task object for the pool to be created.
         :param cluster_id str: Id of the cluster(Used for uploading the resource files)
@@ -103,7 +127,6 @@ def generate_cluster_start_task(
     """
 
     resource_files = [zip_resource_file]
-
     spark_web_ui_port = constants.DOCKER_SPARK_WEB_UI_PORT
     spark_worker_ui_port = constants.DOCKER_SPARK_WORKER_UI_PORT
     spark_jupyter_port = constants.DOCKER_SPARK_JUPYTER_PORT
@@ -132,7 +155,7 @@ def generate_cluster_start_task(
     ] + __get_docker_credentials(spark_client)
 
     # start task command
-    command = __cluster_install_cmd(zip_resource_file, docker_repo)
+    command = __cluster_install_cmd(zip_resource_file, docker_repo, file_shares)
 
     return batch_models.StartTask(
         command_line=helpers.wrap_commands_in_shell(command),

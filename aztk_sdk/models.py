@@ -2,6 +2,15 @@ from typing import List
 import aztk_sdk.utils.constants as constants
 import azure.batch.models as batch_models
 
+class FileShare:
+    def __init__(self, storage_account_name: str = None,
+        storage_account_key: str = None,
+        file_share_path: str = None,
+        mount_path: str = None):
+        self.storage_account_name = storage_account_name
+        self.storage_account_key = storage_account_key
+        self.file_share_path = file_share_path
+        self.mount_path = mount_path
 
 class CustomScript:
     def __init__(self, name: str = None, script: str = None, run_on=None):
@@ -14,6 +23,7 @@ class ClusterConfiguration:
     def __init__(
             self,
             custom_scripts: List[CustomScript] = None,
+            file_shares: List[FileShare] = None,
             cluster_id: str = None,
             vm_count=None,
             vm_low_pri_count=None,
@@ -21,6 +31,7 @@ class ClusterConfiguration:
             docker_repo: str=None):
 
         self.custom_scripts = custom_scripts
+        self.file_shares = file_shares
         self.cluster_id = cluster_id
         self.vm_count = vm_count
         self.vm_size = vm_size

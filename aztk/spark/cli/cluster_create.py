@@ -65,6 +65,20 @@ def execute(args: typing.NamedTuple):
     else:
         custom_scripts = None
 
+    if cluster_conf.file_shares:
+        file_shares = []
+        for file_share in cluster_conf.file_shares:
+            file_shares.append(
+                aztk_sdk.models.FileShare(
+                    storage_account_name=file_share['storage_account_name'],
+                    storage_account_key=file_share['storage_account_key'],
+                    file_share_path=file_share['file_share_path'],
+                    mount_path=file_share['mount_path']
+                )
+            )
+    else:
+        file_shares = None
+
     jars_src = aztk_sdk.utils.constants.DEFAULT_SPARK_JARS_SOURCE
 
     # create spark cluster
@@ -75,6 +89,7 @@ def execute(args: typing.NamedTuple):
             vm_low_pri_count=cluster_conf.size_low_pri,
             vm_size=cluster_conf.vm_size,
             custom_scripts=custom_scripts,
+            file_shares=file_shares,
             docker_repo=cluster_conf.docker_repo,
             spark_configuration=aztk_sdk.spark.models.SparkConfiguration(
                 spark_defaults_conf=os.path.join(
@@ -119,6 +134,7 @@ def print_cluster_conf(cluster_conf):
     log.info(">     low priority:      %s", cluster_conf.size_low_pri)
     log.info("spark cluster vm size:   %s", cluster_conf.vm_size)
     log.info("custom scripts:          %s", cluster_conf.custom_scripts)
+    log.info("file shares:             %s", len(cluster_conf.file_shares) if cluster_conf.file_shares is not None else 0)
     log.info("docker repo name:        %s", cluster_conf.docker_repo)
     log.info("wait for cluster:        %s", cluster_conf.wait)
     log.info("username:                %s", cluster_conf.username)
