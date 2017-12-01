@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
-from aztk import constants
-from aztk_sdk import version
+from cli import constants
+from aztk import version
 
 
 setup(name='aztk',
@@ -16,7 +16,7 @@ setup(name='aztk',
       ],
       entry_points=dict(
             console_scripts=[
-                  "{0} = aztk.cli:main".format(constants.CLI_EXE)
+                  "{0} = cli.entrypoint:main".format(constants.CLI_EXE)
             ]
       ),
       zip_safe=False)
