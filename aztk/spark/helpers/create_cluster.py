@@ -13,12 +13,14 @@ POOL_ADMIN_USER_IDENTITY = batch_models.UserIdentity(
 '''
 Cluster create helper methods
 '''
-def __docker_run_cmd(docker_repo: str = None, file_mounts = []) -> str:
+def __docker_run_cmd(docker_repo: str = None, gpu_enabled: bool = False, file_mounts = []) -> str:
     """
         Build the docker run command by setting up the environment variables
     """
-
-    cmd = CommandBuilder('docker run')
+    if gpu_enabled:
+        cmd = CommandBuilder('nvidia-docker run')
+    else:
+        cmd = CommandBuilder('docker run')
     cmd.add_option('--net', 'host')
     cmd.add_option('--name', constants.DOCKER_SPARK_CONTAINER_NAME)
     cmd.add_option('-v', '/mnt/batch/tasks:/batch')
@@ -57,7 +59,7 @@ def __docker_run_cmd(docker_repo: str = None, file_mounts = []) -> str:
     cmd.add_option('-p', '50090:50090')     # Secondary NameNode http address
     cmd.add_option('-d', docker_repo)
     cmd.add_argument('/bin/bash /batch/startup/wd/docker_main.sh')
-
+    
     return cmd.to_str()
 
 def __get_docker_credentials(spark_client):
@@ -76,13 +78,15 @@ def __get_docker_credentials(spark_client):
     return creds
 
 def __cluster_install_cmd(zip_resource_file: batch_models.ResourceFile,
+                            gpu_enabled: bool,
                             docker_repo: str = None,
                             file_mounts = []):
     """
         For Docker on ubuntu 16.04 - return the command line
         to be run on the start task of the pool to setup spark.
     """
-    docker_repo = docker_repo or constants.DEFAULT_DOCKER_REPO
+    default_docker_repo = constants.DEFAULT_DOCKER_REPO if not gpu_enabled else constants.DEFAULT_DOCKER_REPO_GPU
+    docker_repo = docker_repo or default_docker_repo
 
     shares = []
 
@@ -107,10 +111,11 @@ def __cluster_install_cmd(zip_resource_file: batch_models.ResourceFile,
         'unzip $AZ_BATCH_TASK_WORKING_DIR/{0}'.format(
             zip_resource_file.file_path),
         'chmod 777 $AZ_BATCH_TASK_WORKING_DIR/setup_node.sh',
-        '/bin/bash $AZ_BATCH_TASK_WORKING_DIR/setup_node.sh {0} {1} "{2}"'.format(
+        '/bin/bash $AZ_BATCH_TASK_WORKING_DIR/setup_node.sh {0} {1} {2} "{3}"'.format(
             constants.DOCKER_SPARK_CONTAINER_NAME,
+            gpu_enabled,
             docker_repo,
-            __docker_run_cmd(docker_repo, file_mounts)),
+            __docker_run_cmd(docker_repo, gpu_enabled, file_mounts)),
     ]
 
     commands = shares + setup
@@ -119,6 +124,7 @@ def __cluster_install_cmd(zip_resource_file: batch_models.ResourceFile,
 def generate_cluster_start_task(
         spark_client,
         zip_resource_file: batch_models.ResourceFile,
+        gpu_enabled: bool,
         docker_repo: str = None,
         file_shares: List[aztk_models.FileShare] = None):
     """
@@ -156,7 +162,7 @@ def generate_cluster_start_task(
     ] + __get_docker_credentials(spark_client)
 
     # start task command
-    command = __cluster_install_cmd(zip_resource_file, docker_repo, file_shares)
+    command = __cluster_install_cmd(zip_resource_file, gpu_enabled, docker_repo, file_shares)
 
     return batch_models.StartTask(
         command_line=helpers.wrap_commands_in_shell(command),

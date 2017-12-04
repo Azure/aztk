@@ -1,7 +1,7 @@
 from Crypto.PublicKey import RSA
 from typing import List
 import aztk.models
-from aztk.utils import constants
+from aztk.utils import constants, helpers
 import azure.batch.models as batch_models
 
 
@@ -9,6 +9,8 @@ class Cluster(aztk.models.Cluster):
     def __init__(self, pool: batch_models.CloudPool, nodes: batch_models.ComputeNodePaged = None):
         super().__init__(pool, nodes)
         self.master_node_id = self.__get_master_node_id()
+        self.gpu_enabled = helpers.is_gpu_enabled(pool.vm_size)
+
 
     def is_pool_running_spark(self, pool: batch_models.CloudPool):
         if pool.metadata is None:
@@ -80,6 +82,7 @@ class ClusterConfiguration(aztk.models.ClusterConfiguration):
               file_shares=file_shares
         )
         self.spark_configuration = spark_configuration
+        self.gpu_enabled = helpers.is_gpu_enabled(vm_size)
 
 
 class SecretsConfiguration(aztk.models.SecretsConfiguration):

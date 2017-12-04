@@ -3,6 +3,7 @@ import datetime
 import io
 import os
 import time
+import re
 import azure.batch.batch_service_client as batch
 import azure.batch.batch_auth as batch_auth
 import azure.batch.models as batch_models
@@ -15,6 +16,9 @@ import aztk.models
 _STANDARD_OUT_FILE_NAME = 'stdout.txt'
 _STANDARD_ERROR_FILE_NAME = 'stderr.txt'
 
+
+def is_gpu_enabled(vm_size):
+    return bool(re.search('nv|nc', vm_size))
 
 def get_cluster(cluster_id, batch_client):
     pool = batch_client.pool.get(cluster_id)

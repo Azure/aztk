@@ -3,7 +3,8 @@ import os
 """
     DOCKER
 """
-DEFAULT_DOCKER_REPO = "jiata/aztk-base:0.1.0-spark2.2.0"
+DEFAULT_DOCKER_REPO = "aztk/base:spark2.2.0"
+DEFAULT_DOCKER_REPO_GPU = "aztk/gpu:spark2.2.0"
 DOCKER_SPARK_CONTAINER_NAME = "spark"
 
 # DOCKER SPARK

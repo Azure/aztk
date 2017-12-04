@@ -1,5 +1,5 @@
 # Ubuntu 16.04 (Xenial)
-FROM jiata/aztk-base:0.1.0-spark2.1.0
+FROM aztk/base:spark2.2.0
 
 # modify these ARGs on build time to specify your desired versions of Spark/Hadoop
 ARG ANACONDA_VERSION=anaconda3-5.0.0
