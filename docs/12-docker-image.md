@@ -20,9 +20,9 @@ We also provide two other image types tailored for the Python and R users: __azt
 - Anaconda3-5.0.0 (Python 3.6.2) / Spark 2.2.0 - aztk/base:spark2.2.0-python3.6.2-base
 - Anaconda3-5.0.0 (Python 3.6.2) / Spark 2.1.0 - aztk/base:spark2.1.0-python3.6.2-base
 - Anaconda3-5.0.0 (Python 3.6.2) / Spark 1.6.3 - aztk/base:spark1.6.3-python3.6.2-base
-- [coming soon] R 3.4.0 / Spark v2.2.0 - jiata/aztk-r:0.1.0-spark2.2.0-r3.4.1
-- [coming soon] R 3.4.0 / Spark v2.1.0 - jiata/aztk-r:0.1.0-spark2.1.0-r3.4.1
-- [coming soon] R 3.4.0 / Spark v1.6.3 - jiata/aztk-r:0.1.0-spark1.6.3-r3.4.1
+- [coming soon] R 3.4.1 / Spark v2.2.0 - aztk/r-base:spark2.2.0
+- [coming soon] R 3.4.1 / Spark v2.1.0 - aztk/r-base:spark2.1.0
+- [coming soon] R 3.4.1 / Spark v1.6.3 - aztk/r-base:spark1.6.3
 
 
 Please note that each of these images also have GPU enabled versions. To use these versions, replace the "-base" part of the Docker image tag with "-gpu":
