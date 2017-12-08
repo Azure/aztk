@@ -48,6 +48,7 @@ def __docker_run_cmd(docker_repo: str = None, gpu_enabled: bool = False, file_mo
     cmd.add_option('-p', '7077:7077')       # Spark Master
     cmd.add_option('-p', '4040:4040')       # Job UI
     cmd.add_option('-p', '8888:8888')       # Jupyter UI
+    cmd.add_option('-p', '8787:8787')       # Rstudio Server
     cmd.add_option('-p', '18080:18080')     # Spark History Server UI
     cmd.add_option('-p', '3022:3022')       # Docker SSH
     cmd.add_option('-p', '8020:8020')       # Namenode IPC: ClientProtocol
@@ -138,6 +139,7 @@ def generate_cluster_start_task(
     spark_worker_ui_port = constants.DOCKER_SPARK_WORKER_UI_PORT
     spark_jupyter_port = constants.DOCKER_SPARK_JUPYTER_PORT
     spark_job_ui_port = constants.DOCKER_SPARK_JOB_UI_PORT
+    spark_rstudio_server_port = constants.DOCKER_SPARK_RSTUDIO_SERVER_PORT
 
     # TODO use certificate
     environment_settings = [
@@ -159,6 +161,8 @@ def generate_cluster_start_task(
             name="SPARK_JUPYTER_PORT", value=spark_jupyter_port),
         batch_models.EnvironmentSetting(
             name="SPARK_JOB_UI_PORT", value=spark_job_ui_port),
+        batch_models.EnvironmentSetting(
+            name="SPARK_RSTUDIO_SERVER_PORT", value=spark_rstudio_server_port),
     ] + __get_docker_credentials(spark_client)
 
     # start task command

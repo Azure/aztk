@@ -150,7 +150,7 @@ def copy_spark_env():
     spark_env_path_dest = os.path.join(spark_home, 'conf/spark-env.sh')
     copyfile(spark_env_path_src, spark_env_path_dest)
 
-    
+
 def copy_spark_defaults():
     spark_default_path_src = os.path.join(os.environ['DOCKER_WORKING_DIR'], 'conf/spark-defaults.conf')
     spark_default_path_dest = os.path.join(spark_home, 'conf/spark-defaults.conf')
@@ -202,5 +202,8 @@ def configure_history_server_log_path(path_to_log_file):
             else:
                 print('Create direcotory {}.'.format(directory))
                 os.makedirs(directory)
+
+                # Make sure the directory can be accessed by all users
+                os.chmod(directory, mode=0o777)
         else:
             print('Skipping. The eventLog directory is not local.')

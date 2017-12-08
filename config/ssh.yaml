@@ -20,5 +20,8 @@ jupyter_port: 8888
 # name_node_ui_port: <local port which where Name Node UI is forwarded to>
 name_node_ui_port: 50070
 
+# rstudio_server_port: <local port which where rstudio server is forwarded to>
+rstudio_server_port: 8787
+
 # connect: <true/false, connect to spark master or print connection string (--no-connect)>
 connect: true
