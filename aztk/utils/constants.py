@@ -37,6 +37,7 @@ DEFAULT_SECRETS_PATH = os.path.join(os.getcwd(), '.aztk/secrets.yaml')
 """
     Paths to the cluster configuration files
 """
+GLOBAL_CONFIG_PATH = os.path.join(HOME_DIRECTORY_PATH, '.aztk')
 DEFAULT_SSH_CONFIG_PATH = os.path.join(os.getcwd(), '.aztk/ssh.yaml')
 DEFAULT_CLUSTER_CONFIG_PATH = os.path.join(os.getcwd(), '.aztk/cluster.yaml')
 DEFAULT_SPARK_CONF_SOURCE = os.path.join(os.getcwd(), '.aztk')

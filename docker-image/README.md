@@ -34,9 +34,9 @@ aztk/python:spark1.6.3-python3.6.2-base | v1.6.3 | v3.6.2 | -- | -- | -- | --
 aztk/python:spark2.2.0-python3.6.2-gpu | v2.2.0 | v3.6.2 | -- | 8.0 | 6.0 
 aztk/python:spark2.1.0-python3.6.2-gpu | v2.1.0 | v3.6.2 | -- | 8.0 | 6.0 
 aztk/python:spark1.6.3-python3.6.2-gpu | v1.6.3 | v3.6.2 | -- | 8.0 | 6.0 
-[coming soon] aztk/r-base:spark2.2.0-r3.4.1 | v2.2.0 | -- | v3.4.1 | -- | --
-[coming soon] aztk/r-base:spark2.1.0-r3.4.1 | v2.1.0 | -- | v3.4.1 | -- | --
-[coming soon] aztk/r-base:spark1.6.3-r3.4.1 | v1.6.3 | -- | v3.4.1 | -- | --
+aztk/r-base:spark2.2.0-r3.4.1-base | v2.2.0 | -- | v3.4.1 | -- | --
+aztk/r-base:spark2.1.0-r3.4.1-base | v2.1.0 | -- | v3.4.1 | -- | --
+aztk/r-base:spark1.6.3-r3.4.1-base | v1.6.3 | -- | v3.4.1 | -- | --
 
 If you have requests to add to the list of supported images, please file a Github issue.
 

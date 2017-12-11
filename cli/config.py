@@ -66,9 +66,10 @@ class SecretsConfig:
 
     def load(self):
         # read global ~/secrets.yaml
-        self._load_secrets_config(os.path.join(aztk.utils.constants.HOME_DIRECTORY_PATH, '.aztk', 'ssh.yaml'))
+        self._load_secrets_config(os.path.join(aztk.utils.constants.HOME_DIRECTORY_PATH, '.aztk', 'secrets.yaml'))
         # read current working directory secrets.yaml
         self._load_secrets_config()
+
 
 class ClusterConfig:
 
@@ -159,23 +160,23 @@ class ClusterConfig:
         )
 
         if self.uid is None:
-                raise aztk.error.AztkError(
+            raise aztk.error.AztkError(
                 "Please supply an id for the cluster with a parameter (--id)")
 
         if self.size == 0 and self.size_low_pri == 0:
-                raise aztk.error.AztkError(
+            raise aztk.error.AztkError(
                 "Please supply a valid (greater than 0) size or size_low_pri value either in the cluster.yaml configuration file or with a parameter (--size or --size-low-pri)")
 
         if self.vm_size is None:
-                raise aztk.error.AztkError(
+            raise aztk.error.AztkError(
                 "Please supply a vm_size in either the cluster.yaml configuration file or with a parameter (--vm-size)")
 
         if self.wait is None:
-                raise aztk.error.AztkError(
+            raise aztk.error.AztkError(
                 "Please supply a value for wait in either the cluster.yaml configuration file or with a parameter (--wait or --no-wait)")
 
         if self.username is not None and self.wait is False:
-                raise aztk.error.AztkError(
+            raise aztk.error.AztkError(
                 "You cannot create a user '{0}' if wait is set to false. By default, we create a user in the cluster.yaml file. Please either the configure your cluster.yaml file or set the parameter (--wait)".format(self.username))
 
 
@@ -194,7 +195,7 @@ class SshConfig:
         self.jupyter_port = '8888'
         self.name_node_ui_port = '50070'
         self.rstudio_server_port = '8787'
-        
+
     def _read_config_file(self, path: str = aztk.utils.constants.DEFAULT_SSH_CONFIG_PATH):
         """
             Reads the config file in the .aztk/ directory (.aztk/cluster.yaml)
@@ -267,9 +268,45 @@ class SshConfig:
         )
 
         if self.cluster_id is None:
-                raise aztk.error.AztkError(
+            raise aztk.error.AztkError(
                 "Please supply an id for the cluster either in the ssh.yaml configuration file or with a parameter (--id)")
 
         if self.username is None:
-                raise aztk.error.AztkError(
+            raise aztk.error.AztkError(
                 "Please supply a username either in the ssh.yaml configuration file or with a parameter (--username)")
+
+
+def load_aztk_spark_config():
+    # try load global
+    jars_src = os.path.join(aztk.utils.constants.GLOBAL_CONFIG_PATH, 'jars')
+
+    jars = spark_defaults_conf = spark_env_sh = core_site_xml = None
+
+    try:
+        jars = [os.path.join(jars_src, jar) for jar in os.listdir(jars_src)]
+        if os.path.exists(os.path.join(aztk.utils.constants.GLOBAL_CONFIG_PATH, 'spark-defaults.conf')):
+            spark_defaults_conf = os.path.join(aztk.utils.constants.GLOBAL_CONFIG_PATH, 'spark-defaults.conf')
+        if os.path.exists(os.path.join(aztk.utils.constants.GLOBAL_CONFIG_PATH, 'spark-env.sh')):
+            spark_env_sh = os.path.join(aztk.utils.constants.GLOBAL_CONFIG_PATH, 'spark-env.sh')
+        if os.path.exists(os.path.join(aztk.utils.constants.GLOBAL_CONFIG_PATH, 'core-site.xml')):
+            core_site_xml = os.path.join(aztk.utils.constants.GLOBAL_CONFIG_PATH, 'core-site.xml')
+    except FileNotFoundError:
+        pass
+
+    # try load local, overwrite if found
+    try:
+        jars = [os.path.join(jars_src, jar) for jar in os.listdir(jars_src)]
+        if os.path.exists(os.path.join(aztk.utils.constants.DEFAULT_SPARK_CONF_SOURCE, 'spark-defaults.conf')):
+            spark_defaults_conf = os.path.join(aztk.utils.constants.DEFAULT_SPARK_CONF_SOURCE, 'spark-defaults.conf')
+        if os.path.exists(os.path.join(aztk.utils.constants.DEFAULT_SPARK_CONF_SOURCE, 'spark-env.sh')):
+            spark_env_sh = os.path.join(aztk.utils.constants.DEFAULT_SPARK_CONF_SOURCE, 'spark-env.sh')
+        if os.path.exists(os.path.join(aztk.utils.constants.DEFAULT_SPARK_CONF_SOURCE, 'core-site.xml')):
+            core_site_xml = os.path.join(aztk.utils.constants.DEFAULT_SPARK_CONF_SOURCE, 'core-site.xml')
+    except FileNotFoundError:
+        pass
+
+    return aztk.spark.models.SparkConfiguration(
+        spark_defaults_conf=spark_defaults_conf,
+        jars=jars,
+        spark_env_sh=spark_env_sh,
+        core_site_xml=core_site_xml)
