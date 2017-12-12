@@ -49,11 +49,23 @@ username: spark
 # job_ui_port: <local port where the job ui is forwarded to>
 job_ui_port: 4040
 
+# job_history_ui_port: <local port where the job history ui is forwarded to>
+job_history_ui_port: 18080
+
 # web_ui_port: <local port where the spark master web ui is forwarded to>
 web_ui_port: 8080
 
 # jupyter_port: <local port which where jupyter is forwarded to>
-jupyter_port: 8088
+jupyter_port: 8888
+
+# name_node_ui_port: <local port which where Name Node UI is forwarded to>
+name_node_ui_port: 50070
+
+# rstudio_server_port: <local port which where rstudio server is forwarded to>
+rstudio_server_port: 8787
+
+# connect: <true/false, connect to spark master or print connection string (--no-connect)>
+connect: true
 ```
 
 Running the command `aztk spark cluster ssh --id <cluster_id>` will ssh into the master node of the Spark cluster. It will also forward the Spark Job UI to localhost:4040, the Spark master's web UI to localhost:8080, and Jupyter to localhost:8888.
@@ -89,7 +101,7 @@ The Spark cluster can be configured to use different cloud supported storage off
 Additional JAR files can be added to the cluster by simply adding them to the *.aztk/jars* directory. These JARS will automatically be added to Spark's default JAR directory. In the case of a naming conflict, the file in *.aztk/jars* will **overwrite** the file in the cluster. Typically new JARS must be registered with Spark. To do this, either run the Spark Submit command with a path to the JARS
 
 ```sh
-aztk spark cluster submit --id <my_cluster_id> --jars $SPARK_HOME/jars/my_jar_file_1.jar <my_application> <my_parameteres>
+aztk spark cluster submit --id <my_cluster_id> --jars $SPARK_HOME/jars/my_jar_file_1.jar <my_application> <my_parameters>
 ```
 
 Or update the *.aztk/spark-default.conf* file as shown below to have it registered for all Spark applications.
