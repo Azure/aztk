@@ -53,6 +53,11 @@ def execute(args: typing.NamedTuple):
 
     print_cluster_conf(cluster_conf)
 
+    spinner = utils.Spinner()
+
+    log.info("Please wait while your cluster is being provisioned")
+    spinner.start()
+
     if cluster_conf.custom_scripts:
         custom_scripts = []
         for custom_script in cluster_conf.custom_scripts:
@@ -106,6 +111,8 @@ def execute(args: typing.NamedTuple):
             password=password,
             ssh_key=ssh_key
         )
+
+    spinner.stop()
 
     if cluster_conf.wait:
         log.info("Cluster %s created successfully.", cluster.id)
