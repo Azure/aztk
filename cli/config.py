@@ -277,33 +277,37 @@ class SshConfig:
 
 
 def load_aztk_spark_config():
-    # try load global
-    jars_src = os.path.join(aztk.utils.constants.GLOBAL_CONFIG_PATH, 'jars')
+    def get_file_if_exists(file, local: bool):
+        if local:
+            if os.path.exists(os.path.join(aztk.utils.constants.DEFAULT_SPARK_CONF_SOURCE, file)):
+                return os.path.join(aztk.utils.constants.DEFAULT_SPARK_CONF_SOURCE, file)
+        else:
+            if os.path.exists(os.path.join(aztk.utils.constants.GLOBAL_CONFIG_PATH, file)):
+                return os.path.join(aztk.utils.constants.GLOBAL_CONFIG_PATH, file)
 
     jars = spark_defaults_conf = spark_env_sh = core_site_xml = None
 
+    # try load global
     try:
+        jars_src = os.path.join(aztk.utils.constants.GLOBAL_CONFIG_PATH, 'jars')
         jars = [os.path.join(jars_src, jar) for jar in os.listdir(jars_src)]
-        if os.path.exists(os.path.join(aztk.utils.constants.GLOBAL_CONFIG_PATH, 'spark-defaults.conf')):
-            spark_defaults_conf = os.path.join(aztk.utils.constants.GLOBAL_CONFIG_PATH, 'spark-defaults.conf')
-        if os.path.exists(os.path.join(aztk.utils.constants.GLOBAL_CONFIG_PATH, 'spark-env.sh')):
-            spark_env_sh = os.path.join(aztk.utils.constants.GLOBAL_CONFIG_PATH, 'spark-env.sh')
-        if os.path.exists(os.path.join(aztk.utils.constants.GLOBAL_CONFIG_PATH, 'core-site.xml')):
-            core_site_xml = os.path.join(aztk.utils.constants.GLOBAL_CONFIG_PATH, 'core-site.xml')
     except FileNotFoundError:
         pass
 
+    spark_defaults_conf = get_file_if_exists('spark-defaults.conf', False)
+    spark_env_sh = get_file_if_exists('spark-env.sh', False)
+    core_site_xml = get_file_if_exists('core-site.xml', False)
+
     # try load local, overwrite if found
     try:
+        jars_src = os.path.join(aztk.utils.constants.DEFAULT_SPARK_CONF_SOURCE, 'jars')
         jars = [os.path.join(jars_src, jar) for jar in os.listdir(jars_src)]
-        if os.path.exists(os.path.join(aztk.utils.constants.DEFAULT_SPARK_CONF_SOURCE, 'spark-defaults.conf')):
-            spark_defaults_conf = os.path.join(aztk.utils.constants.DEFAULT_SPARK_CONF_SOURCE, 'spark-defaults.conf')
-        if os.path.exists(os.path.join(aztk.utils.constants.DEFAULT_SPARK_CONF_SOURCE, 'spark-env.sh')):
-            spark_env_sh = os.path.join(aztk.utils.constants.DEFAULT_SPARK_CONF_SOURCE, 'spark-env.sh')
-        if os.path.exists(os.path.join(aztk.utils.constants.DEFAULT_SPARK_CONF_SOURCE, 'core-site.xml')):
-            core_site_xml = os.path.join(aztk.utils.constants.DEFAULT_SPARK_CONF_SOURCE, 'core-site.xml')
     except FileNotFoundError:
         pass
+
+    spark_defaults_conf = get_file_if_exists('spark-defaults.conf', True)
+    spark_env_sh = get_file_if_exists('spark-env.sh', True)
+    core_site_xml = get_file_if_exists('core-site.xml', True)
 
     return aztk.spark.models.SparkConfiguration(
         spark_defaults_conf=spark_defaults_conf,
