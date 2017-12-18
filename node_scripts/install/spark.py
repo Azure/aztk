@@ -77,8 +77,11 @@ def start_spark_master():
            str(config.spark_web_ui_port)]
     print("Starting master with '{0}'".format(" ".join(cmd)))
     call(cmd)
-
-    start_history_server()
+    try:
+        start_history_server()
+    except Exception as e:
+        print("Failed to start history server with the following exception:")
+        print(e)
 
 
 def start_history_server():
@@ -181,6 +184,7 @@ def copy_jars():
 
 
 def parse_configuration_file(path_to_file: str):
+    try:
         file = open(path_to_file, 'r')
         properties = {}
         for line in file:
@@ -188,6 +192,9 @@ def parse_configuration_file(path_to_file: str):
                 split = line.split()
                 properties[split[0]] = split[1]
         return properties
+    except Exception as e:
+        print("Failed to parse configuration file:", path_to_file, "with error:")
+        print(e)
 
 
 def configure_history_server_log_path(path_to_log_file):
