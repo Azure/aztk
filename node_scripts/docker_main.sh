@@ -13,11 +13,11 @@ custom_script_dir=$DOCKER_WORKING_DIR/custom-scripts
 # Preload jupyter samples
 # TODO: remove when we support uploading random (non-executable) files as part custom-scripts
 # -----------------------
-mkdir -p /jupyter/samples
+mkdir -p /mnt/samples
 
 # add all files from 'jupyter-samples' to container folder '/pyspark/samples'
 for file in $(dirname $0)/jupyter-samples/*; do
-    cp $file /jupyter/samples
+    cp $file /mnt/samples
 done
 
 # ----------------------------

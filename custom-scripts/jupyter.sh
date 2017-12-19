@@ -3,9 +3,10 @@
 # This custom script only works on images where jupyter is pre-installed on the Docker image
 # 
 # This custom script has been tested to work on the following docker images:
-#  - jiata/aztk-python:0.1.0-spark2.2.0-python3.6.2
-#  - jiata/aztk-python:0.1.0-spark2.1.0-python3.6.2
-#  - jiata/aztk-python:0.1.0-spark1.6.3-python3.6.2
+#  - aztk/python:spark2.2.0-python3.6.2-base
+#  - aztk/python:spark2.2.0-python3.6.2-gpu
+#  - aztk/python:spark2.1.0-python3.6.2-base
+#  - aztk/python:spark2.1.0-python3.6.2-gpu
 
 if  [ "$IS_MASTER" = "1" ]; then
 
@@ -47,8 +48,8 @@ if  [ "$IS_MASTER" = "1" ]; then
 }
 EOF
 
-    # start jupyter notebook from /jupyter
-    cd /jupyter
+    # start jupyter notebook from /mnt - this is where we recommend you put your azure files mount point as well
+    cd /mnt
     (PYSPARK_DRIVER_PYTHON=$PYSPARK_DRIVER_PYTHON PYSPARK_DRIVER_PYTHON_OPTS="notebook --no-browser --port=8888 --allow-root" pyspark &)
 fi
 
