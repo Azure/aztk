@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import azure.batch.models as batch_models
 import aztk.utils.azure_api as azure_api
 import aztk.utils.helpers as helpers
@@ -147,7 +147,7 @@ class Client:
                 is_admin=True,
                 password=password,
                 ssh_public_key=get_ssh_key.get_user_public_key(ssh_key, self.secrets_config),
-                expiry_time=datetime.now() + timedelta(days=365)))
+                expiry_time=datetime.now(timezone.utc) + timedelta(days=365)))
     
     def __get_remote_login_settings(self, pool_id: str, node_id: str):
         """
