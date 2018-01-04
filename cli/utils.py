@@ -43,8 +43,8 @@ def print_cluster(client, cluster: aztk.spark.models.Cluster):
     log.info("| Low priority: %s", __pretty_low_pri_node_count(cluster))
     log.info("")
 
-    print_format = '{:<36}| {:<15} | {:<21}| {:<8}'
-    print_format_underline = '{:-<36}|{:-<17}|{:-<22}|{:-<8}'
+    print_format = '{:<36}| {:<19} | {:<21}| {:<8}'
+    print_format_underline = '{:-<36}|{:-<21}|{:-<22}|{:-<8}'
     log.info(print_format.format("Nodes", "State", "IP:Port", "Master"))
     log.info(print_format_underline.format('', '', '', ''))
 
