@@ -270,8 +270,10 @@ Find some samples and getting stated tutorial in the `examples/sdk/` directory o
             Cores for driver (Default: 1).
 
         - executor_cores: str 
-            Number of cores per executor. (Default: All available cores on the worker
-
+            Number of cores per executor. (Default: All available cores on the worker)
+        
+        - max_retry_count: int 
+            Number of times the Spark job may be retried if there is a failure
 
 - `ApplicationLog`
     

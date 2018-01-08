@@ -59,7 +59,11 @@ def setup_parser(parser: argparse.ArgumentParser):
 
     parser.add_argument('--executor-cores',
                         help='Number of cores per executor. (Default: All \
-                              available cores on the worker')
+                              available cores on the worker)')
+
+    parser.add_argument('--max-retry-count',
+                        help='Number of times the Spark job may be retried \
+                              if there is a failure')
 
     parser.add_argument('app',
                         help='App jar OR python file to execute. Use absolute \
@@ -131,7 +135,8 @@ def execute(args: typing.NamedTuple):
             driver_memory=args.driver_memory,
             executor_memory=args.executor_memory,
             driver_cores=args.driver_cores,
-            executor_cores=args.executor_cores
+            executor_cores=args.executor_cores,
+            max_retry_count=args.max_retry_count
         ),
         wait=False
     )
