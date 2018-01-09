@@ -2,6 +2,11 @@
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
 <configuration>
 
+  <property>
+    <name>io.file.buffer.size</name>
+    <value>131072</value>
+  </property>
+
 <!-- WASB (Azure Storage) Configuration  -->
 <!-- More information about WASB can be foudn at https://docs.microsoft.com/azure/hdinsight/hdinsight-hadoop-use-blob-storage> -->
 <!-- <property>
