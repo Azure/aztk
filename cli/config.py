@@ -93,11 +93,11 @@ def _merge_secrets_dict(secrets: SecretsConfiguration, secrets_config):
 
         if storage:
             secrets.shared_key.storage_account_name = storage.get(
-                'storage_account_name')
+                'storageaccountname')
             secrets.shared_key.storage_account_key = storage.get(
-                'storage_account_key')
+                'storageaccountkey')
             secrets.shared_key.storage_account_suffix = storage.get(
-                'storage_account_suffix')
+                'storageaccountsuffix')
 
     docker_config = secrets_config.get('docker')
     if docker_config:
