@@ -1,15 +1,17 @@
 import sys, os, time
+import aztk.models
 import aztk.spark
 from aztk.error import AztkError
 
 # set your secrets
 secrets_confg = aztk.spark.models.SecretsConfiguration(
-    batch_account_name="",
-    batch_account_key="",
-    batch_service_url="",
-    storage_account_name="",
-    storage_account_key="",
-    storage_account_suffix="",
+    service_principal=aztk.models.ServicePrincipalConfiguration(
+        tenant_id="<org>.onmicrosoft.com",
+        client_id="",
+        credential="",
+        batch_account_resource_id="",
+        storage_account_resource_id="",
+    ),
     ssh_pub_key=""
 )
 

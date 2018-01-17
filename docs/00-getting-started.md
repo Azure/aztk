@@ -23,7 +23,7 @@ The minimum requirements to get started with this package are:
     pip install -e .
     ```
 5. Initialize your environment:
-    
+
     Navigate to the directory you wish to use as your spark development environment, and run:
     ```bash
     aztk spark init

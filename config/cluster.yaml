@@ -18,12 +18,15 @@ username: spark
 docker_repo: aztk/base:spark2.2.0
 
 # # optional custom scripts to run on the Spark master, Spark worker or all nodes in the cluster
-# custom_scripts: 
+# custom_scripts:
 #   - script: </path/to/script.sh or /path/to/script/directory/>
 #     runOn: <master/worker/all-nodes>
 #   - script: <./relative/path/to/other/script.sh or ./relative/path/to/other/script/directory/>
 #     runOn: <master/worker/all-nodes>
 
 
-# wait: <true/false> 
+# wait: <true/false>
 wait: true
+
+# To add yout cluster to a virtual network provide the full arm resoruce id below
+# subnet_id:

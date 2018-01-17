@@ -3,72 +3,115 @@ import yaml
 import typing
 from cli import log
 import aztk.spark
+from aztk.models import ServicePrincipalConfiguration, SharedKeyConfiguration, DockerConfiguration
+from aztk.spark.models import SecretsConfiguration
 
 
-class SecretsConfig:
+def load_aztk_screts() -> SecretsConfiguration:
+    """
+    Loads aztk from .aztk/secrets.yaml files(local and global)
+    """
+    secrets = SecretsConfiguration()
+    # read global ~/secrets.yaml
+    global_config = _load_secrets_config(os.path.join(
+        aztk.utils.constants.HOME_DIRECTORY_PATH, '.aztk', 'secrets.yaml'))
+    # read current working directory secrets.yaml
+    local_config = _load_secrets_config()
 
-    def __init__(self):
-        self.batch_account_name = None
-        self.batch_account_key = None
-        self.batch_service_url = None
+    if not global_config and not local_config:
+        raise "There is no secrets.yaml in either ./.aztk/secrets.yaml or .aztk/secrets.yaml"
 
-        self.storage_account_name = None
-        self.storage_account_key = None
-        self.storage_account_suffix = None
+    if global_config:  # GLobal config is optional
+        _merge_secrets_dict(secrets, global_config)
+    if local_config:
+        _merge_secrets_dict(secrets, local_config)
 
-        self.docker_endpoint = None
-        self.docker_username = None
-        self.docker_password = None
-        self.ssh_pub_key = None
-        self.ssh_priv_key = None
+    # Validate and raise error if any
+    secrets.validate()
+    return secrets
 
-    def _load_secrets_config(self, path: str=aztk.utils.constants.DEFAULT_SECRETS_PATH):
-        """
-            Loads the secrets.yaml file in the .aztk directory
-        """
-        if not os.path.isfile(path):
-            return
 
-        with open(path, 'r') as stream:
-            try:
-                secrets_config = yaml.load(stream)
-            except yaml.YAMLError as err:
-                raise aztk.error.AztkError(
-                    "Error in cluster.yaml: {0}".format(err))
+def _load_secrets_config(path: str = aztk.utils.constants.DEFAULT_SECRETS_PATH):
+    """
+        Loads the secrets.yaml file in the .aztk directory
+    """
+    if not os.path.isfile(path):
+        return None
 
-            self._merge_dict(secrets_config)
+    with open(path, 'r') as stream:
+        try:
+            return yaml.load(stream)
+        except yaml.YAMLError as err:
+            raise aztk.error.AztkError(
+                "Error in secrets.yaml: {0}".format(err))
 
-    def _merge_dict(self, secrets_config):
-        # Ensure all necessary fields are provided
-        batch = secrets_config.get('batch')
+
+def _merge_secrets_dict(secrets: SecretsConfiguration, secrets_config):
+    service_principal_config = secrets_config.get('service_principal')
+    if service_principal_config:
+        secrets.service_principal = ServicePrincipalConfiguration(
+            tenant_id=service_principal_config.get('tenant_id'),
+            client_id=service_principal_config.get('client_id'),
+            credential=service_principal_config.get('credential'),
+            batch_account_resource_id=service_principal_config.get(
+                'batch_account_resource_id'),
+            storage_account_resource_id=service_principal_config.get(
+                'storage_account_resource_id'),
+        )
+
+    shared_key_config = secrets_config.get('shared_key')
+    batch = secrets_config.get('batch')
+    storage = secrets_config.get('storage')
+
+    if shared_key_config and (batch or storage):
+        raise aztk.error.AztkError(
+            "Shared keys must be configured either under 'sharedKey:' or under 'batch:' and 'storage:', not both.")
+
+    if shared_key_config:
+        secrets.shared_key = SharedKeyConfiguration(
+            batch_account_name=shared_key_config.get('batch_account_name'),
+            batch_account_key=shared_key_config.get('batch_account_key'),
+            batch_service_url=shared_key_config.get('batch_service_url'),
+            storage_account_name=shared_key_config.get(
+                'storage_account_name'),
+            storage_account_key=shared_key_config.get(
+                'storage_account_key'),
+            storage_account_suffix=shared_key_config.get(
+                'storage_account_suffix'),
+        )
+    elif batch or storage:
+        secrets.shared_key = SharedKeyConfiguration()
         if batch:
-            self.batch_account_name = batch.get('batchaccountname')
-            self.batch_account_key = batch.get('batchaccountkey')
-            self.batch_service_url = batch.get('batchserviceurl')
+            log.warning(
+                "Your secrets.yaml format is deprecated. To use shared key authentication use the shared_key key. See config/secrets.yaml.template")
+            secrets.shared_key.batch_account_name = batch.get(
+                'batchaccountname')
+            secrets.shared_key.batch_account_key = batch.get(
+                'batchaccountkey')
+            secrets.shared_key.batch_service_url = batch.get(
+                'batchserviceurl')
 
-        storage = secrets_config.get('storage')
         if storage:
-            self.storage_account_name = storage.get('storageaccountname')
-            self.storage_account_key = storage.get('storageaccountkey')
-            self.storage_account_suffix = storage.get('storageaccountsuffix')
+            secrets.shared_key.storage_account_name = storage.get(
+                'storage_account_name')
+            secrets.shared_key.storage_account_key = storage.get(
+                'storage_account_key')
+            secrets.shared_key.storage_account_suffix = storage.get(
+                'storage_account_suffix')
 
-        docker_config = secrets_config.get('docker')
-        if docker_config:
-            self.docker_endpoint = docker_config.get('endpoint')
-            self.docker_username = docker_config.get('username')
-            self.docker_password = docker_config.get('password')
+    docker_config = secrets_config.get('docker')
+    if docker_config:
+        secrets.docker = DockerConfiguration(
+            endpoint = docker_config.get('endpoint'),
+            username = docker_config.get('username'),
+            password = docker_config.get('password'),
+        )
 
-        default_config = secrets_config.get('default')
-        # Check for ssh keys if they are provided
-        if default_config:
-            self.ssh_priv_key = default_config.get('ssh_priv_key')
-            self.ssh_pub_key = default_config.get('ssh_pub_key')
-
-    def load(self):
-        # read global ~/secrets.yaml
-        self._load_secrets_config(os.path.join(aztk.utils.constants.HOME_DIRECTORY_PATH, '.aztk', 'secrets.yaml'))
-        # read current working directory secrets.yaml
-        self._load_secrets_config()
+    default_config = secrets_config.get('default')
+    # Check for ssh keys if they are provided
+    if default_config:
+        secrets.ssh_priv_key = default_config.get('ssh_priv_key')
+        secrets.ssh_pub_key = default_config.get('ssh_pub_key')
 
 
 class ClusterConfig:
@@ -78,6 +121,7 @@ class ClusterConfig:
         self.vm_size = None
         self.size = 0
         self.size_low_pri = 0
+        self.subnet_id = None
         self.username = None
         self.password = None
         self.custom_scripts = None
@@ -119,6 +163,9 @@ class ClusterConfig:
             self.size_low_pri = config['size_low_pri']
             self.size = 0
 
+        if config.get('subnet_id') is not None:
+            self.subnet_id = config['subnet_id']
+
         if config.get('username') is not None:
             self.username = config['username']
 
@@ -137,12 +184,13 @@ class ClusterConfig:
         if config.get('wait') is not None:
             self.wait = config['wait']
 
-    def merge(self, uid, username, size, size_low_pri, vm_size, password, wait, docker_repo):
+    def merge(self, uid, username, size, size_low_pri, vm_size, subnet_id, password, wait, docker_repo):
         """
             Reads configuration file (cluster.yaml), merges with command line parameters,
             checks for errors with configuration
         """
-        self._read_config_file(os.path.join(aztk.utils.constants.HOME_DIRECTORY_PATH, '.aztk', 'cluster.yaml'))
+        self._read_config_file(os.path.join(
+            aztk.utils.constants.HOME_DIRECTORY_PATH, '.aztk', 'cluster.yaml'))
         self._read_config_file()
 
         self._merge_dict(
@@ -152,6 +200,7 @@ class ClusterConfig:
                 size=size,
                 size_low_pri=size_low_pri,
                 vm_size=vm_size,
+                subnet_id=subnet_id,
                 password=password,
                 wait=wait,
                 custom_scripts=None,
@@ -251,7 +300,8 @@ class SshConfig:
             Merges fields with args object
         """
         self._read_config_file()
-        self._read_config_file(os.path.join(aztk.utils.constants.HOME_DIRECTORY_PATH, '.aztk', 'ssh.yaml'))
+        self._read_config_file(os.path.join(
+            aztk.utils.constants.HOME_DIRECTORY_PATH, '.aztk', 'ssh.yaml'))
         self._merge_dict(
             dict(
                 cluster_id=cluster_id,
@@ -289,7 +339,8 @@ def load_aztk_spark_config():
 
     # try load global
     try:
-        jars_src = os.path.join(aztk.utils.constants.GLOBAL_CONFIG_PATH, 'jars')
+        jars_src = os.path.join(
+            aztk.utils.constants.GLOBAL_CONFIG_PATH, 'jars')
         jars = [os.path.join(jars_src, jar) for jar in os.listdir(jars_src)]
     except FileNotFoundError:
         pass
@@ -300,7 +351,8 @@ def load_aztk_spark_config():
 
     # try load local, overwrite if found
     try:
-        jars_src = os.path.join(aztk.utils.constants.DEFAULT_SPARK_CONF_SOURCE, 'jars')
+        jars_src = os.path.join(
+            aztk.utils.constants.DEFAULT_SPARK_CONF_SOURCE, 'jars')
         jars = [os.path.join(jars_src, jar) for jar in os.listdir(jars_src)]
     except FileNotFoundError:
         pass

@@ -1,8 +1,6 @@
 import argparse
 import typing
-from cli import log
-from cli import utils
-from cli.spark.aztklib import load_spark_client
+from cli import utils, config, log
 import aztk.spark
 
 
@@ -74,7 +72,7 @@ def setup_parser(parser: argparse.ArgumentParser):
 
 
 def execute(args: typing.NamedTuple):
-    spark_client = load_spark_client()
+    spark_client = aztk.spark.Client(config.load_aztk_screts())
     jars = []
     py_files = []
     files = []

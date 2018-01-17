@@ -4,8 +4,7 @@ import typing
 import aztk.spark
 from cli import log
 from cli.config import ClusterConfig, load_aztk_spark_config
-from cli.spark.aztklib import load_spark_client
-from cli import utils
+from cli import utils, config
 
 
 def setup_parser(parser: argparse.ArgumentParser):
@@ -29,6 +28,8 @@ def setup_parser(parser: argparse.ArgumentParser):
     parser.add_argument('--docker-repo',
                         help='The location of the public docker image you want to use \
                              (<my-username>/<my-repo>:<tag>)')
+    parser.add_argument('--subnet-id',
+                        help='The subnet in which to create the cluster.')
 
     parser.add_argument('--no-wait', dest='wait', action='store_false')
     parser.add_argument('--wait', dest='wait', action='store_true')
@@ -36,7 +37,7 @@ def setup_parser(parser: argparse.ArgumentParser):
 
 
 def execute(args: typing.NamedTuple):
-    spark_client = load_spark_client()
+    spark_client = aztk.spark.Client(config.load_aztk_screts())
 
     # read cluster.yaml configuartion file, overwrite values with args
     cluster_conf = ClusterConfig()
@@ -46,6 +47,7 @@ def execute(args: typing.NamedTuple):
         size=args.size,
         size_low_pri=args.size_low_pri,
         vm_size=args.vm_size,
+        subnet_id=args.subnet_id,
         wait=args.wait,
         username=args.username,
         password=args.password,
@@ -91,6 +93,7 @@ def execute(args: typing.NamedTuple):
             vm_count=cluster_conf.size,
             vm_low_pri_count=cluster_conf.size_low_pri,
             vm_size=cluster_conf.vm_size,
+            subnet_id=cluster_conf.subnet_id,
             custom_scripts=custom_scripts,
             file_shares=file_shares,
             docker_repo=cluster_conf.docker_repo,
@@ -129,6 +132,7 @@ def print_cluster_conf(cluster_conf):
     log.info(">     low priority:      %s", cluster_conf.size_low_pri)
     log.info("spark cluster vm size:   %s", cluster_conf.vm_size)
     log.info("custom scripts:          %s", cluster_conf.custom_scripts)
+    log.info("subnet ID:               %s", cluster_conf.subnet_id)
     log.info("file shares:             %s", len(cluster_conf.file_shares) if cluster_conf.file_shares is not None else 0)
     log.info("docker repo name:        %s", cluster_conf.docker_repo)
     log.info("wait for cluster:        %s", cluster_conf.wait)

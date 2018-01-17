@@ -1,7 +1,7 @@
 import argparse
 import typing
-from cli import log
-from cli.spark.aztklib import load_spark_client
+import aztk
+from cli import log, config
 
 
 def setup_parser(parser: argparse.ArgumentParser):
@@ -16,9 +16,9 @@ def setup_parser(parser: argparse.ArgumentParser):
                         help='Do not prompt for confirmation, force deletion of cluster.')
     parser.set_defaults(force=False)
 
-    
+
 def execute(args: typing.NamedTuple):
-    spark_client = load_spark_client()
+    spark_client = aztk.spark.Client(config.load_aztk_screts())
     cluster_id = args.cluster_id
 
     if not args.force:

@@ -1,9 +1,8 @@
 import argparse
 import typing
 from cli import log
-from cli import utils
+from cli import utils, config
 from cli.config import SshConfig
-from cli.spark.aztklib import load_spark_client
 import aztk
 import azure.batch.models.batch_error as batch_error
 
@@ -37,7 +36,7 @@ def setup_parser(parser: argparse.ArgumentParser):
 
 
 def execute(args: typing.NamedTuple):
-    spark_client = load_spark_client()
+    spark_client = aztk.spark.Client(config.load_aztk_screts())
     ssh_conf = SshConfig()
 
     ssh_conf.merge(

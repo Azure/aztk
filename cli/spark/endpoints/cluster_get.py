@@ -1,7 +1,7 @@
 import argparse
 import typing
-from cli.spark.aztklib import load_spark_client
-from cli import utils
+import aztk
+from cli import utils, config
 
 
 def setup_parser(parser: argparse.ArgumentParser):
@@ -12,7 +12,7 @@ def setup_parser(parser: argparse.ArgumentParser):
 
 
 def execute(args: typing.NamedTuple):
-    spark_client = load_spark_client()
+    spark_client = aztk.spark.Client(config.load_aztk_screts())
     cluster_id = args.cluster_id
     cluster = spark_client.get_cluster(cluster_id)
     utils.print_cluster(spark_client, cluster)

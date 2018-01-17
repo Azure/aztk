@@ -32,10 +32,15 @@ def __docker_run_cmd(docker_repo: str = None, gpu_enabled: bool = False, file_mo
     cmd.add_option('-e', 'DOCKER_WORKING_DIR=/batch/startup/wd')
     cmd.add_option('-e', 'AZ_BATCH_ACCOUNT_NAME=$AZ_BATCH_ACCOUNT_NAME')
     cmd.add_option('-e', 'BATCH_ACCOUNT_KEY=$BATCH_ACCOUNT_KEY')
-    cmd.add_option('-e', 'BATCH_ACCOUNT_URL=$BATCH_ACCOUNT_URL')
+    cmd.add_option('-e', 'BATCH_SERVICE_URL=$BATCH_SERVICE_URL')
     cmd.add_option('-e', 'STORAGE_ACCOUNT_NAME=$STORAGE_ACCOUNT_NAME')
     cmd.add_option('-e', 'STORAGE_ACCOUNT_KEY=$STORAGE_ACCOUNT_KEY')
     cmd.add_option('-e', 'STORAGE_ACCOUNT_SUFFIX=$STORAGE_ACCOUNT_SUFFIX')
+    cmd.add_option('-e', 'SP_TENANT_ID=$SP_TENANT_ID')
+    cmd.add_option('-e', 'SP_CLIENT_ID=$SP_CLIENT_ID')
+    cmd.add_option('-e', 'SP_CREDENTIAL=$SP_CREDENTIAL')
+    cmd.add_option('-e', 'SP_BATCH_RESOURCE_ID=$SP_BATCH_RESOURCE_ID')
+    cmd.add_option('-e', 'SP_STORAGE_RESOURCE_ID=$SP_STORAGE_RESOURCE_ID')
     cmd.add_option('-e', 'AZ_BATCH_POOL_ID=$AZ_BATCH_POOL_ID')
     cmd.add_option('-e', 'AZ_BATCH_NODE_ID=$AZ_BATCH_NODE_ID')
     cmd.add_option(
@@ -60,23 +65,56 @@ def __docker_run_cmd(docker_repo: str = None, gpu_enabled: bool = False, file_mo
     cmd.add_option('-p', '50090:50090')     # Secondary NameNode http address
     cmd.add_option('-d', docker_repo)
     cmd.add_argument('/bin/bash /batch/startup/wd/docker_main.sh')
-    
+
     return cmd.to_str()
 
 def __get_docker_credentials(spark_client):
     creds = []
-
-    if spark_client.secrets_config.docker_endpoint:
-        creds.append(batch_models.EnvironmentSetting(
-            name="DOCKER_ENDPOINT", value=spark_client.secrets_config.docker_endpoint))
-    if spark_client.secrets_config.docker_username:
-        creds.append(batch_models.EnvironmentSetting(
-            name="DOCKER_USERNAME", value=spark_client.secrets_config.docker_username))
-    if spark_client.secrets_config.docker_password:
-        creds.append(batch_models.EnvironmentSetting(
-            name="DOCKER_PASSWORD", value=spark_client.secrets_config.docker_password))
+    docker = spark_client.secrets_config.docker
+    if docker:
+        if docker.endpoint:
+            creds.append(batch_models.EnvironmentSetting(
+                name="DOCKER_ENDPOINT", value=docker.endpoint))
+        if docker.username:
+            creds.append(batch_models.EnvironmentSetting(
+                name="DOCKER_USERNAME", value=docker.username))
+        if docker.password:
+            creds.append(batch_models.EnvironmentSetting(
+                name="DOCKER_PASSWORD", value=docker.password))
 
     return creds
+
+
+def __get_secrets_env(spark_client):
+    shared_key = spark_client.secrets_config.shared_key
+    service_principal = spark_client.secrets_config.service_principal
+    if shared_key:
+        return [
+            batch_models.EnvironmentSetting(
+                name="BATCH_SERVICE_URL", value=shared_key.batch_service_url),
+            batch_models.EnvironmentSetting(
+                name="BATCH_ACCOUNT_KEY", value=shared_key.batch_account_key),
+            batch_models.EnvironmentSetting(
+                name="STORAGE_ACCOUNT_NAME", value=shared_key.storage_account_name),
+            batch_models.EnvironmentSetting(
+                name="STORAGE_ACCOUNT_KEY", value=shared_key.storage_account_key),
+            batch_models.EnvironmentSetting(
+                name="STORAGE_ACCOUNT_SUFFIX", value=shared_key.storage_account_suffix),
+        ]
+    else:
+        return [
+            batch_models.EnvironmentSetting(
+                name="SP_TENANT_ID", value=service_principal.tenant_id),
+            batch_models.EnvironmentSetting(
+                name="SP_CLIENT_ID", value=service_principal.client_id),
+            batch_models.EnvironmentSetting(
+                name="SP_CREDENTIAL", value=service_principal.credential),
+            batch_models.EnvironmentSetting(
+                name="SP_BATCH_RESOURCE_ID", value=service_principal.batch_account_resource_id),
+            batch_models.EnvironmentSetting(
+                name="SP_STORAGE_RESOURCE_ID", value=service_principal.storage_account_resource_id),
+        ]
+
 
 def __cluster_install_cmd(zip_resource_file: batch_models.ResourceFile,
                             gpu_enabled: bool,
@@ -142,17 +180,7 @@ def generate_cluster_start_task(
     spark_rstudio_server_port = constants.DOCKER_SPARK_RSTUDIO_SERVER_PORT
 
     # TODO use certificate
-    environment_settings = [
-        batch_models.EnvironmentSetting(
-            name="BATCH_ACCOUNT_KEY", value=spark_client.batch_config.account_key),
-        batch_models.EnvironmentSetting(
-            name="BATCH_ACCOUNT_URL", value=spark_client.batch_config.account_url),
-        batch_models.EnvironmentSetting(
-            name="STORAGE_ACCOUNT_NAME", value=spark_client.blob_config.account_name),
-        batch_models.EnvironmentSetting(
-            name="STORAGE_ACCOUNT_KEY", value=spark_client.blob_config.account_key),
-        batch_models.EnvironmentSetting(
-            name="STORAGE_ACCOUNT_SUFFIX", value=spark_client.blob_config.account_suffix),
+    environment_settings = __get_secrets_env(spark_client) + [
         batch_models.EnvironmentSetting(
             name="SPARK_WEB_UI_PORT", value=spark_web_ui_port),
         batch_models.EnvironmentSetting(

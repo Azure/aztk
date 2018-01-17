@@ -2,8 +2,7 @@ import argparse
 import typing
 import aztk.spark
 from cli import log
-from cli.spark.aztklib import load_spark_client
-from cli import utils
+from cli import utils, config
 
 
 def setup_parser(parser: argparse.ArgumentParser):
@@ -21,7 +20,7 @@ def setup_parser(parser: argparse.ArgumentParser):
 
 
 def execute(args: typing.NamedTuple):
-    spark_client = load_spark_client()
+    spark_client = aztk.spark.Client(config.load_aztk_screts())
 
     log.info('-------------------------------------------')
     log.info('spark cluster id:    {}'.format(args.cluster_id))
@@ -32,7 +31,7 @@ def execute(args: typing.NamedTuple):
         ssh_key = args.ssh_key
     else:
         ssh_key = spark_client.secrets_config.ssh_pub_key
-    
+
     ssh_key, password = utils.get_ssh_key_or_prompt(ssh_key, args.username, args.password, spark_client.secrets_config)
 
     spark_client.create_user(

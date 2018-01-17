@@ -1,34 +1,32 @@
+import re
 import azure.batch.batch_service_client as batch
 import azure.batch.batch_auth as batch_auth
 import azure.storage.blob as blob
 from aztk import error
 from aztk.version import __version__
+from azure.common.credentials import ServicePrincipalCredentials
+from azure.mgmt.batch import BatchManagementClient
+from azure.mgmt.storage import StorageManagementClient
+from azure.storage import CloudStorageAccount
+from typing import Optional
 
 
-class BatchConfig:
-    def __init__(self, account_key: str, account_name: str, account_url: str):
-        self.account_key = account_key
-        self.account_name = account_name
-        self.account_url = account_url
+RESOURCE_ID_PATTERN = re.compile('^/subscriptions/(?P<subscription>[^/]+)'
+                                 '/resourceGroups/(?P<resourcegroup>[^/]+)'
+                                 '/providers/[^/]+'
+                                 '/[^/]+Accounts/(?P<account>[^/]+)$')
 
 
-class BlobConfig:
-    def __init__(self, account_key: str, account_name: str, account_suffix: str):
-        self.account_key = account_key
-        self.account_name = account_name
-        self.account_suffix = account_suffix
+def validate_secrets(secrets):
+    if secrets.service_principal:
+        if not RESOURCE_ID_PATTERN.match(secrets.service_principal.batch_account_resource_id):
+            raise error.AzureApiInitError("ServicePrincipal batch_account_resource_id is not in expected format")
+
+        if not RESOURCE_ID_PATTERN.match(secrets.service_principal.storage_account_resource_id):
+            raise error.AzureApiInitError("ServicePrincipal storage_account_resource_id is not in expected format")
 
 
-def _validate_batch_config(batch_config: BatchConfig):
-    if batch_config.account_key is None:
-        raise error.AzureApiInitError("Batch account key is not set in secrets.yaml config")
-    if batch_config.account_name is None:
-        raise error.AzureApiInitError("Batch account name is not set in secrets.yaml config")
-    if batch_config.account_url is None:
-        raise error.AzureApiInitError("Batch service url is not set in secrets.yaml config")
-
-
-def make_batch_client(batch_config: BatchConfig):
+def make_batch_client(secrets):
     """
         Creates a batch client object
         :param str batch_account_key: batch account key
@@ -36,17 +34,35 @@ def make_batch_client(batch_config: BatchConfig):
         :param str batch_service_url: batch service url
     """
     # Validate the given config
-    _validate_batch_config(batch_config)
-    
-    # Set up SharedKeyCredentials
-    credentials = batch_auth.SharedKeyCredentials(
-        batch_config.account_name,
-        batch_config.account_key)
+    credentials = None
+
+    if secrets.shared_key:
+        # Set up SharedKeyCredentials
+        base_url = secrets.shared_key.batch_service_url
+        credentials = batch_auth.SharedKeyCredentials(
+            secrets.shared_key.batch_account_name,
+            secrets.shared_key.batch_account_key)
+    else:
+        # Set up ServicePrincipalCredentials
+        arm_credentials = ServicePrincipalCredentials(
+            client_id=secrets.service_principal.client_id,
+            secret=secrets.service_principal.credential,
+            tenant=secrets.service_principal.tenant_id,
+            resource='https://management.core.windows.net/')
+        m = RESOURCE_ID_PATTERN.match(secrets.service_principal.batch_account_resource_id)
+        arm_batch_client = BatchManagementClient(arm_credentials, m.group('subscription'))
+        account = arm_batch_client.batch_account.get(m.group('resourcegroup'), m.group('account'))
+        base_url = 'https://{0}/'.format(account.account_endpoint)
+        credentials = ServicePrincipalCredentials(
+            client_id=secrets.service_principal.client_id,
+            secret=secrets.service_principal.credential,
+            tenant=secrets.service_principal.tenant_id,
+            resource='https://batch.core.windows.net/')
 
     # Set up Batch Client
     batch_client = batch.BatchServiceClient(
         credentials,
-        base_url=batch_config.account_url)
+        base_url=base_url)
 
     # Set retry policy
     batch_client.config.retry_policy.retries = 5
@@ -55,29 +71,34 @@ def make_batch_client(batch_config: BatchConfig):
     return batch_client
 
 
-def _validate_blob_config(blob_config: BlobConfig):
-    if blob_config.account_key is None:
-        raise error.AzureApiInitError("Storage account key is not set in secrets.yaml config")
-    if blob_config.account_name is None:
-        raise error.AzureApiInitError("Storage account name is not set in secrets.yaml config")
-    if blob_config.account_suffix is None:
-        raise error.AzureApiInitError("Storage account suffix is not set in secrets.yaml config")
-
-
-def make_blob_client(blob_config: BlobConfig):
+def make_blob_client(secrets):
     """
         Creates a blob client object
         :param str storage_account_key: storage account key
         :param str storage_account_name: storage account name
         :param str storage_account_suffix: storage account suffix
     """
-    # Validate Blob config
-    _validate_blob_config(blob_config)
 
-    # Set up BlockBlobStorage
-    blob_client = blob.BlockBlobService(
-        account_name=blob_config.account_name,
-        account_key=blob_config.account_key,
-        endpoint_suffix=blob_config.account_suffix)
+    if secrets.shared_key:
+        # Set up SharedKeyCredentials
+        blob_client = blob.BlockBlobService(
+            account_name=secrets.shared_key.storage_account_name,
+            account_key=secrets.shared_key.storage_account_key,
+            endpoint_suffix=secrets.shared_key.storage_account_suffix)
+    else:
+        # Set up ServicePrincipalCredentials
+        arm_credentials = ServicePrincipalCredentials(
+            client_id=secrets.service_principal.client_id,
+            secret=secrets.service_principal.credential,
+            tenant=secrets.service_principal.tenant_id,
+            resource='https://management.core.windows.net/')
+        m = RESOURCE_ID_PATTERN.match(secrets.service_principal.storage_account_resource_id)
+        accountname = m.group('account')
+        subscription = m.group('subscription')
+        resourcegroup = m.group('resourcegroup')
+        mgmt_client = StorageManagementClient(arm_credentials, subscription)
+        key = mgmt_client.storage_accounts.list_keys(resource_group_name=resourcegroup, account_name=accountname).keys[0].value
+        storage_client = CloudStorageAccount(accountname, key)
+        blob_client = storage_client.create_block_blob_service()
 
     return blob_client

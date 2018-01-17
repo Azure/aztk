@@ -71,6 +71,7 @@ class ClusterConfiguration(aztk.models.ClusterConfiguration):
             vm_count=None,
             vm_low_pri_count=None,
             vm_size=None,
+            subnet_id=None,
             docker_repo: str=None,
             spark_configuration: SparkConfiguration = None):
         super().__init__(custom_scripts=custom_scripts,
@@ -79,6 +80,7 @@ class ClusterConfiguration(aztk.models.ClusterConfiguration):
               vm_low_pri_count=vm_low_pri_count,
               vm_size=vm_size,
               docker_repo=docker_repo,
+              subnet_id=subnet_id,
               file_shares=file_shares
         )
         self.spark_configuration = spark_configuration
