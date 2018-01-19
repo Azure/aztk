@@ -399,6 +399,7 @@ Find some samples and getting stated tutorial in the `examples/sdk/` directory o
         - state_transition_time: datetime
         - previous_state: str
         - previous_state_transition_time: datetime
+        - exit_code: int
 
     <!---
     - _execution_info: azure.batch.models.TaskExecutionInformation
@@ -473,16 +474,17 @@ Find some samples and getting stated tutorial in the `examples/sdk/` directory o
             Number of times the Spark job may be retried if there is a failure
 
 - `ApplicationLog`
-
-    Holds the logged data from a spark application and metadataq about the application and log.
+    
+    Holds the logged data from a spark application and metadata about the application and log.
 
     Fields:
 
         - name: str
         - cluster_id: str
         - log: str
-        - total_bytes: int
-        - application_state: str
+        - total_bytes: int 
+        - application_state: str 
+        - exit_code: str 
 
 
 - `Cluster`

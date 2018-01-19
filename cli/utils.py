@@ -319,9 +319,9 @@ def application_summary(applications):
         log.warning("\nNo Spark applications will be scheduled until the master is selected.")
 
 def print_applications(applications):
-    print_format = '{:<36}| {:<15}| {:<14}'
-    print_format_underline = '{:-<36}|{:-<16}|{:-<17}'
-    log.info(print_format.format("Applications", "State", "Transition Time"))
+    print_format = '{:<36}| {:<15}| {:<16} | {:^9} |'
+    print_format_underline = '{:-<36}|{:-<16}|{:-<18}|{:-<11}|'
+    log.info(print_format.format("Applications", "State", "Transition Time", "Exit Code"))
     log.info(print_format_underline.format('', '', '', ''))
 
     warn_scheduling = False
@@ -341,7 +341,8 @@ def print_applications(applications):
                 print_format.format(
                     application.name,
                     application.state,
-                    utc_to_local(application.state_transition_time)
+                    utc_to_local(application.state_transition_time),
+                    application.exit_code
                 )
             )
     if warn_scheduling:

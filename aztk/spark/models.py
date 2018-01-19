@@ -137,6 +137,7 @@ class Application:
         self.creation_time = cloud_task.creation_time
         self.state = cloud_task.state._value_
         self.state_transition_time = cloud_task.state_transition_time
+        self.exit_code = cloud_task.execution_info.exit_code
         if cloud_task.previous_state:
             self.previous_state = cloud_task.previous_state._value_
             self.previous_state_transition_time = cloud_task.previous_state_transition_time
@@ -209,9 +210,10 @@ class Job():
             self.cluster = None
 
 class ApplicationLog():
-    def __init__(self, name: str, cluster_id: str, log: str, total_bytes: int, application_state: batch_models.TaskState):
+    def __init__(self, name: str, cluster_id: str, log: str, total_bytes: int, application_state: batch_models.TaskState, exit_code: int):
         self.name = name
         self.cluster_id = cluster_id  # TODO: change to something cluster/job agnostic
         self.log = log
         self.total_bytes = total_bytes
         self.application_state = application_state
+        self.exit_code = exit_code
