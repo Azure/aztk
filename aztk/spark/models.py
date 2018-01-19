@@ -6,11 +6,10 @@ import azure.batch.models as batch_models
 
 
 class Cluster(aztk.models.Cluster):
-    def __init__(self, pool: batch_models.CloudPool, nodes: batch_models.ComputeNodePaged = None):
+    def __init__(self, pool: batch_models.CloudPool = None, nodes: batch_models.ComputeNodePaged = None):
         super().__init__(pool, nodes)
         self.master_node_id = self.__get_master_node_id()
         self.gpu_enabled = helpers.is_gpu_enabled(pool.vm_size)
-
 
     def is_pool_running_spark(self, pool: batch_models.CloudPool):
         if pool.metadata is None:
@@ -34,6 +33,7 @@ class Cluster(aztk.models.Cluster):
                 return metadata.value
 
         return None
+
 
 class RemoteLogin(aztk.models.RemoteLogin):
     pass
@@ -95,7 +95,7 @@ class VmImage(aztk.models.VmImage):
     pass
 
 
-class Application:
+class ApplicationConfiguration:
     def __init__(
             self,
             name=None,
@@ -130,10 +130,88 @@ class Application:
         self.max_retry_count = max_retry_count
 
 
+class Application:
+    def __init__(self, cloud_task: batch_models.CloudTask):
+        self.name = cloud_task.id
+        self.last_modified = cloud_task.last_modified
+        self.creation_time = cloud_task.creation_time
+        self.state = cloud_task.state._value_
+        self.state_transition_time = cloud_task.state_transition_time
+        if cloud_task.previous_state:
+            self.previous_state = cloud_task.previous_state._value_
+            self.previous_state_transition_time = cloud_task.previous_state_transition_time
+
+        self._execution_info = cloud_task.execution_info
+        self._node_info = cloud_task.node_info
+        self._stats = cloud_task.stats
+        self._multi_instance_settings = cloud_task.multi_instance_settings
+        self._display_name = cloud_task.display_name
+        self._exit_conditions = cloud_task.exit_conditions
+        self._command_line = cloud_task.command_line
+        self._resource_files = cloud_task.resource_files
+        self._output_files = cloud_task.output_files
+        self._environment_settings = cloud_task.environment_settings
+        self._affinity_info = cloud_task.affinity_info
+        self._constraints = cloud_task.constraints
+        self._user_identity = cloud_task.user_identity
+        self._depends_on = cloud_task.depends_on
+        self._application_package_references = cloud_task.application_package_references
+        self._authentication_token_settings = cloud_task.authentication_token_settings
+        self._url = cloud_task.url
+        self._e_tag = cloud_task.e_tag
+
+
+class JobConfiguration:
+    def __init__(
+            self,
+            id,
+            applications,
+            vm_size,
+            custom_scripts=None,
+            spark_configuration=None,
+            docker_repo=None,
+            max_dedicated_nodes=None,
+            max_low_pri_nodes=None):
+        self.id = id
+        self.applications = applications
+        self.custom_scripts = custom_scripts
+        self.spark_configuration = spark_configuration
+        self.vm_size = vm_size
+        self.gpu_enabled = helpers.is_gpu_enabled(vm_size)
+        self.docker_repo = docker_repo
+        self.max_dedicated_nodes = max_dedicated_nodes
+        self.max_low_pri_nodes = max_low_pri_nodes
+
+
+class JobState():
+    complete = 'completed'
+    active = "active"
+    completed = "completed"
+    disabled = "disabled"
+    terminating = "terminating"
+    deleting = "deleting"
+
+
+class Job():
+    def __init__(self, cloud_job_schedule: batch_models.CloudJobSchedule,
+                 cloud_tasks: List[batch_models.CloudTask] = None,
+                 pool: batch_models.CloudPool = None,
+                 nodes: batch_models.ComputeNodePaged = None):
+        self.id = cloud_job_schedule.id
+        self.last_modified = cloud_job_schedule.last_modified
+        self.state = cloud_job_schedule.state._value_
+        self.state_transition_time = cloud_job_schedule.state_transition_time
+        self.creation_time = cloud_job_schedule.creation_time
+        self.applications = [Application(task) for task in (cloud_tasks or [])]
+        if pool:
+            self.cluster = Cluster(pool, nodes)
+        else:
+            self.cluster = None
+
 class ApplicationLog():
     def __init__(self, name: str, cluster_id: str, log: str, total_bytes: int, application_state: batch_models.TaskState):
         self.name = name
-        self.cluster_id = cluster_id
+        self.cluster_id = cluster_id  # TODO: change to something cluster/job agnostic
         self.log = log
         self.total_bytes = total_bytes
         self.application_state = application_state

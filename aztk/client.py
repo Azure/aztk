@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta, timezone
 import azure.batch.models as batch_models
+import azure.batch.models.batch_error as batch_error
 import aztk.utils.azure_api as azure_api
 import aztk.utils.helpers as helpers
 import aztk.utils.constants as constants
@@ -158,6 +159,84 @@ class Client:
             pool_id, node_id)
         return models.RemoteLogin(ip_address=result.remote_login_ip_address, port=str(result.remote_login_port))
 
+    def __submit_job(self,
+                     job_configuration,
+                     start_task,
+                     job_manager_task,
+                     autoscale_formula,
+                     software_metadata_key: str,
+                     vm_image_model,
+                     application_metadata):
+        """
+            Job Submission
+            :param job_configuration -> aztk_sdk.spark.models.JobConfiguration
+            :param start_task -> batch_models.StartTask
+            :param job_manager_task -> batch_models.TaskAddParameter
+            :param autoscale forumula -> str
+            :param software_metadata_key -> str
+            :param vm_image_model -> aztk_sdk.models.VmImage
+            :returns None
+        """
+        # get a verified node agent sku
+        sku_to_use, image_ref_to_use = \
+            helpers.select_latest_verified_vm_image_with_node_agent_sku(
+                vm_image_model.publisher, vm_image_model.offer, vm_image_model.sku, self.batch_client)
+
+        # set up a schedule for a recurring job
+        auto_pool_specification = batch_models.AutoPoolSpecification(
+            pool_lifetime_option=batch_models.PoolLifetimeOption.job_schedule,
+            auto_pool_id_prefix=job_configuration.id,
+            keep_alive=False,
+            pool=batch_models.PoolSpecification(
+                display_name=job_configuration.id,
+                virtual_machine_configuration=batch_models.VirtualMachineConfiguration(
+                    image_reference=image_ref_to_use,
+                    node_agent_sku_id=sku_to_use),
+                vm_size=job_configuration.vm_size,
+                enable_auto_scale=True,
+                auto_scale_formula=autoscale_formula,
+                auto_scale_evaluation_interval=timedelta(minutes=5),
+                start_task=start_task,
+                enable_inter_node_communication=True,
+                max_tasks_per_node=1,
+                metadata=[
+                    batch_models.MetadataItem(
+                        name=constants.AZTK_SOFTWARE_METADATA_KEY, value=software_metadata_key)
+                ]
+            )
+        )
+
+        # define job specification
+        job_spec = batch_models.JobSpecification(
+            pool_info=batch_models.PoolInformation(auto_pool_specification=auto_pool_specification),
+            display_name=job_configuration.id,
+            on_all_tasks_complete=batch_models.OnAllTasksComplete.terminate_job,
+            job_manager_task=job_manager_task,
+            metadata=[
+                batch_models.MetadataItem(
+                    name='applications', value=application_metadata)
+            ]
+        )
+
+        # define schedule
+        schedule = batch_models.Schedule(
+            do_not_run_until=None,
+            do_not_run_after=None,
+            start_window=None,
+            recurrence_interval=None
+        )
+
+        # create job schedule and add task
+        setup = batch_models.JobScheduleAddParameter(
+            id=job_configuration.id,
+            schedule=schedule,
+            job_specification=job_spec)
+
+        self.batch_client.job_schedule.add(setup)
+
+        return self.batch_client.job_schedule.get(job_schedule_id=job_configuration.id)
+
+
     '''
     Define Public Interface
     '''
@@ -184,4 +263,7 @@ class Client:
         raise NotImplementedError()
 
     def get_remote_login_settings(self, cluster_id, node_id):
+        raise NotImplementedError()
+
+    def submit_job(self, job):
         raise NotImplementedError()

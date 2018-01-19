@@ -67,6 +67,14 @@ else
     # Start docker
     eval $docker_run_cmd
 
+    # wait until container is running
+    until [ "`/usr/bin/docker inspect -f {{.State.Running}} $container_name`"=="true" ]; do
+        sleep 0.1;
+    done;
+    
+    # wait until container setup is complete
+    docker exec spark /bin/bash -c 'python $DOCKER_WORKING_DIR/wait_until_setup_complete.py'
+
     # Setup symbolic link for the docker logs
     docker_log=$(docker inspect --format='{{.LogPath}}' $container_name)
     mkdir -p $AZ_BATCH_TASK_WORKING_DIR/logs

@@ -44,6 +44,8 @@ DEFAULT_SPARK_CONF_SOURCE = os.path.join(os.getcwd(), '.aztk')
 DEFAULT_SPARK_CONF_DEST = os.path.join(ROOT_PATH, 'node_scripts', 'conf')
 DEFAULT_SPARK_JARS_SOURCE = os.path.join(os.getcwd(), '.aztk', 'jars')
 DEFAULT_SPARK_JARS_DEST = os.path.join(ROOT_PATH, 'node_scripts', 'jars')
+DEFAULT_SPARK_JOB_CONFIG = os.path.join(os.getcwd(), '.aztk', 'job.yaml')
+GLOBAL_SPARK_JOB_CONFIG = os.path.join(HOME_DIRECTORY_PATH, '.aztk', 'job.yaml')
 
 CUSTOM_SCRIPTS_DEST = os.path.join(ROOT_PATH, 'node_scripts', 'custom-scripts')
 

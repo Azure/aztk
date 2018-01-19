@@ -22,6 +22,8 @@ def setup_node():
     else:
         setup_as_worker()
         scripts.run_custom_scripts(is_master=False, is_worker=True)
+    
+    open("/tmp/setup_complete", 'a').close()
 
 
 def setup_as_master():

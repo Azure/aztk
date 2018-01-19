@@ -247,7 +247,7 @@ class SshConfig:
 
     def _read_config_file(self, path: str = aztk.utils.constants.DEFAULT_SSH_CONFIG_PATH):
         """
-            Reads the config file in the .aztk/ directory (.aztk/cluster.yaml)
+            Reads the config file in the .aztk/ directory (.aztk/ssh.yaml)
         """
         if not os.path.isfile(path):
             return
@@ -299,9 +299,8 @@ class SshConfig:
         """
             Merges fields with args object
         """
+        self._read_config_file(os.path.join(aztk.utils.constants.HOME_DIRECTORY_PATH, '.aztk', 'ssh.yaml'))
         self._read_config_file()
-        self._read_config_file(os.path.join(
-            aztk.utils.constants.HOME_DIRECTORY_PATH, '.aztk', 'ssh.yaml'))
         self._merge_dict(
             dict(
                 cluster_id=cluster_id,
@@ -324,6 +323,83 @@ class SshConfig:
         if self.username is None:
             raise aztk.error.AztkError(
                 "Please supply a username either in the ssh.yaml configuration file or with a parameter (--username)")
+
+class JobConfig():
+    def __init__(self):
+        self.id = None
+        self.applications = []
+        self.custom_scripts = None
+        self.spark_configuration = None
+        self.vm_size=None
+        self.docker_repo = None
+        self.max_dedicated_nodes = None
+        self.max_low_pri_nodes = None
+        self.spark_defaults_conf = None
+        self.spark_env_sh = None
+        self.core_site_xml = None
+
+    def _merge_dict(self, config):
+        config = config.get('job')
+
+        if config.get('id') is not None:
+            self.id = config['id']
+
+        cluster_configuration = config.get('cluster_configuration')
+        if cluster_configuration:
+            self.vm_size = cluster_configuration.get('vm_size')
+            self.docker_repo = cluster_configuration.get('docker_repo')
+            self.max_dedicated_nodes = cluster_configuration.get('size')
+            self.max_low_pri_nodes = cluster_configuration.get('size_low_pri')
+            self.custom_scripts = cluster_configuration.get('custom_scripts')
+
+        self.applications = config.get('applications')
+
+        spark_configuration = config.get('spark_configuration')
+        if spark_configuration:
+            self.spark_defaults_conf = self.__convert_to_path(spark_configuration.get('spark_defaults_conf'))
+            self.spark_env_sh = self.__convert_to_path(spark_configuration.get('spark_env_sh'))
+            self.core_site_xml = self.__convert_to_path(spark_configuration.get('core_site_xml'))
+
+    def __convert_to_path(self, str_path):
+        if str_path:
+            abs_path = os.path.abspath(os.path.expanduser(str_path))
+            if not os.path.exists(abs_path):
+                raise aztk.error.AztkError("Could not find file: {0}\nCheck your configuration file".format(str_path))
+            return abs_path
+
+    def _read_config_file(self, path: str = aztk.utils.constants.DEFAULT_SPARK_JOB_CONFIG):
+        """
+            Reads the Job config file in the .aztk/ directory (.aztk/job.yaml)
+        """
+        if not path or not os.path.isfile(path):
+            return
+
+        with open(path, 'r') as stream:
+            try:
+                config = yaml.load(stream)
+            except yaml.YAMLError as err:
+                raise aztk.error.AztkError(
+                    "Error in job.yaml: {0}".format(err))
+
+            if config is None:
+                return
+
+            self._merge_dict(config)
+
+    def merge(self, id, job_config_yaml=None):
+        self._read_config_file(aztk.utils.constants.GLOBAL_SPARK_JOB_CONFIG)
+        self._read_config_file(aztk.utils.constants.DEFAULT_SPARK_JOB_CONFIG)
+        self._read_config_file(job_config_yaml)
+        if id:
+            self.id = id
+
+        for entry in self.applications:
+            if entry['name'] is None:
+                raise aztk.error.AztkError(
+                    "Application specified with no name. Please verify your configuration in job.yaml")
+            if entry['application'] is None:
+                raise aztk.error.AztkError(
+                    "No path to application specified for {} in job.yaml".format(entry['name']))
 
 
 def load_aztk_spark_config():

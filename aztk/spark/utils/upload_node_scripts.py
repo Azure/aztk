@@ -1,6 +1,7 @@
 import fnmatch
 import io
 import os
+import datetime
 import logging
 import zipfile
 import yaml
@@ -64,10 +65,12 @@ def __create_zip():
     return zipf
 
 
-def __upload(blob_client):
+def __upload(blob_client, cluster_id):
     logging.debug("Uploading node scripts...")
+
     return helpers.upload_file_to_container(
-        container_name="spark-node-scripts",
+        container_name=cluster_id,
+        application_name="aztk-node-scripts",
         file_path=local_tmp_zipfile,
         blob_client=blob_client,
         use_full_path=False)
@@ -98,21 +101,24 @@ def __add_str_to_zip(zipf, payload, zipf_file_path=None):
     zipf.writestr(zipf_file_path, payload)
     return zipf
 
-def zip_scripts(blob_client, custom_scripts, spark_conf):
+def zip_scripts(blob_client, container_id, custom_scripts, spark_configuration):
     zipf = __create_zip()
     if custom_scripts:
         zipf = __add_custom_scripts(zipf, custom_scripts)
 
-    if spark_conf:
-        zipf = __add_file_to_zip(zipf, spark_conf.spark_defaults_conf, 'conf', binary=False)
-        zipf = __add_file_to_zip(zipf, spark_conf.spark_env_sh, 'conf', binary=False)
-        zipf = __add_file_to_zip(zipf, spark_conf.core_site_xml, 'conf', binary=False)
-        # add ssh keys for hdfs
-        zipf = __add_str_to_zip(zipf, spark_conf.ssh_key_pair['pub_key'], 'id_rsa.pub')
-        zipf = __add_str_to_zip(zipf, spark_conf.ssh_key_pair['priv_key'], 'id_rsa')
-        if spark_conf.jars:
-            for jar in spark_conf.jars:
+    if spark_configuration:
+        zipf = __add_file_to_zip(zipf, spark_configuration.spark_defaults_conf, 'conf', binary=False)
+        zipf = __add_file_to_zip(zipf, spark_configuration.spark_env_sh, 'conf', binary=False)
+        zipf = __add_file_to_zip(zipf, spark_configuration.core_site_xml, 'conf', binary=False)
+        # add ssh keys for passwordless ssh
+        zipf = __add_str_to_zip(zipf, spark_configuration.ssh_key_pair['pub_key'], 'id_rsa.pub')
+        zipf = __add_str_to_zip(zipf, spark_configuration.ssh_key_pair['priv_key'], 'id_rsa')
+        if spark_configuration.jars:
+            for jar in spark_configuration.jars:
                 zipf = __add_file_to_zip(zipf, jar, 'jars', binary=True)
 
+    # add helper file to node_scripts/submit/
+    zip_file_to_dir(file=os.path.join(constants.ROOT_PATH, 'aztk', 'utils', 'command_builder.py'), directory='', zipf=zipf, binary=False)
+
     zipf.close()
-    return __upload(blob_client)
+    return __upload(blob_client, container_id)

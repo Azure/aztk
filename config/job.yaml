@@ -1,0 +1,76 @@
+# Job Configuration
+#   An Aztk Job is a cluster and an array of Spark applications to run on that cluster
+#   AZTK Spark Jobs will automatically manage the lifecycle of the cluster
+#   For more information see the documentation at: https://github.com/Azure/aztk/blob/master/docs/70-jobs.md
+
+job:
+    id: 
+    cluster_configuration:
+        vm_size: standard_d2_v2
+        size: 2
+        size_low_pri: 0
+        docker_repo: # defaults to aztk/base:spark2.2.0
+        # custom_scripts:
+        #     - script: </path/to/script.sh or /path/to/script/directory/>
+        #       runOn: <master/worker/all-nodes>
+
+    spark_configuration:
+        spark_defaults_conf: .aztk/spark-defaults.conf
+        spark_env_sh: .aztk/spark-env.sh
+        core_site_xml: .aztk/core-site.xml
+
+    # an application maps directly to a spark-submit command
+    applications:
+      - name: # unique ID
+        application: # /path/to/application
+        application_args: 
+          - 
+        main_class: 
+        jars: 
+          - 
+        py_files: 
+          - 
+        files:
+          - 
+        driver_java_options: 
+        driver_library_path: 
+        driver_class_path: 
+        driver_memory: 
+        executor_memory: 
+        driver_cores: 
+        executor_cores: 
+      
+      - name: # unique ID
+        application: # /path/to/application
+        application_args: 
+          - 
+        main_class: 
+        jars: 
+          - 
+        py_files: 
+          - 
+        files:
+          - 
+        driver_java_options: 
+        driver_library_path: 
+        driver_class_path: 
+        driver_memory: 
+        executor_memory: 
+        driver_cores: 
+        executor_cores: 
+
+# # Functioning example, execute from the root of the repo
+# job:
+#   cluster_configuration:
+#     vm_size: standard_f2
+#     size: 3
+ 
+#   applications:
+#     - name: pipy100
+#       application: ./examples/src/main/python/pi.py
+#       application_args: 
+#         - 100
+#     - name: pipy200
+#       application: ./examples/src/main/python/pi.py
+#       application_args: 
+#         - 200

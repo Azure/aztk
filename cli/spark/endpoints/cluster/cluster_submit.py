@@ -119,7 +119,7 @@ def execute(args: typing.NamedTuple):
 
     spark_client.submit(
         cluster_id=args.cluster_id,
-        application = aztk.spark.models.Application(
+        application = aztk.spark.models.ApplicationConfiguration(
             name=args.name,
             application=args.app,
             application_args=args.app_args,

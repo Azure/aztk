@@ -23,13 +23,13 @@ def __docker_run_cmd(docker_repo: str = None, gpu_enabled: bool = False, file_mo
         cmd = CommandBuilder('docker run')
     cmd.add_option('--net', 'host')
     cmd.add_option('--name', constants.DOCKER_SPARK_CONTAINER_NAME)
-    cmd.add_option('-v', '/mnt/batch/tasks:/batch')
+    cmd.add_option('-v', '/mnt/batch/tasks:/mnt/batch/tasks')
 
     if file_mounts:
         for mount in file_mounts:
             cmd.add_option('-v', '{0}:{0}'.format(mount.mount_path))
 
-    cmd.add_option('-e', 'DOCKER_WORKING_DIR=/batch/startup/wd')
+    cmd.add_option('-e', 'DOCKER_WORKING_DIR=/mnt/batch/tasks/startup/wd')
     cmd.add_option('-e', 'AZ_BATCH_ACCOUNT_NAME=$AZ_BATCH_ACCOUNT_NAME')
     cmd.add_option('-e', 'BATCH_ACCOUNT_KEY=$BATCH_ACCOUNT_KEY')
     cmd.add_option('-e', 'BATCH_SERVICE_URL=$BATCH_SERVICE_URL')
@@ -47,6 +47,8 @@ def __docker_run_cmd(docker_repo: str = None, gpu_enabled: bool = False, file_mo
         '-e', 'AZ_BATCH_NODE_IS_DEDICATED=$AZ_BATCH_NODE_IS_DEDICATED')
     cmd.add_option('-e', 'SPARK_WEB_UI_PORT=$SPARK_WEB_UI_PORT')
     cmd.add_option('-e', 'SPARK_WORKER_UI_PORT=$SPARK_WORKER_UI_PORT')
+    cmd.add_option('-e', 'SPARK_CONTAINER_NAME=$SPARK_CONTAINER_NAME')
+    cmd.add_option('-e', 'SPARK_SUBMIT_LOGS_FILE=$SPARK_SUBMIT_LOGS_FILE')
     cmd.add_option('-e', 'SPARK_JUPYTER_PORT=$SPARK_JUPYTER_PORT')
     cmd.add_option('-e', 'SPARK_JOB_UI_PORT=$SPARK_JOB_UI_PORT')
     cmd.add_option('-p', '8080:8080')       # Spark Master UI
@@ -64,8 +66,8 @@ def __docker_run_cmd(docker_repo: str = None, gpu_enabled: bool = False, file_mo
     cmd.add_option('-p', '50075:50075')     # DataNode WebUI
     cmd.add_option('-p', '50090:50090')     # Secondary NameNode http address
     cmd.add_option('-d', docker_repo)
-    cmd.add_argument('/bin/bash /batch/startup/wd/docker_main.sh')
-
+    cmd.add_argument('/bin/bash /mnt/batch/tasks/startup/wd/docker_main.sh')
+       
     return cmd.to_str()
 
 def __get_docker_credentials(spark_client):
@@ -178,6 +180,9 @@ def generate_cluster_start_task(
     spark_jupyter_port = constants.DOCKER_SPARK_JUPYTER_PORT
     spark_job_ui_port = constants.DOCKER_SPARK_JOB_UI_PORT
     spark_rstudio_server_port = constants.DOCKER_SPARK_RSTUDIO_SERVER_PORT
+    
+    spark_container_name = constants.DOCKER_SPARK_CONTAINER_NAME
+    spark_submit_logs_file = constants.SPARK_SUBMIT_LOGS_FILE
 
     # TODO use certificate
     environment_settings = __get_secrets_env(spark_client) + [
@@ -189,6 +194,10 @@ def generate_cluster_start_task(
             name="SPARK_JUPYTER_PORT", value=spark_jupyter_port),
         batch_models.EnvironmentSetting(
             name="SPARK_JOB_UI_PORT", value=spark_job_ui_port),
+        batch_models.EnvironmentSetting(
+            name="SPARK_CONTAINER_NAME", value=spark_container_name),
+        batch_models.EnvironmentSetting(
+            name="SPARK_SUBMIT_LOGS_FILE", value=spark_submit_logs_file),
         batch_models.EnvironmentSetting(
             name="SPARK_RSTUDIO_SERVER_PORT", value=spark_rstudio_server_port),
     ] + __get_docker_credentials(spark_client)

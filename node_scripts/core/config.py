@@ -2,6 +2,7 @@ import os
 import re
 import logging
 import azure.batch.batch_service_client as batch
+import azure.storage.blob as blob
 import azure.batch.batch_auth as batchauth
 from azure.common.credentials import ServicePrincipalCredentials
 from azure.mgmt.batch import BatchManagementClient
@@ -11,9 +12,9 @@ RESOURCE_ID_PATTERN = re.compile('^/subscriptions/(?P<subscription>[^/]+)'
                                  '/providers/[^/]+'
                                  '/[^/]+Accounts/(?P<account>[^/]+)$')
 
-account_name = os.environ["AZ_BATCH_ACCOUNT_NAME"]
-account_key = os.environ["BATCH_ACCOUNT_KEY"]
-service_url = os.environ["BATCH_SERVICE_URL"]
+batch_account_name = os.environ["AZ_BATCH_ACCOUNT_NAME"]
+batch_account_key = os.environ["BATCH_ACCOUNT_KEY"]
+batch_service_url = os.environ["BATCH_SERVICE_URL"]
 tenant_id = os.environ["SP_TENANT_ID"]
 client_id = os.environ["SP_CLIENT_ID"]
 credential = os.environ["SP_CREDENTIAL"]
@@ -29,12 +30,23 @@ spark_worker_ui_port = os.environ["SPARK_WORKER_UI_PORT"]
 spark_jupyter_port = os.environ["SPARK_JUPYTER_PORT"]
 spark_job_ui_port = os.environ["SPARK_JOB_UI_PORT"]
 
-def get_client() -> batch.BatchServiceClient:
+storage_account_name = os.environ["STORAGE_ACCOUNT_NAME"]
+storage_account_key = os.environ["STORAGE_ACCOUNT_KEY"]
+storage_account_suffix = os.environ["STORAGE_ACCOUNT_SUFFIX"]
+
+def get_blob_client() -> blob.BlockBlobService:
+    return blob.BlockBlobService(
+        account_name=storage_account_name,
+        account_key=storage_account_key,
+        endpoint_suffix=storage_account_suffix)
+
+
+def get_batch_client() -> batch.BatchServiceClient:
     if not batch_resource_id:
-        base_url=service_url
+        base_url = batch_service_url
         credentials = batchauth.SharedKeyCredentials(
-            account_name,
-            account_key)
+            batch_account_name,
+            batch_account_key)
     else:
         credentials = ServicePrincipalCredentials(
             client_id=client_id,
@@ -53,9 +65,10 @@ def get_client() -> batch.BatchServiceClient:
 
     return batch.BatchServiceClient(credentials, base_url=base_url)
 
-batch_client = get_client()
+batch_client = get_batch_client()
+blob_client = get_blob_client()
 
 logging.info("Pool id is %s", pool_id)
 logging.info("Node id is %s", node_id)
-logging.info("Batch account name %s", account_name)
+logging.info("Batch account name %s", batch_account_name)
 logging.info("Is dedicated %s", is_dedicated)
