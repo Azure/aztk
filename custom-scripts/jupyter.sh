@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # This custom script only works on images where jupyter is pre-installed on the Docker image
-# 
+#
 # This custom script has been tested to work on the following docker images:
 #  - aztk/python:spark2.2.0-python3.6.2-base
 #  - aztk/python:spark2.2.0-python3.6.2-gpu
@@ -9,6 +9,8 @@
 #  - aztk/python:spark2.1.0-python3.6.2-gpu
 
 if  [ "$IS_MASTER" = "1" ]; then
+    pip install jupyter --upgrade
+    pip install notebook --upgrade
 
     PYSPARK_DRIVER_PYTHON="/.pyenv/versions/${USER_PYTHON_VERSION}/bin/jupyter"
     JUPYTER_KERNELS="/.pyenv/versions/${USER_PYTHON_VERSION}/share/jupyter/kernels"
@@ -26,7 +28,7 @@ if  [ "$IS_MASTER" = "1" ]; then
     # remove existing kernels
     rm -rf $JUPYTER_KERNELS/*
 
-    # set up jupyter to use pyspark 
+    # set up jupyter to use pyspark
     mkdir $JUPYTER_KERNELS/pyspark
     touch $JUPYTER_KERNELS/pyspark/kernel.json
     cat << EOF > $JUPYTER_KERNELS/pyspark/kernel.json
