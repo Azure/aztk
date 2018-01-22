@@ -117,6 +117,7 @@ def start_spark_worker():
 
 def copyfile(src, dest):
     try:
+        os.makedirs(dest, exist_ok=True)
         shutil.copyfile(src, dest)
         file_stat = os.stat(dest)
         os.chmod(dest, file_stat.st_mode | 0o777)
@@ -177,7 +178,7 @@ def copy_jars():
             src = os.path.join(spark_default_path_src, jar)
             dest = os.path.join(spark_default_path_dest, jar)
             print("copy {} to {}".format(src, dest))
-            shutil.copyfile(src, dest)
+            copyfile(src, dest)
     except Exception as e:
         print("Failed to copy jar files with error:")
         print(e)
