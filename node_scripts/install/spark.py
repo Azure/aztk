@@ -117,7 +117,7 @@ def start_spark_worker():
 
 def copyfile(src, dest):
     try:
-        os.makedirs(dest, exist_ok=True)
+        os.makedirs(os.path.dirname(dest), exist_ok=True)
         shutil.copyfile(src, dest)
         file_stat = os.stat(dest)
         os.chmod(dest, file_stat.st_mode | 0o777)
