@@ -47,7 +47,7 @@ RUN apt-get clean \
     && eval "$(pyenv init -)" \
     && echo 'eval "$(pyenv init -)"' >> ~/.bashrc \
     # install aztk required python version 
-    && pyenv install -f $AZTK_PYTHON_VERSION \
+    && env PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install -f $AZTK_PYTHON_VERSION \
     && pyenv global $AZTK_PYTHON_VERSION \
     # install spark & setup symlink to SPARK_HOME
     && curl https://d3kbcqa49mib13.cloudfront.net/$SPARK_VERSION_KEY.tgz | tar xvz -C /home \
