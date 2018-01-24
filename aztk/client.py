@@ -107,9 +107,6 @@ class Client:
             :return pool: CloudPool, nodes: ComputeNodePaged
         """
         pool = self.batch_client.pool.get(cluster_id)
-        if pool.state is batch_models.PoolState.deleting:
-            return models.Cluster(pool)
-
         nodes = self.batch_client.compute_node.list(pool_id=cluster_id)
         return pool, nodes
 
