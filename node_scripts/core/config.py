@@ -6,6 +6,10 @@ import azure.storage.blob as blob
 import azure.batch.batch_auth as batchauth
 from azure.common.credentials import ServicePrincipalCredentials
 from azure.mgmt.batch import BatchManagementClient
+from azure.mgmt.storage import StorageManagementClient
+from azure.storage import CloudStorageAccount
+
+
 
 RESOURCE_ID_PATTERN = re.compile('^/subscriptions/(?P<subscription>[^/]+)'
                                  '/resourceGroups/(?P<resourcegroup>[^/]+)'
@@ -35,11 +39,26 @@ storage_account_key = os.environ["STORAGE_ACCOUNT_KEY"]
 storage_account_suffix = os.environ["STORAGE_ACCOUNT_SUFFIX"]
 
 def get_blob_client() -> blob.BlockBlobService:
-    return blob.BlockBlobService(
-        account_name=storage_account_name,
-        account_key=storage_account_key,
-        endpoint_suffix=storage_account_suffix)
-
+    if not storage_resource_id:
+        return blob.BlockBlobService(
+            account_name=storage_account_name,
+            account_key=storage_account_key,
+            endpoint_suffix=storage_account_suffix)
+    else:
+        credentials = ServicePrincipalCredentials(
+            client_id=client_id,
+            secret=credential,
+            tenant=tenant_id,
+            resource='https://management.core.windows.net/')
+        m = RESOURCE_ID_PATTERN.match(storage_resource_id)
+        accountname = m.group('account')
+        subscription = m.group('subscription')
+        resourcegroup = m.group('resourcegroup')
+        mgmt_client = StorageManagementClient(credentials, subscription)
+        key = mgmt_client.storage_accounts.list_keys(resource_group_name=resourcegroup,
+                                                     account_name=accountname).keys[0].value
+        storage_client = CloudStorageAccount(accountname, key)
+        return storage_client.create_block_blob_service()
 
 def get_batch_client() -> batch.BatchServiceClient:
     if not batch_resource_id:
