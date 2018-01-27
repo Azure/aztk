@@ -10,6 +10,7 @@ from aztk.spark.helpers import submit as cluster_submit_helper
 from aztk.spark.helpers import job_submission as job_submit_helper
 from aztk.spark.helpers import get_log as get_log_helper
 from aztk.spark.utils import upload_node_scripts, util
+import yaml
 
 
 class Client(BaseClient):
@@ -24,7 +25,8 @@ class Client(BaseClient):
             zip_resource_files = upload_node_scripts.zip_scripts(self.blob_client,
                                                                  cluster_conf.cluster_id,
                                                                  cluster_conf.custom_scripts,
-                                                                 cluster_conf.spark_configuration)
+                                                                 cluster_conf.spark_configuration,
+                                                                 cluster_conf.user_configuration)
 
             start_task = create_cluster_helper.generate_cluster_start_task(self,
                                                                            zip_resource_files,
@@ -137,7 +139,7 @@ class Client(BaseClient):
             return task.state._value_
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
-    
+
     '''
         job submission
     '''
@@ -180,7 +182,7 @@ class Client(BaseClient):
             else:
                 raise error.AztkError("Jobs do not support both dedicated and low priority nodes." \
                                       " JobConfiguration fields max_dedicated_nodes and max_low_pri_nodes are mutually exclusive values.")
-            
+
             job = self.__submit_job(
                 job_configuration=job_configuration,
                 start_task=start_task,

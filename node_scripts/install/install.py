@@ -1,10 +1,12 @@
 import os
 from core import config
-from install import pick_master, spark, scripts
+from install import pick_master, spark, scripts, create_user
 
 
 def setup_node():
     client = config.batch_client
+
+    create_user.create_user(batch_client=client)
 
     spark.setup_conf()
 

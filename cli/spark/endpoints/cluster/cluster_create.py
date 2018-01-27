@@ -53,13 +53,6 @@ def execute(args: typing.NamedTuple):
         password=args.password,
         docker_repo=args.docker_repo)
 
-    print_cluster_conf(cluster_conf)
-
-    spinner = utils.Spinner()
-
-    log.info("Please wait while your cluster is being provisioned")
-    spinner.start()
-
     if cluster_conf.custom_scripts:
         custom_scripts = []
         for custom_script in cluster_conf.custom_scripts:
@@ -86,6 +79,23 @@ def execute(args: typing.NamedTuple):
     else:
         file_shares = None
 
+    if cluster_conf.username:
+        ssh_key, password = utils.get_ssh_key_or_prompt(spark_client.secrets_config.ssh_pub_key,
+                                                        cluster_conf.username,
+                                                        cluster_conf.password,
+                                                        spark_client.secrets_config)
+        user_conf = aztk.spark.models.UserConfiguration(
+            username=cluster_conf.username,
+            password=password,
+            ssh_key=ssh_key
+        )
+    else:
+        user_conf = None
+
+    print_cluster_conf(cluster_conf)
+    spinner = utils.Spinner()
+    spinner.start()
+
     # create spark cluster
     cluster = spark_client.create_cluster(
         aztk.spark.models.ClusterConfiguration(
@@ -97,23 +107,11 @@ def execute(args: typing.NamedTuple):
             custom_scripts=custom_scripts,
             file_shares=file_shares,
             docker_repo=cluster_conf.docker_repo,
-            spark_configuration=load_aztk_spark_config()
+            spark_configuration=load_aztk_spark_config(),
+            user_configuration=user_conf
         ),
         wait=cluster_conf.wait
     )
-
-    if cluster_conf.username:
-        ssh_key = spark_client.secrets_config.ssh_pub_key
-
-        ssh_key, password = utils.get_ssh_key_or_prompt(
-            ssh_key, cluster_conf.username, cluster_conf.password, spark_client.secrets_config)
-
-        spark_client.create_user(
-            cluster_id=cluster_conf.uid,
-            username=cluster_conf.username,
-            password=password,
-            ssh_key=ssh_key
-        )
 
     spinner.stop()
 

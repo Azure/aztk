@@ -69,7 +69,7 @@ aztk spark cluster create --id my_cluster --size 5 --vm-size standard_d2_v2
 - The `--vm-size` argument must be the official SKU name which usually come in the form: "standard_d2_v2"
 - You can create [low-priority VMs](https://docs.microsoft.com/en-us/azure/batch/batch-low-pri-vms) at an 80% discount by using `--size-low-pri` instead of `--size`
 - By default, AZTK runs Spark 2.2.0 on an Ubuntu16.04 Docker image. More info [here](/docker-image)
-- By default, AZTK will create a user (with the username **spark**) for your cluster if the argument `--wait` is true
+- By default, AZTK will create a user (with the username **spark**) for your cluster
 - The cluster id (`--id`) can only contain alphanumeric characters including hyphens and underscores, and cannot contain more than 64 characters.
 - By default, you cannot create clusters of more than 20 cores in total. Visit [this page](https://docs.microsoft.com/en-us/azure/batch/batch-quota-limit#view-batch-quotas) to request a core quota increase.
 
