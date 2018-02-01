@@ -332,6 +332,7 @@ def print_applications(applications):
                 print_format.format(
                     name,
                     "scheduling",
+                    "-",
                     "-"
                 )
             )
@@ -343,7 +344,7 @@ def print_applications(applications):
                     application.name,
                     application.state,
                     utc_to_local(application.state_transition_time),
-                    application.exit_code
+                    application.exit_code or "-"
                 )
             )
     if warn_scheduling:
