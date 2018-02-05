@@ -56,7 +56,8 @@ def execute(args: typing.NamedTuple):
         vm_size=job_conf.vm_size,
         docker_repo=job_conf.docker_repo,
         max_dedicated_nodes=job_conf.max_dedicated_nodes,
-        max_low_pri_nodes=job_conf.max_low_pri_nodes
+        max_low_pri_nodes=job_conf.max_low_pri_nodes,
+        subnet_id=job_conf.subnet_id
     )
 
     #TODO: utils.print_job_conf(job_configuration)

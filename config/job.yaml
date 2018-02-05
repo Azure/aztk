@@ -9,6 +9,7 @@ job:
         vm_size: standard_d2_v2
         size: 2
         size_low_pri: 0
+        subnet_id: 
         docker_repo: # defaults to aztk/base:spark2.2.0
         # custom_scripts:
         #     - script: </path/to/script.sh or /path/to/script/directory/>

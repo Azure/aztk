@@ -333,6 +333,7 @@ class JobConfig():
         self.spark_defaults_conf = None
         self.spark_env_sh = None
         self.core_site_xml = None
+        self.subnet_id = None
 
     def _merge_dict(self, config):
         config = config.get('job')
@@ -347,6 +348,7 @@ class JobConfig():
             self.max_dedicated_nodes = cluster_configuration.get('size')
             self.max_low_pri_nodes = cluster_configuration.get('size_low_pri')
             self.custom_scripts = cluster_configuration.get('custom_scripts')
+            self.subnet_id = cluster_configuration.get('subnet_id')
 
         self.applications = config.get('applications')
 

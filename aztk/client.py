@@ -179,6 +179,12 @@ class Client:
             helpers.select_latest_verified_vm_image_with_node_agent_sku(
                 vm_image_model.publisher, vm_image_model.offer, vm_image_model.sku, self.batch_client)
 
+        # set up subnet if necessary
+        network_conf = None
+        if job_configuration.subnet_id:
+            network_conf = batch_models.NetworkConfiguration(
+                subnet_id=job_configuration.subnet_id)
+
         # set up a schedule for a recurring job
         auto_pool_specification = batch_models.AutoPoolSpecification(
             pool_lifetime_option=batch_models.PoolLifetimeOption.job_schedule,
@@ -195,6 +201,7 @@ class Client:
                 auto_scale_evaluation_interval=timedelta(minutes=5),
                 start_task=start_task,
                 enable_inter_node_communication=True,
+                network_configuration=network_conf,
                 max_tasks_per_node=1,
                 metadata=[
                     batch_models.MetadataItem(

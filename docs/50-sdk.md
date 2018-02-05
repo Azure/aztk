@@ -597,7 +597,8 @@ Find some samples and getting stated tutorial in the `examples/sdk/` directory o
             spark_configuration=None,
             vm_size=None,
             docker_repo=None,
-            max_dedicated_nodes=None)`
+            max_dedicated_nodes=None,
+            subnet_id=None)`
         
 
     Fields:
@@ -610,7 +611,7 @@ Find some samples and getting stated tutorial in the `examples/sdk/` directory o
         - gpu_enabled: str
         - docker_repo: str
         - max_dedicated_nodes: str
-
+        - subnet_id: str
 
 
 - `Job`
