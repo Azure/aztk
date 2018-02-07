@@ -27,6 +27,11 @@ By default, you cannot create clusters of more than 20 cores in total. Visit [th
 #### Low priority nodes
 You can create your cluster with [low-priority](https://docs.microsoft.com/en-us/azure/batch/batch-low-pri-vms) VMs at an 80% discount by using `--size-low-pri` instead of `--size`. Note that these are great for experimental use, but can be taken away at any time. We recommend against this option when doing long running jobs or for critical workloads.
 
+#### Mixed Mode
+You can create clusters with a mixed of [low-priority](https://docs.microsoft.com/en-us/azure/batch/batch-low-pri-vms) and dedicated VMs to reach the optimal balance of price and availability. In Mixed Mode, your cluster will have both dedicated instances and low priority instances. To mimize the potential impact on your Spark workloads, the Spark master node will always be provisioned on one of the dedicated nodes while each of the low priority nodes will be Spark workers.
+
+Please note, to use Mixed Mode clusters, you need to authenticate using Azure Active Directory (AAD) by configuring the Service Principal in `.aztk/secrets.yaml`. You also need to create a [Virtual Network \(VNET\)](https://azure.microsoft.com/en-us/services/virtual-network/), and provide the resource ID to a Subnet within the VNET in your ./aztk/cluster.yaml` configuration file.
+
 #### Setting your Spark and/or Python versions
 By default, the Azure Distributed Data Engineering Toolkit will use **Spark v2.2.0** and **Python v3.5.4**. However, you can set your Spark and/or Python versions by [configuring the base Docker image used by this package](./12-docker-image.md).
 

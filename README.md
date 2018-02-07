@@ -9,6 +9,7 @@ This toolkit is built on top of Azure Batch but does not require any Azure Batch
 - Run Spark on a GPU enabled cluster
 - Users can bring their own Docker image
 - Ability to use low-priority VMs for an 80% discount
+- Mixed Mode clusters that use both low-priority and dedicated VMs
 - Built in support for Azure Blob Storage and Azure Data Lake connection
 - [Tailored pythonic experience with PySpark, Jupyter, and Anaconda](https://github.com/Azure/aztk/wiki/PySpark-on-Azure-with-AZTK)
 - [Tailored R experience with SparklyR, RStudio-Server, and Tidyverse](https://github.com/Azure/aztk/wiki/SparklyR-on-Azure-with-AZTK)

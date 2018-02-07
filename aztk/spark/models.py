@@ -91,6 +91,7 @@ class ClusterConfiguration(aztk.models.ClusterConfiguration):
                         )
         self.spark_configuration = spark_configuration
         self.gpu_enabled = helpers.is_gpu_enabled(vm_size)
+        self.mixed_mode = True if (self.vm_count > 0) and (self.vm_low_pri_count > 0) else False
 
 
 class SecretsConfiguration(aztk.models.SecretsConfiguration):

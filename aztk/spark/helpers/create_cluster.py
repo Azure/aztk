@@ -13,7 +13,7 @@ POOL_ADMIN_USER_IDENTITY = batch_models.UserIdentity(
 '''
 Cluster create helper methods
 '''
-def __docker_run_cmd(docker_repo: str = None, gpu_enabled: bool = False, file_mounts = []) -> str:
+def __docker_run_cmd(docker_repo: str = None, gpu_enabled: bool = False, file_mounts = [], mixed_mode = False) -> str:
     """
         Build the docker run command by setting up the environment variables
     """
@@ -45,6 +45,7 @@ def __docker_run_cmd(docker_repo: str = None, gpu_enabled: bool = False, file_mo
     cmd.add_option('-e', 'AZ_BATCH_NODE_ID=$AZ_BATCH_NODE_ID')
     cmd.add_option(
         '-e', 'AZ_BATCH_NODE_IS_DEDICATED=$AZ_BATCH_NODE_IS_DEDICATED')
+    cmd.add_option('-e', 'MIXED_MODE={}'.format(mixed_mode))
     cmd.add_option('-e', 'SPARK_WEB_UI_PORT=$SPARK_WEB_UI_PORT')
     cmd.add_option('-e', 'SPARK_WORKER_UI_PORT=$SPARK_WORKER_UI_PORT')
     cmd.add_option('-e', 'SPARK_CONTAINER_NAME=$SPARK_CONTAINER_NAME')
@@ -119,9 +120,10 @@ def __get_secrets_env(spark_client):
 
 
 def __cluster_install_cmd(zip_resource_file: batch_models.ResourceFile,
-                            gpu_enabled: bool,
-                            docker_repo: str = None,
-                            file_mounts = []):
+                          gpu_enabled: bool,
+                          docker_repo: str = None,
+                          file_mounts = [],
+                          mixed_mode: bool = False):
     """
         For Docker on ubuntu 16.04 - return the command line
         to be run on the start task of the pool to setup spark.
@@ -156,7 +158,7 @@ def __cluster_install_cmd(zip_resource_file: batch_models.ResourceFile,
             constants.DOCKER_SPARK_CONTAINER_NAME,
             gpu_enabled,
             docker_repo,
-            __docker_run_cmd(docker_repo, gpu_enabled, file_mounts)),
+            __docker_run_cmd(docker_repo, gpu_enabled, file_mounts, mixed_mode)),
     ]
 
     commands = shares + setup
@@ -167,7 +169,8 @@ def generate_cluster_start_task(
         zip_resource_file: batch_models.ResourceFile,
         gpu_enabled: bool,
         docker_repo: str = None,
-        file_shares: List[aztk_models.FileShare] = None):
+        file_shares: List[aztk_models.FileShare] = None,
+        mixed_mode: bool = False):
     """
         This will return the start task object for the pool to be created.
         :param cluster_id str: Id of the cluster(Used for uploading the resource files)
@@ -203,7 +206,7 @@ def generate_cluster_start_task(
     ] + __get_docker_credentials(spark_client)
 
     # start task command
-    command = __cluster_install_cmd(zip_resource_file, gpu_enabled, docker_repo, file_shares)
+    command = __cluster_install_cmd(zip_resource_file, gpu_enabled, docker_repo, file_shares, mixed_mode)
 
     return batch_models.StartTask(
         command_line=helpers.wrap_commands_in_shell(command),

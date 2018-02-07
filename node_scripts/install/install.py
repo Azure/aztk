@@ -1,6 +1,7 @@
 import os
 from core import config
 from install import pick_master, spark, scripts, create_user
+import wait_until_master_selected
 
 
 def setup_node():
@@ -10,7 +11,11 @@ def setup_node():
 
     spark.setup_conf()
 
-    is_master = pick_master.find_master(client)
+    if os.environ['AZ_BATCH_NODE_IS_DEDICATED'] == "true" or os.environ['MIXED_MODE'] == "False":
+        is_master = pick_master.find_master(client)
+    else:
+        is_master = False
+        wait_until_master_selected.main()
 
     master_node_id = pick_master.get_master_node_id(config.batch_client.pool.get(config.pool_id))
     master_node = config.batch_client.compute_node.get(config.pool_id, master_node_id)

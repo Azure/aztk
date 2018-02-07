@@ -10,14 +10,10 @@ from cli import utils, config
 def setup_parser(parser: argparse.ArgumentParser):
     parser.add_argument('--id', dest='cluster_id',
                         help='The unique id of your spark cluster')
-
-    # Make --size and --size-low-pri mutually exclusive until there is a fix for
-    # having clusters with mixed priority types
-    size_group = parser.add_mutually_exclusive_group()
-    size_group.add_argument('--size', type=int,
-                            help='Number of vms in your cluster')
-    size_group.add_argument('--size-low-pri', type=int,
-                            help='Number of low priority vms in your cluster')
+    parser.add_argument('--size', type=int,
+                        help='Number of vms in your cluster')
+    parser.add_argument('--size-low-pri', type=int,
+                        help='Number of low priority vms in your cluster')
     parser.add_argument('--vm-size',
                         help='VM size for nodes in your cluster')
     parser.add_argument('--username',
@@ -43,6 +39,7 @@ def execute(args: typing.NamedTuple):
     cluster_conf = ClusterConfig()
 
     cluster_conf.merge(
+        spark_client=spark_client,
         uid=args.cluster_id,
         size=args.size,
         size_low_pri=args.size_low_pri,

@@ -32,7 +32,8 @@ class Client(BaseClient):
                                                                            zip_resource_files,
                                                                            cluster_conf.gpu_enabled,
                                                                            cluster_conf.docker_repo,
-                                                                           cluster_conf.file_shares)
+                                                                           cluster_conf.file_shares,
+                                                                           cluster_conf.mixed_mode)
 
             software_metadata_key = "spark"
 
