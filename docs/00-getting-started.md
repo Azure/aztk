@@ -30,6 +30,14 @@ The minimum requirements to get started with this package are:
     ```
     This will create a *.aztk* folder with preset configuration files in your current working directory.
 
+    If you would like to initialize your AZTK clusters with a specific development toolset, please pass one of the following flags:
+    ```bash
+    aztk spark init --python
+    aztk spark init --R
+    aztk spark init --scala
+    aztk spark init --java
+    ```
+
     If you wish to have global configuration files that will be read regardless of your current working directory, run:
     ```bash
     aztk spark init --global
