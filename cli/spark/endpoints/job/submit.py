@@ -3,7 +3,7 @@ import typing
 import time
 import aztk.spark
 from cli import config, utils, log
-from cli.config import JobConfig
+from cli.config import JobConfig, load_aztk_spark_config
 
 
 def setup_parser(parser: argparse.ArgumentParser):
@@ -43,11 +43,17 @@ def execute(args: typing.NamedTuple):
                 executor_cores=application.get('executor_cores')
             )
         )
-    spark_configuration = aztk.spark.models.SparkConfiguration(
-        spark_defaults_conf=job_conf.spark_defaults_conf,
-        spark_env_sh=job_conf.spark_env_sh,
-        core_site_xml=job_conf.core_site_xml
-    )
+
+    # by default, load spark configuration files in .aztk/
+    spark_configuration = config.load_aztk_spark_config()
+    # overwrite with values in job_conf if they exist
+    if job_conf.spark_defaults_conf:
+        spark_configuration.spark_defaults_conf = job_conf.spark_defaults_conf
+    if job_conf.spark_env_sh:
+        spark_configuration.spark_env_sh = job_conf.spark_env_sh
+    if job_conf.core_site_xml:
+        spark_configuration.core_site_xml = job_conf.core_site_xml
+
     job_configuration = aztk.spark.models.JobConfiguration(
         id=job_conf.id,
         applications=aztk_applications,
