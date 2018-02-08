@@ -18,7 +18,8 @@ _STANDARD_ERROR_FILE_NAME = 'stderr.txt'
 
 
 def is_gpu_enabled(vm_size):
-    return bool(re.search('nv|nc', vm_size))
+    return bool(re.search('nv|nc', vm_size, flags=re.IGNORECASE))
+
 
 def get_cluster(cluster_id, batch_client):
     pool = batch_client.pool.get(cluster_id)
