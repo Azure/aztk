@@ -3,8 +3,7 @@ import yaml
 import typing
 from cli import log
 import aztk.spark
-from aztk.models import ServicePrincipalConfiguration, SharedKeyConfiguration, DockerConfiguration
-from aztk.spark.models import SecretsConfiguration
+from aztk.spark.models import SecretsConfiguration, ServicePrincipalConfiguration, SharedKeyConfiguration, DockerConfiguration, ClusterConfiguration, UserConfiguration
 
 
 def load_aztk_screts() -> SecretsConfiguration:
@@ -114,125 +113,68 @@ def _merge_secrets_dict(secrets: SecretsConfiguration, secrets_config):
         secrets.ssh_pub_key = default_config.get('ssh_pub_key')
 
 
-class ClusterConfig:
+def read_cluster_config(path: str = aztk.utils.constants.DEFAULT_CLUSTER_CONFIG_PATH) -> ClusterConfiguration:
+    """
+        Reads the config file in the .aztk/ directory (.aztk/cluster.yaml)
+    """
+    if not os.path.isfile(path):
+        return
 
-    def __init__(self):
-        self.uid = None
-        self.vm_size = None
-        self.size = 0
-        self.size_low_pri = 0
-        self.subnet_id = None
-        self.username = None
-        self.password = None
-        self.custom_scripts = None
-        self.file_shares = None
-        self.docker_repo = None
-        self.wait = None
-        self.mixed_mode = False
+    with open(path, 'r') as stream:
+        try:
+            config_dict = yaml.load(stream)
+        except yaml.YAMLError as err:
+            raise aztk.error.AztkError(
+                "Error in cluster.yaml: {0}".format(err))
 
-    def _read_config_file(self, path: str = aztk.utils.constants.DEFAULT_CLUSTER_CONFIG_PATH):
-        """
-            Reads the config file in the .aztk/ directory (.aztk/cluster.yaml)
-        """
-        if not os.path.isfile(path):
+        if config_dict is None:
             return
 
-        with open(path, 'r') as stream:
-            try:
-                config = yaml.load(stream)
-            except yaml.YAMLError as err:
-                raise aztk.error.AztkError(
-                    "Error in cluster.yaml: {0}".format(err))
+        return cluster_config_from_dict(config_dict)
 
-            if config is None:
-                return
+def cluster_config_from_dict(config: dict):
+    output = ClusterConfiguration()
+    wait = False
+    if config.get('id') is not None:
+        output.cluster_id = config['id']
 
-            self._merge_dict(config)
+    if config.get('vm_size') is not None:
+        output.vm_size = config['vm_size']
 
-    def _merge_dict(self, config):
-        if config.get('id') is not None:
-            self.uid = config['id']
+    if config.get('size'):
+        output.vm_count = config['size']
+        output.vm_low_pri_count = 0
 
-        if config.get('vm_size') is not None:
-            self.vm_size = config['vm_size']
+    if config.get('size_low_pri'):
+        output.vm_low_pri_count = config['size_low_pri']
+        output.vm_count = 0
 
-        if config.get('size') is not None:
-            self.size = config['size']
+    if config.get('subnet_id') is not None:
+        output.subnet_id = config['subnet_id']
 
-        if config.get('size_low_pri') is not None:
-            self.size_low_pri = config['size_low_pri']
-
-        if config.get('subnet_id') is not None:
-            self.subnet_id = config['subnet_id']
-
-        if config.get('username') is not None:
-            self.username = config['username']
-
-        if config.get('password') is not None:
-            self.password = config['password']
-
-        if config.get('custom_scripts') not in [[None], None]:
-            self.custom_scripts = config['custom_scripts']
-
-        if config.get('azure_files') not in [[None], None]:
-            self.file_shares = config['azure_files']
-
-        if config.get('docker_repo') is not None:
-            self.docker_repo = config['docker_repo']
-
-        if config.get('wait') is not None:
-            self.wait = config['wait']
-
-    def merge(self, spark_client, uid, username, size, size_low_pri, vm_size, subnet_id, password, wait, docker_repo):
-        """
-            Reads configuration file (cluster.yaml), merges with command line parameters,
-            checks for errors with configuration
-        """
-        self._read_config_file(os.path.join(
-            aztk.utils.constants.HOME_DIRECTORY_PATH, '.aztk', 'cluster.yaml'))
-        self._read_config_file()
-
-        self._merge_dict(
-            dict(
-                id=uid,
-                username=username,
-                size=size,
-                size_low_pri=size_low_pri,
-                vm_size=vm_size,
-                subnet_id=subnet_id,
-                password=password,
-                wait=wait,
-                custom_scripts=None,
-                docker_repo=docker_repo
-            )
+    if config.get('username') is not None:
+        output.user_configuration = UserConfiguration(
+            username=config['username']
         )
 
-        if self.uid is None:
-            raise aztk.error.AztkError(
-                "Please supply an id for the cluster with a parameter (--id)")
+        if config.get('password') is not None:
+            output.user_configuration.password = config['password']
 
-        if self.size == 0 and self.size_low_pri == 0:
-            raise aztk.error.AztkError(
-                "Please supply a valid (greater than 0) size or size_low_pri value either in the cluster.yaml configuration file or with a parameter (--size or --size-low-pri)")
+    if config.get('custom_scripts') not in [[None], None]:
+        output.custom_scripts = config['custom_scripts']
 
-        if self.vm_size is None:
-            raise aztk.error.AztkError(
-                "Please supply a vm_size in either the cluster.yaml configuration file or with a parameter (--vm-size)")
+    if config.get('azure_files') not in [[None], None]:
+        output.file_shares = config['azure_files']
 
-        if self.wait is None:
-            raise aztk.error.AztkError(
-                "Please supply a value for wait in either the cluster.yaml configuration file or with a parameter (--wait or --no-wait)")
+    if config.get('docker_repo') is not None:
+        output.docker_repo = config['docker_repo']
 
-        if self.size > 0 and self.size_low_pri > 0:
-            self.mixed_mode = True
+    if config.get('wait') is not None:
+        wait = config['wait']
 
-        if not spark_client.secrets_config.service_principal.tenant_id and self.mixed_mode:
-            raise aztk.error.AztkError(
-                "You must configure an AAD service principal to use AZTK in mixed mode (dedicated and low priority nodes).")
+    return output, wait
 
-        if not self.subnet_id and self.mixed_mode:
-            raise aztk.error.AztkError(
-                "You must configure a VNET to use AZTK in mixed mode (dedicated and low priority nodes). Set the VNET's subnet_id in your cluster.yaml.")
+
 
 class SshConfig:
 

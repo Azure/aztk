@@ -21,6 +21,12 @@ class Client(BaseClient):
     Spark client public interface
     '''
     def create_cluster(self, cluster_conf: models.ClusterConfiguration, wait: bool = False):
+        cluster_conf.validate()
+
+        if cluster_conf.user_configuration.username is not None and wait is False:
+            raise error.AztkError(
+                "You cannot create a user '{0}' if wait is set to false. By default, we create a user in the cluster.yaml file. Please either the configure your cluster.yaml file or set the parameter (--wait)".format(cluster_conf.user_configuration.username))
+
         try:
             zip_resource_files = upload_node_scripts.zip_scripts(self.blob_client,
                                                                  cluster_conf.cluster_id,
@@ -30,10 +36,10 @@ class Client(BaseClient):
 
             start_task = create_cluster_helper.generate_cluster_start_task(self,
                                                                            zip_resource_files,
-                                                                           cluster_conf.gpu_enabled,
+                                                                           cluster_conf.gpu_enabled(),
                                                                            cluster_conf.docker_repo,
                                                                            cluster_conf.file_shares,
-                                                                           cluster_conf.mixed_mode)
+                                                                           cluster_conf.mixed_mode())
 
             software_metadata_key = "spark"
 
@@ -152,7 +158,7 @@ class Client(BaseClient):
             return self.__cluster_copy(cluster_id, 'spark', source_path, destination_path)
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
-    
+
     '''
         job submission
     '''

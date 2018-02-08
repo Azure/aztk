@@ -2,8 +2,9 @@ import os
 import argparse
 import typing
 import aztk.spark
+from aztk.spark.models import ClusterConfiguration, UserConfiguration
 from cli import log
-from cli.config import ClusterConfig, load_aztk_spark_config
+from cli.config import load_aztk_spark_config
 from cli import utils, config
 
 
@@ -34,21 +35,24 @@ def setup_parser(parser: argparse.ArgumentParser):
 
 def execute(args: typing.NamedTuple):
     spark_client = aztk.spark.Client(config.load_aztk_screts())
+    cluster_conf = ClusterConfiguration()
+    cluster_conf.spark_configuration = load_aztk_spark_config()
 
     # read cluster.yaml configuartion file, overwrite values with args
-    cluster_conf = ClusterConfig()
-
-    cluster_conf.merge(
-        spark_client=spark_client,
-        uid=args.cluster_id,
-        size=args.size,
-        size_low_pri=args.size_low_pri,
+    file_config, wait = config.read_cluster_config()
+    cluster_conf.merge(file_config)
+    cluster_conf.merge(ClusterConfiguration(
+        cluster_id=args.cluster_id,
+        vm_count=args.size,
+        vm_low_pri_count=args.size_low_pri,
         vm_size=args.vm_size,
         subnet_id=args.subnet_id,
-        wait=args.wait,
-        username=args.username,
-        password=args.password,
-        docker_repo=args.docker_repo)
+        user_configuration=UserConfiguration(
+            username=args.username,
+            password=args.password,
+        ),
+        docker_repo=args.docker_repo))
+    wait = wait if args.wait is None else args.wait
 
     if cluster_conf.custom_scripts:
         custom_scripts = []
@@ -76,62 +80,55 @@ def execute(args: typing.NamedTuple):
     else:
         file_shares = None
 
-    if cluster_conf.username:
+    user_configuration = cluster_conf.user_configuration
+
+    if user_configuration and user_configuration.username:
         ssh_key, password = utils.get_ssh_key_or_prompt(spark_client.secrets_config.ssh_pub_key,
-                                                        cluster_conf.username,
-                                                        cluster_conf.password,
+                                                        user_configuration.username,
+                                                        user_configuration.password,
                                                         spark_client.secrets_config)
-        user_conf = aztk.spark.models.UserConfiguration(
-            username=cluster_conf.username,
+        cluster_conf.user_configuration = aztk.spark.models.UserConfiguration(
+            username=user_configuration.username,
             password=password,
             ssh_key=ssh_key
         )
     else:
-        user_conf = None
+        cluster_conf.user_configuration = None
 
-    print_cluster_conf(cluster_conf)
+    print_cluster_conf(cluster_conf, wait)
     spinner = utils.Spinner()
     spinner.start()
 
     # create spark cluster
     cluster = spark_client.create_cluster(
-        aztk.spark.models.ClusterConfiguration(
-            cluster_id=cluster_conf.uid,
-            vm_count=cluster_conf.size,
-            vm_low_pri_count=cluster_conf.size_low_pri,
-            vm_size=cluster_conf.vm_size,
-            subnet_id=cluster_conf.subnet_id,
-            custom_scripts=custom_scripts,
-            file_shares=file_shares,
-            docker_repo=cluster_conf.docker_repo,
-            spark_configuration=load_aztk_spark_config(),
-            user_configuration=user_conf
-        ),
-        wait=cluster_conf.wait
+        cluster_conf,
+        wait=wait
     )
 
     spinner.stop()
 
-    if cluster_conf.wait:
+    if wait:
         log.info("Cluster %s created successfully.", cluster.id)
     else:
         log.info("Cluster %s is being provisioned.", cluster.id)
 
 
-def print_cluster_conf(cluster_conf):
+def print_cluster_conf(cluster_conf: ClusterConfiguration, wait: bool):
+    user_configuration = cluster_conf.user_configuration
+
     log.info("-------------------------------------------")
-    log.info("spark cluster id:        %s", cluster_conf.uid)
+    log.info("spark cluster id:        %s", cluster_conf.cluster_id)
     log.info("spark cluster size:      %s",
-             cluster_conf.size + cluster_conf.size_low_pri)
-    log.info(">        dedicated:      %s", cluster_conf.size)
-    log.info(">     low priority:      %s", cluster_conf.size_low_pri)
+             cluster_conf.vm_count + cluster_conf.vm_low_pri_count)
+    log.info(">        dedicated:      %s", cluster_conf.vm_count)
+    log.info(">     low priority:      %s", cluster_conf.vm_low_pri_count)
     log.info("spark cluster vm size:   %s", cluster_conf.vm_size)
     log.info("custom scripts:          %s", cluster_conf.custom_scripts)
     log.info("subnet ID:               %s", cluster_conf.subnet_id)
     log.info("file shares:             %s", len(cluster_conf.file_shares) if cluster_conf.file_shares is not None else 0)
     log.info("docker repo name:        %s", cluster_conf.docker_repo)
-    log.info("wait for cluster:        %s", cluster_conf.wait)
-    log.info("username:                %s", cluster_conf.username)
-    if cluster_conf.password:
-        log.info("Password: %s", '*' * len(cluster_conf.password))
+    log.info("wait for cluster:        %s", wait)
+    log.info("username:                %s", user_configuration.username)
+    if user_configuration.password:
+        log.info("Password: %s", '*' * len(user_configuration.password))
     log.info("-------------------------------------------")

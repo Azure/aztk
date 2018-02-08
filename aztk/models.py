@@ -4,6 +4,33 @@ import aztk.utils.constants as constants
 import azure.batch.models as batch_models
 
 
+class ConfigurationBase:
+    """
+    Base class for any configuration.
+    Include methods to help with validation
+    """
+    def validate(self):
+        raise NotImplementedError("Validate not implemented")
+
+    def valid(self):
+        try:
+            self.validate()
+            return True
+        except error.AztkError:
+            return False
+
+    def _validate_required(self, attrs):
+        for attr in attrs:
+            if not getattr(self, attr):
+                raise error.AztkError(
+                    "{0} missing {1}.".format(self.__class__.__name__, attr))
+
+    def _merge_attributes(self, other, attrs):
+        for attr in attrs:
+            val = getattr(other, attr)
+            if val is not None:
+                setattr(self, attr, val)
+
 class FileShare:
     def __init__(self,
                  storage_account_name: str = None,
@@ -23,26 +50,35 @@ class CustomScript:
         self.run_on = run_on
 
 
-class UserConfiguration:
+class UserConfiguration(ConfigurationBase):
     def __init__(self, username: str, ssh_key: str = None, password: str = None):
         self.username = username
         self.ssh_key = ssh_key
         self.password = password
 
+    def merge(self, other):
+        self._merge_attributes(other, [
+            "username",
+            "ssh_key",
+            "password",
+        ])
 
-class ClusterConfiguration:
+class ClusterConfiguration(ConfigurationBase):
+    """
+    Cluster configuration model
+    """
     def __init__(
             self,
             custom_scripts: List[CustomScript] = None,
             file_shares: List[FileShare] = None,
             cluster_id: str = None,
-            vm_count=None,
-            vm_low_pri_count=None,
+            vm_count=0,
+            vm_low_pri_count=0,
             vm_size=None,
             subnet_id=None,
-            docker_repo: str = None,
-            user_configuration: UserConfiguration = None):
-
+            docker_repo: str=None,
+            user_configuration: UserConfiguration=None):
+        super().__init__()
         self.custom_scripts = custom_scripts
         self.file_shares = file_shares
         self.cluster_id = cluster_id
@@ -53,29 +89,59 @@ class ClusterConfiguration:
         self.docker_repo = docker_repo
         self.user_configuration = user_configuration
 
+    def merge(self, other):
+        """
+        Merge other cluster config into this one.
+        :params other: ClusterConfiguration
+        """
+
+        self._merge_attributes(other, [
+            "custom_scripts",
+            "file_shares",
+            "cluster_id",
+            "vm_size",
+            "subnet_id",
+            "docker_repo",
+            "vm_count",
+            "vm_low_pri_count",
+        ])
+
+        if other.user_configuration:
+            if self.user_configuration:
+                self.user_configuration.merge(other.user_configuration)
+            else:
+                self.user_configuration = other.user_configuration
+
+    def mixed_mode(self) -> bool:
+        return self.vm_count > 0 and self.vm_low_pri_count > 0
+
+    def validate(self) -> bool:
+        """
+        Validate the config at its current state.
+        Raises: Error if invalid
+        """
+
+        if self.cluster_id is None:
+            raise error.AztkError(
+                "Please supply an id for the cluster with a parameter (--id)")
+
+        if self.vm_count == 0 and self.vm_low_pri_count == 0:
+            raise error.AztkError(
+                "Please supply a valid (greater than 0) size or size_low_pri value either in the cluster.yaml configuration file or with a parameter (--size or --size-low-pri)")
+
+        if self.vm_size is None:
+            raise error.AztkError(
+                "Please supply a vm_size in either the cluster.yaml configuration file or with a parameter (--vm-size)")
+
+        if self.mixed_mode() and not self.subnet_id:
+            raise error.AztkError(
+                "You must configure a VNET to use AZTK in mixed mode (dedicated and low priority nodes). Set the VNET's subnet_id in your cluster.yaml.")
+
 
 class RemoteLogin:
     def __init__(self, ip_address, port):
         self.ip_address = ip_address
         self.port = port
-
-
-class ConfigurationBase:
-    def validate(self):
-        raise NotImplementedError("Validate not implemented")
-
-    def valid(self):
-        try:
-            self.validate()
-            return True
-        except error.AztkError:
-            return False
-
-    def _validate_required(self, attrs):
-        for attr in attrs:
-            if not getattr(self, attr):
-                raise error.AztkError(
-                    "{0} missing {1}.".format(self.__class__.__name__, attr))
 
 
 class ServicePrincipalConfiguration(ConfigurationBase):

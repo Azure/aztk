@@ -66,6 +66,18 @@ class UserConfiguration(aztk.models.UserConfiguration):
     pass
 
 
+class ServicePrincipalConfiguration(aztk.models.ServicePrincipalConfiguration):
+    pass
+
+
+class SharedKeyConfiguration(aztk.models.SharedKeyConfiguration):
+    pass
+
+
+class DockerConfiguration(aztk.models.DockerConfiguration):
+    pass
+
+
 class ClusterConfiguration(aztk.models.ClusterConfiguration):
     def __init__(
             self,
@@ -76,22 +88,24 @@ class ClusterConfiguration(aztk.models.ClusterConfiguration):
             vm_low_pri_count=None,
             vm_size=None,
             subnet_id=None,
-            docker_repo: str = None,
-            spark_configuration: SparkConfiguration = None,
-            user_configuration: UserConfiguration = None):
-        super().__init__(custom_scripts=custom_scripts,
-                         cluster_id=cluster_id,
-                         vm_count=vm_count,
-                         vm_low_pri_count=vm_low_pri_count,
-                         vm_size=vm_size,
-                         docker_repo=docker_repo,
-                         subnet_id=subnet_id,
-                         file_shares=file_shares,
-                         user_configuration=user_configuration
-                        )
+            docker_repo: str=None,
+            user_configuration: UserConfiguration=None,
+            spark_configuration: SparkConfiguration = None):
+        super().__init__(
+            custom_scripts=custom_scripts,
+            cluster_id=cluster_id,
+            vm_count=vm_count,
+            vm_low_pri_count=vm_low_pri_count,
+            vm_size=vm_size,
+            docker_repo=docker_repo,
+            subnet_id=subnet_id,
+            file_shares=file_shares,
+            user_configuration=user_configuration,
+        )
         self.spark_configuration = spark_configuration
-        self.gpu_enabled = helpers.is_gpu_enabled(vm_size)
-        self.mixed_mode = True if (self.vm_count > 0) and (self.vm_low_pri_count > 0) else False
+
+    def gpu_enabled(self):
+        return helpers.is_gpu_enabled(self.vm_size)
 
 
 class SecretsConfiguration(aztk.models.SecretsConfiguration):
@@ -217,6 +231,7 @@ class Job():
             self.cluster = Cluster(pool, nodes)
         else:
             self.cluster = None
+
 
 class ApplicationLog():
     def __init__(self, name: str, cluster_id: str, log: str, total_bytes: int, application_state: batch_models.TaskState, exit_code: int):
