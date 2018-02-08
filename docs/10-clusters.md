@@ -77,8 +77,25 @@ aztk spark cluster delete --id <your_cluster_id>
 
 __You are charged for the cluster as long as the nodes are provisioned in your account.__ Make sure to delete any clusters you are not using to avoid unwanted costs.
 
+### Run a command on all nodes in the cluster
+To run a command on all nodes in the cluster, run:
+```sh
+aztk spark cluster run --id <your_cluster_id> "<command>"
+```
+
+The command is executed through an SSH tunnel.
+
+### Copy a file to all nodes in the cluster
+To securely copy a file to all nodes, run:
+```sh
+aztk spark cluster copy --id <your_cluster_id> --source-path </path/to/local/file> --dest-path </path/on/node>
+```
+
+The file will be securely copied to each node using SFTP.
+
 ### Interactive Mode
-All interaction to the cluster is done via SSH and SSH tunneling. If you didn't create a user during cluster create (`aztk spark cluster create`), the first step is to enable to add a user to the master node.
+
+All other interaction with the cluster is done via SSH and SSH tunneling. If you didn't create a user during cluster create (`aztk spark cluster create`), the first step is to enable to add a user to the master node.
 
 Make sure that the *.aztk/secrets.yaml* file has your SSH key (or path to the SSH key), and it will automatically use it to make the SSH connection.
 

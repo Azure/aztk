@@ -141,6 +141,18 @@ class Client(BaseClient):
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
+    def cluster_run(self, cluster_id: str, command: str):
+        try:
+            return self.__cluster_run(cluster_id, 'spark', command)
+        except batch_error.BatchErrorException as e:
+            raise error.AztkError(helpers.format_batch_exception(e))
+
+    def cluster_copy(self, cluster_id: str, source_path: str, destination_path: str):
+        try:
+            return self.__cluster_copy(cluster_id, 'spark', source_path, destination_path)
+        except batch_error.BatchErrorException as e:
+            raise error.AztkError(helpers.format_batch_exception(e))
+    
     '''
         job submission
     '''

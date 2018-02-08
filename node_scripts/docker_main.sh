@@ -32,4 +32,3 @@ $(pyenv root)/versions/$AZTK_PYTHON_VERSION/bin/python $(dirname $0)/main.py ins
 
 # sleep to keep container running
 while true; do sleep 1; done
-

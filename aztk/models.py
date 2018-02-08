@@ -216,6 +216,10 @@ class Cluster:
         self.target_dedicated_nodes = pool.target_dedicated_nodes
         self.target_low_pri_nodes = pool.target_low_priority_nodes
 
+class SSHLog():
+    def __init__(self, output, node_id):
+        self.output = output
+        self.node_id = node_id
 
 class Software:
     """
