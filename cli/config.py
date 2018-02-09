@@ -101,9 +101,9 @@ def _merge_secrets_dict(secrets: SecretsConfiguration, secrets_config):
     docker_config = secrets_config.get('docker')
     if docker_config:
         secrets.docker = DockerConfiguration(
-            endpoint = docker_config.get('endpoint'),
-            username = docker_config.get('username'),
-            password = docker_config.get('password'),
+            endpoint=docker_config.get('endpoint'),
+            username=docker_config.get('username'),
+            password=docker_config.get('password'),
         )
 
     default_config = secrets_config.get('default')
@@ -131,6 +131,7 @@ def read_cluster_config(path: str = aztk.utils.constants.DEFAULT_CLUSTER_CONFIG_
             return
 
         return cluster_config_from_dict(config_dict)
+
 
 def cluster_config_from_dict(config: dict):
     output = ClusterConfiguration()
@@ -161,10 +162,26 @@ def cluster_config_from_dict(config: dict):
             output.user_configuration.password = config['password']
 
     if config.get('custom_scripts') not in [[None], None]:
-        output.custom_scripts = config['custom_scripts']
+        output.custom_scripts = []
+        for custom_script in config['custom_scripts']:
+            output.custom_scripts.append(
+                aztk.spark.models.CustomScript(
+                    script=custom_script['script'],
+                    run_on=custom_script['runOn']
+                )
+            )
 
     if config.get('azure_files') not in [[None], None]:
-        output.file_shares = config['azure_files']
+        output.file_shares = []
+        for file_share in config['azure_files']:
+            output.file_shares.append(
+                aztk.spark.models.FileShare(
+                    storage_account_name=file_share['storage_account_name'],
+                    storage_account_key=file_share['storage_account_key'],
+                    file_share_path=file_share['file_share_path'],
+                    mount_path=file_share['mount_path'],
+                )
+            )
 
     if config.get('docker_repo') is not None:
         output.docker_repo = config['docker_repo']
@@ -173,7 +190,6 @@ def cluster_config_from_dict(config: dict):
         wait = config['wait']
 
     return output, wait
-
 
 
 class SshConfig:
@@ -271,13 +287,14 @@ class SshConfig:
             raise aztk.error.AztkError(
                 "Please supply a username either in the ssh.yaml configuration file or with a parameter (--username)")
 
+
 class JobConfig():
     def __init__(self):
         self.id = None
         self.applications = []
         self.custom_scripts = None
         self.spark_configuration = None
-        self.vm_size=None
+        self.vm_size = None
         self.docker_repo = None
         self.max_dedicated_nodes = None
         self.max_low_pri_nodes = None

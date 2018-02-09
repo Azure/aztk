@@ -8,6 +8,7 @@
         "**/__pycache__/**/*": true
     },
     "python.autoComplete.extraPaths": [
-        "${workspaceRoot}/node"
-    ]
+        "${workspaceRoot}/node_scripts"
+    ],
+    "python.formatting.provider": "yapf"
 }
