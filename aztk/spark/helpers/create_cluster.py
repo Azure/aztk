@@ -13,7 +13,7 @@ POOL_ADMIN_USER_IDENTITY = batch_models.UserIdentity(
 '''
 Cluster create helper methods
 '''
-def __docker_run_cmd(docker_repo: str = None, gpu_enabled: bool = False, file_mounts = [], mixed_mode = False) -> str:
+def __docker_run_cmd(docker_repo: str = None, gpu_enabled: bool = False, file_mounts = None, mixed_mode = False) -> str:
     """
         Build the docker run command by setting up the environment variables
     """
@@ -123,7 +123,7 @@ def __get_secrets_env(spark_client):
 def __cluster_install_cmd(zip_resource_file: batch_models.ResourceFile,
                           gpu_enabled: bool,
                           docker_repo: str = None,
-                          file_mounts = [],
+                          file_mounts = None,
                           mixed_mode: bool = False):
     """
         For Docker on ubuntu 16.04 - return the command line

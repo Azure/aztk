@@ -123,9 +123,9 @@ class ApplicationConfiguration:
             application=None,
             application_args=None,
             main_class=None,
-            jars=[],
-            py_files=[],
-            files=[],
+            jars=None,
+            py_files=None,
+            files=None,
             driver_java_options=None,
             driver_library_path=None,
             driver_class_path=None,
@@ -138,9 +138,9 @@ class ApplicationConfiguration:
         self.application = application
         self.application_args = application_args
         self.main_class = main_class
-        self.jars = jars
-        self.py_files = py_files
-        self.files = files
+        self.jars = jars or []
+        self.py_files = py_files or []
+        self.files = files or []
         self.driver_java_options = driver_java_options
         self.driver_library_path = driver_library_path
         self.driver_class_path = driver_class_path
