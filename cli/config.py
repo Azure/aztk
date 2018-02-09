@@ -325,7 +325,7 @@ class JobConfig():
             self.spark_defaults_conf = self.__convert_to_path(spark_configuration.get('spark_defaults_conf'))
             self.spark_env_sh = self.__convert_to_path(spark_configuration.get('spark_env_sh'))
             self.core_site_xml = self.__convert_to_path(spark_configuration.get('core_site_xml'))
-            self.jars = [self.__convert_to_path(jar) for jar in spark_configuration.get('jars')]
+            self.jars = [self.__convert_to_path(jar) for jar in spark_configuration.get('jars') or []]
 
     def __convert_to_path(self, str_path):
         if str_path:
