@@ -23,10 +23,6 @@ class Client(BaseClient):
     def create_cluster(self, cluster_conf: models.ClusterConfiguration, wait: bool = False):
         cluster_conf.validate()
 
-        if cluster_conf.user_configuration.username is not None and wait is False:
-            raise error.AztkError(
-                "You cannot create a user '{0}' if wait is set to false. By default, we create a user in the cluster.yaml file. Please either the configure your cluster.yaml file or set the parameter (--wait)".format(cluster_conf.user_configuration.username))
-
         try:
             zip_resource_files = upload_node_scripts.zip_scripts(self.blob_client,
                                                                  cluster_conf.cluster_id,
