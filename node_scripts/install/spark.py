@@ -114,6 +114,15 @@ def start_spark_worker():
     print("Connecting to master with '{0}'".format(" ".join(cmd)))
     call(cmd)
 
+    # enable the shuffle service on all slaves
+    start_shuffle_service()
+
+
+def start_shuffle_service():
+    exe = os.path.join(spark_home, "sbin", "start-shuffle-service.sh")
+    print("Starting the shuffle service with {}".format(exe))
+    call([exe, " &"])
+
 
 def copyfile(src, dest):
     try:

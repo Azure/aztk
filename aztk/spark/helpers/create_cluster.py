@@ -54,6 +54,7 @@ def __docker_run_cmd(docker_repo: str = None, gpu_enabled: bool = False, file_mo
     cmd.add_option('-e', 'SPARK_JOB_UI_PORT=$SPARK_JOB_UI_PORT')
     cmd.add_option('-p', '8080:8080')       # Spark Master UI
     cmd.add_option('-p', '7077:7077')       # Spark Master
+    cmd.add_option('-p', '7337:7337')       # Spark Shuffle Service
     cmd.add_option('-p', '4040:4040')       # Job UI
     cmd.add_option('-p', '8888:8888')       # Jupyter UI
     cmd.add_option('-p', '8787:8787')       # Rstudio Server
