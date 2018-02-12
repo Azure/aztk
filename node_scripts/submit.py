@@ -162,18 +162,32 @@ def recieve_submit_request(application_file_path):
         driver_cores=application['driver_cores'],
         executor_cores=application['executor_cores'])
 
-    try:
-        return_code = subprocess.call(cmd.to_str(), shell=True)
-        upload_log(blob_client, application)
-        return return_code
-    except subprocess.CalledProcessError as e:
-        print(e)
-        upload_log(blob_client, application)
-        return 1
+    return_code = subprocess.call(cmd.to_str(), shell=True)
+    upload_log(blob_client, application)
+    return return_code
 
-    return 1
+
+def upload_error_log(error, application_file_path):
+    application = load_application(application_file_path)
+    blob_client = config.blob_client
+
+    error_log = open(os.path.join(os.environ["AZ_BATCH_TASK_WORKING_DIR"], "error.log"), "w")
+    error_log.write(error)
+    upload_file_to_container(
+        container_name=os.environ['STORAGE_LOGS_CONTAINER'],
+        application_name=application['name'],
+        file_path=os.path.realpath(error_log.name),
+        blob_client=blob_client,
+        use_full_path=False)
+    upload_log(blob_client, application)
+
 
 if __name__ == "__main__":
-    return_code = recieve_submit_request(os.path.join(os.environ['AZ_BATCH_TASK_WORKING_DIR'], 'application.yaml'))
+    return_code = 1
+    try:
+        return_code = recieve_submit_request(os.path.join(os.environ['AZ_BATCH_TASK_WORKING_DIR'], 'application.yaml'))
+    except Exception as e:
+        upload_error_log(e, os.path.join(os.environ['AZ_BATCH_TASK_WORKING_DIR'], 'application.yaml'))
+
     # force batch task exit code to match spark exit code
     sys.exit(return_code)
