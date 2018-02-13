@@ -67,7 +67,7 @@ def upload_file_to_container(container_name,
 def __app_submit_cmd(
         name: str,
         app: str,
-        app_args: str,
+        app_args: List[str],
         main_class: str,
         jars: List[str],
         py_files: List[str],
@@ -77,8 +77,8 @@ def __app_submit_cmd(
         driver_class_path: str,
         driver_memory: str,
         executor_memory: str,
-        driver_cores: str,
-        executor_cores: str):
+        driver_cores: int,
+        executor_cores: int):
     cluster_id = os.environ['AZ_BATCH_POOL_ID']
     spark_home = os.environ['SPARK_HOME']
     with open (os.path.join(spark_home, 'conf', 'master')) as f:
@@ -105,8 +105,8 @@ def __app_submit_cmd(
     spark_submit_cmd.add_option('--driver-class-path', driver_class_path)
     spark_submit_cmd.add_option('--driver-memory', driver_memory)
     spark_submit_cmd.add_option('--executor-memory', executor_memory)
-    spark_submit_cmd.add_option('--driver-cores', driver_cores)
-    spark_submit_cmd.add_option('--executor-cores', executor_cores)
+    spark_submit_cmd.add_option('--driver-cores', str(driver_cores))
+    spark_submit_cmd.add_option('--executor-cores', str(executor_cores))
 
     spark_submit_cmd.add_argument(
         os.environ['AZ_BATCH_TASK_WORKING_DIR'] + '/' + app + ' ' +
@@ -171,8 +171,9 @@ def upload_error_log(error, application_file_path):
     application = load_application(application_file_path)
     blob_client = config.blob_client
 
-    error_log = open(os.path.join(os.environ["AZ_BATCH_TASK_WORKING_DIR"], "error.log"), "w")
-    error_log.write(error)
+    with open(os.path.join(os.environ["AZ_BATCH_TASK_WORKING_DIR"], "error.log"), "w") as error_log:
+        error_log.write(error)
+
     upload_file_to_container(
         container_name=os.environ['STORAGE_LOGS_CONTAINER'],
         application_name=application['name'],
