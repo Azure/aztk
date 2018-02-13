@@ -345,7 +345,7 @@ def print_applications(applications):
                     application.name,
                     application.state,
                     utc_to_local(application.state_transition_time),
-                    application.exit_code or "-"
+                    application.exit_code if application.exit_code is not None else "-"
                 )
             )
     if warn_scheduling:
