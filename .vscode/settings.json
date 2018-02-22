@@ -5,7 +5,7 @@
         "bin/**": true
     },
     "files.exclude": {
-        "**/__pycache__/**/*": true
+        "**/__pycache__": true
     },
     "python.autoComplete.extraPaths": [
         "${workspaceRoot}/node_scripts"

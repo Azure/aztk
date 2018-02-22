@@ -105,8 +105,10 @@ def __app_submit_cmd(
     spark_submit_cmd.add_option('--driver-class-path', driver_class_path)
     spark_submit_cmd.add_option('--driver-memory', driver_memory)
     spark_submit_cmd.add_option('--executor-memory', executor_memory)
-    spark_submit_cmd.add_option('--driver-cores', str(driver_cores))
-    spark_submit_cmd.add_option('--executor-cores', str(executor_cores))
+    if driver_cores:
+        spark_submit_cmd.add_option('--driver-cores', str(driver_cores))
+    if executor_cores:
+        spark_submit_cmd.add_option('--executor-cores', str(executor_cores))
 
     spark_submit_cmd.add_argument(
         os.environ['AZ_BATCH_TASK_WORKING_DIR'] + '/' + app + ' ' +

@@ -8,8 +8,8 @@ install:
   - pip install -e .
 
 script:
-  - pytest
   - pylint -E aztk
+  - pytest --ignore=tests/spark/integration_tests
 
 branches:
   only:
