@@ -1,3 +1,4 @@
+import io
 from Crypto.PublicKey import RSA
 from typing import List
 import aztk.models
@@ -39,8 +40,12 @@ class RemoteLogin(aztk.models.RemoteLogin):
     pass
 
 
+class File(aztk.models.File):
+    pass
+
+
 class SparkConfiguration():
-    def __init__(self, spark_defaults_conf: str = None, spark_env_sh: str = None, core_site_xml: str = None, jars: List[str]=None):
+    def __init__(self, spark_defaults_conf=None, spark_env_sh=None, core_site_xml=None, jars=None):
         self.spark_defaults_conf = spark_defaults_conf
         self.spark_env_sh = spark_env_sh
         self.core_site_xml = core_site_xml
@@ -106,7 +111,6 @@ class ClusterConfiguration(aztk.models.ClusterConfiguration):
 
     def gpu_enabled(self):
         return helpers.is_gpu_enabled(self.vm_size)
-
 
 class SecretsConfiguration(aztk.models.SecretsConfiguration):
     pass

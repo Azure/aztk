@@ -570,10 +570,12 @@ Find some samples and getting stated tutorial in the `examples/sdk/` directory o
  
     A script that executed in the Docker container of specified nodes in the cluster.
 
+    Fields:
+
         - name: str
             A unique name for the script
-        - script: str
-            Path to the script to be run
+        - script: str or aztk.spark.models.File
+            Path to the script to be run or File object
         - run_on: str
             Set which nodes the script should execute on. Possible values:
 
@@ -582,6 +584,16 @@ Find some samples and getting stated tutorial in the `examples/sdk/` directory o
                 worker
 
             Please note that by default, the Master node is also a worker node.
+
+
+- `File`
+    
+    A File definition for programmatically defined configuration files.
+
+    Fields:
+        - name: str
+        - payload: io.StringIO
+
 
 - `JobConfiguration`
 
@@ -697,14 +709,14 @@ Find some samples and getting stated tutorial in the `examples/sdk/` directory o
 
     Fields:
 
-        - spark_defaults_conf: str
-            Path to spark_defaults.conf configuration file to be used.
+        - spark_defaults_conf: str or aztk.spark.models.File
+            Path or File object defining spark_defaults.conf configuration file to be used.
 
-        - spark_env_sh: str
-            Path to spark_env.sh configuration file to be used.
+        - spark_env_sh: str or aztk.spark.models.File
+            Path or File object defining spark_env.sh configuration file to be used.
 
-        - core_site_xml: str
-            Path to core-site.xml configuration file to be used.
+        - core_site_xml: str or aztk.spark.models.File
+            Path or File object defining the core-site.xml configuration file to be used.
 
-        - jars: [str]
-            Additional Jars to be uploaded
+        - jars: [str or aztk.spark.models.File]
+            Paths to or File objects defining Additional Jars to be uploaded
