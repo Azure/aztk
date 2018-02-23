@@ -101,11 +101,20 @@ def generate_task(spark_client, container_id, application):
     return task
 
 
+def affinitize_task_to_master(spark_client, cluster_id, task):
+    cluster = spark_client.get_cluster(cluster_id)
+    master_node = spark_client.batch_client.compute_node.get(pool_id=cluster_id, node_id=cluster.master_node_id)
+    task.affinity_info = batch_models.AffinityInformation(affinity_id=master_node.affinity_id)
+    return task
+
+
 def submit_application(spark_client, cluster_id, application, wait: bool = False):
     """
     Submit a spark app
     """
     task = generate_task(spark_client, cluster_id, application)
+    task = affinitize_task_to_master(spark_client, cluster_id, task)
+
 
     # Add task to batch job (which has the same name as cluster_id)
     job_id = cluster_id

@@ -15,7 +15,7 @@ size: 2
 username: spark
 
 # docker_repo: <name of docker image repo (for more information, see https://github.com/Azure/aztk/blob/master/docs/12-docker-image.md)>
-docker_repo: aztk/base:spark2.2.0
+docker_repo: 
 
 # # optional custom scripts to run on the Spark master, Spark worker or all nodes in the cluster
 # custom_scripts:
@@ -24,9 +24,8 @@ docker_repo: aztk/base:spark2.2.0
 #   - script: <./relative/path/to/other/script.sh or ./relative/path/to/other/script/directory/>
 #     runOn: <master/worker/all-nodes>
 
+# To add your cluster to a virtual network provide the full arm resoruce id below
+# subnet_id: /subscriptions/********-****-****-****-************/resourceGroups/********/providers/Microsoft.Network/virtualNetworks/*******/subnets/******
 
 # wait: <true/false>
-wait: true
-
-# To add yout cluster to a virtual network provide the full arm resoruce id below
-# subnet_id:
+wait: false

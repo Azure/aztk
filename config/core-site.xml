@@ -8,7 +8,7 @@
   </property>
 
 <!-- WASB (Azure Storage) Configuration  -->
-<!-- More information about WASB can be foudn at https://docs.microsoft.com/azure/hdinsight/hdinsight-hadoop-use-blob-storage> -->
+<!-- More information about WASB can be found at https://docs.microsoft.com/azure/hdinsight/hdinsight-hadoop-use-blob-storage> -->
 <!-- <property>
   <name>fs.AbstractFileSystem.wasb.Impl</name>
   <value>org.apache.hadoop.fs.azure.Wasb</value>
@@ -19,7 +19,7 @@
 </property> -->
 
 <!-- ADL (Azure Data Lake) Configuration -->
-<!-- More information about ADL can be foudn at https://docs.microsoft.com/azure/hdinsight/hdinsight-hadoop-use-data-lake-store> -->
+<!-- More information about ADL can be found at https://docs.microsoft.com/azure/hdinsight/hdinsight-hadoop-use-data-lake-store> -->
 <!-- <property>
   <name>fs.adl.impl</name>
   <value>org.apache.hadoop.fs.adl.AdlFileSystem</value>

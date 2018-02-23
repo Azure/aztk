@@ -27,6 +27,11 @@ By default, you cannot create clusters of more than 20 cores in total. Visit [th
 #### Low priority nodes
 You can create your cluster with [low-priority](https://docs.microsoft.com/en-us/azure/batch/batch-low-pri-vms) VMs at an 80% discount by using `--size-low-pri` instead of `--size`. Note that these are great for experimental use, but can be taken away at any time. We recommend against this option when doing long running jobs or for critical workloads.
 
+#### Mixed Mode
+You can create clusters with a mixed of [low-priority](https://docs.microsoft.com/en-us/azure/batch/batch-low-pri-vms) and dedicated VMs to reach the optimal balance of price and availability. In Mixed Mode, your cluster will have both dedicated instances and low priority instances. To mimize the potential impact on your Spark workloads, the Spark master node will always be provisioned on one of the dedicated nodes while each of the low priority nodes will be Spark workers.
+
+Please note, to use Mixed Mode clusters, you need to authenticate using Azure Active Directory (AAD) by configuring the Service Principal in `.aztk/secrets.yaml`. You also need to create a [Virtual Network \(VNET\)](https://azure.microsoft.com/en-us/services/virtual-network/), and provide the resource ID to a Subnet within the VNET in your ./aztk/cluster.yaml` configuration file.
+
 #### Setting your Spark and/or Python versions
 By default, the Azure Distributed Data Engineering Toolkit will use **Spark v2.2.0** and **Python v3.5.4**. However, you can set your Spark and/or Python versions by [configuring the base Docker image used by this package](./12-docker-image.md).
 
@@ -72,8 +77,25 @@ aztk spark cluster delete --id <your_cluster_id>
 
 __You are charged for the cluster as long as the nodes are provisioned in your account.__ Make sure to delete any clusters you are not using to avoid unwanted costs.
 
+### Run a command on all nodes in the cluster
+To run a command on all nodes in the cluster, run:
+```sh
+aztk spark cluster run --id <your_cluster_id> "<command>"
+```
+
+The command is executed through an SSH tunnel.
+
+### Copy a file to all nodes in the cluster
+To securely copy a file to all nodes, run:
+```sh
+aztk spark cluster copy --id <your_cluster_id> --source-path </path/to/local/file> --dest-path </path/on/node>
+```
+
+The file will be securely copied to each node using SFTP.
+
 ### Interactive Mode
-All interaction to the cluster is done via SSH and SSH tunneling. If you didn't create a user during cluster create (`aztk spark cluster create`), the first step is to enable to add a user to the master node.
+
+All other interaction with the cluster is done via SSH and SSH tunneling. If you didn't create a user during cluster create (`aztk spark cluster create`), the first step is to enable to add a user to the master node.
 
 Make sure that the *.aztk/secrets.yaml* file has your SSH key (or path to the SSH key), and it will automatically use it to make the SSH connection.
 

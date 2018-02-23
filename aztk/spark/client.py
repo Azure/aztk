@@ -10,6 +10,7 @@ from aztk.spark.helpers import submit as cluster_submit_helper
 from aztk.spark.helpers import job_submission as job_submit_helper
 from aztk.spark.helpers import get_log as get_log_helper
 from aztk.spark.utils import upload_node_scripts, util
+import yaml
 
 
 class Client(BaseClient):
@@ -20,17 +21,22 @@ class Client(BaseClient):
     Spark client public interface
     '''
     def create_cluster(self, cluster_conf: models.ClusterConfiguration, wait: bool = False):
+        cluster_conf.validate()
+
         try:
             zip_resource_files = upload_node_scripts.zip_scripts(self.blob_client,
                                                                  cluster_conf.cluster_id,
                                                                  cluster_conf.custom_scripts,
-                                                                 cluster_conf.spark_configuration)
+                                                                 cluster_conf.spark_configuration,
+                                                                 cluster_conf.user_configuration)
 
             start_task = create_cluster_helper.generate_cluster_start_task(self,
                                                                            zip_resource_files,
-                                                                           cluster_conf.gpu_enabled,
+                                                                           cluster_conf.gpu_enabled(),
                                                                            cluster_conf.docker_repo,
-                                                                           cluster_conf.file_shares)
+                                                                           cluster_conf.file_shares,
+                                                                           cluster_conf.mixed_mode(),
+                                                                           cluster_conf.worker_on_master)
 
             software_metadata_key = "spark"
 
@@ -120,6 +126,8 @@ class Client(BaseClient):
         try:
             cluster = self.get_cluster(cluster_id)
             master_node_id = cluster.master_node_id
+            if not master_node_id:
+                raise error.ClusterNotReadyError("The master has not yet been picked, a user cannot be added.")
             self.__create_user(cluster.id, master_node_id, username, password, ssh_key)
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
@@ -137,7 +145,19 @@ class Client(BaseClient):
             return task.state._value_
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
-    
+
+    def cluster_run(self, cluster_id: str, command: str):
+        try:
+            return self.__cluster_run(cluster_id, 'spark', command)
+        except batch_error.BatchErrorException as e:
+            raise error.AztkError(helpers.format_batch_exception(e))
+
+    def cluster_copy(self, cluster_id: str, source_path: str, destination_path: str):
+        try:
+            return self.__cluster_copy(cluster_id, 'spark', source_path, destination_path)
+        except batch_error.BatchErrorException as e:
+            raise error.AztkError(helpers.format_batch_exception(e))
+
     '''
         job submission
     '''
@@ -151,7 +171,8 @@ class Client(BaseClient):
             start_task = create_cluster_helper.generate_cluster_start_task(self,
                                                                            zip_resource_files,
                                                                            job_configuration.gpu_enabled,
-                                                                           job_configuration.docker_repo)
+                                                                           job_configuration.docker_repo,
+                                                                           worker_on_master=job_configuration.worker_on_master)
 
             application_tasks = []
             for application in job_configuration.applications:
@@ -180,7 +201,7 @@ class Client(BaseClient):
             else:
                 raise error.AztkError("Jobs do not support both dedicated and low priority nodes." \
                                       " JobConfiguration fields max_dedicated_nodes and max_low_pri_nodes are mutually exclusive values.")
-            
+
             job = self.__submit_job(
                 job_configuration=job_configuration,
                 start_task=start_task,
@@ -188,7 +209,7 @@ class Client(BaseClient):
                 autoscale_formula=autoscale_formula,
                 software_metadata_key=software_metadata_key,
                 vm_image_model=vm_image,
-                application_metadata='\n'.join(application.name for application in job_configuration.applications))
+                application_metadata='\n'.join(application.name for application in (job_configuration.applications or [])))
 
             return models.Job(job)
 

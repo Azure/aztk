@@ -16,6 +16,7 @@ def get_ssh_key_or_prompt(ssh_key, username, password, secrets_config):
     ssh_key = get_ssh_key.get_user_public_key(ssh_key, secrets_config)
 
     if username is not None and password is None and ssh_key is None:
+        log.warn("It is reccomended to use an SSH key for user creation instead of a password.")
         for i in range(3):
             if i > 0:
                 log.error("Please try again.")
@@ -44,10 +45,10 @@ def print_cluster(client, cluster: aztk.spark.models.Cluster):
     log.info("| Low priority: %s", __pretty_low_pri_node_count(cluster))
     log.info("")
 
-    print_format = '{:<36}| {:<19} | {:<21}| {:<8}'
-    print_format_underline = '{:-<36}|{:-<21}|{:-<22}|{:-<8}'
-    log.info(print_format.format("Nodes", "State", "IP:Port", "Master"))
-    log.info(print_format_underline.format('', '', '', ''))
+    print_format = '|{:^36}| {:^19} | {:^21}| {:^10} | {:^8} |'
+    print_format_underline = '|{:-^36}|{:-^21}|{:-^22}|{:-^12}|{:-^10}|'
+    log.info(print_format.format("Nodes", "State", "IP:Port", "Dedicated", "Master"))
+    log.info(print_format_underline.format('', '', '', '', ''))
 
     if not cluster.nodes:
         return
@@ -58,6 +59,7 @@ def print_cluster(client, cluster: aztk.spark.models.Cluster):
                 node.id,
                 node.state.value,
                 '{}:{}'.format(remote_login_settings.ip_address, remote_login_settings.port),
+                "*" if node.is_dedicated else '',
                 '*' if node.id == cluster.master_node_id else '')
         )
     log.info('')
@@ -331,6 +333,7 @@ def print_applications(applications):
                 print_format.format(
                     name,
                     "scheduling",
+                    "-",
                     "-"
                 )
             )
@@ -342,7 +345,7 @@ def print_applications(applications):
                     application.name,
                     application.state,
                     utc_to_local(application.state_transition_time),
-                    application.exit_code
+                    application.exit_code if application.exit_code is not None else "-"
                 )
             )
     if warn_scheduling:

@@ -1,11 +1,20 @@
+import asyncio
+import concurrent.futures
+import sys
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
+
+import aztk.models as models
 import azure.batch.models as batch_models
 import azure.batch.models.batch_error as batch_error
 import aztk.utils.azure_api as azure_api
-import aztk.utils.helpers as helpers
 import aztk.utils.constants as constants
 import aztk.utils.get_ssh_key as get_ssh_key
-import aztk.models as models
+import aztk.utils.helpers as helpers
+import aztk.utils.ssh as ssh_lib
+import azure.batch.models as batch_models
+from azure.batch.models import batch_error
+from Crypto.PublicKey import RSA
 
 
 class Client:
@@ -68,6 +77,8 @@ class Client:
         if cluster_conf.subnet_id is not None:
             network_conf = batch_models.NetworkConfiguration(
                 subnet_id=cluster_conf.subnet_id)
+        auto_scale_formula = "$TargetDedicatedNodes={0}; $TargetLowPriorityNodes={1}".format(
+            cluster_conf.vm_count, cluster_conf.vm_low_pri_count)
 
         # Confiure the pool
         pool = batch_models.PoolAddParameter(
@@ -76,10 +87,11 @@ class Client:
                 image_reference=image_ref_to_use,
                 node_agent_sku_id=sku_to_use),
             vm_size=cluster_conf.vm_size,
-            target_dedicated_nodes=cluster_conf.vm_count,
-            target_low_priority_nodes=cluster_conf.vm_low_pri_count,
+            enable_auto_scale=True,
+            auto_scale_formula=auto_scale_formula,
+            auto_scale_evaluation_interval=timedelta(minutes=5),
             start_task=start_task,
-            enable_inter_node_communication=True,
+            enable_inter_node_communication=True if not cluster_conf.subnet_id else False,
             max_tasks_per_node=1,
             network_configuration=network_conf,
             metadata=[
@@ -145,6 +157,17 @@ class Client:
                     ssh_key, self.secrets_config),
                 expiry_time=datetime.now(timezone.utc) + timedelta(days=365)))
 
+    def __delete_user(self, pool_id: str, node_id: str, username: str) -> str:
+        """
+            Create a pool user
+            :param pool: the pool to add the user to
+            :param node: the node to add the user to
+            :param username: username of the user to add
+        """
+        # Delete a user on the given node
+        self.batch_client.compute_node.delete_user(pool_id, node_id, username)
+
+
     def __get_remote_login_settings(self, pool_id: str, node_id: str):
         """
         Get the remote_login_settings for node
@@ -156,6 +179,67 @@ class Client:
             pool_id, node_id)
         return models.RemoteLogin(ip_address=result.remote_login_ip_address, port=str(result.remote_login_port))
 
+    def __create_user_on_node(self, username, pool_id, node_id, ssh_key):
+        try:
+            self.__create_user(pool_id=pool_id, node_id=node_id, username=username, ssh_key=ssh_key)
+        except batch_error.BatchErrorException as error:
+            try:
+                self.__delete_user(pool_id, node_id, username)
+                self.__create_user(pool_id=pool_id, node_id=node_id, username=username, ssh_key=ssh_key)
+            except batch_error.BatchErrorException as error:
+                print(error)
+                raise error
+        return ssh_key
+
+    def __create_user_on_pool(self, username, pool_id, nodes):
+        ssh_key = RSA.generate(2048)
+        ssh_pub_key = ssh_key.publickey().exportKey('OpenSSH').decode('utf-8')
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            futures = {executor.submit(self.__create_user_on_node,
+                                       username,
+                                       pool_id,
+                                       node.id,
+                                       ssh_pub_key): node for node in nodes}
+            concurrent.futures.wait(futures)
+        return ssh_key
+
+    def __delete_user_on_pool(self, username, pool_id, nodes):
+        with concurrent.futures.ThreadPoolExecutor() as exector:
+            futures = [exector.submit(self.__delete_user, pool_id, node.id, username) for node in nodes]
+            concurrent.futures.wait(futures)
+
+
+    def __cluster_run(self, cluster_id, container_name, command):
+        pool, nodes = self.__get_pool_details(cluster_id)
+        nodes = [node for node in nodes]
+        cluster_nodes = [self.__get_remote_login_settings(pool.id, node.id) for node in nodes]
+        try:
+            ssh_key = self.__create_user_on_pool('aztk', pool.id, nodes)
+            asyncio.get_event_loop().run_until_complete(ssh_lib.clus_exec_command(command,
+                                                                                  container_name,
+                                                                                  'aztk',
+                                                                                  cluster_nodes,
+                                                                                  ssh_key=ssh_key.exportKey().decode('utf-8')))
+        except OSError as exc:
+            raise exc
+        finally:
+            self.__delete_user_on_pool('aztk', pool.id, nodes)
+
+    def __cluster_copy(self, cluster_id, container_name, source_path, destination_path):
+        pool, nodes = self.__get_pool_details(cluster_id)
+        nodes = [node for node in nodes]
+        cluster_nodes = [self.__get_remote_login_settings(pool.id, node.id) for node in nodes]
+        try:
+            ssh_key = self.__create_user_on_pool('aztk', pool.id, nodes)
+            asyncio.get_event_loop().run_until_complete(ssh_lib.clus_copy(container_name=container_name,
+                                                                          username='aztk',
+                                                                          nodes=cluster_nodes,
+                                                                          source_path=source_path,
+                                                                          destination_path=destination_path,
+                                                                          ssh_key=ssh_key.exportKey().decode('utf-8')))
+            self.__delete_user_on_pool('aztk', pool.id, nodes)
+        except (OSError, batch_error.BatchErrorException) as exc:
+            raise exc
     def __submit_job(self,
                      job_configuration,
                      start_task,
@@ -179,6 +263,12 @@ class Client:
             helpers.select_latest_verified_vm_image_with_node_agent_sku(
                 vm_image_model.publisher, vm_image_model.offer, vm_image_model.sku, self.batch_client)
 
+        # set up subnet if necessary
+        network_conf = None
+        if job_configuration.subnet_id:
+            network_conf = batch_models.NetworkConfiguration(
+                subnet_id=job_configuration.subnet_id)
+
         # set up a schedule for a recurring job
         auto_pool_specification = batch_models.AutoPoolSpecification(
             pool_lifetime_option=batch_models.PoolLifetimeOption.job_schedule,
@@ -195,6 +285,7 @@ class Client:
                 auto_scale_evaluation_interval=timedelta(minutes=5),
                 start_task=start_task,
                 enable_inter_node_communication=True,
+                network_configuration=network_conf,
                 max_tasks_per_node=1,
                 metadata=[
                     batch_models.MetadataItem(
@@ -260,6 +351,12 @@ class Client:
         raise NotImplementedError()
 
     def get_remote_login_settings(self, cluster_id, node_id):
+        raise NotImplementedError()
+
+    def cluster_run(self, cluster_id, command):
+        raise NotImplementedError()
+
+    def cluster_copy(self, cluster_id, source_path, destination_path):
         raise NotImplementedError()
 
     def submit_job(self, job):

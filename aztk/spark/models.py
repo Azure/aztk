@@ -1,3 +1,4 @@
+import io
 from Crypto.PublicKey import RSA
 from typing import List
 import aztk.models
@@ -39,8 +40,12 @@ class RemoteLogin(aztk.models.RemoteLogin):
     pass
 
 
+class File(aztk.models.File):
+    pass
+
+
 class SparkConfiguration():
-    def __init__(self, spark_defaults_conf: str = None, spark_env_sh: str = None, core_site_xml: str = None, jars: List[str]=None):
+    def __init__(self, spark_defaults_conf=None, spark_env_sh=None, core_site_xml=None, jars=None):
         self.spark_defaults_conf = spark_defaults_conf
         self.spark_env_sh = spark_env_sh
         self.core_site_xml = core_site_xml
@@ -62,29 +67,56 @@ class FileShare(aztk.models.FileShare):
     pass
 
 
+class UserConfiguration(aztk.models.UserConfiguration):
+    pass
+
+
+class ServicePrincipalConfiguration(aztk.models.ServicePrincipalConfiguration):
+    pass
+
+
+class SharedKeyConfiguration(aztk.models.SharedKeyConfiguration):
+    pass
+
+
+class DockerConfiguration(aztk.models.DockerConfiguration):
+    pass
+
+
 class ClusterConfiguration(aztk.models.ClusterConfiguration):
     def __init__(
             self,
             custom_scripts: List[CustomScript] = None,
             file_shares: List[FileShare] = None,
             cluster_id: str = None,
-            vm_count=None,
-            vm_low_pri_count=None,
+            vm_count=0,
+            vm_low_pri_count=0,
             vm_size=None,
             subnet_id=None,
-            docker_repo: str=None,
-            spark_configuration: SparkConfiguration = None):
-        super().__init__(custom_scripts=custom_scripts,
-              cluster_id=cluster_id,
-              vm_count=vm_count,
-              vm_low_pri_count=vm_low_pri_count,
-              vm_size=vm_size,
-              docker_repo=docker_repo,
-              subnet_id=subnet_id,
-              file_shares=file_shares
+            docker_repo: str = None,
+            user_configuration: UserConfiguration = None,
+            spark_configuration: SparkConfiguration = None,
+            worker_on_master: bool = None):
+        super().__init__(
+            custom_scripts=custom_scripts,
+            cluster_id=cluster_id,
+            vm_count=vm_count,
+            vm_low_pri_count=vm_low_pri_count,
+            vm_size=vm_size,
+            docker_repo=docker_repo,
+            subnet_id=subnet_id,
+            file_shares=file_shares,
+            user_configuration=user_configuration,
         )
         self.spark_configuration = spark_configuration
-        self.gpu_enabled = helpers.is_gpu_enabled(vm_size)
+        self.worker_on_master = worker_on_master
+
+    def gpu_enabled(self):
+        return helpers.is_gpu_enabled(self.vm_size)
+
+    def merge(self, other):
+        super().merge(other)
+        self._merge_attributes(other, ["worker_on_master"])
 
 
 class SecretsConfiguration(aztk.models.SecretsConfiguration):
@@ -102,9 +134,9 @@ class ApplicationConfiguration:
             application=None,
             application_args=None,
             main_class=None,
-            jars=[],
-            py_files=[],
-            files=[],
+            jars=None,
+            py_files=None,
+            files=None,
             driver_java_options=None,
             driver_library_path=None,
             driver_class_path=None,
@@ -117,9 +149,9 @@ class ApplicationConfiguration:
         self.application = application
         self.application_args = application_args
         self.main_class = main_class
-        self.jars = jars
-        self.py_files = py_files
-        self.files = files
+        self.jars = jars or []
+        self.py_files = py_files or []
+        self.files = files or []
         self.driver_java_options = driver_java_options
         self.driver_library_path = driver_library_path
         self.driver_class_path = driver_class_path
@@ -172,7 +204,9 @@ class JobConfiguration:
             spark_configuration=None,
             docker_repo=None,
             max_dedicated_nodes=None,
-            max_low_pri_nodes=None):
+            max_low_pri_nodes=None,
+            subnet_id=None,
+            worker_on_master=None):
         self.id = id
         self.applications = applications
         self.custom_scripts = custom_scripts
@@ -182,6 +216,8 @@ class JobConfiguration:
         self.docker_repo = docker_repo
         self.max_dedicated_nodes = max_dedicated_nodes
         self.max_low_pri_nodes = max_low_pri_nodes
+        self.subnet_id = subnet_id
+        self.worker_on_master = worker_on_master
 
 
 class JobState():
@@ -208,6 +244,7 @@ class Job():
             self.cluster = Cluster(pool, nodes)
         else:
             self.cluster = None
+
 
 class ApplicationLog():
     def __init__(self, name: str, cluster_id: str, log: str, total_bytes: int, application_state: batch_models.TaskState, exit_code: int):
