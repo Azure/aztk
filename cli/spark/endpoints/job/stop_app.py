@@ -19,7 +19,7 @@ def setup_parser(parser: argparse.ArgumentParser):
 
 
 def execute(args: typing.NamedTuple):
-    spark_client = aztk.spark.Client(config.load_aztk_screts())
+    spark_client = aztk.spark.Client(config.load_aztk_secrets())
 
     if spark_client.stop_job_app(args.job_id, args.app_name):
         log.info("Stopped app {0}".format(args.app_name))

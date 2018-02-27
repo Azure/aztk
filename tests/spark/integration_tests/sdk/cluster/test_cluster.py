@@ -19,7 +19,7 @@ base_cluster_id = "cluster-{}".format(current_time)
 
 # load secrets
 # note: this assumes secrets are set up in .aztk/secrets
-spark_client = aztk.spark.Client(config.load_aztk_screts())
+spark_client = aztk.spark.Client(config.load_aztk_secrets())
 
 
 # helper method

@@ -15,6 +15,6 @@ def setup_parser(parser: argparse.ArgumentParser):
 
 
 def execute(args: typing.NamedTuple):
-    spark_client = aztk.spark.Client(config.load_aztk_screts())
+    spark_client = aztk.spark.Client(config.load_aztk_secrets())
     app_logs = spark_client.get_job_application_log(args.job_id, args.app_name)
     print(app_logs.log)

@@ -14,7 +14,7 @@ base_job_id = "job-{}".format(time)
 
 # load secrets
 # note: this assumes secrets are set up in .aztk/secrets
-spark_client = aztk.spark.Client(config.load_aztk_screts())
+spark_client = aztk.spark.Client(config.load_aztk_secrets())
 
 
 def test_submit_job():

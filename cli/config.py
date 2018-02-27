@@ -13,7 +13,7 @@ from aztk.spark.models import (
 )
 from aztk.models.plugins.internal import PluginReference
 
-def load_aztk_screts() -> SecretsConfiguration:
+def load_aztk_secrets() -> SecretsConfiguration:
     """
     Loads aztk from .aztk/secrets.yaml files(local and global)
     """
