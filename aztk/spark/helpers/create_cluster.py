@@ -211,7 +211,7 @@ def generate_cluster_start_task(
     ] + __get_docker_credentials(spark_client)
 
     # start task command
-    command = __cluster_install_cmd(zip_resource_file, gpu_enabled, docker_repo, worker_on_master, file_shares, mixed_mode)
+    command = __cluster_install_cmd(zip_resource_file, gpu_enabled, docker_repo, plugins, worker_on_master, file_shares, mixed_mode)
 
     return batch_models.StartTask(
         command_line=helpers.wrap_commands_in_shell(command),
