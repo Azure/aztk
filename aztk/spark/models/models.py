@@ -82,6 +82,9 @@ class SharedKeyConfiguration(aztk.models.SharedKeyConfiguration):
 class DockerConfiguration(aztk.models.DockerConfiguration):
     pass
 
+class PluginConfiguration(aztk.models.PluginConfiguration):
+    pass
+
 
 class ClusterConfiguration(aztk.models.ClusterConfiguration):
     def __init__(

@@ -15,7 +15,7 @@ size: 2
 username: spark
 
 # docker_repo: <name of docker image repo (for more information, see https://github.com/Azure/aztk/blob/master/docs/12-docker-image.md)>
-docker_repo: 
+docker_repo:
 
 # # optional custom scripts to run on the Spark master, Spark worker or all nodes in the cluster
 # custom_scripts:
@@ -26,6 +26,12 @@ docker_repo:
 
 # To add your cluster to a virtual network provide the full arm resoruce id below
 # subnet_id: /subscriptions/********-****-****-****-************/resourceGroups/********/providers/Microsoft.Network/virtualNetworks/*******/subnets/******
+
+# To define plugins
+# plugins:
+#   - name: rstudio_server
+#     args:
+#       version: 1.2.3
 
 # wait: <true/false>
 wait: false

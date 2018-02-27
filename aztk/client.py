@@ -1,6 +1,7 @@
 import asyncio
 import concurrent.futures
 import sys
+import yaml
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 
@@ -24,6 +25,7 @@ class Client:
         azure_api.validate_secrets(secrets_config)
         self.batch_client = azure_api.make_batch_client(secrets_config)
         self.blob_client = azure_api.make_blob_client(secrets_config)
+
 
     '''
     General Batch Operations
@@ -54,7 +56,7 @@ class Client:
 
         return job_exists or pool_exists
 
-    def __create_pool_and_job(self, cluster_conf, software_metadata_key: str, start_task, VmImageModel):
+    def __create_pool_and_job(self, cluster_conf: models.ClusterConfiguration, software_metadata_key: str, start_task, VmImageModel):
         """
             Create a pool and job
             :param cluster_conf: the configuration object used to create the cluster
@@ -64,6 +66,7 @@ class Client:
             :param VmImageModel: the type of image to provision for the cluster
             :param wait: wait until the cluster is ready
         """
+        helpers.save_cluster_config(cluster_conf, self.blob_client)
         # reuse pool_id as job_id
         pool_id = cluster_conf.cluster_id
         job_id = cluster_conf.cluster_id

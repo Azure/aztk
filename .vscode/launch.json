@@ -9,10 +9,10 @@
           "type": "python",
           "request": "launch",
           "stopOnEntry": false,
-          "internalConsoleOptions": "openOnSessionStart",
           "pythonPath": "${config:python.pythonPath}",
           "program": "${workspaceFolder}/cli/entrypoint.py",
           "cwd": "${workspaceFolder}",
+          "console": "integratedTerminal",
           "args": [
             "spark", "cluster", "list"
           ],
@@ -27,9 +27,9 @@
           "type": "python",
           "request": "launch",
           "stopOnEntry": false,
-          "internalConsoleOptions": "openOnSessionStart",
           "pythonPath": "${config:python.pythonPath}",
           "program": "${workspaceFolder}/cli/entrypoint.py",
+          "console": "integratedTerminal",
           "cwd": "${workspaceFolder}",
           "args": [
             "spark", "cluster", "create", "--id", "spark-debug"

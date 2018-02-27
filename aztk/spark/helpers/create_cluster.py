@@ -18,6 +18,7 @@ def __docker_run_cmd(docker_repo: str = None,
                      gpu_enabled: bool = False,
                      worker_on_master: bool = True,
                      file_mounts = None,
+                     plugins = None,
                      mixed_mode = False) -> str:
     """
         Build the docker run command by setting up the environment variables
@@ -60,23 +61,18 @@ def __docker_run_cmd(docker_repo: str = None,
     cmd.add_option('-e', 'SPARK_WORKER_UI_PORT=$SPARK_WORKER_UI_PORT')
     cmd.add_option('-e', 'SPARK_CONTAINER_NAME=$SPARK_CONTAINER_NAME')
     cmd.add_option('-e', 'SPARK_SUBMIT_LOGS_FILE=$SPARK_SUBMIT_LOGS_FILE')
-    cmd.add_option('-e', 'SPARK_JUPYTER_PORT=$SPARK_JUPYTER_PORT')
     cmd.add_option('-e', 'SPARK_JOB_UI_PORT=$SPARK_JOB_UI_PORT')
     cmd.add_option('-p', '8080:8080')       # Spark Master UI
     cmd.add_option('-p', '7077:7077')       # Spark Master
     cmd.add_option('-p', '7337:7337')       # Spark Shuffle Service
     cmd.add_option('-p', '4040:4040')       # Job UI
-    cmd.add_option('-p', '8888:8888')       # Jupyter UI
-    cmd.add_option('-p', '8787:8787')       # Rstudio Server
     cmd.add_option('-p', '18080:18080')     # Spark History Server UI
     cmd.add_option('-p', '3022:3022')       # Docker SSH
-    cmd.add_option('-p', '8020:8020')       # Namenode IPC: ClientProtocol
-    cmd.add_option('-p', '9000:9000')       # Namenode IPC: ClientProtocol
-    cmd.add_option('-p', '50010:50010')     # Datanode http data transfer
-    cmd.add_option('-p', '50020:50020')     # Datanode IPC metaata operations
-    cmd.add_option('-p', '50070:50070')     # Namenode WebUI
-    cmd.add_option('-p', '50075:50075')     # DataNode WebUI
-    cmd.add_option('-p', '50090:50090')     # Secondary NameNode http address
+    if plugins:
+        for plugin in plugins:
+            for port in plugin.ports:
+                cmd.add_option('-p', '{0}:{1}'.format(port.internal, port.internal))       # Jupyter UI
+
     cmd.add_option('-d', docker_repo)
     cmd.add_argument('/bin/bash /mnt/batch/tasks/startup/wd/docker_main.sh')
 
@@ -133,6 +129,7 @@ def __get_secrets_env(spark_client):
 def __cluster_install_cmd(zip_resource_file: batch_models.ResourceFile,
                           gpu_enabled: bool,
                           docker_repo: str = None,
+                          plugins = None,
                           worker_on_master: bool = True,
                           file_mounts = None,
                           mixed_mode: bool = False):
@@ -170,7 +167,7 @@ def __cluster_install_cmd(zip_resource_file: batch_models.ResourceFile,
             constants.DOCKER_SPARK_CONTAINER_NAME,
             gpu_enabled,
             docker_repo,
-            __docker_run_cmd(docker_repo, gpu_enabled, worker_on_master, file_mounts, mixed_mode)),
+            __docker_run_cmd(docker_repo, gpu_enabled, worker_on_master, file_mounts, plugins, mixed_mode)),
     ]
 
     commands = shares + setup
@@ -182,6 +179,7 @@ def generate_cluster_start_task(
         gpu_enabled: bool,
         docker_repo: str = None,
         file_shares: List[aztk_models.FileShare] = None,
+        plugins: List[aztk_models.PluginConfiguration] = None,
         mixed_mode: bool = False,
         worker_on_master: bool = True):
     """
@@ -193,9 +191,7 @@ def generate_cluster_start_task(
     resource_files = [zip_resource_file]
     spark_web_ui_port = constants.DOCKER_SPARK_WEB_UI_PORT
     spark_worker_ui_port = constants.DOCKER_SPARK_WORKER_UI_PORT
-    spark_jupyter_port = constants.DOCKER_SPARK_JUPYTER_PORT
     spark_job_ui_port = constants.DOCKER_SPARK_JOB_UI_PORT
-    spark_rstudio_server_port = constants.DOCKER_SPARK_RSTUDIO_SERVER_PORT
 
     spark_container_name = constants.DOCKER_SPARK_CONTAINER_NAME
     spark_submit_logs_file = constants.SPARK_SUBMIT_LOGS_FILE
@@ -207,15 +203,11 @@ def generate_cluster_start_task(
         batch_models.EnvironmentSetting(
             name="SPARK_WORKER_UI_PORT", value=spark_worker_ui_port),
         batch_models.EnvironmentSetting(
-            name="SPARK_JUPYTER_PORT", value=spark_jupyter_port),
-        batch_models.EnvironmentSetting(
             name="SPARK_JOB_UI_PORT", value=spark_job_ui_port),
         batch_models.EnvironmentSetting(
             name="SPARK_CONTAINER_NAME", value=spark_container_name),
         batch_models.EnvironmentSetting(
             name="SPARK_SUBMIT_LOGS_FILE", value=spark_submit_logs_file),
-        batch_models.EnvironmentSetting(
-            name="SPARK_RSTUDIO_SERVER_PORT", value=spark_rstudio_server_port),
     ] + __get_docker_credentials(spark_client)
 
     # start task command

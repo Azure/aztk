@@ -5,13 +5,17 @@ import datetime
 import logging
 import zipfile
 import yaml
+import json
 from pathlib import Path
 from aztk.utils import constants
 from aztk.utils import helpers
+from aztk.error import InvalidCustomScriptError
 import aztk.spark.models
 from Crypto.PublicKey import RSA
 from Crypto.Random import get_random_bytes
 from Crypto.Cipher import AES, PKCS1_OAEP
+from aztk.spark.models import ClusterConfiguration, PluginConfiguration
+from typing import List
 
 root = constants.ROOT_PATH
 
@@ -88,12 +92,16 @@ def __add_custom_scripts(zipf, custom_scripts):
     for index, custom_script in enumerate(custom_scripts):
         if isinstance(custom_script.script, (str, bytes)):
             new_file_name = str(index) + '_' + os.path.basename(custom_script.script)
-            with io.open(custom_script.script, 'r') as f:
-                zipf.writestr(os.path.join('custom-scripts', new_file_name), f.read().replace('\r\n', '\n'))
+            try:
+                with io.open(custom_script.script, 'r') as f:
+                    zipf.writestr(os.path.join('custom-scripts', new_file_name), f.read().replace('\r\n', '\n'))
+            except FileNotFoundError:
+                raise InvalidCustomScriptError("Custom script '{0}' doesn't exists.".format(custom_script.script))
         elif isinstance(custom_script.script, aztk.spark.models.File):
             new_file_name = str(index) + '_' + custom_script.script.name
             zipf.writestr(os.path.join('custom-scripts', new_file_name), custom_script.script.payload.getvalue())
         data.append(dict(script=new_file_name, runOn=str(custom_script.run_on)))
+
 
     zipf.writestr(os.path.join('custom-scripts', 'custom-scripts.yaml'), yaml.dump(data, default_flow_style=False))
 
@@ -106,13 +114,15 @@ def __add_file_to_zip(zipf, file_path, zip_file_path, binary):
     zipf = zip_file_to_dir(file_path, zip_file_path, zipf, binary)
     return zipf
 
+
 def __add_str_to_zip(zipf, payload, zipf_file_path=None):
     if not payload:
         return zipf
     zipf.writestr(zipf_file_path, payload)
     return zipf
 
-def zip_scripts(blob_client, container_id, custom_scripts, spark_configuration, user_conf=None):
+
+def zip_scripts(blob_client, container_id, custom_scripts, spark_configuration, user_conf=None, plugins=None):
     zipf = __create_zip()
     if custom_scripts:
         zipf = __add_custom_scripts(zipf, custom_scripts)
@@ -127,6 +137,9 @@ def zip_scripts(blob_client, container_id, custom_scripts, spark_configuration, 
         if spark_configuration.jars:
             for jar in spark_configuration.jars:
                 zipf = __add_file_to_zip(zipf, jar, 'jars', binary=True)
+
+    if plugins:
+        zipf = __add_plugins(zipf, plugins)
 
     if user_conf:
         encrypted_aes_session_key, cipher_aes_nonce, tag, ciphertext = encrypt_password(spark_configuration.ssh_key_pair['pub_key'], user_conf.password)
@@ -161,3 +174,20 @@ def encrypt_password(ssh_pub_key, password):
     cipher_aes = AES.new(session_key, AES.MODE_EAX)
     ciphertext, tag = cipher_aes.encrypt_and_digest(password.encode())
     return [encrypted_aes_session_key, cipher_aes.nonce, tag, ciphertext]
+
+def __add_plugins(zipf, plugins: List[PluginConfiguration]):
+    data = []
+    for plugin in plugins:
+        for file in plugin.files:
+            zipf = __add_str_to_zip(zipf, file.content(), 'plugins/{0}/{1}'.format(plugin.name, file.target))
+        if plugin.execute:
+            data.append(dict(
+                name=plugin.name,
+                execute='{0}/{1}'.format(plugin.name, plugin.execute),
+                args=plugin.args,
+                env=plugin.env,
+                runOn=plugin.run_on.value,
+            ))
+
+    zipf.writestr(os.path.join('plugins', 'plugins-manifest.yaml'), yaml.dump(data))
+    return zipf

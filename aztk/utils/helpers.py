@@ -4,6 +4,7 @@ import io
 import os
 import time
 import re
+import azure.common
 import azure.batch.batch_service_client as batch
 import azure.batch.batch_auth as batch_auth
 import azure.batch.models as batch_models
@@ -12,6 +13,8 @@ from aztk.version import __version__
 from aztk.utils import constants
 from aztk import error
 import aztk.models
+import yaml
+import logging
 
 _STANDARD_OUT_FILE_NAME = 'stdout.txt'
 _STANDARD_ERROR_FILE_NAME = 'stderr.txt'
@@ -38,8 +41,10 @@ def wait_for_tasks_to_complete(job_id, batch_client):
     while True:
         tasks = batch_client.task.list(job_id)
 
-        incomplete_tasks = [task for task in tasks if
-                            task.state != batch_models.TaskState.completed]
+        incomplete_tasks = [
+            task for task in tasks
+            if task.state != batch_models.TaskState.completed
+        ]
         if not incomplete_tasks:
             return
         time.sleep(5)
@@ -61,9 +66,13 @@ def wait_for_task_to_complete(job_id: str, task_id: str, batch_client):
             return
 
 
-def upload_text_to_container(container_name: str, application_name: str, content: str, file_path: str, blob_client=None) -> batch_models.ResourceFile:
+def upload_text_to_container(container_name: str,
+                             application_name: str,
+                             content: str,
+                             file_path: str,
+                             blob_client=None) -> batch_models.ResourceFile:
     blob_name = file_path
-    blob_path = application_name + '/' + blob_name # + '/' + time_stamp + '/' + blob_name
+    blob_path = application_name + '/' + blob_name  # + '/' + time_stamp + '/' + blob_name
     blob_client.create_container(container_name, fail_on_exist=False)
     blob_client.create_blob_from_text(container_name, blob_path, content)
 
@@ -73,12 +82,10 @@ def upload_text_to_container(container_name: str, application_name: str, content
         permission=blob.BlobPermissions.READ,
         expiry=datetime.datetime.utcnow() + datetime.timedelta(days=365))
 
-    sas_url = blob_client.make_blob_url(container_name,
-                                              blob_path,
-                                              sas_token=sas_token)
+    sas_url = blob_client.make_blob_url(
+        container_name, blob_path, sas_token=sas_token)
 
-    return batch_models.ResourceFile(file_path=blob_name,
-                                     blob_source=sas_url)
+    return batch_models.ResourceFile(file_path=blob_name, blob_source=sas_url)
 
 
 def upload_file_to_container(container_name,
@@ -109,12 +116,9 @@ def upload_file_to_container(container_name,
     if not node_path:
         node_path = blob_name
 
-    blob_client.create_container(container_name,
-                                 fail_on_exist=False)
+    blob_client.create_container(container_name, fail_on_exist=False)
 
-    blob_client.create_blob_from_path(container_name,
-                                      blob_path,
-                                      file_path)
+    blob_client.create_blob_from_path(container_name, blob_path, file_path)
 
     sas_token = blob_client.generate_blob_shared_access_signature(
         container_name,
@@ -122,12 +126,10 @@ def upload_file_to_container(container_name,
         permission=blob.BlobPermissions.READ,
         expiry=datetime.datetime.utcnow() + datetime.timedelta(days=7))
 
-    sas_url = blob_client.make_blob_url(container_name,
-                                        blob_path,
-                                        sas_token=sas_token)
+    sas_url = blob_client.make_blob_url(
+        container_name, blob_path, sas_token=sas_token)
 
-    return batch_models.ResourceFile(file_path=node_path,
-                                     blob_source=sas_url)
+    return batch_models.ResourceFile(file_path=node_path, blob_source=sas_url)
 
 
 def create_pool_if_not_exist(pool, batch_client):
@@ -142,7 +144,9 @@ def create_pool_if_not_exist(pool, batch_client):
         batch_client.pool.add(pool)
     except batch_models.BatchErrorException as e:
         if e.error.code == "PoolExists":
-            raise error.AztkError("A cluster with the same id already exists. Use a different id or delete the existing cluster")
+            raise error.AztkError(
+                "A cluster with the same id already exists. Use a different id or delete the existing cluster"
+            )
         else:
             raise
     return True
@@ -169,8 +173,8 @@ def wait_for_all_nodes_state(pool, node_state, batch_client):
         nodes = list(batch_client.compute_node.list(pool.id))
 
         totalNodes = pool.target_dedicated_nodes + pool.target_low_priority_nodes
-        if (len(nodes) >= totalNodes and
-                all(node.state in node_state for node in nodes)):
+        if (len(nodes) >= totalNodes
+                and all(node.state in node_state for node in nodes)):
             return nodes
         time.sleep(1)
 
@@ -195,9 +199,9 @@ def select_latest_verified_vm_image_with_node_agent_sku(
     skus_to_use = [
         (sku, image_ref) for sku in node_agent_skus for image_ref in sorted(
             sku.verified_image_references, key=lambda item: item.sku)
-        if image_ref.publisher.lower() == publisher.lower() and
-        image_ref.offer.lower() == offer.lower() and
-        image_ref.sku.startswith(sku_starts_with)
+        if image_ref.publisher.lower() == publisher.lower()
+        and image_ref.offer.lower() == offer.lower()
+        and image_ref.sku.startswith(sku_starts_with)
     ]
 
     # skus are listed in reverse order, pick first for latest
@@ -205,9 +209,12 @@ def select_latest_verified_vm_image_with_node_agent_sku(
     return (sku_to_use.id, image_ref_to_use)
 
 
-def create_sas_token(
-        container_name, blob_name, permission, blob_client, expiry=None,
-        timeout=None):
+def create_sas_token(container_name,
+                     blob_name,
+                     permission,
+                     blob_client,
+                     expiry=None,
+                     timeout=None):
     """
     Create a blob sas token
     :param blob_client: The storage block blob client to use.
@@ -230,9 +237,12 @@ def create_sas_token(
         container_name, blob_name, permission=permission, expiry=expiry)
 
 
-def upload_blob_and_create_sas(
-        container_name, blob_name, file_name, expiry, blob_client,
-        timeout=None):
+def upload_blob_and_create_sas(container_name,
+                               blob_name,
+                               file_name,
+                               expiry,
+                               blob_client,
+                               timeout=None):
     """
     Uploads a file from local disk to Azure Storage and creates a SAS for it.
     :param blob_client: The storage block blob client to use.
@@ -247,14 +257,9 @@ def upload_blob_and_create_sas(
     :return: A SAS URL to the blob with the specified expiry time.
     :rtype: str
     """
-    blob_client.create_container(
-        container_name,
-        fail_on_exist=False)
+    blob_client.create_container(container_name, fail_on_exist=False)
 
-    blob_client.create_blob_from_path(
-        container_name,
-        blob_name,
-        file_name)
+    blob_client.create_blob_from_path(container_name, blob_name, file_name)
 
     sas_token = create_sas_token(
         container_name,
@@ -265,9 +270,7 @@ def upload_blob_and_create_sas(
         timeout=timeout)
 
     sas_url = blob_client.make_blob_url(
-        container_name,
-        blob_name,
-        sas_token=sas_token)
+        container_name, blob_name, sas_token=sas_token)
 
     return sas_url
 
@@ -292,8 +295,7 @@ def get_connection_info(pool_id, node_id, batch_client):
     :param str pool_id: The pool id to look up
     :param str node_id: The node id to look up
     """
-    rls = batch_client.compute_node.get_remote_login_settings(
-        pool_id, node_id)
+    rls = batch_client.compute_node.get_remote_login_settings(pool_id, node_id)
     remote_ip = rls.remote_login_ip_address
     ssh_port = str(rls.remote_login_port)
     return (remote_ip, ssh_port)
@@ -313,7 +315,7 @@ def get_cluster_total_current_nodes(pool):
     return pool.current_dedicated_nodes + pool.current_low_priority_nodes
 
 
-def normalize_path(path: str)-> str:
+def normalize_path(path: str) -> str:
     """
     Convert a path in a path that will work well with blob storage and unix
     It will replace \ with / and remove relative .
@@ -326,7 +328,8 @@ def normalize_path(path: str)-> str:
         return path
 
 
-def get_file_properties(job_id: str, task_id: str, file_path: str, batch_client):
+def get_file_properties(job_id: str, task_id: str, file_path: str,
+                        batch_client):
     raw = batch_client.file.get_properties_from_task(
         job_id, task_id, file_path, raw=True)
 
@@ -374,3 +377,26 @@ def format_batch_exception(batch_exception):
     l.append("-------------------------------------------")
 
     return '\n'.join(l)
+
+
+def save_cluster_config(cluster_config, blob_client):
+    blob_path = "config.yaml"
+    content = yaml.dump(cluster_config)
+    container_name = cluster_config.cluster_id
+    blob_client.create_container(container_name, fail_on_exist=False)
+    blob_client.create_blob_from_text(container_name, blob_path, content)
+
+
+def read_cluster_config(cluster_id: str, blob_client: blob.BlockBlobService):
+    blob_path = "config.yaml"
+    try:
+        result = blob_client.get_blob_to_text(cluster_id, blob_path)
+        return yaml.load(result.content)
+    except azure.common.AzureMissingResourceHttpError:
+        logging.warn(
+            "Cluster %s doesn't have cluster configuration in storage",
+            cluster_id)
+    except yaml.YAMLError:
+        logging.warn(
+            "Cluster %s contains invalid cluster configuration in blob",
+            cluster_id)

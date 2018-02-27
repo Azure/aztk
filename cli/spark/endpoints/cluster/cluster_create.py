@@ -69,7 +69,7 @@ def execute(args: typing.NamedTuple):
     else:
         cluster_conf.user_configuration = None
 
-    print_cluster_conf(cluster_conf, wait)
+    utils.print_cluster_conf(cluster_conf, wait)
     spinner = utils.Spinner()
     spinner.start()
 
@@ -86,23 +86,3 @@ def execute(args: typing.NamedTuple):
     else:
         log.info("Cluster %s is being provisioned.", cluster.id)
 
-
-def print_cluster_conf(cluster_conf: ClusterConfiguration, wait: bool):
-    user_configuration = cluster_conf.user_configuration
-
-    log.info("-------------------------------------------")
-    log.info("spark cluster id:        %s", cluster_conf.cluster_id)
-    log.info("spark cluster size:      %s",
-             cluster_conf.vm_count + cluster_conf.vm_low_pri_count)
-    log.info(">        dedicated:      %s", cluster_conf.vm_count)
-    log.info(">     low priority:      %s", cluster_conf.vm_low_pri_count)
-    log.info("spark cluster vm size:   %s", cluster_conf.vm_size)
-    log.info("custom scripts:          %s", len(cluster_conf.custom_scripts) if cluster_conf.custom_scripts else 0)
-    log.info("subnet ID:               %s", cluster_conf.subnet_id)
-    log.info("file shares:             %s", len(cluster_conf.file_shares) if cluster_conf.file_shares is not None else 0)
-    log.info("docker repo name:        %s", cluster_conf.docker_repo)
-    log.info("wait for cluster:        %s", wait)
-    log.info("username:                %s", user_configuration.username)
-    if user_configuration.password:
-        log.info("Password: %s", '*' * len(user_configuration.password))
-    log.info("-------------------------------------------")

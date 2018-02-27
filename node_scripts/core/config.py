@@ -31,7 +31,6 @@ is_dedicated = os.environ["AZ_BATCH_NODE_IS_DEDICATED"]
 
 spark_web_ui_port = os.environ["SPARK_WEB_UI_PORT"]
 spark_worker_ui_port = os.environ["SPARK_WORKER_UI_PORT"]
-spark_jupyter_port = os.environ["SPARK_JUPYTER_PORT"]
 spark_job_ui_port = os.environ["SPARK_JOB_UI_PORT"]
 
 storage_account_name = os.environ["STORAGE_ACCOUNT_NAME"]

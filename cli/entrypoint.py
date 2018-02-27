@@ -10,7 +10,7 @@ import azure.batch.models.batch_error as batch_error
 import aztk
 from cli import logger, log, utils, constants
 from cli.spark.endpoints import spark
-
+from . import plugins
 
 def main():
     parser = argparse.ArgumentParser(prog=constants.CLI_EXE)
@@ -22,8 +22,11 @@ def main():
     subparsers.required = True
     spark_parser = subparsers.add_parser(
         "spark", help="Commands to run spark jobs")
+    plugins_parser = subparsers.add_parser(
+        "plugins", help="Commands to list and view plugins")
 
     spark.setup_parser(spark_parser)
+    plugins.setup_parser(plugins_parser)
     args = parser.parse_args()
 
     parse_common_args(args)
@@ -33,7 +36,7 @@ def main():
     except batch_error.BatchErrorException as e:
         utils.print_batch_exception(e)
     except aztk.error.AztkError as e:
-        log.error(e.message)
+        log.error(str(e))
 
 
 def setup_common_args(parser: argparse.ArgumentParser):
@@ -54,6 +57,7 @@ def parse_common_args(args: NamedTuple):
 def run_software(args: NamedTuple):
     softwares = {}
     softwares[aztk.models.Software.spark] = spark.execute
+    softwares["plugins"] = plugins.execute
 
     func = softwares[args.software]
     func(args)
