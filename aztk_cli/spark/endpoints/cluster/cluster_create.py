@@ -3,9 +3,9 @@ import argparse
 import typing
 import aztk.spark
 from aztk.spark.models import ClusterConfiguration, UserConfiguration
-from cli import log
-from cli.config import load_aztk_spark_config
-from cli import utils, config
+from aztk_cli import log
+from aztk_cli.config import load_aztk_spark_config
+from aztk_cli import utils, config
 
 
 def setup_parser(parser: argparse.ArgumentParser):

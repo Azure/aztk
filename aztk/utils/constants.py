@@ -43,7 +43,7 @@ CUSTOM_SCRIPTS_DEST = os.path.join(ROOT_PATH, 'node_scripts', 'custom-scripts')
 """
     Source and destination paths for spark init
 """
-INIT_DIRECTORY_SOURCE = os.path.join(ROOT_PATH, 'config')
+INIT_DIRECTORY_SOURCE = os.path.join(ROOT_PATH, "aztk_cli", 'config')
 LOCAL_INIT_DIRECTORY_DEST = os.path.join(os.getcwd(), '.aztk')
 GLOBAL_INIT_DIRECTORY_DEST = os.path.join(HOME_DIRECTORY_PATH, '.aztk')
 """

@@ -1,7 +1,7 @@
 language: python
 python:
-  - "3.5"
-  - "3.6"
+  - 3.5
+  - 3.6
 
 install:
   - pip install -r requirements.txt
@@ -13,4 +13,14 @@ script:
 
 branches:
   only:
-  - master
+    - master
+
+deploy:
+  provider: pypi
+  distributions: "sdist bdist_wheel"
+  user: aztk
+  password:
+    secure: j/mwA+hWudujDZ+JkgN3hDBUcIH3Vt1SWsvxnyUadErFsi9S9bW8OZ8kOp3R8yj73pnaENADmvDPjBt6w39b3h7l/EmNYlEdsAuPBMmaNQ0+fmPiKLCcALVIt/Odxdc+a1p2p+F3HEatqMCkaSRUs9gcHSYA1P57rt7y6i28xrCTt1ayQrdOZofgyAx4egocFQlgXgFpQIO3vNXySmc5HaIJF8h84CUKvLG/jv9bHgDoT7n2F00sQQV/tLbXdWEA2LcJFN5q4gjk3AwFtofTtMzlk3IE3y3qp9DagWbdsKoy9+b31lypVDBiIp/N+kCm/pwYDJXyG0H7U1pev2F8K/f4xF2x0AJDJJamLczAY4Ac4AMPImlI3cCpSS6htQhb+i5+KeEUW2tm+xGmdprOSto2712C4TNMna25x+WZteuPmRGYTmmDxGSeD769lE6TMGqrJTlmpkzndJiyp8ek/86hJPJUQoPfDadWdIdcA4wCjpXFBach4DYEItKvYoIk/KfK3wdqp3Lbs+MhT+JhuXGR0RRWlkCROiIo48TwQ716ddvjy2PPxwxNhplu3BdyEXLEDGN9EnEL+3L5P0GELhB4+KstjXSbECBYzULJ1+4kzvrdSB3K9F41stpT7x9PN9mK0t9FrVpXWbNozuJqkCvVVtz2ZSJ+20kvSuI1TPA=
+  on:
+    python: 3.6
+    tags: true

@@ -5,7 +5,7 @@ from azure.batch.models import BatchErrorException
 
 import aztk.spark
 from aztk.error import AztkError
-from cli import config
+from aztk_cli import config
 
 dt = datetime.now()
 time = dt.microsecond

@@ -9,7 +9,7 @@ import aztk.spark
 import pytest
 from aztk.utils import constants
 from aztk.error import AztkError
-from cli import config
+from aztk_cli import config
 
 
 # base cluster name

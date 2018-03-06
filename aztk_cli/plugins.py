@@ -1,6 +1,6 @@
 import argparse
 import typing
-from cli import log
+from aztk_cli import log
 from aztk.models.plugins.internal import plugin_manager
 
 

@@ -1,7 +1,7 @@
 import argparse
 import typing
 import aztk.spark
-from cli import config
+from aztk_cli import config
 
 
 def setup_parser(parser: argparse.ArgumentParser):

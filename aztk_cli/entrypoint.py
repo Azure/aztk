@@ -8,8 +8,8 @@ import argparse
 from typing import NamedTuple
 import azure.batch.models.batch_error as batch_error
 import aztk
-from cli import logger, log, utils, constants
-from cli.spark.endpoints import spark
+from aztk_cli import logger, log, utils, constants
+from aztk_cli.spark.endpoints import spark
 from . import plugins
 
 def main():

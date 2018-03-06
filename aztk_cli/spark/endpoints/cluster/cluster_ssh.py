@@ -1,8 +1,8 @@
 import argparse
 import typing
-from cli import log
-from cli import utils, config
-from cli.config import SshConfig
+from aztk_cli import log
+from aztk_cli import utils, config
+from aztk_cli.config import SshConfig
 import aztk
 import azure.batch.models.batch_error as batch_error
 from aztk.models import ClusterConfiguration

@@ -2,8 +2,8 @@ import argparse
 import typing
 import time
 import aztk.spark
-from cli import config
-from cli import utils
+from aztk_cli import config
+from aztk_cli import utils
 
 def setup_parser(_: argparse.ArgumentParser):
     # No arguments for list yet

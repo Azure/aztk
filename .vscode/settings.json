@@ -5,7 +5,8 @@
         "bin/**": true
     },
     "files.exclude": {
-        "**/__pycache__": true
+        "**/__pycache__": true,
+        "*.egg-info": true,
     },
     "python.autoComplete.extraPaths": [
         "${workspaceRoot}/node_scripts"

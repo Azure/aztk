@@ -1,6 +1,6 @@
 import os
 import yaml
-from cli import log
+from aztk_cli import log
 import aztk.spark
 from aztk.spark.models import (
     SecretsConfiguration,

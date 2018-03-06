@@ -1,14 +1,14 @@
 import argparse
 import typing
-import aztk
-from cli import log, config
+import aztk.spark
+from aztk_cli import log, config
 
 
 def setup_parser(parser: argparse.ArgumentParser):
     parser.add_argument('--id',
-                        dest='cluster_id',
+                        dest='job_id',
                         required=True,
-                        help='The unique id of your spark cluster')
+                        help='The unique id of your AZTK Job')
     parser.add_argument('--force',
                         dest='force',
                         required=False,
@@ -19,16 +19,19 @@ def setup_parser(parser: argparse.ArgumentParser):
 
 def execute(args: typing.NamedTuple):
     spark_client = aztk.spark.Client(config.load_aztk_secrets())
-    cluster_id = args.cluster_id
+    job_id = args.job_id
 
     if not args.force:
+        # check if job exists before prompting for confirmation
+        spark_client.get_job(job_id)
+
         confirmation_cluster_id = input("Please confirm the id of the cluster you wish to delete: ")
 
-        if confirmation_cluster_id  != cluster_id:
+        if confirmation_cluster_id != job_id:
             log.error("Confirmation cluster id does not match. Please try again.")
             return
 
-    if spark_client.delete_cluster(cluster_id):
-        log.info("Deleting cluster %s", cluster_id)
+    if spark_client.delete_job(job_id):
+        log.info("Deleting Job %s", job_id)
     else:
-        log.error("Cluster with id '%s' doesn't exist or was already deleted.", cluster_id)
+        log.error("Job with id '%s' doesn't exist or was already deleted.", job_id)
