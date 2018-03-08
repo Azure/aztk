@@ -222,6 +222,14 @@ class JobConfiguration:
         self.subnet_id = subnet_id
         self.worker_on_master = worker_on_master
 
+    def as_cluster_config(self):
+        return ClusterConfiguration(
+            cluster_id =  self.id,
+            custom_scripts = self.custom_scripts,
+            vm_size=self.vm_size,
+            spark_configuration=self.spark_configuration,
+        )
+
 
 class JobState():
     complete = 'completed'

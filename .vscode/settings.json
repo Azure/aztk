@@ -1,15 +1,18 @@
 {
-    // "python.linting.pylintEnabled": false,
-    "search.exclude": {
-        "build/**": true,
-        "bin/**": true
-    },
-    "files.exclude": {
-        "**/__pycache__": true,
-        "*.egg-info": true,
-    },
-    "python.autoComplete.extraPaths": [
-        "${workspaceRoot}/node_scripts"
-    ],
-    "python.formatting.provider": "yapf"
+  // "python.linting.pylintEnabled": false,
+  "search.exclude": {
+    "build/**": true,
+    "bin/**": true
+  },
+  "files.exclude": {
+    "**/__pycache__": true,
+    "*.egg-info": true,
+  },
+  "python.autoComplete.extraPaths": [
+    "${workspaceRoot}/node_scripts"
+  ],
+  "python.formatting.provider": "yapf",
+  "python.formatting.yapfArgs": [
+    "--style=.style.yapf"
+  ]
 }

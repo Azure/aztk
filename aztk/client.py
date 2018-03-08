@@ -16,7 +16,7 @@ import aztk.utils.ssh as ssh_lib
 import azure.batch.models as batch_models
 from azure.batch.models import batch_error
 from Crypto.PublicKey import RSA
-
+from aztk.internal import cluster_data
 
 class Client:
     def __init__(self, secrets_config: models.SecretsConfiguration):
@@ -26,6 +26,14 @@ class Client:
         self.batch_client = azure_api.make_batch_client(secrets_config)
         self.blob_client = azure_api.make_blob_client(secrets_config)
 
+    def get_cluster_config(self, cluster_id: str) -> models.ClusterConfiguration:
+        return self._get_cluster_data(cluster_id).read_cluster_config()
+
+    def _get_cluster_data(self, cluster_id: str) -> cluster_data.ClusterData:
+        """
+        Returns ClusterData object to manage data related to the given cluster id
+        """
+        return cluster_data.ClusterData(self.blob_client, cluster_id)
 
     '''
     General Batch Operations
@@ -66,7 +74,7 @@ class Client:
             :param VmImageModel: the type of image to provision for the cluster
             :param wait: wait until the cluster is ready
         """
-        helpers.save_cluster_config(cluster_conf, self.blob_client)
+        self._get_cluster_data(cluster_conf.cluster_id).save_cluster_config(cluster_conf)
         # reuse pool_id as job_id
         pool_id = cluster_conf.cluster_id
         job_id = cluster_conf.cluster_id

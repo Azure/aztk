@@ -9,7 +9,8 @@ from aztk.spark.helpers import create_cluster as create_cluster_helper
 from aztk.spark.helpers import submit as cluster_submit_helper
 from aztk.spark.helpers import job_submission as job_submit_helper
 from aztk.spark.helpers import get_log as get_log_helper
-from aztk.spark.utils import upload_node_scripts, util
+from aztk.spark.utils import util
+from aztk.internal.cluster_data import NodeData
 import yaml
 
 
@@ -22,14 +23,11 @@ class Client(BaseClient):
     '''
     def create_cluster(self, cluster_conf: models.ClusterConfiguration, wait: bool = False):
         cluster_conf.validate()
-
+        cluster_data = self._get_cluster_data(cluster_conf.cluster_id)
         try:
-            zip_resource_files = upload_node_scripts.zip_scripts(self.blob_client,
-                                                                 cluster_conf.cluster_id,
-                                                                 cluster_conf.custom_scripts,
-                                                                 cluster_conf.spark_configuration,
-                                                                 cluster_conf.user_configuration,
-                                                                 cluster_conf.plugins)
+            zip_resource_files = None
+            node_data = NodeData(cluster_conf).add_core().done()
+            zip_resource_files = cluster_data.upload_node_data(node_data).to_resource_file()
 
             start_task = create_cluster_helper.generate_cluster_start_task(self,
                                                                            zip_resource_files,
@@ -165,10 +163,9 @@ class Client(BaseClient):
     '''
     def submit_job(self, job_configuration):
         try:
-            zip_resource_files = upload_node_scripts.zip_scripts(self.blob_client,
-                                                                 job_configuration.id,
-                                                                 job_configuration.custom_scripts,
-                                                                 job_configuration.spark_configuration)
+            cluster_data = self._get_cluster_data(job_configuration.id)
+            node_data =  NodeData(job_configuration.as_cluster_config()).add_core().done()
+            zip_resource_files = cluster_data.upload_node_data(node_data).to_resource_file()
 
             start_task = create_cluster_helper.generate_cluster_start_task(self,
                                                                            zip_resource_files,
