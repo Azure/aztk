@@ -108,6 +108,8 @@ class Client:
             metadata=[
                 batch_models.MetadataItem(
                     name=constants.AZTK_SOFTWARE_METADATA_KEY, value=software_metadata_key),
+                batch_models.MetadataItem(
+                        name=constants.AZTK_MODE_METADATA_KEY, value=constants.AZTK_CLUSTER_MODE_METADATA)
             ])
 
         # Create the pool + create user for the pool
@@ -140,10 +142,13 @@ class Client:
         pools = self.batch_client.pool.list()
         software_metadata = (
             constants.AZTK_SOFTWARE_METADATA_KEY, software_metadata_key)
+        cluster_metadata = (
+            constants.AZTK_MODE_METADATA_KEY, constants.AZTK_CLUSTER_MODE_METADATA)
 
         aztk_pools = []
         for pool in [pool for pool in pools if pool.metadata]:
-            if software_metadata in [(metadata.name, metadata.value) for metadata in pool.metadata]:
+            pool_metadata = [(metadata.name, metadata.value) for metadata in pool.metadata]
+            if all([metadata in pool_metadata for metadata in [software_metadata, cluster_metadata]]):
                 aztk_pools.append(pool)
         return aztk_pools
 
@@ -300,7 +305,9 @@ class Client:
                 max_tasks_per_node=1,
                 metadata=[
                     batch_models.MetadataItem(
-                        name=constants.AZTK_SOFTWARE_METADATA_KEY, value=software_metadata_key)
+                        name=constants.AZTK_SOFTWARE_METADATA_KEY, value=software_metadata_key),
+                    batch_models.MetadataItem(
+                        name=constants.AZTK_MODE_METADATA_KEY, value=constants.AZTK_JOB_MODE_METADATA)
                 ]
             )
         )
