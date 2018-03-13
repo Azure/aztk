@@ -92,7 +92,7 @@ Once submitted, this Job will run two applications, pipy100 and pipy200, on an a
 Submit a Spark Job:
 
 ```sh
-aztk spark job submit --id <your_job_id> --job-conf </path/to/job.yaml>
+aztk spark job submit --id <your_job_id> --configuration </path/to/job.yaml>
 ```
 
 NOTE: The Job id (`--id`) can only contain alphanumeric characters including hyphens and underscores, and cannot contain more than 64 characters. Each Job **must** have a unique id.

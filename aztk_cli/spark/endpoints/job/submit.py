@@ -11,7 +11,7 @@ def setup_parser(parser: argparse.ArgumentParser):
                         dest='job_id',
                         required=False,
                         help='The unique id of your Spark Job. Defaults to the id value in .aztk/job.yaml')
-    parser.add_argument('--configuration' '-c',
+    parser.add_argument('--configuration', '-c',
                         dest='job_conf',
                         required=False,
                         help='Path to the job.yaml configuration file. Defaults to .aztk/job.yaml')
