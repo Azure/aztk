@@ -33,19 +33,14 @@ if [ $gpu_enabled == "True" ]; then
 fi
 
 if [ -z "$DOCKER_USERNAME" ]; then
-    echo "No Credentials provided. No need to login to dockerhub $DOCKER_USERNAME $DOCKER_PASSWORD"
+    echo "No Credentials provided. No need to login to dockerhub"
 else
     echo "Docker credentials provided. Login in."
-    docker login $docker_endpoint --username $DOCKER_USERNAME --password $DOCKER_PASSWORD
+    docker login $DOCKER_ENDPOINT --username $DOCKER_USERNAME --password $DOCKER_PASSWORD
 fi
 
-if [ -z "$DOCKER_ENDPOINT" ]; then
-    echo "Pulling $repo_name from dockerhub"
-    (time docker pull $repo_name) 2>&1
-else
-    echo "Pulling $container_name from $DOCKER_ENDPOINT"
-    (time docker pull $DOCKER_ENDPOINT/$repo_name) 2>&1
-fi
+echo "Pulling $repo_name"
+(time docker pull $repo_name) 2>&1
 
 # Unzip resource files and set permissions
 apt-get -y install unzip
@@ -71,7 +66,7 @@ else
     until [ "`/usr/bin/docker inspect -f {{.State.Running}} $container_name`"=="true" ]; do
         sleep 0.1;
     done;
-    
+
     # wait until container setup is complete
     docker exec spark /bin/bash -c 'python $DOCKER_WORKING_DIR/wait_until_setup_complete.py'
 
