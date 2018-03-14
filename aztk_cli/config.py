@@ -153,11 +153,9 @@ def cluster_config_from_dict(config: dict):
 
     if config.get('size'):
         output.vm_count = config['size']
-        output.vm_low_pri_count = 0
 
     if config.get('size_low_pri'):
         output.vm_low_pri_count = config['size_low_pri']
-        output.vm_count = 0
 
     if config.get('subnet_id') is not None:
         output.subnet_id = config['subnet_id']
