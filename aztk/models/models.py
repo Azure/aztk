@@ -50,7 +50,6 @@ class UserConfiguration(ConfigurationBase):
         ])
 
 
-
 class ClusterConfiguration(ConfigurationBase):
     """
     Cluster configuration model

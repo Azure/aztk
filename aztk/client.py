@@ -300,7 +300,7 @@ class Client:
                 auto_scale_formula=autoscale_formula,
                 auto_scale_evaluation_interval=timedelta(minutes=5),
                 start_task=start_task,
-                enable_inter_node_communication=True,
+                enable_inter_node_communication=not job_configuration.mixed_mode(),
                 network_configuration=network_conf,
                 max_tasks_per_node=1,
                 metadata=[

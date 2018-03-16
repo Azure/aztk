@@ -2,6 +2,7 @@ import io
 from Crypto.PublicKey import RSA
 from typing import List
 import aztk.models
+from aztk import error
 from aztk.utils import constants, helpers
 import azure.batch.models as batch_models
 
@@ -222,13 +223,44 @@ class JobConfiguration:
         self.subnet_id = subnet_id
         self.worker_on_master = worker_on_master
 
-    def as_cluster_config(self):
+    def to_cluster_config(self):
         return ClusterConfiguration(
             cluster_id =  self.id,
             custom_scripts = self.custom_scripts,
+            docker_repo=self.docker_repo,
             vm_size=self.vm_size,
+            vm_count=self.max_dedicated_nodes,
+            vm_low_pri_count=self.max_low_pri_nodes,
+            subnet_id=self.subnet_id,
+            worker_on_master=self.worker_on_master,
             spark_configuration=self.spark_configuration,
         )
+
+    def mixed_mode(self) -> bool:
+        return self.max_dedicated_nodes > 0 and self.max_low_pri_nodes > 0
+
+    def validate(self) -> bool:
+        """
+        Validate the config at its current state.
+        Raises: Error if invalid
+        """
+        if self.id is None:
+            raise error.AztkError("Please supply an ID for the Job in your configuration.")
+
+        if self.max_dedicated_nodes == 0 and self.max_low_pri_nodes == 0:
+            raise error.AztkError(
+                "Please supply a valid (greater than 0) value for either max_dedicated_nodes or max_low_pri_nodes in your configuration."
+            )
+
+        if self.vm_size is None:
+            raise error.AztkError(
+                "Please supply a vm_size in your configuration."
+            )
+
+        if self.mixed_mode() and not self.subnet_id:
+            raise error.AztkError(
+                "You must configure a VNET to use AZTK in mixed mode (dedicated and low priority nodes) and pass the subnet_id in your configuration.."
+            )
 
 
 class JobState():
