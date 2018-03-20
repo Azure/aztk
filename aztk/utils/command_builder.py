@@ -22,7 +22,7 @@ class CommandBuilder:
 
             :param name: Option name (with the dash(es))
             :param value: Value for the option(If null and enable is not provided it won't add the option)
-            :param enable: To expecity add or ignore the option
+            :param enable: To explicitly add or ignore the option
 
             Usage:
             >>> command.add_option("--id", myId)               # => Will only add to the command if myId is not null
