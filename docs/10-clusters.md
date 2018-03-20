@@ -20,7 +20,7 @@ aztk spark cluster create --id spark --vm-size standard_a2 --size 4
 
 You can find more information on VM sizes [here.](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/sizes) Please note that you must use the official SKU name when setting your VM size - they usually come in the form: "standard_d2_v2". 
 
-NOTE: The cluster id (`--id`) can only contain alphanumeric characters including hyphens and underscores, and cannot contain more than 64 characters. Each cluster **must** have a unique cluster id.
+_Note: The cluster id (`--id`) can only contain alphanumeric characters including hyphens and underscores, and cannot contain more than 64 characters. Each cluster **must** have a unique cluster id._
 
 By default, you cannot create clusters of more than 20 cores in total. Visit [this page](https://docs.microsoft.com/en-us/azure/batch/batch-quota-limit#view-batch-quotas) to request a core quota increase.
 
@@ -74,6 +74,7 @@ To delete a cluster run:
 ```sh
 aztk spark cluster delete --id <your_cluster_id>
 ```
+Deleting a cluster also permanently deletes any data or logs associated with that cluster. If you wish to persist this data, use the `--keep-logs` flag.
 
 __You are charged for the cluster as long as the nodes are provisioned in your account.__ Make sure to delete any clusters you are not using to avoid unwanted costs.
 

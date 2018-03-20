@@ -36,7 +36,7 @@ Find some samples and getting stated tutorial in the `examples/sdk/` directory o
 
         - None
 
-- `delete_cluster(self, cluster_id: str)`
+- `delete_cluster(self, cluster_id: str, keep_logs: bool = False)`
 
     Delete an AZTK cluster with the given ID
 
@@ -44,6 +44,8 @@ Find some samples and getting stated tutorial in the `examples/sdk/` directory o
 
         - cluster_id: str
             - The ID of the cluster to delete
+        - keep_logs: bool
+            - If true, the logs associated with this cluster will not be deleted.
 
     Returns:
 
@@ -291,7 +293,7 @@ Find some samples and getting stated tutorial in the `examples/sdk/` directory o
         
         - None
 
-- `delete_job(self, job_id)`
+- `delete_job(self, job_id, keep_logs: bool = False)`
 
     Delete the AZTK Spark Job with id job_id
 
@@ -299,7 +301,9 @@ Find some samples and getting stated tutorial in the `examples/sdk/` directory o
 
         - job_id: str
             The id of the Job
-    
+        - keep_logs: bool
+            - If true, the logs associated with this Job will not be deleted.
+
     Returns:
         
         - bool

@@ -39,7 +39,7 @@ class Client:
     General Batch Operations
     '''
 
-    def __delete_pool_and_job(self, pool_id: str):
+    def __delete_pool_and_job(self, pool_id: str, keep_logs: bool = False):
         """
             Delete a pool and it's associated job
             :param cluster_id: the pool to add the user to
@@ -61,6 +61,10 @@ class Client:
 
         if pool_exists:
             self.batch_client.pool.delete(pool_id)
+        
+        if not keep_logs:
+            cluster_data = self._get_cluster_data(pool_id)
+            cluster_data.delete_container(pool_id)
 
         return job_exists or pool_exists
 
@@ -256,6 +260,7 @@ class Client:
             self.__delete_user_on_pool('aztk', pool.id, nodes)
         except (OSError, batch_error.BatchErrorException) as exc:
             raise exc
+
     def __submit_job(self,
                      job_configuration,
                      start_task,

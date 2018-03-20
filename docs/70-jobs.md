@@ -137,6 +137,7 @@ To delete a Job run:
 ```sh
 aztk spark job delete --id <your_job_id>
 ```
+Deleting a Job also permanently deletes any data or logs associated with that cluster. If you wish to persist this data, use the `--keep-logs` flag.
 
 __You are only charged for the job while it is active, Jobs handle provisioning and destorying infrastructure, so you are only charged for the time that your applications are running.__
 

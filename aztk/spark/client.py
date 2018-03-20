@@ -62,9 +62,9 @@ class Client(BaseClient):
         for cluster_conf in cluster_confs:
             self.create_cluster(cluster_conf)
 
-    def delete_cluster(self, cluster_id: str):
+    def delete_cluster(self, cluster_id: str, keep_logs: bool = False):
         try:
-            return self.__delete_pool_and_job(cluster_id)
+            return self.__delete_pool_and_job(cluster_id, keep_logs)
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
@@ -239,9 +239,9 @@ class Client(BaseClient):
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
-    def delete_job(self, job_id):
+    def delete_job(self, job_id: str, keep_logs: bool = False):
         try:
-            return job_submit_helper.delete(self, job_id)
+            return job_submit_helper.delete(self, job_id, keep_logs)
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 

@@ -55,3 +55,6 @@ class ClusterData:
 
     def _ensure_container(self):
         self.blob_client.create_container(self.cluster_id, fail_on_exist=False)
+
+    def delete_container(self, container_name: str):
+        self.blob_client.delete_container(container_name)

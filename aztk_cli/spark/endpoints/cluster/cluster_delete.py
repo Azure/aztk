@@ -9,12 +9,17 @@ def setup_parser(parser: argparse.ArgumentParser):
                         dest='cluster_id',
                         required=True,
                         help='The unique id of your spark cluster')
-    parser.add_argument('--force',
+    parser.add_argument('--force', '-f',
                         dest='force',
                         required=False,
                         action='store_true',
                         help='Do not prompt for confirmation, force deletion of cluster.')
-    parser.set_defaults(force=False)
+    parser.add_argument('--keep-logs', '-k',
+                        dest='keep_logs',
+                        action='store_true',
+                        required=False,
+                        help='Prevent logs in storage from being deleted.')
+    parser.set_defaults(force=False, keep_logs=False)
 
 
 def execute(args: typing.NamedTuple):
@@ -22,13 +27,16 @@ def execute(args: typing.NamedTuple):
     cluster_id = args.cluster_id
 
     if not args.force:
+        if not args.keep_logs:
+            log.warn("All logs persisted for this cluster will be deleted.")
+
         confirmation_cluster_id = input("Please confirm the id of the cluster you wish to delete: ")
 
         if confirmation_cluster_id  != cluster_id:
             log.error("Confirmation cluster id does not match. Please try again.")
             return
 
-    if spark_client.delete_cluster(cluster_id):
+    if spark_client.delete_cluster(cluster_id, args.keep_logs):
         log.info("Deleting cluster %s", cluster_id)
     else:
         log.error("Cluster with id '%s' doesn't exist or was already deleted.", cluster_id)
