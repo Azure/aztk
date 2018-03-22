@@ -13,7 +13,7 @@ from aztk.error import InvalidCustomScriptError
 ROOT_PATH = constants.ROOT_PATH
 
 # Constants for node data
-NODE_SCRIPT_FOLDER = "node_scripts"
+NODE_SCRIPT_FOLDER = "aztk"
 CUSTOM_SCRIPT_FOLDER = "custom-scripts"
 CUSTOM_SCRIPT_METADATA_FILE = "custom-scripts.yaml"
 PLUGIN_FOLDER = "plugins"
@@ -36,7 +36,6 @@ class NodeData:
         self._add_plugins()
         self._add_spark_configuration()
         self._add_user_conf()
-        self.add_file(os.path.join(constants.ROOT_PATH, 'aztk', 'utils', 'command_builder.py'), '', binary=False)
         return self
 
     def done(self):
@@ -63,7 +62,7 @@ class NodeData:
         for file in file_paths:
             self.add_file(file, zip_dir, binary)
 
-    def add_dir(self, path: str, exclude: List[str] = []):
+    def add_dir(self, path: str, dest: str = None, exclude: List[str] = []):
         """
             Zip all the files in the given directory into the zip file handler
         """
@@ -72,7 +71,7 @@ class NodeData:
             for file in files:
                 if self._includeFile(file, exclude):
                     with io.open(os.path.join(base, file), 'r') as f:
-                        self.zipf.writestr(os.path.join(relative_folder, file), f.read().replace('\r\n', '\n'))
+                        self.zipf.writestr(os.path.join(dest, relative_folder, file), f.read().replace('\r\n', '\n'))
 
     def _add_custom_scripts(self):
         data = []
@@ -155,7 +154,7 @@ class NodeData:
         return zipf
 
     def _add_node_scripts(self):
-        self.add_dir(os.path.join(ROOT_PATH, NODE_SCRIPT_FOLDER), exclude=['*.pyc'])
+        self.add_dir(os.path.join(ROOT_PATH, NODE_SCRIPT_FOLDER), NODE_SCRIPT_FOLDER, exclude=['*.pyc*'])
 
     def _includeFile(self, filename: str, exclude: List[str] = []) -> bool:
         for pattern in exclude:

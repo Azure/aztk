@@ -74,7 +74,7 @@ def __docker_run_cmd(docker_repo: str = None,
                 cmd.add_option('-p', '{0}:{1}'.format(port.internal, port.internal))       # Jupyter UI
 
     cmd.add_option('-d', docker_repo)
-    cmd.add_argument('/bin/bash /mnt/batch/tasks/startup/wd/docker_main.sh')
+    cmd.add_argument('/bin/bash /mnt/batch/tasks/startup/wd/aztk/node_scripts/docker_main.sh')
 
     return cmd.to_str()
 
@@ -162,8 +162,8 @@ def __cluster_install_cmd(zip_resource_file: batch_models.ResourceFile,
         'apt-get -y install unzip',
         'unzip $AZ_BATCH_TASK_WORKING_DIR/{0}'.format(
             zip_resource_file.file_path),
-        'chmod 777 $AZ_BATCH_TASK_WORKING_DIR/setup_node.sh',
-        '/bin/bash $AZ_BATCH_TASK_WORKING_DIR/setup_node.sh {0} {1} {2} "{3}"'.format(
+        'chmod 777 $AZ_BATCH_TASK_WORKING_DIR/aztk/node_scripts/setup_node.sh',
+        '/bin/bash $AZ_BATCH_TASK_WORKING_DIR/aztk/node_scripts/setup_node.sh {0} {1} {2} "{3}"'.format(
             constants.DOCKER_SPARK_CONTAINER_NAME,
             gpu_enabled,
             docker_repo,

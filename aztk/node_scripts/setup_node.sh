@@ -44,7 +44,7 @@ echo "Pulling $repo_name"
 
 # Unzip resource files and set permissions
 apt-get -y install unzip
-chmod 777 $AZ_BATCH_TASK_WORKING_DIR/docker_main.sh
+chmod 777 $AZ_BATCH_TASK_WORKING_DIR/aztk/node_scripts/docker_main.sh
 
 # Check docker is running
 docker info > /dev/null 2>&1
@@ -68,7 +68,7 @@ else
     done;
 
     # wait until container setup is complete
-    docker exec spark /bin/bash -c 'python $DOCKER_WORKING_DIR/wait_until_setup_complete.py'
+    docker exec spark /bin/bash -c 'python $DOCKER_WORKING_DIR/aztk/node_scripts/wait_until_setup_complete.py'
 
     # Setup symbolic link for the docker logs
     docker_log=$(docker inspect --format='{{.LogPath}}' $container_name)
