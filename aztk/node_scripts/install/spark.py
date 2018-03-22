@@ -17,6 +17,20 @@ batch_client = config.batch_client
 spark_home = "/home/spark-current"
 spark_conf_folder = os.path.join(spark_home, "conf")
 
+
+def setup_as_master():
+    print("Setting up as master.")
+    setup_connection()
+    start_spark_master()
+    if os.environ["WORKER_ON_MASTER"] == "True":
+        start_spark_worker()
+
+
+def setup_as_worker():
+    print("Setting up as worker.")
+    setup_connection()
+    start_spark_worker()
+
 def get_pool() -> batchmodels.CloudPool:
     return batch_client.pool.get(config.pool_id)
 

@@ -15,6 +15,7 @@ apt-get -y install apt-transport-https
 apt-get -y install curl
 apt-get -y install ca-certificates
 apt-get -y install software-properties-common
+apt-get -y install python3-pip python-dev build-essential
 
 # Install docker
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
@@ -44,7 +45,7 @@ echo "Pulling $repo_name"
 
 # Unzip resource files and set permissions
 apt-get -y install unzip
-chmod 777 $AZ_BATCH_TASK_WORKING_DIR/aztk/node_scripts/docker_main.sh
+chmod 777 $pip/aztk/node_scripts/docker_main.sh
 
 # Check docker is running
 docker info > /dev/null 2>&1
@@ -59,13 +60,22 @@ if [ "$(docker ps -a -q -f name=$container_name)" ]; then
     docker restart $container_name
 else
     echo "Creating docker container."
-    # Start docker
-    eval $docker_run_cmd
+
+    echo "Node python version:"
+    python3 --version
+    # Install python dependencies
+    pip3 install -r $(dirname $0)/requirements.txt
+    export PYTHONPATH=$PYTHONPATH:$DOCKER_WORKING_DIR
+
+    echo "Running setup python script"
+    $(pyenv root)/versions/$AZTK_PYTHON_VERSION/bin/python $(dirname $0)/main.py setup-node $docker_run_cmd
 
     # wait until container is running
     until [ "`/usr/bin/docker inspect -f {{.State.Running}} $container_name`"=="true" ]; do
         sleep 0.1;
     done;
+
+
 
     # wait until container setup is complete
     docker exec spark /bin/bash -c 'python $DOCKER_WORKING_DIR/aztk/node_scripts/wait_until_setup_complete.py'

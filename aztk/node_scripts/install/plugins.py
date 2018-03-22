@@ -3,6 +3,7 @@ import json
 import yaml
 import subprocess
 from pathlib import Path
+from aztk.models.plugins import PluginTarget
 
 
 log_folder = os.path.join(os.environ['DOCKER_WORKING_DIR'], 'logs','plugins')
@@ -21,7 +22,7 @@ def _read_manifest_file(path=None):
     return custom_scripts
 
 
-def setup_plugins(is_master: bool = False, is_worker: bool = False):
+def setup_plugins(target: PluginTarget, is_master: bool = False, is_worker: bool = False):
 
     plugins_dir = _plugins_dir()
     plugins_manifest = _read_manifest_file(

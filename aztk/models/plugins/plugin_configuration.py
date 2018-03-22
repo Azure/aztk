@@ -1,8 +1,22 @@
-import inspect
-from typing import List, Union
 from enum import Enum
-from .plugin_file import PluginFile
+from typing import List, Union
 from aztk.internal import ConfigurationBase
+from .plugin_file import PluginFile
+
+class PluginTarget(Enum):
+    """
+    Where this plugin should run
+    """
+    SparkContainer = "spark-container",
+    Node = "node",
+
+
+class PluginTargetType(Enum):
+    Master = "master"
+    Worker = "worker"
+    All = "all-nodes"
+
+
 
 class PluginPort:
     """
@@ -26,11 +40,6 @@ class PluginPort:
         self.name = name
 
 
-class PluginRunTarget(Enum):
-    Master = "master"
-    Worker = "worker"
-    All = "all-nodes"
-
 
 
 class PluginConfiguration(ConfigurationBase):
@@ -50,10 +59,11 @@ class PluginConfiguration(ConfigurationBase):
                  execute: str = None,
                  args=None,
                  env=None,
-                 run_on: PluginRunTarget = PluginRunTarget.Master):
+                 target_type: PluginTargetType = PluginTargetType.Master,
+                 target: PluginTarget = PluginTarget.SparkContainer):
         self.name = name
         # self.docker_image = docker_image
-        self.run_on = run_on
+        self.target = target
         self.ports = ports or []
         self.files = files or []
         self.args = args or []
@@ -64,8 +74,7 @@ class PluginConfiguration(ConfigurationBase):
         for x in self.args:
             if x.name == name:
                 return True
-        else:
-            return False
+        return False
 
     def validate(self):
         self._validate_required([

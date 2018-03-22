@@ -31,7 +31,7 @@ $(pyenv root)/versions/$AZTK_PYTHON_VERSION/bin/pip install -r $(dirname $0)/req
 export PYTHONPATH=$PYTHONPATH:$DOCKER_WORKING_DIR
 
 echo "Running main.py script"
-$(pyenv root)/versions/$AZTK_PYTHON_VERSION/bin/python $(dirname $0)/main.py install
+$(pyenv root)/versions/$AZTK_PYTHON_VERSION/bin/python $(dirname $0)/main.py setup-spark-container
 
 # sleep to keep container running
 while true; do sleep 1; done

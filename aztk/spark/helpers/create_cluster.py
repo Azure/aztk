@@ -62,6 +62,12 @@ def __docker_run_cmd(docker_repo: str = None,
     cmd.add_option('-e', 'SPARK_CONTAINER_NAME=$SPARK_CONTAINER_NAME')
     cmd.add_option('-e', 'SPARK_SUBMIT_LOGS_FILE=$SPARK_SUBMIT_LOGS_FILE')
     cmd.add_option('-e', 'SPARK_JOB_UI_PORT=$SPARK_JOB_UI_PORT')
+
+    # Environment computed on th node
+    cmd.add_option('-e', 'AZTK_IS_MASTER=$AZTK_IS_MASTER')
+    cmd.add_option('-e', 'AZTK_IS_WORKER=$AZTK_IS_WORKER')
+    cmd.add_option('-e', 'AZTK_MASTER_IP=$AZTK_MASTER_IP')
+
     cmd.add_option('-p', '8080:8080')       # Spark Master UI
     cmd.add_option('-p', '7077:7077')       # Spark Master
     cmd.add_option('-p', '7337:7337')       # Spark Shuffle Service
