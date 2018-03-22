@@ -7,7 +7,7 @@ from aztk.version import __version__
 from azure.common.credentials import ServicePrincipalCredentials
 from azure.mgmt.batch import BatchManagementClient
 from azure.mgmt.storage import StorageManagementClient
-from azure.storage import CloudStorageAccount
+from azure.storage.common import CloudStorageAccount
 from typing import Optional
 
 

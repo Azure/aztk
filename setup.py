@@ -31,7 +31,7 @@ setup(
         "azure-batch==3.0.0",
         "azure-mgmt-batch==5.0.0",
         "azure-mgmt-storage==1.5.0",
-        "azure-storage==0.33.0",
+        "azure-storage-blob==1.1.0",
         "pyyaml>=3.12",
         "pycryptodome>=3.4",
         "paramiko>=2.4",

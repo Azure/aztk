@@ -7,7 +7,7 @@ import azure.batch.batch_auth as batchauth
 from azure.common.credentials import ServicePrincipalCredentials
 from azure.mgmt.batch import BatchManagementClient
 from azure.mgmt.storage import StorageManagementClient
-from azure.storage import CloudStorageAccount
+from azure.storage.common import CloudStorageAccount
 
 
 

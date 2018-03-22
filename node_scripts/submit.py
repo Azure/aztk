@@ -1,5 +1,6 @@
 import sys
 import os
+import logging
 import yaml
 import subprocess
 import datetime
@@ -9,6 +10,8 @@ import azure.batch.models as batch_models
 from command_builder import CommandBuilder
 from core import config
 
+# limit azure.storage logging
+logging.getLogger("azure.storage").setLevel(logging.CRITICAL)
 
 '''
 Submit helper methods
