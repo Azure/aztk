@@ -16,7 +16,7 @@ def create_user(batch_client):
         print("No user to create.")
         return
 
-    with open(path) as file:
+    with open(path, 'r', encoding='UTF-8') as file:
         user_conf = yaml.load(file.read())
 
     try:
@@ -43,7 +43,8 @@ def decrypt_password(user_conf):
     tag = user_conf['tag']
 
     # Read private key
-    private_key = RSA.import_key(open(os.path.join(os.environ['DOCKER_WORKING_DIR'], 'id_rsa')).read())
+    with open(os.path.join(os.environ['DOCKER_WORKING_DIR'], 'id_rsa'), encoding='UTF-8') as f:
+        private_key = RSA.import_key(f.read())
     # Decrypt the session key with the public RSA key
     cipher_rsa = PKCS1_OAEP.new(private_key)
     session_key = cipher_rsa.decrypt(encrypted_aes_session_key)

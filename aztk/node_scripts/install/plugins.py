@@ -12,7 +12,7 @@ def _read_manifest_file(path=None):
     if not os.path.isfile(path):
         print("Plugins manifest file doesn't exist at {0}".format(path))
     else:
-        with open(path, 'r') as stream:
+        with open(path, 'r', encoding='UTF-8') as stream:
             try:
                 custom_scripts = yaml.load(stream)
             except json.JSONDecodeError as err:
@@ -86,7 +86,7 @@ def _run_script(name: str, script_path: str = None, args: dict = None, env: dict
     if args is None:
         args = []
 
-    out_file = open(os.path.join(log_folder, '{0}.txt'.format(name)), 'w')
+    out_file = open(os.path.join(log_folder, '{0}.txt'.format(name)), 'w', encoding='UTF-8')
     try:
         subprocess.call(
             [script_path] + args,

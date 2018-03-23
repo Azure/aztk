@@ -28,6 +28,6 @@ def __read_ssh_key_from_file(path: str) -> str:
     """
         Read the content of the given file
     """
-    with open(os.path.expanduser(path), 'r') as content_file:
+    with open(os.path.expanduser(path), 'r', encoding='UTF-8') as content_file:
         content = content_file.read()
         return content

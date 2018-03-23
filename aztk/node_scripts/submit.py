@@ -124,7 +124,7 @@ def load_application(application_file_path):
     '''
         Read and parse the application from file
     '''
-    with open(application_file_path) as f:
+    with open(application_file_path, encoding='UTF-8') as f:
         application = yaml.load(f)
     return application
 
@@ -176,7 +176,8 @@ def upload_error_log(error, application_file_path):
     application = load_application(application_file_path)
     blob_client = config.blob_client
 
-    with open(os.path.join(os.environ["AZ_BATCH_TASK_WORKING_DIR"], "error.log"), "w") as error_log:
+    error_log_path = os.path.join(os.environ["AZ_BATCH_TASK_WORKING_DIR"], "error.log")
+    with open(error_log_path, "w", encoding='UTF-8') as error_log:
         error_log.write(error)
 
     upload_file_to_container(

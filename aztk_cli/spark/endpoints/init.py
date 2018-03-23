@@ -48,8 +48,8 @@ def create_directory(dest_path: str, docker_repo: str):
     cluster_path = os.path.join(dest_path, 'cluster.yaml')
 
     if os.path.isfile(cluster_path):
-        with open(cluster_path, 'r') as stream:
+        with open(cluster_path, 'r', encoding='UTF-8') as stream:
             cluster_yaml = stream.read()
         cluster_yaml = cluster_yaml.replace("docker_repo: \n", "docker_repo: {}\n".format(docker_repo))
-        with open(cluster_path, 'w') as file:
+        with open(cluster_path, 'w', encoding='UTF-8') as file:
             file.write(cluster_yaml)

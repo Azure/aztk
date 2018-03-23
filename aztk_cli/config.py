@@ -46,7 +46,7 @@ def _load_secrets_config(
     if not os.path.isfile(path):
         return None
 
-    with open(path, 'r') as stream:
+    with open(path, 'r', encoding='UTF-8') as stream:
         try:
             return yaml.load(stream)
         except yaml.YAMLError as err:
@@ -129,7 +129,7 @@ def read_cluster_config(
     if not os.path.isfile(path):
         return
 
-    with open(path, 'r') as stream:
+    with open(path, 'r', encoding='UTF-8') as stream:
         try:
             config_dict = yaml.load(stream)
         except yaml.YAMLError as err:
@@ -224,7 +224,7 @@ class SshConfig:
         if not os.path.isfile(path):
             return
 
-        with open(path, 'r') as stream:
+        with open(path, 'r', encoding='UTF-8') as stream:
             try:
                 config = yaml.load(stream)
             except yaml.YAMLError as err:
@@ -359,7 +359,7 @@ class JobConfig():
         if not path or not os.path.isfile(path):
             return
 
-        with open(path, 'r') as stream:
+        with open(path, 'r', encoding='UTF-8') as stream:
             try:
                 config = yaml.load(stream)
             except yaml.YAMLError as err:

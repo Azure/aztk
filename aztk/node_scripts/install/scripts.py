@@ -9,7 +9,7 @@ def _read_yaml_file(path=None):
     if not os.path.isfile(path):
         print("Configuration file doesn't exist at {0}".format(path))
     else:
-        with open(path, 'r') as stream:
+        with open(path, 'r', encoding='UTF-8') as stream:
             try:
                 custom_scripts = yaml.load(stream)
             except yaml.YAMLError as err:

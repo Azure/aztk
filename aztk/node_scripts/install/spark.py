@@ -43,7 +43,7 @@ def setup_connection():
     master_node = get_node(master_node_id)
 
     master_config_file = os.path.join(spark_conf_folder, "master")
-    master_file = open(master_config_file, 'w')
+    master_file = open(master_config_file, 'w', encoding='UTF-8')
 
     print("Adding master node ip {0} to config file '{1}'".format(
         master_node.ip_address, master_config_file))
@@ -195,7 +195,7 @@ def copy_jars():
 
 def parse_configuration_file(path_to_file: str):
     try:
-        file = open(path_to_file, 'r')
+        file = open(path_to_file, 'r', encoding='UTF-8')
         properties = {}
         for line in file:
             if (not line.startswith('#') and len(line) > 1):
