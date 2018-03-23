@@ -37,7 +37,7 @@ def _plugins_dir():
     return os.path.join(os.environ['AZTK_WORKING_DIR'], 'plugins')
 
 
-def _run_on_this_node(plugin_obj=None, target: PluginTarget, is_master=False, is_worker=False):
+def _run_on_this_node(plugin_obj, target: PluginTarget, is_master=False, is_worker=False):
     if plugin_obj['target'] != target.value:
         print("Ignoring ", plugin_obj["execute"], " as target is for ", plugin_obj['target'], " but is currently running in ", target.value)
         return False
