@@ -49,14 +49,10 @@ def __docker_run_cmd(docker_repo: str = None,
     cmd.add_option('-e', 'SP_STORAGE_RESOURCE_ID=$SP_STORAGE_RESOURCE_ID')
     cmd.add_option('-e', 'AZ_BATCH_POOL_ID=$AZ_BATCH_POOL_ID')
     cmd.add_option('-e', 'AZ_BATCH_NODE_ID=$AZ_BATCH_NODE_ID')
+    cmd.add_option('-e', 'AZTK_WORKER_ON_MASTER=$AZTK_WORKER_ON_MASTER')
+    cmd.add_option('-e', 'AZTK_MIXED_MODE=$AZTK_MIXED_MODE')
     cmd.add_option(
         '-e', 'AZ_BATCH_NODE_IS_DEDICATED=$AZ_BATCH_NODE_IS_DEDICATED')
-    if worker_on_master is not None:
-        cmd.add_option('-e', 'WORKER_ON_MASTER={}'.format(worker_on_master))
-    else:
-        # default to True if not specified
-        cmd.add_option('-e', 'WORKER_ON_MASTER={}'.format(True))
-    cmd.add_option('-e', 'MIXED_MODE={}'.format(mixed_mode))
     cmd.add_option('-e', 'SPARK_WEB_UI_PORT=$SPARK_WEB_UI_PORT')
     cmd.add_option('-e', 'SPARK_WORKER_UI_PORT=$SPARK_WORKER_UI_PORT')
     cmd.add_option('-e', 'SPARK_CONTAINER_NAME=$SPARK_CONTAINER_NAME')
@@ -83,6 +79,17 @@ def __docker_run_cmd(docker_repo: str = None,
     cmd.add_argument('/bin/bash /mnt/batch/tasks/startup/wd/aztk/node_scripts/docker_main.sh')
 
     return cmd.to_str()
+
+def _get_aztk_environment(worker_on_master, mixed_mode):
+    envs = []
+    envs.append(batch_models.EnvironmentSetting(name="AZTK_MIXED_MODE", value=mixed_mode))
+    if worker_on_master is not None:
+        envs.append(batch_models.EnvironmentSetting(
+                name="AZTK_WORKER_ON_MASTER", value=worker_on_master))
+    else:
+        envs.append(batch_models.EnvironmentSetting(
+                name="AZTK_WORKER_ON_MASTER", value=False))
+    return envs
 
 def __get_docker_credentials(spark_client):
     creds = []
@@ -214,7 +221,7 @@ def generate_cluster_start_task(
             name="SPARK_CONTAINER_NAME", value=spark_container_name),
         batch_models.EnvironmentSetting(
             name="SPARK_SUBMIT_LOGS_FILE", value=spark_submit_logs_file),
-    ] + __get_docker_credentials(spark_client)
+    ] + __get_docker_credentials(spark_client) + _get_aztk_environment(worker_on_master, mixed_mode)
 
     # start task command
     command = __cluster_install_cmd(zip_resource_file, gpu_enabled, docker_repo, plugins, worker_on_master, file_shares, mixed_mode)

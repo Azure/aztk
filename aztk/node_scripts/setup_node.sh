@@ -4,6 +4,7 @@
 # Usage:
 # setup_node.sh [container_name] [gpu_enabled] [docker_repo] [docker_cmd]
 
+export AZTK_WORKING_DIR=/mnt/batch/tasks/startup/wd
 
 container_name=$1
 gpu_enabled=$2
@@ -65,7 +66,7 @@ else
     python3 --version
     # Install python dependencies
     pip3 install -r $(dirname $0)/requirements.txt
-    export PYTHONPATH=$PYTHONPATH:$DOCKER_WORKING_DIR
+    export PYTHONPATH=$PYTHONPATH:$AZTK_WORKING_DIR
 
     echo "Running setup python script"
     python3 $(dirname $0)/main.py setup-node $docker_run_cmd
@@ -78,7 +79,7 @@ else
 
 
     # wait until container setup is complete
-    docker exec spark /bin/bash -c 'python $DOCKER_WORKING_DIR/aztk/node_scripts/wait_until_setup_complete.py'
+    docker exec spark /bin/bash -c 'python $AZTK_WORKING_DIR/aztk/node_scripts/wait_until_setup_complete.py'
 
     # Setup symbolic link for the docker logs
     docker_log=$(docker inspect --format='{{.LogPath}}' $container_name)

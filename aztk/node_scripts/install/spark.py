@@ -22,7 +22,7 @@ def setup_as_master():
     print("Setting up as master.")
     setup_connection()
     start_spark_master()
-    if os.environ["WORKER_ON_MASTER"] == "True":
+    if os.environ["AZTK_WORKER_ON_MASTER"] == "True":
         start_spark_worker()
 
 
@@ -161,8 +161,8 @@ def setup_conf():
 
 
 def setup_ssh_keys():
-    pub_key_path_src = os.path.join(os.environ['DOCKER_WORKING_DIR'], 'id_rsa.pub')
-    priv_key_path_src = os.path.join(os.environ['DOCKER_WORKING_DIR'], 'id_rsa')
+    pub_key_path_src = os.path.join(os.environ['AZTK_WORKING_DIR'], 'id_rsa.pub')
+    priv_key_path_src = os.path.join(os.environ['AZTK_WORKING_DIR'], 'id_rsa')
     ssh_key_dest = '/root/.ssh'
 
     if not os.path.exists(ssh_key_dest):
@@ -173,26 +173,26 @@ def setup_ssh_keys():
 
 
 def copy_spark_env():
-    spark_env_path_src = os.path.join(os.environ['DOCKER_WORKING_DIR'], 'conf/spark-env.sh')
+    spark_env_path_src = os.path.join(os.environ['AZTK_WORKING_DIR'], 'conf/spark-env.sh')
     spark_env_path_dest = os.path.join(spark_home, 'conf/spark-env.sh')
     copyfile(spark_env_path_src, spark_env_path_dest)
 
 
 def copy_spark_defaults():
-    spark_default_path_src = os.path.join(os.environ['DOCKER_WORKING_DIR'], 'conf/spark-defaults.conf')
+    spark_default_path_src = os.path.join(os.environ['AZTK_WORKING_DIR'], 'conf/spark-defaults.conf')
     spark_default_path_dest = os.path.join(spark_home, 'conf/spark-defaults.conf')
     copyfile(spark_default_path_src, spark_default_path_dest)
 
 
 def copy_core_site():
-    spark_core_site_src = os.path.join(os.environ['DOCKER_WORKING_DIR'], 'conf/core-site.xml')
+    spark_core_site_src = os.path.join(os.environ['AZTK_WORKING_DIR'], 'conf/core-site.xml')
     spark_core_site_dest = os.path.join(spark_home, 'conf/core-site.xml')
     copyfile(spark_core_site_src, spark_core_site_dest)
 
 
 def copy_jars():
     # Copy jars to $SPARK_HOME/jars
-    spark_default_path_src = os.path.join(os.environ['DOCKER_WORKING_DIR'], 'jars')
+    spark_default_path_src = os.path.join(os.environ['AZTK_WORKING_DIR'], 'jars')
     spark_default_path_dest = os.path.join(spark_home, 'jars')
 
     try:

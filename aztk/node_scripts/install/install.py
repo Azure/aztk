@@ -12,17 +12,16 @@ def setup_node(docker_run_cmd: str):
     client = config.batch_client
 
     create_user.create_user(batch_client=client)
-    if os.environ['AZ_BATCH_NODE_IS_DEDICATED'] == "true" or os.environ['MIXED_MODE'] == "False":
+    if os.environ['AZ_BATCH_NODE_IS_DEDICATED'] == "true" or os.environ['AZTK_MIXED_MODE'] == "False":
         is_master = pick_master.find_master(client)
     else:
         is_master = False
         wait_until_master_selected.main()
 
-    is_worker = not is_master or os.environ["WORKER_ON_MASTER"]
+    is_worker = not is_master or os.environ["AZTK_WORKER_ON_MASTER"]
     master_node_id = pick_master.get_master_node_id(config.batch_client.pool.get(config.pool_id))
     master_node = config.batch_client.compute_node.get(config.pool_id, master_node_id)
     master_node_ip = master_node.ip_address
-    os.environ['AZTK_WORKING_DIR'] = "/mnt/batch/tasks/startup/wd"
 
     env = os.environ.copy()
     env["AZTK_IS_MASTER"] = is_master
