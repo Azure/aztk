@@ -64,6 +64,7 @@ class PluginConfiguration(ConfigurationBase):
         self.name = name
         # self.docker_image = docker_image
         self.target = target
+        self.target_type = target_type
         self.ports = ports or []
         self.files = files or []
         self.args = args or []

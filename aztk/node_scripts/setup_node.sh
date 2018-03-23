@@ -68,7 +68,7 @@ else
     export PYTHONPATH=$PYTHONPATH:$DOCKER_WORKING_DIR
 
     echo "Running setup python script"
-    $(pyenv root)/versions/$AZTK_PYTHON_VERSION/bin/python $(dirname $0)/main.py setup-node $docker_run_cmd
+    python3 $(dirname $0)/main.py setup-node $docker_run_cmd
 
     # wait until container is running
     until [ "`/usr/bin/docker inspect -f {{.State.Running}} $container_name`"=="true" ]; do
