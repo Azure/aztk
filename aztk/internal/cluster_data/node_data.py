@@ -147,7 +147,8 @@ class NodeData:
                     execute='{0}/{1}'.format(plugin.name, plugin.execute),
                     args=plugin.args,
                     env=plugin.env,
-                    runOn=plugin.run_on.value,
+                    target=plugin.target.value,
+                    target_type=plugin.target_type.value,
                 ))
 
         self.zipf.writestr(os.path.join('plugins', 'plugins-manifest.yaml'), yaml.dump(data))

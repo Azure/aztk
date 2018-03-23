@@ -35,7 +35,7 @@ def __docker_run_cmd(docker_repo: str = None,
         for mount in file_mounts:
             cmd.add_option('-v', '{0}:{0}'.format(mount.mount_path))
 
-    cmd.add_option('-e', 'DOCKER_WORKING_DIR=/mnt/batch/tasks/startup/wd')
+    cmd.add_option('-e', 'AZTK_WORKING_DIR=/mnt/batch/tasks/startup/wd')
     cmd.add_option('-e', 'AZ_BATCH_ACCOUNT_NAME=$AZ_BATCH_ACCOUNT_NAME')
     cmd.add_option('-e', 'BATCH_ACCOUNT_KEY=$BATCH_ACCOUNT_KEY')
     cmd.add_option('-e', 'BATCH_SERVICE_URL=$BATCH_SERVICE_URL')

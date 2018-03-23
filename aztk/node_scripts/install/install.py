@@ -22,6 +22,7 @@ def setup_node(docker_run_cmd: str):
     master_node_id = pick_master.get_master_node_id(config.batch_client.pool.get(config.pool_id))
     master_node = config.batch_client.compute_node.get(config.pool_id, master_node_id)
     master_node_ip = master_node.ip_address
+    os.environ['AZTK_WORKING_DIR'] = "/mnt/batch/tasks/startup/wd"
 
     env = os.environ.copy()
     env["AZTK_IS_MASTER"] = is_master
