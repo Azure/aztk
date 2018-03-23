@@ -30,14 +30,14 @@ def setup_plugins(target: PluginTarget, is_master: bool = False, is_worker: bool
         os.makedirs(log_folder)
 
     if plugins_manifest is not None:
-        _setup_plugins(plugins_manifest, is_master, is_worker)
+        _setup_plugins(plugins_manifest, target, is_master, is_worker)
 
 
 def _plugins_dir():
     return os.path.join(os.environ['AZTK_WORKING_DIR'], 'plugins')
 
 
-def _run_on_this_node(plugin_obj, target: PluginTarget, is_master=False, is_worker=False):
+def _run_on_this_node(plugin_obj, target: PluginTarget, is_master, is_worker):
     if plugin_obj['target'] != target.value:
         print("Ignoring ", plugin_obj["execute"], " as target is for ", plugin_obj['target'], " but is currently running in ", target.value)
         return False
@@ -52,11 +52,11 @@ def _run_on_this_node(plugin_obj, target: PluginTarget, is_master=False, is_work
     return False
 
 
-def _setup_plugins(plugins_manifest, is_master=False, is_worker=False):
+def _setup_plugins(plugins_manifest, target: PluginTarget, is_master, is_worker):
     plugins_dir = _plugins_dir()
 
     for plugin in plugins_manifest:
-        if _run_on_this_node(plugin, is_master, is_worker):
+        if _run_on_this_node(plugin, target, is_master, is_worker):
             path = os.path.join(plugins_dir, plugin['execute'])
             _run_script(plugin.get("name"), path, plugin.get('args'), plugin.get('env'))
 

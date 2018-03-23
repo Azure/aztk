@@ -9,7 +9,6 @@ def run():
     action = sys.argv[1]
 
     if action == "setup-node":
-        print("Setup node??", sys.argv)
         install.setup_node(sys.argv[2])
     elif action == "setup-spark-container":
         install.setup_spark_container()

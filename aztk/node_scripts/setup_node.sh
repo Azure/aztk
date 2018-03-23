@@ -46,7 +46,7 @@ echo "Pulling $repo_name"
 
 # Unzip resource files and set permissions
 apt-get -y install unzip
-chmod 777 $pip/aztk/node_scripts/docker_main.sh
+chmod 777 $AZTK_WORKING_DIR/aztk/node_scripts/docker_main.sh
 
 # Check docker is running
 docker info > /dev/null 2>&1
@@ -69,7 +69,7 @@ else
     export PYTHONPATH=$PYTHONPATH:$AZTK_WORKING_DIR
 
     echo "Running setup python script"
-    python3 $(dirname $0)/main.py setup-node $docker_run_cmd
+    python3 $(dirname $0)/main.py setup-node "$docker_run_cmd"
 
     # wait until container is running
     until [ "`/usr/bin/docker inspect -f {{.State.Running}} $container_name`"=="true" ]; do

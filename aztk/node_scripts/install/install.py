@@ -21,14 +21,18 @@ def setup_node(docker_run_cmd: str):
     is_worker = not is_master or os.environ["AZTK_WORKER_ON_MASTER"]
     master_node_id = pick_master.get_master_node_id(config.batch_client.pool.get(config.pool_id))
     master_node = config.batch_client.compute_node.get(config.pool_id, master_node_id)
-    master_node_ip = master_node.ip_address
 
     env = os.environ.copy()
-    env["AZTK_IS_MASTER"] = is_master
-    env["AZTK_IS_WORKER"] = is_worker
+    if is_master:
+        env["AZTK_IS_MASTER"] = "1"
+    if is_worker:
+        env["AZTK_IS_WORKER"] = "1"
+
     env["AZTK_MASTER_IP"] = master_node.ip_address
 
-    subprocess.call(docker_run_cmd, env=env)
+    print("Running docker with command: ", docker_run_cmd)
+
+    subprocess.call(docker_run_cmd, shell=True, env=env)
 
     plugins.setup_plugins(target=PluginTarget.Node, is_master=is_master, is_worker=is_worker)
 
