@@ -52,10 +52,10 @@ def start_spark_container(
     cmd.pass_env('SPARK_JOB_UI_PORT')
 
     cmd.open_port(8080)       # Spark Master UI
-    cmd.add_option(7077)       # Spark Master
-    cmd.add_option(7337)       # Spark Shuffle Service
-    cmd.add_option(4040)       # Job UI
-    cmd.add_option(18080)     # Spark History Server UI
-    cmd.add_option(3022)       # Docker SSH
+    cmd.open_port(7077)       # Spark Master
+    cmd.open_port(7337)       # Spark Shuffle Service
+    cmd.open_port(4040)       # Job UI
+    cmd.open_port(18080)     # Spark History Server UI
+    cmd.open_port(3022)       # Docker SSH
 
     subprocess.call(cmd.to_str(), shell=True)

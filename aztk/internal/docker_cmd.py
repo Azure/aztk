@@ -14,11 +14,11 @@ class DockerCmd:
         self.cmd.add_option('--net', 'host')
         self.cmd.add_option('--name', name)
         self.cmd.add_option('--d', docker_repo)
-        self.add_argument(cmd)
+        self.cmd.add_argument(cmd)
 
 
     def add_env(self, env: str, value: str):
-        self.environments.append((env, value))
+        self.cmd.add_option('-e', '{0}={1}'.format(env, value))
 
     def pass_env(self, env: str):
         """

@@ -8,8 +8,7 @@ export AZTK_WORKING_DIR=/mnt/batch/tasks/startup/wd
 export PYTHONUNBUFFERED=TRUE
 
 container_name=$1
-gpu_enabled=$2
-repo_name=$3
+repo_name=$2
 
 apt-get -y install linux-image-extra-$(uname -r) linux-image-extra-virtual
 apt-get -y install apt-transport-https
