@@ -1,11 +1,11 @@
 import os
 import subprocess
 from core import config
-from install import pick_master, spark, scripts, create_user, plugins
+from install import pick_master, spark, scripts, create_user, plugins, spark_container
 import wait_until_master_selected
 from aztk.models.plugins import PluginTarget
 
-def setup_node(docker_run_cmd: str):
+def setup_node(docker_repo: str):
     """
     Code to be run on the node(NOT in a container)
     """
@@ -31,13 +31,10 @@ def setup_node(docker_run_cmd: str):
     env["AZTK_MASTER_IP"] = master_node.ip_address
 
 
-    bash_script = os.path.join(os.environ["AZTK_WORKING_DIR"], "aztk/node_scripts/run_docker.sh")
-    print("Running docker with command: ", '{0} "{1}"'.format(bash_script, docker_run_cmd))
-
-    subprocess.call(['{0} "{1}"'.format(bash_script, docker_run_cmd)],
-        shell=True,
-        env=env)
-
+    spark_container.start_spark_container(
+        docker_repo=docker_repo,
+        gpu_enabled=os.environ.get("AZTK_GPU_ENABLED") == "true",
+    )
     plugins.setup_plugins(target=PluginTarget.Node, is_master=is_master, is_worker=is_worker)
 
 

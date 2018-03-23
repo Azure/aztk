@@ -10,7 +10,6 @@ export PYTHONUNBUFFERED=TRUE
 container_name=$1
 gpu_enabled=$2
 repo_name=$3
-docker_run_cmd=$4
 
 apt-get -y install linux-image-extra-$(uname -r) linux-image-extra-virtual
 apt-get -y install apt-transport-https
@@ -25,7 +24,7 @@ add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(
 apt-get -y update
 apt-get -y install docker-ce
 
-if [ $gpu_enabled == "True" ]; then
+if [ $AZTK_GPU_ENABLED == "True" ]; then
     echo "running nvidia install"
     sudo apt-get -y install nvidia-384
     sudo apt-get -y install nvidia-modprobe
@@ -48,7 +47,6 @@ echo "Pulling $repo_name"
 # Unzip resource files and set permissions
 apt-get -y install unzip
 chmod 777 $AZTK_WORKING_DIR/aztk/node_scripts/docker_main.sh
-chmod 777 $AZTK_WORKING_DIR/aztk/node_scripts/run_docker.sh
 
 # Check docker is running
 docker info > /dev/null 2>&1
@@ -71,7 +69,7 @@ else
     export PYTHONPATH=$PYTHONPATH:$AZTK_WORKING_DIR
 
     echo "Running setup python script"
-    python3 $(dirname $0)/main.py setup-node "$docker_run_cmd"
+    python3 $(dirname $0)/main.py setup-node $repo_name
 
     # wait until container is running
     until [ "`/usr/bin/docker inspect -f {{.State.Running}} $container_name`"=="true" ]; do
