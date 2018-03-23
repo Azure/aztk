@@ -21,14 +21,14 @@ sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' 
 /usr/sbin/sshd
 
 # install and configure hadoop
-mkdir /home/hadoop-2.8.2
-curl http://apache.claz.org/hadoop/common/hadoop-2.8.2/hadoop-2.8.2.tar.gz | tar -xz -C /home
+mkdir /home/hadoop-2.8.3
+curl http://apache.claz.org/hadoop/common/hadoop-2.8.3/hadoop-2.8.3.tar.gz | tar -xz -C /home
 
-export HADOOP_HOME=/home/hadoop-2.8.2
-echo 'export HADOOP_HOME=/home/hadoop-2.8.2' >> ~/.bashrc
+export HADOOP_HOME=/home/hadoop-2.8.3
+echo 'export HADOOP_HOME=/home/hadoop-2.8.3' >> ~/.bashrc
 
-export HADOOP_CONF_DIR=/home/hadoop-2.8.2/etc/hadoop
-echo 'export HADOOP_CONF_DIR=/home/hadoop-2.8.2/etc/hadoop' >> ~/.bashrc
+export HADOOP_CONF_DIR=/home/hadoop-2.8.3/etc/hadoop
+echo 'export HADOOP_CONF_DIR=/home/hadoop-2.8.3/etc/hadoop' >> ~/.bashrc
 
 export PATH=$PATH:$HADOOP_HOME/bin
 echo 'export PATH=$PATH:$HADOOP_HOME/bin' >> ~/.bashrc
@@ -59,7 +59,7 @@ echo '<?xml version="1.0" encoding="UTF-8"?>
     </configuration>' > $HADOOP_HOME/etc/hadoop/hdfs-site.xml
 
 # run HDFS
-if [ $IS_MASTER -eq "1" ]; then
+if [ "$AZTK_IS_MASTER" -eq "1" ]; then
     echo 'starting namenode and datanode'
     hdfs namenode -format
     $HADOOP_HOME/sbin/hadoop-daemon.sh --config $HADOOP_CONF_DIR --script hdfs start namenode

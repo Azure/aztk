@@ -8,7 +8,9 @@
 #  - aztk/python:spark2.1.0-python3.6.2-base
 #  - aztk/python:spark2.1.0-python3.6.2-gpu
 
-if  [ "$IS_MASTER" = "1" ]; then
+echo "Is master: $AZTK_IS_MASTER"
+
+if  [ "$AZTK_IS_MASTER" = "1" ]; then
     pip install jupyter --upgrade
     pip install notebook --upgrade
 

@@ -30,9 +30,13 @@ def setup_node(docker_run_cmd: str):
 
     env["AZTK_MASTER_IP"] = master_node.ip_address
 
-    print("Running docker with command: ", docker_run_cmd)
 
-    subprocess.call(docker_run_cmd, shell=True, env=env)
+    bash_script = os.path.join(os.environ["AZTK_WORKING_DIR"], "aztk/node_scripts/run_docker.sh")
+    print("Running docker with command: ", '{0} "{1}"'.format(bash_script, docker_run_cmd))
+
+    subprocess.call(['{0} "{1}"'.format(bash_script, docker_run_cmd)],
+        shell=True,
+        env=env)
 
     plugins.setup_plugins(target=PluginTarget.Node, is_master=is_master, is_worker=is_worker)
 

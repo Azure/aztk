@@ -5,6 +5,7 @@
 # setup_node.sh [container_name] [gpu_enabled] [docker_repo] [docker_cmd]
 
 export AZTK_WORKING_DIR=/mnt/batch/tasks/startup/wd
+export PYTHONUNBUFFERED=TRUE
 
 container_name=$1
 gpu_enabled=$2
@@ -47,6 +48,7 @@ echo "Pulling $repo_name"
 # Unzip resource files and set permissions
 apt-get -y install unzip
 chmod 777 $AZTK_WORKING_DIR/aztk/node_scripts/docker_main.sh
+chmod 777 $AZTK_WORKING_DIR/aztk/node_scripts/run_docker.sh
 
 # Check docker is running
 docker info > /dev/null 2>&1

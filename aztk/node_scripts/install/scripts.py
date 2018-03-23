@@ -64,16 +64,6 @@ def _run_scripts_dir(root: str = None):
 
 
 def run_custom_scripts(is_master: bool = False, is_worker: bool = False):
-    if is_master:
-        os.environ["IS_MASTER"] = "1"
-    else:
-        os.environ["IS_MASTER"] = "0"
-
-    if is_worker:
-        os.environ["IS_WORKER"] = "1"
-    else:
-        os.environ["IS_WORKER"] = "0"
-
     custom_scripts_dir = os.path.join(os.environ['AZTK_WORKING_DIR'], 'custom-scripts')
 
     custom_scripts = _read_yaml_file(os.path.join(custom_scripts_dir, 'custom-scripts.yaml'))
