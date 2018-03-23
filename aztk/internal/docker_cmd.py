@@ -13,7 +13,7 @@ class DockerCmd:
             self.cmd = CommandBuilder('docker run')
         self.cmd.add_option('--net', 'host')
         self.cmd.add_option('--name', name)
-        self.cmd.add_option('--d', docker_repo)
+        self.cmd.add_option('-d', docker_repo)
         self.cmd.add_argument(cmd)
 
 
