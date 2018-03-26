@@ -8,7 +8,7 @@ class PluginTarget(Enum):
     Where this plugin should run
     """
     SparkContainer = "spark-container",
-    Node = "node",
+    Host = "host",
 
 
 class PluginTargetType(Enum):

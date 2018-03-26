@@ -2,7 +2,7 @@
 
 # Entry point for the start task. It will install all dependencies and start docker.
 # Usage:
-# setup_node.sh [container_name] [gpu_enabled] [docker_repo] [docker_cmd]
+# setup_host.sh [container_name] [gpu_enabled] [docker_repo] [docker_cmd]
 
 export AZTK_WORKING_DIR=/mnt/batch/tasks/startup/wd
 export PYTHONUNBUFFERED=TRUE

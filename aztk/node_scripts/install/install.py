@@ -3,8 +3,15 @@ from core import config
 from install import pick_master, spark, scripts, create_user, plugins, spark_container
 import wait_until_master_selected
 from aztk.models.plugins import PluginTarget
+from aztk.internal.cluster_data import ClusterData
 
-def setup_node(docker_repo: str):
+def read_cluster_config():
+    data = ClusterData(config.blob_client, config.pool_id)
+    config = data.read_cluster_config()
+    print("Got cluster config", config)
+    return config
+
+def setup_host(docker_repo: str):
     """
     Code to be run on the node(NOT in a container)
     """
@@ -28,12 +35,14 @@ def setup_node(docker_repo: str):
 
     os.environ["AZTK_MASTER_IP"] = master_node.ip_address
 
+    cluster_conf = read_cluster_config()
 
     spark_container.start_spark_container(
         docker_repo=docker_repo,
         gpu_enabled=os.environ.get("AZTK_GPU_ENABLED") == "true",
+        plugins=cluster_conf.plugins,
     )
-    plugins.setup_plugins(target=PluginTarget.Node, is_master=is_master, is_worker=is_worker)
+    plugins.setup_plugins(target=PluginTarget.Host, is_master=is_master, is_worker=is_worker)
 
 
 def setup_spark_container():

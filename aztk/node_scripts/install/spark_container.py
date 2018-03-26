@@ -58,6 +58,11 @@ def start_spark_container(
     cmd.open_port(18080)     # Spark History Server UI
     cmd.open_port(3022)       # Docker SSH
 
+    if plugins:
+        for plugin in plugins:
+            for port in plugin.ports:
+                cmd.open_port(port.internal)
+
     print("="*60)
     print("                 Starting docker container")
     print("-"*60)
