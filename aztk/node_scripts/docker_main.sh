@@ -3,6 +3,7 @@
 # This file is the entry point of the docker container.
 
 set -e
+echo "Initializing spark container"
 
 # --------------------
 # Setup custom scripts

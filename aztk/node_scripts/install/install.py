@@ -42,19 +42,24 @@ def setup_spark_container():
     """
     Code run in the main spark container
     """
-
     is_master = os.environ["AZTK_IS_MASTER"]
     is_worker = os.environ["AZTK_IS_WORKER"]
+    print("Setting spark container. Master: ", is_master, ", Worker: ", is_worker)
 
+    print("Copying spark setup config")
     spark.setup_conf()
+    print("Done copying spark setup config")
+
     master_node_id = pick_master.get_master_node_id(config.batch_client.pool.get(config.pool_id))
     master_node = config.batch_client.compute_node.get(config.pool_id, master_node_id)
 
+    spark.setup_connection()
 
     if is_master:
-        spark.setup_as_master()
-    else:
-        spark.setup_as_worker()
+        spark.start_spark_master()
+
+    if is_worker:
+        spark.start_spark_worker()
 
     plugins.setup_plugins(target=PluginTarget.SparkContainer, is_master=is_master, is_worker=is_worker)
     scripts.run_custom_scripts(is_master=is_master, is_worker=is_worker)

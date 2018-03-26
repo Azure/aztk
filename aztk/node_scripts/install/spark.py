@@ -22,8 +22,6 @@ def setup_as_master():
     print("Setting up as master.")
     setup_connection()
     start_spark_master()
-    if os.environ["AZTK_WORKER_ON_MASTER"] == "True":
-        start_spark_worker()
 
 
 def setup_as_worker():

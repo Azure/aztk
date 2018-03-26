@@ -13,7 +13,8 @@ class DockerCmd:
             self.cmd = CommandBuilder('docker run')
         self.cmd.add_option('--net', 'host')
         self.cmd.add_option('--name', name)
-        self.cmd.add_option('-d', docker_repo)
+        self.cmd.add_argument('-d')
+        self.cmd.add_argument(docker_repo)
         self.cmd.add_argument(cmd)
 
 
@@ -24,8 +25,8 @@ class DockerCmd:
         """
         Give the value of an environment variable in the main process to the docker image
         """
-        if env in os.environ:
-            self.add_env(env, os.environ[env])
+            # self.add_env(env, os.environ[env])
+        self.add_env(env, "${0}".format(env))
 
     def share_folder(self, folder: str):
         self.cmd.add_option('-v', '{0}:{0}'.format(folder))
