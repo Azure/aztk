@@ -63,4 +63,5 @@ def start_spark_container(
     print("-"*60)
     print(cmd.to_str())
     print("="*60)
-    subprocess.call(cmd.to_str(), shell=True)
+    subprocess.call(['/bin/bash', '-c', 'echo Is master?: $AZTK_IS_MASTER _ $AZTK_IS_WORKER'])
+    subprocess.call(['/bin/bash', '-c', cmd.to_str()])

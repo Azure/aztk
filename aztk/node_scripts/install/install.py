@@ -1,5 +1,4 @@
 import os
-import subprocess
 from core import config
 from install import pick_master, spark, scripts, create_user, plugins, spark_container
 import wait_until_master_selected
@@ -22,13 +21,12 @@ def setup_node(docker_repo: str):
     master_node_id = pick_master.get_master_node_id(config.batch_client.pool.get(config.pool_id))
     master_node = config.batch_client.compute_node.get(config.pool_id, master_node_id)
 
-    env = os.environ.copy()
     if is_master:
-        env["AZTK_IS_MASTER"] = "1"
+        os.environ["AZTK_IS_MASTER"] = "1"
     if is_worker:
-        env["AZTK_IS_WORKER"] = "1"
+        os.environ["AZTK_IS_WORKER"] = "1"
 
-    env["AZTK_MASTER_IP"] = master_node.ip_address
+    os.environ["AZTK_MASTER_IP"] = master_node.ip_address
 
 
     spark_container.start_spark_container(
