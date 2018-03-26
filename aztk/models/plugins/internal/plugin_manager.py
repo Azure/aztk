@@ -19,6 +19,7 @@ class PluginManager:
         jupyter=plugins.JupyterPlugin,
         rstudio_server=plugins.RStudioServerPlugin,
         hdfs=plugins.HDFSPlugin,
+        simple=plugins.SimplePlugin,
     )
 
     def __init__(self):
