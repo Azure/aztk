@@ -3,13 +3,13 @@ from core import config
 from install import pick_master, spark, scripts, create_user, plugins, spark_container
 import wait_until_master_selected
 from aztk.models.plugins import PluginTarget
-from aztk.internal.cluster_data import ClusterData
+from aztk.internal import cluster_data
 
 def read_cluster_config():
-    data = ClusterData(config.blob_client, config.pool_id)
-    config = data.read_cluster_config()
-    print("Got cluster config", config)
-    return config
+    data = cluster_data.ClusterData(config.blob_client, config.pool_id)
+    cluster_config = data.read_cluster_config()
+    print("Got cluster config", cluster_config)
+    return cluster_config
 
 def setup_host(docker_repo: str):
     """

@@ -1,4 +1,5 @@
 import sys
+import aztk.spark
 from install import install
 
 def run():

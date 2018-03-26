@@ -11,7 +11,6 @@ from aztk.spark.helpers import job_submission as job_submit_helper
 from aztk.spark.helpers import get_log as get_log_helper
 from aztk.spark.utils import util
 from aztk.internal.cluster_data import NodeData
-import yaml
 
 
 class Client(BaseClient):
@@ -193,7 +192,7 @@ class Client(BaseClient):
 
             autoscale_formula = "$TargetDedicatedNodes = {0}; " \
                                 "$TargetLowPriorityNodes = {1}".format(
-                                    job_configuration.max_dedicated_nodes, 
+                                    job_configuration.max_dedicated_nodes,
                                     job_configuration.max_low_pri_nodes)
 
             job = self.__submit_job(
