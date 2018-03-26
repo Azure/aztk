@@ -13,7 +13,7 @@ class PluginFile:
         # TODO handle folders?
 
     def content(self):
-        with open(self.local_path, "r") as f:
+        with open(self.local_path, "r", encoding='UTF-8') as f:
             return  f.read()
 
 

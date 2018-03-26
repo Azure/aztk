@@ -14,7 +14,7 @@ def find_package_files(root, directory, dest=""):
     return paths
 
 
-with open('README.md') as fd:
+with open('README.md', encoding='UTF-8') as fd:
     long_description = fd.read()
 
 setup(

@@ -27,7 +27,7 @@ def schedule_tasks(tasks_path):
     blob_client = config.blob_client
 
     for task_definition in tasks_path:
-        with open(task_definition, 'r') as stream:
+        with open(task_definition, 'r', encoding='UTF-8') as stream:
             try:
                 task = yaml.load(stream)
             except yaml.YAMLError as exc:
