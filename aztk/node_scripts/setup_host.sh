@@ -15,7 +15,7 @@ apt-get -y install apt-transport-https
 apt-get -y install curl
 apt-get -y install ca-certificates
 apt-get -y install software-properties-common
-apt-get -y install python3-pip python-dev build-essential
+apt-get -y install python3-pip python-dev build-essential libssl-dev
 
 # Install docker
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
