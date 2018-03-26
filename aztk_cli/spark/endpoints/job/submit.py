@@ -23,27 +23,6 @@ def execute(args: typing.NamedTuple):
 
     job_conf.merge(args.job_id, args.job_conf)
 
-    aztk_applications = []
-    for application in job_conf.applications:
-        aztk_applications.append(
-            aztk.spark.models.ApplicationConfiguration(
-                name=application.get('name'),
-                application=application.get('application'),
-                application_args=application.get('application_args'),
-                main_class=application.get('main_class'),
-                jars=[],
-                py_files=[],
-                files=[],
-                driver_java_options=application.get('driver_java_options'),
-                driver_library_path=application.get('driver_library_path'),
-                driver_class_path=application.get('driver_class_path'),
-                driver_memory=application.get('driver_memory'),
-                executor_memory=application.get('executor_memory'),
-                driver_cores=application.get('driver_cores'),
-                executor_cores=application.get('executor_cores')
-            )
-        )
-
     # by default, load spark configuration files in .aztk/
     spark_configuration = config.load_aztk_spark_config()
     # overwrite with values in job_conf if they exist
@@ -56,7 +35,7 @@ def execute(args: typing.NamedTuple):
 
     job_configuration = aztk.spark.models.JobConfiguration(
         id=job_conf.id,
-        applications=aztk_applications,
+        applications=job_conf.applications,
         custom_scripts=job_conf.custom_scripts,
         spark_configuration=spark_configuration,
         vm_size=job_conf.vm_size,

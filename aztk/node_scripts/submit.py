@@ -117,6 +117,9 @@ def __app_submit_cmd(
         os.environ['AZ_BATCH_TASK_WORKING_DIR'] + '/' + app + ' ' +
         ' '.join(['\'' + str(app_arg) + '\'' for app_arg in (app_args or [])]))
 
+    with open("spark-submit.txt", mode="w", encoding="UTF-8") as stream:
+        stream.write(spark_submit_cmd.to_str())
+
     return spark_submit_cmd
 
 

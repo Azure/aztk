@@ -207,8 +207,8 @@ class JobConfiguration:
             custom_scripts=None,
             spark_configuration=None,
             docker_repo=None,
-            max_dedicated_nodes=None,
-            max_low_pri_nodes=None,
+            max_dedicated_nodes=0,
+            max_low_pri_nodes=0,
             subnet_id=None,
             worker_on_master=None):
         self.id = id
