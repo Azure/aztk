@@ -1,5 +1,5 @@
 import os
-from aztk.models.plugins.plugin_configuration import PluginConfiguration, PluginPort, PluginTargetType, PluginTarget
+from aztk.models.plugins.plugin_configuration import PluginConfiguration, PluginPort, PluginTargetRole, PluginTarget
 from aztk.models.plugins.plugin_file import PluginFile
 from aztk.utils import constants
 
@@ -9,7 +9,7 @@ class SimplePlugin(PluginConfiguration):
     def __init__(self):
         super().__init__(
             name="simple",
-            target_type=PluginTargetType.All,
+            target_role=PluginTargetRole.All,
             target=PluginTarget.Host,
             execute="simple.sh",
             files=[

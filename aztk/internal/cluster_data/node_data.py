@@ -147,7 +147,7 @@ class NodeData:
                     args=plugin.args,
                     env=plugin.env,
                     target=plugin.target.value,
-                    target_type=plugin.target_type.value,
+                    target_role=plugin.target_role.value,
                 ))
 
         self.zipf.writestr(os.path.join('plugins', 'plugins-manifest.yaml'), yaml.dump(data))

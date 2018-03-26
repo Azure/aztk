@@ -3,7 +3,7 @@ import json
 import yaml
 import subprocess
 from pathlib import Path
-from aztk.models.plugins import PluginTarget, PluginTargetType
+from aztk.models.plugins import PluginTarget, PluginTargetRole
 
 
 log_folder = os.path.join(os.environ['AZTK_WORKING_DIR'], 'logs','plugins')
@@ -42,11 +42,11 @@ def _run_on_this_node(plugin_obj, target: PluginTarget, is_master, is_worker):
         print("Ignoring ", plugin_obj["execute"], " as target is for ", plugin_obj['target'], " but is currently running in ", target.value)
         return False
 
-    if plugin_obj['target_type'] == PluginTargetType.Master.value and is_master is True:
+    if plugin_obj['target_role'] == PluginTargetRole.Master.value and is_master is True:
         return True
-    if plugin_obj['target_type'] == PluginTargetType.Worker.value and is_worker is True:
+    if plugin_obj['target_role'] == PluginTargetRole.Worker.value and is_worker is True:
         return True
-    if plugin_obj['target_type'] == PluginTargetType.All.value:
+    if plugin_obj['target_role'] == PluginTargetRole.All.value:
         return True
 
     return False

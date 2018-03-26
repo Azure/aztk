@@ -1,5 +1,5 @@
 import os
-from aztk.models.plugins.plugin_configuration import PluginConfiguration, PluginPort, PluginTargetType
+from aztk.models.plugins.plugin_configuration import PluginConfiguration, PluginPort, PluginTargetRole
 from aztk.models.plugins.plugin_file import PluginFile
 from aztk.utils import constants
 
@@ -38,7 +38,7 @@ class HDFSPlugin(PluginConfiguration):
                     public=True,
                 ),
             ],
-            target_type=PluginTargetType.All,
+            target_role=PluginTargetRole.All,
             execute="hdfs.sh",
             files=[
                 PluginFile("hdfs.sh", os.path.join(dir_path, "hdfs.sh")),

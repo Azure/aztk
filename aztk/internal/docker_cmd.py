@@ -25,8 +25,7 @@ class DockerCmd:
         """
         Give the value of an environment variable in the main process to the docker image
         """
-            # self.add_env(env, os.environ[env])
-        self.add_env(env, "${0}".format(env))
+        self.cmd.add_option('-e', '{0}'.format(env))
 
     def share_folder(self, folder: str):
         self.cmd.add_option('-v', '{0}:{0}'.format(folder))

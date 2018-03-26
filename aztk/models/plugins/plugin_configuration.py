@@ -11,7 +11,7 @@ class PluginTarget(Enum):
     Host = "host",
 
 
-class PluginTargetType(Enum):
+class PluginTargetRole(Enum):
     Master = "master"
     Worker = "worker"
     All = "all-nodes"
@@ -59,12 +59,12 @@ class PluginConfiguration(ConfigurationBase):
                  execute: str = None,
                  args=None,
                  env=None,
-                 target_type: PluginTargetType = PluginTargetType.Master,
+                 target_role: PluginTargetRole = PluginTargetRole.Master,
                  target: PluginTarget = PluginTarget.SparkContainer):
         self.name = name
         # self.docker_image = docker_image
         self.target = target
-        self.target_type = target_type
+        self.target_role = target_role
         self.ports = ports or []
         self.files = files or []
         self.args = args or []

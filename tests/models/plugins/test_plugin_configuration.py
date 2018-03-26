@@ -1,4 +1,4 @@
-from aztk.models.plugins import PluginConfiguration, PluginPort, PluginTargetType
+from aztk.models.plugins import PluginConfiguration, PluginPort, PluginTargetRole
 
 
 def test_create_basic_plugin():
@@ -8,7 +8,7 @@ def test_create_basic_plugin():
     assert plugin.files == ["file.sh"]
     assert plugin.execute == "file.sh"
     assert plugin.args == []
-    assert plugin.run_on == PluginTargetType.Master
+    assert plugin.run_on == PluginTargetRole.Master
 
 
 def test_create_with_args():

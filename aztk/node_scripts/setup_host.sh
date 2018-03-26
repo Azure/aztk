@@ -18,10 +18,18 @@ apt-get -y install software-properties-common
 apt-get -y install python3-pip python-dev build-essential libssl-dev
 
 # Install docker
+echo "Installing Docker"
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 apt-get -y update
 apt-get -y install docker-ce
+echo "Done installing Docker"
+
+# Install docker-compose
+echo "Installing Docker-Componse"
+sudo curl -L https://github.com/docker/compose/releases/download/1.19.0/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+echo "Done installing Docker-Compose"
 
 if [ $AZTK_GPU_ENABLED == "True" ]; then
     echo "running nvidia install"
