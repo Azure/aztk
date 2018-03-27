@@ -81,9 +81,10 @@ def generate_task(spark_client, container_id, application):
     task_cmd.add_option('-e', 'AZ_BATCH_TASK_WORKING_DIR=$AZ_BATCH_TASK_WORKING_DIR')
     task_cmd.add_option('-e', 'STORAGE_LOGS_CONTAINER={0}'.format(container_id))
     task_cmd.add_argument('spark /bin/bash >> output.log 2>&1')
-    task_cmd.add_argument('-c "cd $AZ_BATCH_TASK_WORKING_DIR; ' \
+    task_cmd.add_argument('-c "source ~/.bashrc; '\
+                          'cd $AZ_BATCH_TASK_WORKING_DIR; ' \
                           '\$(pyenv root)/versions/\$AZTK_PYTHON_VERSION/bin/python ' \
-                          '\$DOCKER_WORKING_DIR/submit.py"')
+                          '\$DOCKER_WORKING_DIR/aztk/node_scripts/submit.py"')
 
     # Create task
     task = batch_models.TaskAddParameter(
