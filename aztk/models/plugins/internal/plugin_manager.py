@@ -17,6 +17,7 @@ class PluginManager:
     # Indexing of all the predefined plugins
     plugins = dict(
         jupyter=plugins.JupyterPlugin,
+        jupyterlab=plugins.JupyterLabPlugin,
         rstudio_server=plugins.RStudioServerPlugin,
         hdfs=plugins.HDFSPlugin,
     )

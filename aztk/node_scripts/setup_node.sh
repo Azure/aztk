@@ -4,23 +4,26 @@
 # Usage:
 # setup_node.sh [container_name] [gpu_enabled] [docker_repo] [docker_cmd]
 
-
 container_name=$1
 gpu_enabled=$2
 repo_name=$3
 docker_run_cmd=$4
 
+echo "Installing pre-reqs"
 apt-get -y install linux-image-extra-$(uname -r) linux-image-extra-virtual
 apt-get -y install apt-transport-https
 apt-get -y install curl
 apt-get -y install ca-certificates
 apt-get -y install software-properties-common
+echo "Done installing pre-reqs"
 
 # Install docker
+echo "Installing Docker"
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 apt-get -y update
 apt-get -y install docker-ce
+echo "Done installing Docker"
 
 if [ $gpu_enabled == "True" ]; then
     echo "running nvidia install"

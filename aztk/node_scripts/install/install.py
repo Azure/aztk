@@ -26,7 +26,6 @@ def setup_node():
         setup_as_master()
         plugins.setup_plugins(is_master=True, is_worker=True)
         scripts.run_custom_scripts(is_master=True, is_worker=True)
-
     else:
         setup_as_worker()
         plugins.setup_plugins(is_master=False, is_worker=True)
@@ -41,7 +40,6 @@ def setup_as_master():
     spark.start_spark_master()
     if os.environ["WORKER_ON_MASTER"] == "True":
         spark.start_spark_worker()
-
 
 def setup_as_worker():
     print("Setting up as worker.")
