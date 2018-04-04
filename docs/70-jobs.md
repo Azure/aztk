@@ -1,5 +1,5 @@
 # Jobs
-In the Azure Distributed Data Engineering Toolkit, a Job is a serverless entity that runs applications and records application output. A Job will manage the full lifecycle of the infrastructure so you do not have to. This document describes how to create and use AZTK Jobs.
+In the Azure Distributed Data Engineering Toolkit,a Job is an entity that runs against an automatically provisioned and managed cluster. Jobs run a collection of Spark applications and and persist the outputs.
 
 ------------------------------------------------------
 
