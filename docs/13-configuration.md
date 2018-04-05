@@ -11,7 +11,7 @@ This is the default cluster configuration:
 # id: <id of the cluster to be created>
 id: spark_cluster
 
-# vm_size: <vm-size, see available options here: https://azure.microsoft.com/en-us/pricing/details/virtual-machines/linux/>
+# vm_size: <vm-size, see available options here: https://azure.microsoft.com/pricing/details/batch//>
 vm_size: standard_a2
 
 # size: <number of dedicated nodes in the cluster, not that clusters must contain all dedicated or all low priority nodes>
@@ -76,6 +76,8 @@ Note that all of the settings in ssh.yaml will be overrided by parameters passed
 
 The repository comes with default Spark configuration files which provision your Spark cluster just the same as you would locally. After running `aztk spark init` to initialize your working environment, you can view and edit these files at `.aztk/spark-defaults.conf`, `.aztk/spark-env.sh` and `.aztk/core-site.xml`. Please note that you can bring your own Spark configuration files by copying your `spark-defaults.conf`, `spark-env.sh` and `core-site.xml` into your `.aztk/` direcotry.
 
+If using `aztk` job submission, please note that both `spark.shuffle.service.enabled` and `spark.dynamicAllocation.enabled` must be set to true so that the number of executors registered with an application can scale as nodes in the job's cluster come online.
+
 The following settings available in `spark-defaults.conf` and `spark-env.sh` are not supported:
 
 `spark-env.sh`:
@@ -91,6 +93,19 @@ The following settings available in `spark-defaults.conf` and `spark-env.sh` are
 - spark.master
 
 Also note that this toolkit pre-loads wasb jars, so loading them elsewhere is not necessary.
+
+### History Server
+If you want to use Spark's history server, please set the following values in your `.aztk/spark-defaults.conf` file:
+```
+spark.eventLog.enabled          true
+spark.eventLog.dir              <path>
+spark.history.fs.logDirectory   <path>
+ ```
+
+Please note that the path for `spark.eventLog.dir` and `spark.history.fs.logDirectory` should most likely match so that the history server reads the logs that each Spark job writes. Also note that while the paths can be local (`file:/`), it is recommended that the paths be accessible by every node in the cluster so that the history server, which runs on the Spark master node, has access to all application logs. HDFS, WASB, ADL, or any other Hadoop API compliant storage system may be used. 
+
+If using WASB, ADL or other cloud storage services, be sure to set your keys in `.aztk/core-site.xml`. For more information, see the [Cloud Storage](./30-cloud-storage.md) documentation.
+
 
 ## Configuring Spark Storage
 

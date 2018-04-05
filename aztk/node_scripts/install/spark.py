@@ -84,24 +84,6 @@ def start_spark_master():
         print(e)
 
 
-def start_history_server():
-    # configure the history server
-    spark_event_log_enabled_key = 'spark.eventLog.enabled'
-    spark_event_log_directory_key = 'spark.eventLog.dir'
-    path_to_spark_defaults_conf = os.path.join(spark_home, 'conf/spark-defaults.conf')
-    properties = parse_configuration_file(path_to_spark_defaults_conf)
-
-    # only enable the history server if it was enabled in the configuration file
-    if properties and spark_event_log_enabled_key in properties:
-        if spark_event_log_directory_key in properties:
-            configure_history_server_log_path(properties[spark_event_log_directory_key])
-
-        exe = os.path.join(spark_home, "sbin", "start-history-server.sh")
-        cmd = [exe]
-        print("Starting history server")
-        call(cmd)
-
-
 def start_spark_worker():
     wait_for_master()
     exe = os.path.join(spark_home, "sbin", "start-slave.sh")
@@ -205,6 +187,24 @@ def parse_configuration_file(path_to_file: str):
     except Exception as e:
         print("Failed to parse configuration file:", path_to_file, "with error:")
         print(e)
+
+
+def start_history_server():
+    # configure the history server
+    spark_event_log_enabled_key = 'spark.eventLog.enabled'
+    spark_event_log_directory_key = 'spark.eventLog.dir'
+    spark_history_fs_log_directory = 'spark.history.fs.logDirectory'
+    path_to_spark_defaults_conf = os.path.join(spark_home, 'conf/spark-defaults.conf')
+    properties = parse_configuration_file(path_to_spark_defaults_conf)
+    required_keys = [spark_event_log_enabled_key, spark_event_log_directory_key, spark_history_fs_log_directory]
+
+    # only enable the history server if it was enabled in the configuration file
+    if properties:
+        if all(key in properties for key in required_keys):
+            configure_history_server_log_path(properties[spark_history_fs_log_directory])
+            exe = os.path.join(spark_home, "sbin", "start-history-server.sh")
+            print("Starting history server")
+            call([exe])
 
 
 def configure_history_server_log_path(path_to_log_file):
