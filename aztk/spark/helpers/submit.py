@@ -3,6 +3,7 @@ import os
 from typing import List
 import yaml
 import azure.batch.models as batch_models
+from aztk.error import AztkError
 from aztk.utils import constants, helpers
 from aztk.utils.command_builder import CommandBuilder
 
@@ -104,6 +105,8 @@ def generate_task(spark_client, container_id, application):
 
 def affinitize_task_to_master(spark_client, cluster_id, task):
     cluster = spark_client.get_cluster(cluster_id)
+    if cluster.master_node_id is None:
+        raise AztkError("Master has not yet been selected. Please wait until the cluster is finished provisioning.")
     master_node = spark_client.batch_client.compute_node.get(pool_id=cluster_id, node_id=cluster.master_node_id)
     task.affinity_info = batch_models.AffinityInformation(affinity_id=master_node.affinity_id)
     return task
