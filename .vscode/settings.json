@@ -15,5 +15,6 @@
   "python.formatting.yapfArgs": [
     "--style=.style.yapf"
   ],
-  "python.venvPath": "${workspaceFolder}/ENV"
+  "python.venvPath": "${workspaceFolder}/ENV",
+  "python.pythonPath": "${workspaceFolder}\\ENV\\Scripts\\python.exe"
 }

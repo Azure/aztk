@@ -26,7 +26,7 @@ def load_aztk_secrets() -> SecretsConfiguration:
     local_config = _load_secrets_config()
 
     if not global_config and not local_config:
-        raise "There is no secrets.yaml in either ./.aztk/secrets.yaml or .aztk/secrets.yaml"
+        raise aztk.error.AztkError("There is no secrets.yaml in either ./.aztk/secrets.yaml or .aztk/secrets.yaml")
 
     if global_config:  # GLobal config is optional
         _merge_secrets_dict(secrets, global_config)
@@ -330,7 +330,6 @@ class JobConfig():
             if cluster_configuration.get('size') is not None:
                 self.max_dedicated_nodes = cluster_configuration.get('size')
             if cluster_configuration.get('size_low_pri') is not None:
-                print("max_low_pri nodes is None")
                 self.max_low_pri_nodes = cluster_configuration.get('size_low_pri')
             self.custom_scripts = cluster_configuration.get('custom_scripts')
             self.subnet_id = cluster_configuration.get('subnet_id')

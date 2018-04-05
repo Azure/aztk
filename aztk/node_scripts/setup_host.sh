@@ -10,12 +10,14 @@ export PYTHONUNBUFFERED=TRUE
 container_name=$1
 repo_name=$2
 
+echo "Installing pre-reqs"
 apt-get -y install linux-image-extra-$(uname -r) linux-image-extra-virtual
 apt-get -y install apt-transport-https
 apt-get -y install curl
 apt-get -y install ca-certificates
 apt-get -y install software-properties-common
 apt-get -y install python3-pip python-dev build-essential libssl-dev
+echo "Done installing pre-reqs"
 
 # Install docker
 echo "Installing Docker"

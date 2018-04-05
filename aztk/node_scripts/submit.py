@@ -7,7 +7,7 @@ import datetime
 from typing import List
 import azure.storage.blob as blob
 import azure.batch.models as batch_models
-from command_builder import CommandBuilder
+from aztk.utils.command_builder import CommandBuilder
 from core import config
 
 # limit azure.storage logging
