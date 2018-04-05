@@ -1,11 +1,11 @@
-import os
 import argparse
+import os
 import typing
+
 import aztk.spark
 from aztk.spark.models import ClusterConfiguration, UserConfiguration
-from aztk_cli import log
+from aztk_cli import config, log, utils
 from aztk_cli.config import load_aztk_spark_config
-from aztk_cli import utils, config
 
 
 def setup_parser(parser: argparse.ArgumentParser):
@@ -70,19 +70,14 @@ def execute(args: typing.NamedTuple):
         cluster_conf.user_configuration = None
 
     utils.print_cluster_conf(cluster_conf, wait)
-    spinner = utils.Spinner()
-    spinner.start()
-
-    # create spark cluster
-    cluster = spark_client.create_cluster(
-        cluster_conf,
-        wait=wait
-    )
-
-    spinner.stop()
+    with utils.Spinner():
+        # create spark cluster
+        cluster = spark_client.create_cluster(
+            cluster_conf,
+            wait=wait
+        )
 
     if wait:
         log.info("Cluster %s created successfully.", cluster.id)
     else:
         log.info("Cluster %s is being provisioned.", cluster.id)
-

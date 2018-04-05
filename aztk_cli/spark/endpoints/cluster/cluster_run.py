@@ -1,7 +1,9 @@
 import argparse
 import typing
+
 import aztk.spark
-from aztk_cli import utils, config
+from aztk_cli import config, utils
+
 
 def setup_parser(parser: argparse.ArgumentParser):
     parser.add_argument('--id',

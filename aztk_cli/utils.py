@@ -379,6 +379,12 @@ class Spinner:
         self.spinner_generator = self.spinning_cursor()
         if delay and float(delay): self.delay = delay
 
+    def __enter__(self):
+        return self.start()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        return self.stop()
+
     def spinner_task(self):
         while self.busy:
             sys.stdout.write(next(self.spinner_generator))

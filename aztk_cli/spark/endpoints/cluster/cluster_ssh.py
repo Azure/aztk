@@ -1,11 +1,12 @@
 import argparse
 import typing
-from aztk_cli import log
-from aztk_cli import utils, config
-from aztk_cli.config import SshConfig
-import aztk
+
 import azure.batch.models.batch_error as batch_error
+
+import aztk
 from aztk.models import ClusterConfiguration
+from aztk_cli import config, log, utils
+from aztk_cli.config import SshConfig
 
 
 def setup_parser(parser: argparse.ArgumentParser):
@@ -106,4 +107,3 @@ def print_plugin_ports(cluster_config: ClusterConfiguration):
 
                         url = "{0}{1}".format(http_prefix, port.public_port)
                         utils.log_property(label, url)
-

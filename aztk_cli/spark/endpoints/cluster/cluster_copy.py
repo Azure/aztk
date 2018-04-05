@@ -1,5 +1,6 @@
 import argparse
 import typing
+
 import aztk.spark
 from aztk_cli import config
 

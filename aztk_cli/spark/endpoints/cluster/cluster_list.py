@@ -1,7 +1,8 @@
 import argparse
 import typing
+
 import aztk
-from aztk_cli import utils, config
+from aztk_cli import config, utils
 
 
 def setup_parser(_: argparse.ArgumentParser):
