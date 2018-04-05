@@ -1,4 +1,5 @@
 import argparse
+import sys
 import typing
 from aztk_cli import utils, config, log
 import aztk.spark
@@ -140,4 +141,6 @@ def execute(args: typing.NamedTuple):
     )
 
     if args.wait:
-        utils.stream_logs(client=spark_client, cluster_id=args.cluster_id, application_name=args.name)
+        exit_code = utils.stream_logs(client=spark_client, cluster_id=args.cluster_id, application_name=args.name)
+        sys.exit(exit_code)
+

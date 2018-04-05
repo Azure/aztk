@@ -121,7 +121,7 @@ def stream_logs(client, cluster_id, application_name):
             current_bytes=current_bytes)
         print(app_logs.log, end="")
         if app_logs.application_state == 'completed':
-            break
+            return app_logs.exit_code
         current_bytes = app_logs.total_bytes
         time.sleep(3)
 
