@@ -14,9 +14,6 @@ def setup_parser(parser: argparse.ArgumentParser):
     parser.add_argument('--webui', help='Local port to port spark\'s master UI to')
     parser.add_argument('--jobui', help='Local port to port spark\'s job UI to')
     parser.add_argument('--jobhistoryui', help='Local port to port spark\'s job history UI to')
-    parser.add_argument('--jupyter', help='Local port to port jupyter to')
-    parser.add_argument('--namenodeui', help='Local port to port HDFS NameNode UI to')
-    parser.add_argument('--rstudioserver', help='Local port to port rstudio server to')
     parser.add_argument('-u', '--username', help='Username to spark cluster')
     parser.add_argument('--host', dest="host", action='store_true', help='Connect to the host of the Spark container')
     parser.add_argument(
@@ -44,9 +41,6 @@ def execute(args: typing.NamedTuple):
         job_ui_port=args.jobui,
         job_history_ui_port=args.jobhistoryui,
         web_ui_port=args.webui,
-        jupyter_port=args.jupyter,
-        name_node_ui_port=args.namenodeui,
-        rstudio_server_port=args.rstudioserver,
         host=args.host,
         connect=args.connect)
 
