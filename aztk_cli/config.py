@@ -210,6 +210,7 @@ class SshConfig:
         self.cluster_id = None
         self.host = False
         self.connect = True
+        self.internal = False
 
         # Set up ports with default values
         self.job_ui_port = '4040'
@@ -258,8 +259,11 @@ class SshConfig:
         if config.get('connect') is not None:
             self.connect = config['connect']
 
+        if config.get('internal') is not None:
+            self.internal = config['internal']
+
     def merge(self, cluster_id, username, job_ui_port, job_history_ui_port,
-              web_ui_port, host, connect):
+              web_ui_port, host, connect, internal):
         """
             Merges fields with args object
         """
@@ -275,7 +279,8 @@ class SshConfig:
                 job_history_ui_port=job_history_ui_port,
                 web_ui_port=web_ui_port,
                 host=host,
-                connect=connect))
+                connect=connect,
+                internal=internal))
 
         if self.cluster_id is None:
             raise aztk.error.AztkError(

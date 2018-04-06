@@ -16,14 +16,11 @@ def setup_parser(parser: argparse.ArgumentParser):
     parser.add_argument('--jobhistoryui', help='Local port to port spark\'s job history UI to')
     parser.add_argument('-u', '--username', help='Username to spark cluster')
     parser.add_argument('--host', dest="host", action='store_true', help='Connect to the host of the Spark container')
-    parser.add_argument(
-        '--no-connect',
-        dest="connect",
-        action='store_false',
-        help='Do not create the ssh session. Only print out \
-                        the command to run.')
-
-    parser.set_defaults(connect=True)
+    parser.add_argument('--no-connect', dest="connect", action='store_false',
+                        help='Do not create the ssh session. Only print out the command to run.')
+    parser.add_argument('--internal', action='store_true',
+                        help='Connect using the local IP of the master node. Only use if using a VPN.')
+    parser.set_defaults(connect=True, internal=False)
 
 
 http_prefix = 'http://localhost:'
@@ -42,7 +39,8 @@ def execute(args: typing.NamedTuple):
         job_history_ui_port=args.jobhistoryui,
         web_ui_port=args.webui,
         host=args.host,
-        connect=args.connect)
+        connect=args.connect,
+        internal=args.internal)
 
     log.info("-------------------------------------------")
     utils.log_property("spark cluster id", ssh_conf.cluster_id)
@@ -64,7 +62,8 @@ def execute(args: typing.NamedTuple):
             jobhistoryui=ssh_conf.job_history_ui_port,
             username=ssh_conf.username,
             host=ssh_conf.host,
-            connect=ssh_conf.connect)
+            connect=ssh_conf.connect,
+            internal=ssh_conf.internal)
 
         if not ssh_conf.connect:
             log.info("")

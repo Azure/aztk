@@ -12,8 +12,12 @@ def setup_parser(parser: argparse.ArgumentParser):
                         help='The unique id of your spark cluster')
     parser.add_argument('command',
                         help='The command to run on your spark cluster')
+    parser.add_argument('--internal', action='store_true',
+                        help='Connect using the local IP of the master node. Only use if using a VPN.')
+    parser.set_defaults(internal=False)
+
 
 def execute(args: typing.NamedTuple):
     spark_client = aztk.spark.Client(config.load_aztk_secrets())
-    result = spark_client.cluster_run(args.cluster_id, args.command)
+    result = spark_client.cluster_run(args.cluster_id, args.command, args.internal)
     #TODO: pretty print result

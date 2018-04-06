@@ -15,6 +15,9 @@ def setup_parser(parser: argparse.ArgumentParser):
     parser.add_argument('--dest-path', required=True,
                         help='the path the file will be copied to on each node in the cluster.'\
                              'Note that this must include the file name.')
+    parser.add_argument('--internal', action='store_true',
+                        help='Connect using the local IP of the master node. Only use if using a VPN.')
+    parser.set_defaults(internal=False)
 
 
 def execute(args: typing.NamedTuple):
@@ -23,5 +26,6 @@ def execute(args: typing.NamedTuple):
     spark_client.cluster_copy(
         cluster_id=args.cluster_id,
         source_path=args.source_path,
-        destination_path=args.dest_path
+        destination_path=args.dest_path,
+        internal=args.internal
     )
