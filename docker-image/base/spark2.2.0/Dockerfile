@@ -5,7 +5,11 @@ FROM ubuntu:16.04
 ENV AZTK_PYTHON_VERSION=3.5.4
 
 # modify these ARGs on build time to specify your desired versions of Spark/Hadoop
-ARG SPARK_VERSION_KEY=spark-2.2.0-bin-hadoop2.7
+ENV SPARK_VERSION_KEY 2.2.0
+ENV SPARK_FULL_VERSION spark-${SPARK_VERSION_KEY}-bin-without-hadoop
+ENV HADOOP_VERSION 2.8.3
+ENV HADOOP_PREFIX=/opt/hadoop-$HADOOP_VERSION
+ENV HADOOP_CONF_DIR=/etc/hadoop
 
 # set up env vars for pyenv
 ENV HOME /
@@ -49,13 +53,20 @@ RUN apt-get clean \
     # install aztk required python version 
     && env PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install -f $AZTK_PYTHON_VERSION \
     && pyenv global $AZTK_PYTHON_VERSION \
-    # install spark & setup symlink to SPARK_HOME
-    && curl https://d3kbcqa49mib13.cloudfront.net/$SPARK_VERSION_KEY.tgz | tar xvz -C /home \
-    && ln -s /home/$SPARK_VERSION_KEY /home/spark-current
+    # download spark
+    && curl -L "https://www.apache.org/dyn/mirrors/mirrors.cgi?action=download&filename=spark/spark-${SPARK_VERSION_KEY}/${SPARK_FULL_VERSION}.tgz" | tar -xvz -C /home \
+    && ln -s "/home/${SPARK_FULL_VERSION}" /home/spark-current \
+    # download hadoop
+    && curl -fSL "https://www.apache.org/dyn/mirrors/mirrors.cgi?action=download&filename=hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz" | tar -xvz -C /opt/ \
+    && ln -s /opt/hadoop-$HADOOP_VERSION/etc/hadoop /etc/hadoop \
+    && cp /etc/hadoop/mapred-site.xml.template /etc/hadoop/mapred-site.xml \
+    && mkdir /opt/hadoop-$HADOOP_VERSION/logs
 
 # set env vars
 ENV JAVA_HOME /usr/lib/jvm/java-1.8.0-openjdk-amd64
 ENV SPARK_HOME /home/spark-current
 ENV PATH $SPARK_HOME/bin:$PATH
+ENV PATH $HADOOP_PREFIX/bin/:$PATH
+ENV SPARK_DIST_CLASSPATH $(hadoop classpath)
 
 CMD ["/bin/bash"]
