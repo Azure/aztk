@@ -20,6 +20,7 @@ class PluginManager:
         jupyterlab=plugins.JupyterLabPlugin,
         influxdb=plugins.InfluxDBPlugin,
         grafana=plugins.GrafanaPlugin,
+        resource_monitor=plugins.ResourceMonitorPlugin,
         rstudio_server=plugins.RStudioServerPlugin,
         hdfs=plugins.HDFSPlugin,
         simple=plugins.SimplePlugin,
