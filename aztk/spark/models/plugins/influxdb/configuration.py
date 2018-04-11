@@ -12,15 +12,15 @@ class InfluxDBPlugin(PluginConfiguration):
             ports=[
                 PluginPort(
                     internal=8083,
-                    public=False,
+                    public=True,
                 ),
                 PluginPort(
                     internal=8086,
-                    public=False,
+                    public=True,
                 ),
                 PluginPort(
                     internal=8090,
-                    public=False,
+                    public=True,
                 ),
             ],
             target=PluginTarget.Host,
