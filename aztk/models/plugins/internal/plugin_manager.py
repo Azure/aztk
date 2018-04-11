@@ -18,6 +18,8 @@ class PluginManager:
     plugins = dict(
         jupyter=plugins.JupyterPlugin,
         jupyterlab=plugins.JupyterLabPlugin,
+        influxdb=plugins.InfluxDBPlugin,
+        grafana=plugins.GrafanaPlugin,
         rstudio_server=plugins.RStudioServerPlugin,
         hdfs=plugins.HDFSPlugin,
         simple=plugins.SimplePlugin,
