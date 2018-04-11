@@ -67,6 +67,6 @@ ENV JAVA_HOME /usr/lib/jvm/java-1.8.0-openjdk-amd64
 ENV SPARK_HOME /home/spark-current
 ENV PATH $SPARK_HOME/bin:$PATH
 ENV PATH $HADOOP_PREFIX/bin/:$PATH
-ENV SPARK_DIST_CLASSPATH $(hadoop classpath)
+RUN echo "export SPARK_DIST_CLASSPATH=$(hadoop classpath)" >> /.bashrc
 
 CMD ["/bin/bash"]

@@ -160,7 +160,7 @@ def __cluster_install_cmd(zip_resource_file: batch_models.ResourceFile,
         'apt-get -y update',
         'apt-get install --fix-missing',
         'apt-get -y install unzip',
-        'unzip $AZ_BATCH_TASK_WORKING_DIR/{0}'.format(
+        'unzip -o $AZ_BATCH_TASK_WORKING_DIR/{0}'.format(
             zip_resource_file.file_path),
         'chmod 777 $AZ_BATCH_TASK_WORKING_DIR/aztk/node_scripts/setup_node.sh',
         '/bin/bash $AZ_BATCH_TASK_WORKING_DIR/aztk/node_scripts/setup_node.sh {0} {1} {2} "{3}"'.format(
