@@ -13,13 +13,8 @@ The minimum requirements to get started with this package are:
 2. Make sure you are running python 3.5 or greater.
     _If the default version on your machine is python 2 make sure to run the following commands with **pip3** instead of **pip**._
 
-3. Use pip to install required packages:
-    ```bash
-    pip install -r requirements.txt
+3. Install `aztk`:
     ```
-
-4. Use setuptools to install the required biaries locally:
-    ```bash
     pip install -e .
     ```
 5. Initialize your environment:
@@ -46,6 +41,11 @@ The minimum requirements to get started with this package are:
 
 
 ### Setting up your accounts
+
+#### Using the account setup script
+A script to create and configure the Azure resources required to use `aztk` is provided. For more more information and usage, see [Getting Started Script](./01-getting-started-script.md).
+
+#### Manual resource creation
 To finish setting up, you need to fill out your Azure Batch and Azure Storage secrets in *.aztk/secrets.yaml*. We'd also recommend that you enter SSH key info in this file too.
 
 Please note that if you use ssh keys and a have a non-standard ssh key file name or path, you will need to specify the location of your ssh public and private keys. To do so, set them as shown below:
@@ -61,10 +61,10 @@ default:
 0. Log into Azure
 If you do not already have an Azure account, go to [https://azure.microsoft.com/](https://azure.microsoft.com/) to get started for free today.
 
-   Once you have one, simply log in and go to the [Azure Portal](https://portal.azure.com) to start creating your Azure Batch account and Azure Storage account.
+    Once you have one, simply log in and go to the [Azure Portal](https://portal.azure.com) to start creating your Azure Batch account and Azure Storage account.
 
 
-#### Using AAD
+##### Using AAD
 To get the required keys for your Azure Active Directory (AAD) Service Principal, Azure Batch Account and Azure Storage Account, please follow these instructions. Note that this is the recommended path for use with AZTK, as some features require AAD and are disabled if using Shared Key authentication.
 
 1. Register an Azure Active Directory (AAD) Application
