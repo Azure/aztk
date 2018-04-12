@@ -143,9 +143,10 @@ class NodeStatsCollector:
     Node Stats Manager class
     """
 
-    def __init__(self, pool_id, node_id, refresh_interval=_DEFAULT_STATS_UPDATE_INTERVAL):
+    def __init__(self, pool_id, node_id, is_master, refresh_interval=_DEFAULT_STATS_UPDATE_INTERVAL):
         self.pool_id = pool_id
         self.node_id = node_id
+        self.is_master = is_master
         self.telemetry_client = None
         self.first_collect = True
         self.refresh_interval = refresh_interval
@@ -228,11 +229,6 @@ class NodeStatsCollector:
         now = datetime.utcnow()
         series = []
 
-        # TODO: Add an item to properties to express the role of the node
-        # TODO: in the cluster. For example:
-        # TODO: properties={"role": "master"}
-        # TODO: properties={"role": "server"}
-
         for cpu_n in range(0, stats.cpu_count):
             # client.track_metric("Cpu usage",
             #                     stats.cpu_percent[cpu_n], properties={"Cpu #": cpu_n})
@@ -261,6 +257,7 @@ class NodeStatsCollector:
             },
             "tags": {
                 "hostName": hostName,
+                "is_master": self.is_master
             },
         }
 
@@ -293,6 +290,10 @@ class NodeStatsCollector:
             Start collecting information of the system.
         """
         print('try to create database {}'.format(DBNAME))
+        try:
+            self.telemetry_client.create_database('data')
+        except Exception as ex:
+            logger.warn(ex)
 
         logger.debug("Start collecting stats for pool=%s node=%s",
                      self.pool_id, self.node_id)
@@ -314,6 +315,7 @@ def main():
 
     pool_id = os.environ.get('AZ_BATCH_POOL_ID', '_test-pool-1')
     node_id = os.environ.get('AZ_BATCH_NODE_ID', '_test-node-1')
+    is_master = os.environ.get('AZTK_IS_MASTER', False)
 
     if len(sys.argv) > 0:
         HOST = sys.argv[1]
@@ -327,7 +329,7 @@ def main():
 
 
     # create node stats manager
-    collector = NodeStatsCollector(pool_id, node_id)
+    collector = NodeStatsCollector(pool_id, node_id, is_master)
     collector.init()
     collector.run()
 
