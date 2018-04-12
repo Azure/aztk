@@ -3,7 +3,7 @@
 # This file is the entry point of the docker container.
 
 set -e
-source /.bashrc
+source ~/.bashrc
 
 # --------------------
 # Setup custom scripts
@@ -28,12 +28,12 @@ done
 # use python v3.5.4 to run aztk software
 echo "Starting setup using Docker"
 
-$(pyenv root)/versions/$AZTK_PYTHON_VERSION/bin/pip install -r $(dirname $0)/requirements.txt
+pip install -r $(dirname $0)/requirements.txt
 export PYTHONPATH=$PYTHONPATH:$DOCKER_WORKING_DIR
 echo 'export PYTHONPATH=$PYTHONPATH:$DOCKER_WORKING_DIR' >> ~/.bashrc
 
 echo "Running main.py script"
-$(pyenv root)/versions/$AZTK_PYTHON_VERSION/bin/python $(dirname $0)/main.py install
+python $(dirname $0)/main.py install
 
 # sleep to keep container running
 while true; do sleep 1; done
