@@ -143,7 +143,7 @@ class NodeStatsCollector:
     Node Stats Manager class
     """
 
-    def __init__(self, pool_id, node_id, is_master, refresh_interval=_DEFAULT_STATS_UPDATE_INTERVAL):
+    def __init__(self, host, pool_id, node_id, is_master, refresh_interval=_DEFAULT_STATS_UPDATE_INTERVAL):
         self.pool_id = pool_id
         self.node_id = node_id
         self.is_master = is_master
@@ -153,7 +153,7 @@ class NodeStatsCollector:
 
         self.disk = IOThroughputAggregator()
         self.network = IOThroughputAggregator()
-        self.telemetry_client = InfluxDBClient(HOST, PORT, USER, PASSWORD, DBNAME)
+        self.telemetry_client = InfluxDBClient(host, PORT, USER, PASSWORD, DBNAME)
 
     def init(self):
         """
@@ -313,12 +313,21 @@ def main():
     logger.info("Operating system: %s", os_environment())
     logger.info("Cpu count: %s", psutil.cpu_count())
 
-    pool_id = os.environ.get('AZ_BATCH_POOL_ID', '_test-pool-1')
-    node_id = os.environ.get('AZ_BATCH_NODE_ID', '_test-node-1')
-    is_master = os.environ.get('AZTK_IS_MASTER', False)
-
+    host = HOST
     if len(sys.argv) > 0:
-        HOST = sys.argv[1]
+        host = sys.argv[1]
+        is_master = sys.argv[2]
+        pool_id = sys.argv[3]
+        node_id = sys.argv[4]
+
+    if pool_id is None:
+        pool_id = os.environ.get('AZ_BATCH_POOL_ID', '_test-pool-1')
+
+    if node_id is None:
+        node_id = os.environ.get('AZ_BATCH_NODE_ID', '_test-node-1')
+
+    if is_master is None:
+        is_master = os.environ.get('AZTK_IS_MASTER', "0")
 
     logger.info('setting host to {}'.format(HOST))
 
@@ -326,10 +335,11 @@ def main():
     logger.info('enabling event loop debug mode')
     logger.info('cluster_id {}'.format(pool_id))
     logger.info('node_id    {}'.format(node_id))
+    logger.info('is_master  {}'.format(is_master))
 
 
     # create node stats manager
-    collector = NodeStatsCollector(pool_id, node_id, is_master)
+    collector = NodeStatsCollector(host, pool_id, node_id, is_master)
     collector.init()
     collector.run()
 

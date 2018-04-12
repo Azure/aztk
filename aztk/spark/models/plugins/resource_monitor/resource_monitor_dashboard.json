@@ -15,7 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": null,
+  "id": 1,
   "links": [],
   "panels": [
     {
@@ -33,6 +33,7 @@
       },
       "id": 2,
       "legend": {
+        "alignAsTable": true,
         "avg": false,
         "current": false,
         "max": false,
@@ -55,11 +56,11 @@
       "steppedLine": false,
       "targets": [
         {
-          "$$hashKey": "object:283",
+          "$$hashKey": "object:272",
           "groupBy": [
             {
               "params": [
-                "Cpu #"
+                "hostName"
               ],
               "type": "tag"
             }
@@ -101,7 +102,6 @@
       },
       "yaxes": [
         {
-          "$$hashKey": "object:937",
           "format": "percent",
           "label": null,
           "logBase": 1,
@@ -110,7 +110,6 @@
           "show": true
         },
         {
-          "$$hashKey": "object:938",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -159,7 +158,6 @@
       "steppedLine": false,
       "targets": [
         {
-          "$$hashKey": "object:1274",
           "groupBy": [],
           "measurement": "Network read",
           "orderByTime": "ASC",
@@ -179,7 +177,6 @@
           "tags": []
         },
         {
-          "$$hashKey": "object:1338",
           "groupBy": [],
           "measurement": "Disk write",
           "orderByTime": "ASC",
@@ -218,7 +215,6 @@
       },
       "yaxes": [
         {
-          "$$hashKey": "object:1502",
           "format": "Bps",
           "label": null,
           "logBase": 1,
@@ -227,7 +223,6 @@
           "show": true
         },
         {
-          "$$hashKey": "object:1503",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -274,7 +269,6 @@
       "steppedLine": false,
       "targets": [
         {
-          "$$hashKey": "object:615",
           "groupBy": [
             {
               "params": [
@@ -320,7 +314,6 @@
       },
       "yaxes": [
         {
-          "$$hashKey": "object:652",
           "format": "decbytes",
           "label": null,
           "logBase": 1,
@@ -329,7 +322,6 @@
           "show": true
         },
         {
-          "$$hashKey": "object:653",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -378,6 +370,6 @@
   },
   "timezone": "",
   "title": "Perf Counters",
-  "uid": null,
-  "version": 0
+  "uid": "h5zSugWmk",
+  "version": 1
 }

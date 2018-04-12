@@ -31,7 +31,7 @@ class ResourceMonitorPlugin(PluginConfiguration):
                 PluginFile(".env", os.path.join(dir_path, ".env")),
                 PluginFile("docker-compose.yml", os.path.join(dir_path, "docker-compose.yml")),
                 PluginFile("nodestats.py", os.path.join(dir_path, "nodestats.py")),
-                PluginFile("requrements.txt", os.path.join(dir_path, "requrements.txt")),
+                PluginFile("requirements.txt", os.path.join(dir_path, "requirements.txt")),
                 PluginFile("resource_monitor_dashboard.json",
                     os.path.join(dir_path, "resource_monitor_dashboard.json")),
             ],
