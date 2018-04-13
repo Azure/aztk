@@ -16,28 +16,24 @@ This toolkit is built on top of Azure Batch but does not require any Azure Batch
 - Ability to run _spark submit_ directly from your local machine's CLI
 
 ## Setup
-1. Clone the repo
-```bash
-    git clone -b stable https://www.github.com/azure/aztk
 
-    # You can also clone directly from master to get the latest bits
-    git clone https://www.github.com/azure/aztk
-```
-2. Use pip to install required packages (requires python 3.5+ and pip 9.0.1+)
+1. Install `aztk` with pip:
 ```bash
-    pip install -r requirements.txt
+    pip install aztk
 ```
-3. Use setuptools:
-```bash
-    pip install -e .
-```
-4. Initialize the project in a directory [This will automatically create a *.aztk* folder with config files in your working directory]:
+2. Initialize the project in a directory. This will automatically create a *.aztk* folder with config files in your working directory:
 ```bash
     aztk spark init
 ```
-5. Fill in the fields for your Batch account and Storage account in your *.aztk/secrets.yaml* file. (We'd also recommend that you enter SSH key info in this file)
+3. Login or register for an [Azure Account](https://azure.microsoft.com), navigate to [Azure Cloud Shell](https://shell.azure.com), and run:
+```sh
+wget -q https://raw.githubusercontent.com/Azure/aztk/master/account_setup.sh -O account_setup.sh &&
+chmod 755 account_setup.sh &&
+/bin/bash account_setup.sh
+```
 
-   This package is built on top of two core Azure services, [Azure Batch](https://azure.microsoft.com/en-us/services/batch/) and [Azure Storage](https://azure.microsoft.com/en-us/services/storage/). Create those resources via the portal (see [Getting Started](./docs/00-getting-started.md)).
+4. Follow the on screen prompts to create the necessary Azure resources and copy the output into your `.aztk/secrets.yaml` file. For more infomration see [Getting Started Scripts](./01-Getting-Started-Script).
+
 
 ## Quickstart Guide
 
@@ -55,7 +51,7 @@ aztk spark cluster list
 aztk spark cluster delete
 ```
 ```sh
-# login and submit jobs to your cluster
+# login and submit applications to your cluster
 aztk spark cluster ssh
 aztk spark cluster submit
 ```

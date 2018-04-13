@@ -1,9 +1,10 @@
 import argparse
 import typing
 
+from . import init
 from .cluster import cluster
 from .job import job
-from . import init
+
 
 def setup_parser(parser: argparse.ArgumentParser):
     subparsers = parser.add_subparsers(

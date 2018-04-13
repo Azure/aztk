@@ -33,7 +33,7 @@ def get_ssh_key_or_prompt(ssh_key, username, password, secrets_config):
             raise error.AztkError("Failed to get valid password, cannot add user to cluster. It is recommended that you provide a ssh public key in .aztk/secrets.yaml. Or provide an ssh-key or password with commnad line parameters (--ssh-key or --password). You may also run the 'aztk spark cluster add-user' command to add a user to this cluster.")
     return ssh_key, password
 
-def print_cluster(client, cluster: models.Cluster):
+def print_cluster(client, cluster: models.Cluster, internal: bool = False):
     node_count = __pretty_node_count(cluster)
 
     log.info("")
@@ -48,18 +48,25 @@ def print_cluster(client, cluster: models.Cluster):
 
     print_format = '|{:^36}| {:^19} | {:^21}| {:^10} | {:^8} |'
     print_format_underline = '|{:-^36}|{:-^21}|{:-^22}|{:-^12}|{:-^10}|'
-    log.info(print_format.format("Nodes", "State", "IP:Port", "Dedicated", "Master"))
+    if internal:
+        log.info(print_format.format("Nodes", "State", "IP", "Dedicated", "Master"))
+    else:
+        log.info(print_format.format("Nodes", "State", "IP:Port", "Dedicated", "Master"))
     log.info(print_format_underline.format('', '', '', '', ''))
 
     if not cluster.nodes:
         return
     for node in cluster.nodes:
         remote_login_settings = client.get_remote_login_settings(cluster.id, node.id)
+        if internal:
+            ip = node.ip_address
+        else:
+            ip ='{}:{}'.format(remote_login_settings.ip_address, remote_login_settings.port)
         log.info(
             print_format.format(
                 node.id,
                 node.state.value,
-                '{}:{}'.format(remote_login_settings.ip_address, remote_login_settings.port),
+                ip,
                 "*" if node.is_dedicated else '',
                 '*' if node.id == cluster.master_node_id else '')
         )
@@ -121,7 +128,7 @@ def stream_logs(client, cluster_id, application_name):
             current_bytes=current_bytes)
         print(app_logs.log, end="")
         if app_logs.application_state == 'completed':
-            break
+            return app_logs.exit_code
         current_bytes = app_logs.total_bytes
         time.sleep(3)
 
@@ -134,7 +141,8 @@ def ssh_in_master(
         jobhistoryui: str = None,
         ports=None,
         host: bool = False,
-        connect: bool = True):
+        connect: bool = True,
+        internal: bool = False):
     """
         SSH into head node of spark-app
         :param cluster_id: Id of the cluster to ssh in
@@ -156,6 +164,7 @@ def ssh_in_master(
 
     # get remote login settings for the user
     remote_login_settings = client.get_remote_login_settings(cluster.id, master_node_id)
+    master_internal_node_ip = [node.ip_address for node in cluster.nodes if node.id == master_node_id][0]
     master_node_ip = remote_login_settings.ip_address
     master_node_port = remote_login_settings.port
 
@@ -190,8 +199,11 @@ def ssh_in_master(
                     ssh_command.add_option("-L", "{0}:localhost:{1}".format(port.public_port, port.internal))
 
     user = username if username is not None else '<username>'
-    ssh_command.add_argument(
-        "{0}@{1} -p {2}".format(user, master_node_ip, master_node_port))
+    if internal:
+        ssh_command.add_argument("{0}@{1}".format(user, master_internal_node_ip))
+    else:
+        ssh_command.add_argument(
+            "{0}@{1} -p {2}".format(user, master_node_ip, master_node_port))
 
     if host is False:
         ssh_command.add_argument("\'sudo docker exec -it spark /bin/bash\'")
@@ -378,6 +390,12 @@ class Spinner:
     def __init__(self, delay=None):
         self.spinner_generator = self.spinning_cursor()
         if delay and float(delay): self.delay = delay
+
+    def __enter__(self):
+        return self.start()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        return self.stop()
 
     def spinner_task(self):
         while self.busy:

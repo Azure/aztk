@@ -27,6 +27,11 @@ apt-get -y update
 apt-get -y install docker-ce
 echo "Done installing Docker"
 
+# set hostname in /etc/hosts if dns cannot resolve
+if ! host $HOSTNAME ; then
+    echo $(hostname -I | awk '{print $1}') $HOSTNAME >> /etc/hosts
+fi
+
 # Install docker-compose
 echo "Installing Docker-Componse"
 sudo curl -L https://github.com/docker/compose/releases/download/1.19.0/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
