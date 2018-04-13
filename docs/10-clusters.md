@@ -18,7 +18,7 @@ For example, to create a cluster of 4 *Standard_A2* nodes called 'spark' you can
 aztk spark cluster create --id spark --vm-size standard_a2 --size 4
 ```
 
-You can find more information on VM sizes [here.](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/sizes) Please note that you must use the official SKU name when setting your VM size - they usually come in the form: "standard_d2_v2". 
+You can find more information on VM sizes [here.](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/sizes) Please note that you must use the official SKU name when setting your VM size - they usually come in the form: "standard_d2_v2".
 
 _Note: The cluster id (`--id`) can only contain alphanumeric characters including hyphens and underscores, and cannot contain more than 64 characters. Each cluster **must** have a unique cluster id._
 
@@ -138,6 +138,27 @@ Now that you're in, you can change directory to your familiar `$SPARK_HOME`
 ```sh
 cd $SPARK_HOME
 ```
+
+### Debugging your Spark Cluster
+
+If your cluster is in an unknown or unusbale state, you can debug by running:
+
+```sh
+aztk spark cluster debug --id <cluster-id> --output </path/to/output/directory/>
+```
+
+The debug utility will pull logs from all nodes in the cluster. The utility will check for:
+- free diskspace
+- docker image status
+- docker container status
+- docker container logs
+- docker container process status
+- aztk code & version
+- spark component logs (master, worker, shuffle service, history server, etc) from $SPARK_HOME/logs
+- spark application logs from $SPARK_HOME/work
+
+__Please be careful sharing the output of the `debug` command as secrets and application code are present in the output.__
+
 
 ### Interact with your Spark cluster
 By default, the `aztk spark cluster ssh` command port forwards the Spark Web UI to *localhost:8080*, Spark Jobs UI to *localhost:4040*, and Spark History Server to your *locahost:18080*. This can be [configured in *.aztk/ssh.yaml*](../docs/13-configuration.md##sshyaml).

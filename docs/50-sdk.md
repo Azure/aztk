@@ -9,6 +9,32 @@ Find some samples and getting stated tutorial in the `examples/sdk/` directory o
 
 ### Client
 
+- `cluster_copy(self, cluster_id: str, source_path: str, destination_path: str, internal: bool = False)`
+
+    Copy a file to every node in the given cluster
+
+    Parameters:
+        - cluster_id: str
+            - the id of the cluster
+        - source_path: str
+            - the local path to the file to be copied
+        - destination_path: str
+            - the path (including the file name) that the file should be placed on each node.
+        - internal: bool
+            - if True, connects to the cluster using the local IP. Only set to True if the node's internal IP address is resolvable by the client.
+
+- `cluster_run(self, cluster_id: str, command: str, internal: bool = False)`
+
+    Run a command on every node in the given cluster
+
+    Parameters:
+        - cluster_id: str
+            - the id of the cluster
+        - command: str
+            - the command to run on each node
+        - internal: bool
+            - if True, connects to the cluster using the local IP. Only set to True if the node's internal IP address is resolvable by the client.
+
 - `create_cluster(self, cluster_conf: aztk.spark.models.ClusterConfiguration, wait=False)`
 
     Create an AZTK cluster with the given cluster configuration

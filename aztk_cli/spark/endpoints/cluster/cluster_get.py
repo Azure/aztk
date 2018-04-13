@@ -1,8 +1,8 @@
 import argparse
 import typing
+
 import aztk
-from aztk_cli import log
-from aztk_cli import utils, config
+from aztk_cli import config, log, utils
 
 
 def setup_parser(parser: argparse.ArgumentParser):
@@ -14,13 +14,17 @@ def setup_parser(parser: argparse.ArgumentParser):
                         dest='show_config',
                         action='store_true',
                         help='Show the cluster configuration')
+    parser.add_argument('--internal', action='store_true',
+                        help="Show the local IP of the nodes. "\
+                             "Only use if using connecting with a VPN.")
+    parser.set_defaults(internal=False)
 
 
 def execute(args: typing.NamedTuple):
     spark_client = aztk.spark.Client(config.load_aztk_secrets())
     cluster_id = args.cluster_id
     cluster = spark_client.get_cluster(cluster_id)
-    utils.print_cluster(spark_client, cluster)
+    utils.print_cluster(spark_client, cluster, args.internal)
 
     configuration = spark_client.get_cluster_config(cluster_id)
     if configuration and args.show_config:

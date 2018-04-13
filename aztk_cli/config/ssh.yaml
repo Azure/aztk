@@ -16,3 +16,6 @@ web_ui_port: 8080
 
 # connect: <true/false, connect to spark master or print connection string (--no-connect)>
 connect: true
+
+# internal: <true/false, connect to the spark master using the internal IP address. Only use if using VPN>
+internal: false

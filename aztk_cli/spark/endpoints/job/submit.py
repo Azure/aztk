@@ -1,8 +1,9 @@
 import argparse
-import typing
 import time
+import typing
+
 import aztk.spark
-from aztk_cli import config, utils, log
+from aztk_cli import config, log, utils
 from aztk_cli.config import JobConfig, load_aztk_spark_config
 
 
