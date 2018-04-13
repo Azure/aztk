@@ -57,7 +57,7 @@ RUN apt-get clean \
     && find /opt/hadoop-2.8.3/share/hadoop/mapreduce/lib/* -name '*.jar' -print0 | xargs -0 cp -t  /home/spark-current/jars/ \
     && find /opt/hadoop-2.8.3/share/hadoop/mapreduce/* -name '*.jar' -print0 | xargs -0 cp -t  /home/spark-current/jars/ \
     && rm -rf /opt/hadoop-${HADOOP_VERSION} \
-    # hive dependencies
+    # hive and thrift dependencies
     && mvn org.apache.maven.plugins:maven-dependency-plugin:3.1.0:get -Dartifact=org.spark-project.hive:hive-cli:1.2.1.spark:jar -Dtransitive=false \
     && mvn org.apache.maven.plugins:maven-dependency-plugin:3.1.0:get -Dartifact=org.spark-project.hive:hive-exec:1.2.1.spark2:jar -Dtransitive=false \
     && mvn org.apache.maven.plugins:maven-dependency-plugin:3.1.0:get -Dartifact=org.spark-project.hive:hive-jdbc:1.2.1.spark2:jar -Dtransitive=false \
@@ -65,13 +65,16 @@ RUN apt-get clean \
     && mvn org.apache.maven.plugins:maven-dependency-plugin:3.1.0:get -Dartifact=org.spark-project.hive:hive-beeline:1.2.1.spark2:jar -Dtransitive=false \
     && mvn org.apache.maven.plugins:maven-dependency-plugin:3.1.0:get -Dartifact=org.apache.spark:spark-hive-thriftserver_2.11:2.2.0:jar -Dtransitive=false \
     && mvn org.apache.maven.plugins:maven-dependency-plugin:3.1.0:get -Dartifact=org.apache.spark:spark-hive_2.11:2.2.0:jar -Dtransitive=false \
+    && mvn org.apache.maven.plugins:maven-dependency-plugin:3.1.0:get -Dartifact=org.apache.thrift:libthrift:0.9.3:jar -Dtransitive=false \
     && cp /root/.m2/repository/org/spark-project/hive/hive-cli/1.2.1.spark/hive-cli-1.2.1.spark.jar /home/spark-current/jars/ \
     && cp /root/.m2/repository/org/spark-project/hive/hive-exec/1.2.1.spark2/hive-exec-1.2.1.spark2.jar /home/spark-current/jars/ \
     && cp /root/.m2/repository/org/spark-project/hive/hive-jdbc/1.2.1.spark2/hive-jdbc-1.2.1.spark2.jar /home/spark-current/jars/ \
     && cp /root/.m2/repository/org/spark-project/hive/hive-metastore/1.2.1.spark2/hive-metastore-1.2.1.spark2.jar /home/spark-current/jars/ \
     && cp /root/.m2/repository/org/spark-project/hive/hive-beeline/1.2.1.spark2/hive-beeline-1.2.1.spark2.jar /home/spark-current/jars/ \
     && cp /root/.m2/repository/org/apache/spark/spark-hive-thriftserver_2.11/2.2.0/spark-hive-thriftserver_2.11-2.2.0.jar /home/spark-current/jars/ \
-    && cp /root/.m2/repository/org/apache/spark/spark-hive_2.11/2.2.0/spark-hive_2.11-2.2.0.jar /home/spark-current/jars/ \
+    && cp /root/.m2/repository/org/apache/thrift/libthrift/0.9.3/libthrift-0.9.3.jar /home/spark-current/jars/ \
+
+RUN cp /root/.m2/repository/org/apache/thrift/apache/libthrift_0.9.3.0.0.3/libthrift-0.9.3.jar /home/spark-current/jars/ \
     # azure data lake client jar
     && mvn org.apache.maven.plugins:maven-dependency-plugin:3.1.0:get -Dartifact=com.microsoft.azure:azure-data-lake-store-sdk:2.2.4:jar -Dtransitive=false \
     && cp /root/.m2/repository/com/microsoft/azure/azure-data-lake-store-sdk/2.2.4/azure-data-lake-store-sdk-2.2.4.jar /home/spark-current/jars/ \
