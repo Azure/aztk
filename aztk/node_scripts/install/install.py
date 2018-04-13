@@ -30,6 +30,7 @@ def setup_host(docker_repo: str):
 
     if is_master:
         os.environ["AZTK_IS_MASTER"] = "1"
+
     if is_worker:
         os.environ["AZTK_IS_WORKER"] = "1"
 
@@ -49,8 +50,8 @@ def setup_spark_container():
     """
     Code run in the main spark container
     """
-    is_master = os.environ["AZTK_IS_MASTER"]
-    is_worker = os.environ["AZTK_IS_WORKER"]
+    is_master = bool(os.environ.get("AZTK_IS_MASTER"))``
+    is_worker = bool(os.environ.get("AZTK_IS_WORKER"))
     print("Setting spark container. Master: ", is_master, ", Worker: ", is_worker)
 
     print("Copying spark setup config")

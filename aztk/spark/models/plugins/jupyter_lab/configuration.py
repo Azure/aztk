@@ -1,5 +1,5 @@
 import os
-from aztk.models.plugins.plugin_configuration import PluginConfiguration, PluginPort, PluginTargetRole
+from aztk.models.plugins.plugin_configuration import PluginConfiguration, PluginPort, PluginTarget, PluginTargetRole
 from aztk.models.plugins.plugin_file import PluginFile
 from aztk.utils import constants
 
@@ -15,7 +15,8 @@ class JupyterLabPlugin(PluginConfiguration):
                     public=True,
                 ),
             ],
-            target=PluginTargetRole.All,
+            target=PluginTarget.SparkContainer,
+            target_role=PluginTargetRole.Master,
             execute="jupyter_lab.sh",
             files=[
                 PluginFile("jupyter_lab.sh", os.path.join(dir_path, "jupyter_lab.sh")),

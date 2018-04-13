@@ -88,6 +88,7 @@ class NodeStats:
                  swap_total=0,
                  swap_avail=0,
                  disk_total=0,
+                 disk_available=0,
                  disk=None,
                  net=None):
         """
@@ -102,6 +103,7 @@ class NodeStats:
         self.swap_total = swap_total
         self.swap_avail = swap_avail
         self.disk_total = disk_total
+        self.disk_available = disk_available
         self.disk = disk or NodeIOStats()
         self.net = net or NodeIOStats()
 
@@ -162,19 +164,19 @@ class NodeStatsCollector:
         # start cpu utilization monitoring, first value is ignored
         psutil.cpu_percent(interval=None, percpu=True)
 
-    def _get_network_usage(self):
+    def _get_network_io_usage(self):
         netio = psutil.net_io_counters()
         return self.network.aggregate(netio.bytes_recv, netio.bytes_sent)
 
-    def _get_disk_usage(self):
+    def _get_disk_io_usage(self):
         diskio = psutil.disk_io_counters()
         return self.disk.aggregate(diskio.read_bytes, diskio.write_bytes)
 
     def _sample_stats(self):
         # get system-wide counters
         mem = psutil.virtual_memory()
-        disk_stats = self._get_disk_usage()
-        net_stats = self._get_network_usage()
+        disk_stats = self._get_disk_io_usage()
+        net_stats = self._get_network_io_usage()
 
         swap_total, _, swap_avail, _, _, _ = psutil.swap_memory()
 
@@ -244,8 +246,11 @@ class NodeStatsCollector:
         series.append(self._fill_template(now, "Network read", stats.net.read_bps))
         series.append(self._fill_template(now, "Network write", stats.net.write_bps))
 
-        # print("Write points to database: {0}".format(series))
-        self.telemetry_client.write_points(series)#, retention_policy=retention_policy)
+        try:
+            self.telemetry_client.write_points(series)
+        except Exception as ex:
+            # Error writing data to database. Try again on next loop
+            logger.error(ex)
 
     def _fill_template(self, date, metric, value, properties = None):
         hostName = self.node_id
@@ -289,7 +294,7 @@ class NodeStatsCollector:
         """
             Start collecting information of the system.
         """
-        print('try to create database {}'.format(DBNAME))
+        print("try to create database '{}'".format(DBNAME))
         try:
             self.telemetry_client.create_database('data')
         except Exception as ex:
@@ -329,7 +334,7 @@ def main():
     if is_master is None:
         is_master = os.environ.get('AZTK_IS_MASTER', "0")
 
-    logger.info('setting host to {}'.format(HOST))
+    logger.info('setting host to {}'.format(host))
 
     # get and set event loop mode
     logger.info('enabling event loop debug mode')
