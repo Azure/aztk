@@ -50,7 +50,7 @@ def setup_spark_container():
     """
     Code run in the main spark container
     """
-    is_master = bool(os.environ.get("AZTK_IS_MASTER"))``
+    is_master = bool(os.environ.get("AZTK_IS_MASTER"))
     is_worker = bool(os.environ.get("AZTK_IS_WORKER"))
     print("Setting spark container. Master: ", is_master, ", Worker: ", is_worker)
 
