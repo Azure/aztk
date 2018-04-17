@@ -10,6 +10,7 @@ repo_name=$3
 docker_run_cmd=$4
 
 echo "Installing pre-reqs"
+apt-get -y update
 apt-get -y install linux-image-extra-$(uname -r) linux-image-extra-virtual
 apt-get -y install apt-transport-https
 apt-get -y install curl
