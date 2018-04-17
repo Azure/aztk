@@ -9,6 +9,7 @@ from aztk.spark.helpers import create_cluster as create_cluster_helper
 from aztk.spark.helpers import submit as cluster_submit_helper
 from aztk.spark.helpers import job_submission as job_submit_helper
 from aztk.spark.helpers import get_log as get_log_helper
+from aztk.spark.helpers import cluster_diagnostic_helper
 from aztk.spark.utils import util
 from aztk.internal.cluster_data import NodeData
 import yaml
@@ -146,15 +147,23 @@ class Client(BaseClient):
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
-    def cluster_run(self, cluster_id: str, command: str, internal: bool = False):
+    def cluster_run(self, cluster_id: str, command: str, host=False, internal: bool = False):
         try:
-            return self.__cluster_run(cluster_id, 'spark', command, internal)
+            return self.__cluster_run(cluster_id, command, internal, container_name='spark' if not host else None)
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
-    def cluster_copy(self, cluster_id: str, source_path: str, destination_path: str, internal: bool = False):
+    def cluster_copy(self, cluster_id: str, source_path: str, destination_path: str, host: bool = False, internal: bool = False):
         try:
-            return self.__cluster_copy(cluster_id, 'spark', source_path, destination_path, internal)
+            container_name = None if host else 'spark'
+            return self.__cluster_copy(cluster_id, source_path, destination_path, container_name=container_name, get=False, internal=internal)
+        except batch_error.BatchErrorException as e:
+            raise error.AztkError(helpers.format_batch_exception(e))
+
+    def cluster_download(self, cluster_id: str, source_path: str, destination_path: str, host: bool = False, internal: bool = False):
+        try:
+            container_name = None if host else 'spark'
+            return self.__cluster_copy(cluster_id, source_path, destination_path, container_name=container_name, get=True, internal=internal)
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
@@ -272,3 +281,10 @@ class Client(BaseClient):
     def wait_until_all_jobs_finished(self, jobs):
         for job in jobs:
             self.wait_until_job_finished(job)
+
+    def run_cluster_diagnostics(self, cluster_id, output_directory):
+        try:
+            output = cluster_diagnostic_helper.run(self, cluster_id, output_directory)
+            return output
+        except batch_error.BatchErrorException as e:
+            raise error.AztkError(helpers.format_batch_exception(e))

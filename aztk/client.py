@@ -229,43 +229,48 @@ class Client:
             concurrent.futures.wait(futures)
 
 
-    def __cluster_run(self, cluster_id, container_name, command, internal):
+    def __cluster_run(self, cluster_id, command, internal, container_name=None):
         pool, nodes = self.__get_pool_details(cluster_id)
         nodes = [node for node in nodes]
         if internal:
-            cluster_nodes = [models.RemoteLogin(ip_address=node.ip_address, port="22") for node in nodes]
+            cluster_nodes = [(node, models.RemoteLogin(ip_address=node.ip_address, port="22")) for node in nodes]
         else:
-            cluster_nodes = [self.__get_remote_login_settings(pool.id, node.id) for node in nodes]
+            cluster_nodes = [(node, self.__get_remote_login_settings(pool.id, node.id)) for node in nodes]
         try:
             ssh_key = self.__create_user_on_pool('aztk', pool.id, nodes)
-            asyncio.get_event_loop().run_until_complete(ssh_lib.clus_exec_command(command,
-                                                                                  container_name,
-                                                                                  'aztk',
-                                                                                  cluster_nodes,
-                                                                                  ssh_key=ssh_key.exportKey().decode('utf-8')))
+            output = asyncio.get_event_loop().run_until_complete(ssh_lib.clus_exec_command(command,
+                                                                                           'aztk',
+                                                                                           cluster_nodes,
+                                                                                           ssh_key=ssh_key.exportKey().decode('utf-8'),
+                                                                                           container_name=container_name))
+            return output
         except OSError as exc:
             raise exc
         finally:
             self.__delete_user_on_pool('aztk', pool.id, nodes)
 
-    def __cluster_copy(self, cluster_id, container_name, source_path, destination_path, internal):
+    def __cluster_copy(self, cluster_id, source_path, destination_path, container_name=None, internal=False, get=False):
         pool, nodes = self.__get_pool_details(cluster_id)
         nodes = [node for node in nodes]
         if internal:
-            cluster_nodes = [models.RemoteLogin(ip_address=node.ip_address, port="22") for node in nodes]
+            cluster_nodes = [(node, models.RemoteLogin(ip_address=node.ip_address, port="22")) for node in nodes]
         else:
-            cluster_nodes = [self.__get_remote_login_settings(pool.id, node.id) for node in nodes]
+            cluster_nodes = [(node, self.__get_remote_login_settings(pool.id, node.id)) for node in nodes]
         try:
             ssh_key = self.__create_user_on_pool('aztk', pool.id, nodes)
-            asyncio.get_event_loop().run_until_complete(ssh_lib.clus_copy(container_name=container_name,
-                                                                          username='aztk',
-                                                                          nodes=cluster_nodes,
-                                                                          source_path=source_path,
-                                                                          destination_path=destination_path,
-                                                                          ssh_key=ssh_key.exportKey().decode('utf-8')))
-            self.__delete_user_on_pool('aztk', pool.id, nodes)
+            output = asyncio.get_event_loop().run_until_complete(
+                ssh_lib.clus_copy(container_name=container_name,
+                                  username='aztk',
+                                  nodes=cluster_nodes,
+                                  source_path=source_path,
+                                  destination_path=destination_path,
+                                  ssh_key=ssh_key.exportKey().decode('utf-8'),
+                                  get=get))
+            return output
         except (OSError, batch_error.BatchErrorException) as exc:
             raise exc
+        finally:
+            self.__delete_user_on_pool('aztk', pool.id, nodes)
 
     def __submit_job(self,
                      job_configuration,
@@ -386,6 +391,9 @@ class Client:
         raise NotImplementedError()
 
     def cluster_copy(self, cluster_id, source_path, destination_path):
+        raise NotImplementedError()
+
+    def cluster_download(self, cluster_id, source_path, destination_path):
         raise NotImplementedError()
 
     def submit_job(self, job):

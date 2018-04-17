@@ -10,6 +10,7 @@ from . import cluster_app_logs
 from . import cluster_submit
 from . import cluster_run
 from . import cluster_copy
+from . import cluster_debug
 
 
 class ClusterAction:
@@ -23,6 +24,7 @@ class ClusterAction:
     submit = "submit"
     run = "run"
     copy = "copy"
+    debug = "debug"
 
 
 def setup_parser(parser: argparse.ArgumentParser):
@@ -50,6 +52,8 @@ def setup_parser(parser: argparse.ArgumentParser):
         ClusterAction.run, help="Run a command on all nodes in your spark cluster")
     copy_parser = subparsers.add_parser(
         ClusterAction.copy, help="Copy files to all nodes in your spark cluster")
+    debug_parser = subparsers.add_parser(
+        ClusterAction.debug, help="Debugging tool that aggregates logs and output from the cluster.")
 
     cluster_create.setup_parser(create_parser)
     cluster_add_user.setup_parser(add_user_parser)
@@ -61,6 +65,7 @@ def setup_parser(parser: argparse.ArgumentParser):
     cluster_app_logs.setup_parser(app_logs_parser)
     cluster_run.setup_parser(run_parser)
     cluster_copy.setup_parser(copy_parser)
+    cluster_debug.setup_parser(debug_parser)
 
 
 def execute(args: typing.NamedTuple):
@@ -76,6 +81,7 @@ def execute(args: typing.NamedTuple):
     actions[ClusterAction.app_logs] = cluster_app_logs.execute
     actions[ClusterAction.run] = cluster_run.execute
     actions[ClusterAction.copy] = cluster_copy.execute
+    actions[ClusterAction.debug] = cluster_debug.execute
 
     func = actions[args.cluster_action]
     func(args)
