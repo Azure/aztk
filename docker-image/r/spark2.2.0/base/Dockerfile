@@ -1,5 +1,5 @@
 # Ubuntu 16.04 (Xenial)
-FROM aztk/base:spark2.2.0
+FROM aztk/staging:spark2.2.0-hadoop2.8.3-nopyenv
 
 # modify these ARGs on build time to specify your desired versions of Spark/Hadoop
 ARG R_VERSION=3.4.1
@@ -93,6 +93,7 @@ RUN apt-get update \
   && make \
   && make install \
   ## Add a default CRAN mirror
+  && touch /usr/local/lib/R/etc/Rprofile.site \
   && echo "options(repos = c(CRAN = 'https://cran.rstudio.com/'), download.file.method = 'libcurl')" >> /usr/local/lib/R/etc/Rprofile.site \
   ## Add a library directory (for user-installed packages)
   && mkdir -p /usr/local/lib/R/site-library \
@@ -118,9 +119,68 @@ RUN apt-get update \
   ## Clean up from R source install
   && cd / \
   && rm -rf /tmp/* \
+  # reset default python
+  && rm /usr/bin/python \
+  && ln -s /usr/bin/python3.5 /usr/bin/python \
   && apt-get autoremove -y \
   && apt-get autoclean -y \
   && rm -rf /var/lib/apt/lists/*
 
-  CMD ["/bin/bash"]
-  
+CMD ["/bin/bash"]
+
+
+## REFACTOR ##
+FROM aztk/staging:spark2.2.0-hadoop2.8.3-nopyenv
+
+ARG R_VERSION=3.4.4
+ARG R_BASE_VERSION=${R_VERSION}-1xenial0
+ARG BUILD_DATE
+
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends apt-transport-https \
+        libxml2-dev \
+        libcairo2-dev \
+        libsqlite-dev \
+        libmariadbd-dev \
+        libmariadb-client-lgpl-dev \
+        libpq-dev \
+        libssh2-1-dev \
+        libcurl4-openssl-dev \
+        locales \
+  && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9 \
+  && add-apt-repository 'deb [arch=amd64,i386] https://cran.rstudio.com/bin/linux/ubuntu xenial/' \
+  && apt-get update \
+  && apt-get install -y --no-install-recommends r-base=${R_BASE_VERSION} r-base-dev=${R_BASE_VERSION}
+
+RUN  mkdir /usr/local/lib/R/etc/ \
+  && touch /usr/local/lib/R/etc/Rprofile.site \
+  && echo "options(repos = c(CRAN = 'https://cran.rstudio.com/'), download.file.method = 'libcurl')" >> /usr/local/lib/R/etc/Rprofile.site \
+  ## Add a library directory (for user-installed packages)
+  && mkdir -p /usr/local/lib/R/site-library \
+  ## Fix library path
+  && echo "R_LIBS_USER='/usr/local/lib/R/site-library'" >> /usr/local/lib/R/etc/Renviron \
+  && echo "R_LIBS=\${R_LIBS-'/usr/local/lib/R/site-library:/usr/local/lib/R/library:/usr/lib/R/library'}" >> /usr/local/lib/R/etc/Renviron \
+  ## install packages from date-locked MRAN snapshot of CRAN
+  && [ -z "$BUILD_DATE" ] && BUILD_DATE=$(TZ="America/Los_Angeles" date -I) || true \
+  && MRAN=https://mran.microsoft.com/snapshot/${BUILD_DATE} \
+  && echo MRAN=$MRAN >> /etc/environment \
+  && export MRAN=$MRAN \
+  && echo "options(repos = c(CRAN='$MRAN'), download.file.method = 'libcurl'); Sys.setenv(SPARK_HOME ='"$SPARK_HOME"')" >> /usr/local/lib/R/etc/Rprofile.site \
+  ## Use littler installation scripts
+  && Rscript -e "install.packages(c('dplyr', 'docopt', 'tidyverse', 'sparklyr'), repo = '$MRAN', dependencies=TRUE)" \
+  && chown -R root:staff /usr/local/lib/R/site-library \
+  && chmod -R g+wx /usr/local/lib/R/site-library \
+  && ln -s /usr/local/lib/R/site-library/littler/examples/install2.r /usr/local/bin/install2.r \
+  && ln -s /usr/local/lib/R/site-library/littler/examples/installGithub.r /usr/local/bin/installGithub.r \
+  && ln -s /usr/local/lib/R/site-library/littler/bin/r /usr/local/bin/r \
+  ## Clean up from R source install
+  && cd / \
+  && rm -rf /tmp/* \
+  && apt-get autoremove -y \
+  && apt-get autoclean -y
+
+RUN rm /usr/bin/python \
+  && ln -s /usr/bin/python3.5 /usr/bin/python
+
+
+CMD ["/bin/bash"]
