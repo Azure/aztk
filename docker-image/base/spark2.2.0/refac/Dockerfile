@@ -100,10 +100,14 @@ RUN apt-get clean \
                                 '<groupId>org.apache.tinkerpop</groupId>' \
                                 '<artifactId>spark-gremlin</artifactId>' \
                             '</exclusion>' \
+                            '<exclusion>' \
+                                '<groupId>io.netty</groupId>' \
+                                '<artifactId>*</artifactId>' \
+                            '</exclusion>' \
                         '</exclusions> ' \
                     '</dependency>' \
                 '</dependencies>' \
-            '</project>' >>/tmp/pom.xml \
+            '</project>' > /tmp/pom.xml \
     && cd /tmp \
     && mvn dependency:copy-dependencies -DoutputDirectory="${SPARK_HOME}/jars/" \
     # cleanup
