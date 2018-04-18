@@ -11,6 +11,10 @@ ENV HADOOP_VERSION 2.8.3
 ENV HADOOP_PREFIX=/opt/hadoop-$HADOOP_VERSION
 ENV HADOOP_CONF_DIR=/etc/hadoop
 
+# set env vars
+ENV JAVA_HOME /usr/lib/jvm/java-1.8.0-openjdk-amd64
+ENV SPARK_HOME /home/spark-current
+ENV PATH $SPARK_HOME/bin:$PATH
 
 RUN apt-get clean \
     && apt-get update -y \
@@ -44,45 +48,72 @@ RUN apt-get clean \
     # install java
     && apt-get install -y --no-install-recommends default-jdk \
     && ln -s /usr/bin/python3.5 /usr/bin/python \
-    && python -m pip install --upgrade pip setuptools wheel \
+    && python -m pip install --upgrade pip setuptools wheel pipenv \
     && apt-get remove -y python3-pip \
     # build and install spark
     && git clone https://github.com/apache/spark.git \
     && cd spark \
-    && git checkout tags/v2.2.0 \
+    && git checkout tags/v${SPARK_VERSION_KEY} \
     && export MAVEN_OPTS="-Xmx3g -XX:ReservedCodeCacheSize=1024m" \
     && ./dev/make-distribution.sh --name custom-spark --pip --tgz -Phive -Phive-thriftserver -Dhadoop.version=2.8.3 \
-    && tar -xvzf /spark/spark-2.2.0-bin-custom-spark.tgz --directory=/home \
-    && ln -s "/home/spark-2.2.0-bin-custom-spark" /home/spark-current \
+    && tar -xvzf /spark/spark-${SPARK_VERSION_KEY}-bin-custom-spark.tgz --directory=/home \
+    && ln -s "/home/spark-${SPARK_VERSION_KEY}-bin-custom-spark" /home/spark-current \
     && rm -rf /spark \ 
+    # copy azure storage jars and dependencies to $SPARK_HOME/jars
+    && echo '<project>' \
+                    '<modelVersion>4.0.0</modelVersion>' \
+                    '<groupId>groupId</groupId>' \
+                    '<artifactId>artifactId</artifactId>' \
+                    '<version>1.0</version>' \
+                '<dependencies>' \
+                    '<dependency>' \
+                        '<groupId>org.apache.hadoop</groupId>' \
+                        '<artifactId>hadoop-azure-datalake</artifactId>' \
+                        '<version>2.8.3</version>' \
+                    '<exclusions>' \
+                        '<exclusion>' \
+                            '<groupId>org.apache.hadoop</groupId>' \
+                            '<artifactId>hadoop-common</artifactId>' \
+                        '</exclusion>' \
+                    '</exclusions> ' \
+                    '</dependency>' \
+                    '<dependency>' \
+                        '<groupId>com.microsoft.sqlserver</groupId>' \
+                        '<artifactId>mssql-jdbc</artifactId>' \
+                        '<version>6.4.0.jre8</version>' \
+                    '</dependency>' \
+                    '<dependency>' \
+                        '<groupId>com.microsoft.azure</groupId>' \
+                        '<artifactId>azure-storage</artifactId>' \
+                        '<version>7.0.0</version>' \
+                    '</dependency>' \
+                    '<dependency>' \
+                        '<groupId>com.microsoft.azure</groupId>' \
+                        '<artifactId>azure-cosmosdb-spark_2.2.0_2.11</artifactId>' \
+                        '<version>1.1.1</version>' \
+                        '<exclusions>' \
+                            '<exclusion>' \
+                                '<groupId>org.apache.tinkerpop</groupId>' \
+                                '<artifactId>tinkergraph-gremlin</artifactId>' \
+                            '</exclusion>' \
+                            '<exclusion>' \
+                                '<groupId>org.apache.tinkerpop</groupId>' \
+                                '<artifactId>spark-gremlin</artifactId>' \
+                            '</exclusion>' \
+                        '</exclusions> ' \
+                    '</dependency>' \
+                '</dependencies>' \
+            '</project>' >>/tmp/pom.xml \
+    && cd /tmp \
+    && mvn dependency:copy-dependencies -DoutputDirectory="${SPARK_HOME}/jars/" \
     # cleanup
     && apt-get --purge autoremove -y maven \
     && apt-get autoremove -y \
+    && apt-get autoclean -y \
+    && rm -rf /tmp/* \
+    && rm -rf /root/.cache \
     && rm -rf /root/.m2 \
     && rm -rf /var/lib/apt/lists/*
 
-# TODO: use dependency:copy-dependencies to move jars and deps to $SPARK_HOME/jars
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends maven \
-    # azure data lake client jar
-    && mvn dependency:copy -Dartifact=com.microsoft.azure:azure-data-lake-store-sdk:2.2.4:jar -DoutputDirectory=/home/spark-current/jars/ \
-    # azure storage client jar
-    && mvn dependency:copy -Dartifact=com.microsoft.azure:azure-storage:7.0.0:jar -DoutputDirectory=/home/spark-current/jars/ \
-    # sql server connector jar
-    && mvn dependency:copy -Dartifact=com.microsoft.sqlserver:mssql-jdbc:6.4.0.jre8:jar -DoutputDirectory=/home/spark-current/jars/ \
-    # azure cosmos db connector jar
-    && mvn dependency:copy -Dartifact=com.microsoft.azure:azure-cosmosdb-spark_2.2.0_2.11:1.1.1:jar -DoutputDirectory=/home/spark-current/jars/ \
-    # move jars to spark-current/jars
-    # && find /root/.m2/* -name '*.jar' -print0 | xargs -0 cp -t  /home/spark-current/jars/ \
-    && apt-get --purge autoremove -y maven \
-    && apt-get autoremove -y \
-    && rm -rf /root/.m2 \
-    && rm -rf /var/lib/apt/lists/*
-
-
-# set env vars
-ENV JAVA_HOME /usr/lib/jvm/java-1.8.0-openjdk-amd64
-ENV SPARK_HOME /home/spark-current
-ENV PATH $SPARK_HOME/bin:$PATH
 
 CMD ["/bin/bash"]
