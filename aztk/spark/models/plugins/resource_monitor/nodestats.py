@@ -232,8 +232,6 @@ class NodeStatsCollector:
         series = []
 
         for cpu_n in range(0, stats.cpu_count):
-            # client.track_metric("Cpu usage",
-            #                     stats.cpu_percent[cpu_n], properties={"Cpu #": cpu_n})
             series.append(self._fill_template(now,
                 "Cpu usage",
                 stats.cpu_percent[cpu_n],
@@ -332,7 +330,9 @@ def main():
         node_id = os.environ.get('AZ_BATCH_NODE_ID', '_test-node-1')
 
     if is_master is None:
-        is_master = os.environ.get('AZTK_IS_MASTER', "0")
+        is_master = os.environ.get('AZTK_IS_MASTER', False)
+    else:
+        is_master = True
 
     logger.info('setting host to {}'.format(host))
 

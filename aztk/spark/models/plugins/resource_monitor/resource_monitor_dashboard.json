@@ -15,7 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 1,
+  "id": 2,
   "links": [],
   "panels": [
     {
@@ -23,7 +23,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
+      "datasource": "perf",
       "fill": 1,
       "gridPos": {
         "h": 9,
@@ -56,6 +56,7 @@
       "steppedLine": false,
       "targets": [
         {
+          "$$hashKey": "object:126",
           "groupBy": [
             {
               "params": [
@@ -76,6 +77,42 @@
                   "value"
                 ],
                 "type": "field"
+              }
+            ]
+          ],
+          "tags": []
+        },
+        {
+          "$$hashKey": "object:133",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
               }
             ]
           ],
@@ -236,7 +273,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
+      "datasource": "perf",
       "fill": 1,
       "gridPos": {
         "h": 9,
@@ -269,7 +306,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "$$hashKey": "object:284",
+          "$$hashKey": "object:229",
           "groupBy": [
             {
               "params": [
