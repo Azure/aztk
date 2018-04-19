@@ -15,7 +15,6 @@ RUN wget --quiet https://repo.continuum.io/miniconda/${MINICONDA_VERISON}-Linux-
     rm ~/miniconda.sh && \
     /opt/conda/bin/conda clean -tipsy && \
     ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
-    echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc && \
-    echo "conda activate base" >> ~/.bashrc
+    echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc
 
 CMD ["/bin/bash"]
