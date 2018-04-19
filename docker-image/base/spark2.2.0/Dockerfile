@@ -11,6 +11,10 @@ ENV HADOOP_VERSION 2.8.3
 ENV HADOOP_PREFIX=/opt/hadoop-$HADOOP_VERSION
 ENV HADOOP_CONF_DIR=/etc/hadoop
 
+# set env vars
+ENV JAVA_HOME /usr/lib/jvm/java-1.8.0-openjdk-amd64
+ENV SPARK_HOME /home/spark-current
+ENV PATH $SPARK_HOME/bin:$PATH
 
 RUN apt-get clean \
     && apt-get update -y \
@@ -44,59 +48,76 @@ RUN apt-get clean \
     && apt-get install -y --no-install-recommends default-jdk \
     # set up python
     && ln -s /usr/bin/python3.5 /usr/bin/python \
-    && python -m pip install --upgrade pip setuptools wheel \
+    && python -m pip install --upgrade pip setuptools wheel pipenv \
     && apt-get remove -y python3-pip \
-    # download spark
-    && curl -L "https://www.apache.org/dyn/mirrors/mirrors.cgi?action=download&filename=spark/spark-${SPARK_VERSION_KEY}/${SPARK_FULL_VERSION}.tgz" | tar -xvz -C /home \
-    && ln -s "/home/${SPARK_FULL_VERSION}" /home/spark-current \
-    # download hadoop
-    && curl -fSL "https://www.apache.org/dyn/mirrors/mirrors.cgi?action=download&filename=hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz" | tar -xvz -C /opt/ \
-    # copy necessary jars and remove hadoop
-    && find /opt/hadoop-2.8.3/share/hadoop/common/lib/* -name '*.jar' -print0 | xargs -0 cp -t  /home/spark-current/jars/ \
-    && find /opt/hadoop-2.8.3/share/hadoop/common/* -name '*.jar' -print0 | xargs -0 cp -t  /home/spark-current/jars/ \
-    && find /opt/hadoop-2.8.3/share/hadoop/mapreduce/lib/* -name '*.jar' -print0 | xargs -0 cp -t  /home/spark-current/jars/ \
-    && find /opt/hadoop-2.8.3/share/hadoop/mapreduce/* -name '*.jar' -print0 | xargs -0 cp -t  /home/spark-current/jars/ \
-    && rm -rf /opt/hadoop-${HADOOP_VERSION} \
-    # hive and thrift dependencies
-    && mvn org.apache.maven.plugins:maven-dependency-plugin:3.1.0:get -Dartifact=org.spark-project.hive:hive-cli:1.2.1.spark:jar -Dtransitive=false \
-    && mvn org.apache.maven.plugins:maven-dependency-plugin:3.1.0:get -Dartifact=org.spark-project.hive:hive-exec:1.2.1.spark2:jar -Dtransitive=false \
-    && mvn org.apache.maven.plugins:maven-dependency-plugin:3.1.0:get -Dartifact=org.spark-project.hive:hive-jdbc:1.2.1.spark2:jar -Dtransitive=false \
-    && mvn org.apache.maven.plugins:maven-dependency-plugin:3.1.0:get -Dartifact=org.spark-project.hive:hive-metastore:1.2.1.spark2:jar -Dtransitive=false \
-    && mvn org.apache.maven.plugins:maven-dependency-plugin:3.1.0:get -Dartifact=org.spark-project.hive:hive-beeline:1.2.1.spark2:jar -Dtransitive=false \
-    && mvn org.apache.maven.plugins:maven-dependency-plugin:3.1.0:get -Dartifact=org.apache.spark:spark-hive-thriftserver_2.11:2.2.0:jar -Dtransitive=false \
-    && mvn org.apache.maven.plugins:maven-dependency-plugin:3.1.0:get -Dartifact=org.apache.spark:spark-hive_2.11:2.2.0:jar -Dtransitive=false \
-    && mvn org.apache.maven.plugins:maven-dependency-plugin:3.1.0:get -Dartifact=org.apache.thrift:libthrift:0.9.3:jar -Dtransitive=false \
-    && cp /root/.m2/repository/org/spark-project/hive/hive-cli/1.2.1.spark/hive-cli-1.2.1.spark.jar /home/spark-current/jars/ \
-    && cp /root/.m2/repository/org/spark-project/hive/hive-exec/1.2.1.spark2/hive-exec-1.2.1.spark2.jar /home/spark-current/jars/ \
-    && cp /root/.m2/repository/org/spark-project/hive/hive-jdbc/1.2.1.spark2/hive-jdbc-1.2.1.spark2.jar /home/spark-current/jars/ \
-    && cp /root/.m2/repository/org/spark-project/hive/hive-metastore/1.2.1.spark2/hive-metastore-1.2.1.spark2.jar /home/spark-current/jars/ \
-    && cp /root/.m2/repository/org/spark-project/hive/hive-beeline/1.2.1.spark2/hive-beeline-1.2.1.spark2.jar /home/spark-current/jars/ \
-    && cp /root/.m2/repository/org/apache/spark/spark-hive-thriftserver_2.11/2.2.0/spark-hive-thriftserver_2.11-2.2.0.jar /home/spark-current/jars/ \
-    && cp /root/.m2/repository/org/apache/thrift/libthrift/0.9.3/libthrift-0.9.3.jar /home/spark-current/jars/ \
-
-RUN cp /root/.m2/repository/org/apache/thrift/apache/libthrift_0.9.3.0.0.3/libthrift-0.9.3.jar /home/spark-current/jars/ \
-    # azure data lake client jar
-    && mvn org.apache.maven.plugins:maven-dependency-plugin:3.1.0:get -Dartifact=com.microsoft.azure:azure-data-lake-store-sdk:2.2.4:jar -Dtransitive=false \
-    && cp /root/.m2/repository/com/microsoft/azure/azure-data-lake-store-sdk/2.2.4/azure-data-lake-store-sdk-2.2.4.jar /home/spark-current/jars/ \
-    # azure storage client jar
-    && mvn org.apache.maven.plugins:maven-dependency-plugin:3.1.0:get -Dartifact=com.microsoft.azure:azure-storage:7.0.0:jar -Dtransitive=false \
-    && cp /root/.m2/repository/com/microsoft/azure/azure-storage/7.0.0/azure-storage-7.0.0.jar /home/spark-current/jars/ \
-    # sql server connector jar
-    && mvn org.apache.maven.plugins:maven-dependency-plugin:3.1.0:get -Dartifact=com.microsoft.sqlserver:mssql-jdbc:6.4.0.jre8:jar -Dtransitive=false \
-    && cp /root/.m2/repository/com/microsoft/sqlserver/mssql-jdbc/6.4.0.jre8/mssql-jdbc-6.4.0.jre8.jar /home/spark-current/jars/ \
-    # azure cosmos db connector jar
-    && mvn org.apache.maven.plugins:maven-dependency-plugin:3.1.0:get -Dartifact=com.microsoft.azure:azure-cosmosdb-spark_2.2.0_2.11:1.1.1:jar -Dtransitive=false \
-    && cp /root/.m2/repository/com/microsoft/azure/azure-cosmosdb-spark_2.2.0_2.11/1.1.1/azure-cosmosdb-spark_2.2.0_2.11-1.1.1.jar /home/spark-current/jars/ \
-    # clean up maven
+    # build and install spark
+    && git clone https://github.com/apache/spark.git \
+    && cd spark \
+    && git checkout tags/v${SPARK_VERSION_KEY} \
+    && export MAVEN_OPTS="-Xmx3g -XX:ReservedCodeCacheSize=1024m" \
+    && ./dev/make-distribution.sh --name custom-spark --pip --tgz -Phive -Phive-thriftserver -Dhadoop.version=2.8.3 \
+    && tar -xvzf /spark/spark-${SPARK_VERSION_KEY}-bin-custom-spark.tgz --directory=/home \
+    && ln -s "/home/spark-${SPARK_VERSION_KEY}-bin-custom-spark" /home/spark-current \
+    && rm -rf /spark \ 
+    # copy azure storage jars and dependencies to $SPARK_HOME/jars
+    && echo '<project>' \
+                    '<modelVersion>4.0.0</modelVersion>' \
+                    '<groupId>groupId</groupId>' \
+                    '<artifactId>artifactId</artifactId>' \
+                    '<version>1.0</version>' \
+                '<dependencies>' \
+                    '<dependency>' \
+                        '<groupId>org.apache.hadoop</groupId>' \
+                        '<artifactId>hadoop-azure-datalake</artifactId>' \
+                        '<version>2.8.3</version>' \
+                    '<exclusions>' \
+                        '<exclusion>' \
+                            '<groupId>org.apache.hadoop</groupId>' \
+                            '<artifactId>hadoop-common</artifactId>' \
+                        '</exclusion>' \
+                    '</exclusions> ' \
+                    '</dependency>' \
+                    '<dependency>' \
+                        '<groupId>com.microsoft.sqlserver</groupId>' \
+                        '<artifactId>mssql-jdbc</artifactId>' \
+                        '<version>6.4.0.jre8</version>' \
+                    '</dependency>' \
+                    '<dependency>' \
+                        '<groupId>com.microsoft.azure</groupId>' \
+                        '<artifactId>azure-storage</artifactId>' \
+                        '<version>7.0.0</version>' \
+                    '</dependency>' \
+                    '<dependency>' \
+                        '<groupId>com.microsoft.azure</groupId>' \
+                        '<artifactId>azure-cosmosdb-spark_2.2.0_2.11</artifactId>' \
+                        '<version>1.1.1</version>' \
+                        '<exclusions>' \
+                            '<exclusion>' \
+                                '<groupId>org.apache.tinkerpop</groupId>' \
+                                '<artifactId>tinkergraph-gremlin</artifactId>' \
+                            '</exclusion>' \
+                            '<exclusion>' \
+                                '<groupId>org.apache.tinkerpop</groupId>' \
+                                '<artifactId>spark-gremlin</artifactId>' \
+                            '</exclusion>' \
+                            '<exclusion>' \
+                                '<groupId>io.netty</groupId>' \
+                                '<artifactId>*</artifactId>' \
+                            '</exclusion>' \
+                        '</exclusions> ' \
+                    '</dependency>' \
+                '</dependencies>' \
+            '</project>' > /tmp/pom.xml \
+    && cd /tmp \
+    && mvn dependency:copy-dependencies -DoutputDirectory="${SPARK_HOME}/jars/" \
+    # cleanup
     && apt-get --purge autoremove -y maven \
     && apt-get autoremove -y \
+    && apt-get autoclean -y \
+    && rm -rf /tmp/* \
+    && rm -rf /root/.cache \
     && rm -rf /root/.m2 \
     && rm -rf /var/lib/apt/lists/*
 
-
-# set env vars
-ENV JAVA_HOME /usr/lib/jvm/java-1.8.0-openjdk-amd64
-ENV SPARK_HOME /home/spark-current
-ENV PATH $SPARK_HOME/bin:$PATH
 
 CMD ["/bin/bash"]
