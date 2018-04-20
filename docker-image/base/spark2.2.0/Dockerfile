@@ -55,7 +55,7 @@ RUN apt-get clean \
     && cd spark \
     && git checkout tags/v${SPARK_VERSION_KEY} \
     && export MAVEN_OPTS="-Xmx3g -XX:ReservedCodeCacheSize=1024m" \
-    && ./dev/make-distribution.sh --name custom-spark --pip --tgz -Phive -Phive-thriftserver -Dhadoop.version=2.8.3 \
+    && ./dev/make-distribution.sh --name custom-spark --pip --tgz -Phive -Phive-thriftserver -Dhadoop.version=2.8.3 -DskipTests \
     && tar -xvzf /spark/spark-${SPARK_VERSION_KEY}-bin-custom-spark.tgz --directory=/home \
     && ln -s "/home/spark-${SPARK_VERSION_KEY}-bin-custom-spark" /home/spark-current \
     && rm -rf /spark \ 
@@ -85,7 +85,7 @@ RUN apt-get clean \
                     '<dependency>' \
                         '<groupId>com.microsoft.azure</groupId>' \
                         '<artifactId>azure-storage</artifactId>' \
-                        '<version>7.0.0</version>' \
+                        '<version>2.2.0</version>' \
                     '</dependency>' \
                     '<dependency>' \
                         '<groupId>com.microsoft.azure</groupId>' \
@@ -119,13 +119,20 @@ RUN apt-get clean \
     && rm -rf /root/.m2 \
     && rm -rf /var/lib/apt/lists/*
 
+ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 
-RUN export LC_ALL=C.UTF-8 \
-    && export LANG=C.UTF-8 \
-    && mkdir /root/.aztk \
-    && cd /root/.aztk \
-    && pipenv install --python 3.5
+# RUN export LC_ALL=C.UTF-8 \
+#     && export LANG=C.UTF-8 \
+#     && mkdir /root/.pipenv \
+#     && cd /root/.pipenv \
+#     && pipenv install --python 3.5
 
-
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends python3-venv \
+    && /usr/bin/python3.5m -m venv /root/.env \
+    && . /root/.env/bin/activate \
+    && pip install --upgrade pip setuptools wheel \
+    && apt-get autoclean -y \
+    && rm -rf /var/lib/apt/lists/*
 
 CMD ["/bin/bash"]

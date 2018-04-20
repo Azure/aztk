@@ -77,7 +77,8 @@ else
     done;
 
     # wait until container setup is complete
-    docker exec spark /bin/bash -c 'python $DOCKER_WORKING_DIR/aztk/node_scripts/wait_until_setup_complete.py'
+    docker exec spark /bin/bash -c 'source /root/.env/bin/activate; '\
+                                   'python $DOCKER_WORKING_DIR/aztk/node_scripts/wait_until_setup_complete.py'
 
     # Setup symbolic link for the docker logs
     docker_log=$(docker inspect --format='{{.LogPath}}' $container_name)

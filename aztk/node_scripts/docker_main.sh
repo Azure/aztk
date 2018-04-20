@@ -25,8 +25,10 @@ done
 # ----------------------------
 # Run aztk setup python scripts
 # ----------------------------
-# use python v3.5.4 to run aztk software
+# activate virtualenv and setup docker container
 echo "Starting setup using Docker"
+
+source /root/.env/bin/activate
 
 pip install -r $(dirname $0)/requirements.txt
 export PYTHONPATH=$PYTHONPATH:$DOCKER_WORKING_DIR
