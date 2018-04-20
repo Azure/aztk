@@ -195,6 +195,10 @@ def upload_error_log(error, application_file_path):
 if __name__ == "__main__":
     return_code = 1
     try:
+        # remove aztk virtualenv from path so Spark doesn't use it
+        path = os.environ.get("PATH").split(":")
+        path.remove("/root/.env/bin")
+        os.environ["PATH"] = ':'.join(path)
         return_code = recieve_submit_request(os.path.join(os.environ['AZ_BATCH_TASK_WORKING_DIR'], 'application.yaml'))
     except Exception as e:
         upload_error_log(str(e), os.path.join(os.environ['AZ_BATCH_TASK_WORKING_DIR'], 'application.yaml'))
