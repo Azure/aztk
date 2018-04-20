@@ -10,6 +10,7 @@ ENV SPARK_FULL_VERSION spark-${SPARK_VERSION_KEY}-bin-without-hadoop
 ENV HADOOP_VERSION 2.8.3
 ENV HADOOP_PREFIX=/opt/hadoop-$HADOOP_VERSION
 ENV HADOOP_CONF_DIR=/etc/hadoop
+ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 
 # set env vars
 ENV JAVA_HOME /usr/lib/jvm/java-1.8.0-openjdk-amd64
@@ -35,6 +36,7 @@ RUN apt-get clean \
        libncurses5-dev \
        libncursesw5-dev \
        python3-pip \
+       python3-venv \
        xz-utils \
        tk-dev \
     && apt-get update -y \
@@ -48,7 +50,9 @@ RUN apt-get clean \
     && apt-get install -y --no-install-recommends default-jdk \
     # set up python
     && ln -s /usr/bin/python3.5 /usr/bin/python \
-    && python -m pip install --upgrade pip setuptools wheel pipenv \
+    && /usr/bin/python3.5m -m venv /root/.env \
+    && . /root/.env/bin/activate \
+    && pip install --upgrade pip setuptools wheel \
     && apt-get remove -y python3-pip \
     # build and install spark
     && git clone https://github.com/apache/spark.git \
@@ -117,22 +121,6 @@ RUN apt-get clean \
     && rm -rf /tmp/* \
     && rm -rf /root/.cache \
     && rm -rf /root/.m2 \
-    && rm -rf /var/lib/apt/lists/*
-
-ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
-
-# RUN export LC_ALL=C.UTF-8 \
-#     && export LANG=C.UTF-8 \
-#     && mkdir /root/.pipenv \
-#     && cd /root/.pipenv \
-#     && pipenv install --python 3.5
-
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends python3-venv \
-    && /usr/bin/python3.5m -m venv /root/.env \
-    && . /root/.env/bin/activate \
-    && pip install --upgrade pip setuptools wheel \
-    && apt-get autoclean -y \
     && rm -rf /var/lib/apt/lists/*
 
 CMD ["/bin/bash"]
