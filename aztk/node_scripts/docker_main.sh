@@ -28,14 +28,13 @@ done
 # activate virtualenv and setup docker container
 echo "Starting setup using Docker"
 
-source /root/.env/bin/activate
+/root/.env/bin/pip install -r $(dirname $0)/requirements.txt
 
-pip install -r $(dirname $0)/requirements.txt
 export PYTHONPATH=$PYTHONPATH:$DOCKER_WORKING_DIR
 echo 'export PYTHONPATH=$PYTHONPATH:$DOCKER_WORKING_DIR' >> ~/.bashrc
 
 echo "Running main.py script"
-python $(dirname $0)/main.py install
+/root/.env/bin/python $(dirname $0)/main.py install
 
 # sleep to keep container running
 while true; do sleep 1; done
