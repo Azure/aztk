@@ -48,11 +48,11 @@ RUN apt-get clean \
     && apt-get update -y \
     # install java
     && apt-get install -y --no-install-recommends default-jdk \
-    # set up python
+    # set up user python and aztk python
     && ln -s /usr/bin/python3.5 /usr/bin/python \
+    && /usr/bin/python -m pip install --upgrade pip setuptools wheel \
     && /usr/bin/python3.5m -m venv /root/.env \
-    && . /root/.env/bin/activate \
-    && pip install --upgrade pip setuptools wheel \
+    && /root/.env/bin/pip install --upgrade pip setuptools wheel \
     && apt-get remove -y python3-pip \
     # build and install spark
     && git clone https://github.com/apache/spark.git \
@@ -90,10 +90,16 @@ RUN apt-get clean \
                         '<groupId>com.microsoft.azure</groupId>' \
                         '<artifactId>azure-storage</artifactId>' \
                         '<version>2.2.0</version>' \
+                        '<exclusions>' \
+                            '<exclusiuon>' \
+                                '<groupId>com.fasterxml.jackson.core</groupId>' \
+                                '<artifactId>jackson-core</artifactId>' \
+                            '</exclusion>' \
+                        '</exclusions>' \
                     '</dependency>' \
                     '<dependency>' \
                         '<groupId>com.microsoft.azure</groupId>' \
-                        '<artifactId>azure-cosmosdb-spark_2.2.0_2.11</artifactId>' \
+                        '<artifactId>azure-cosmosdb-spark_${SPARK_VERSION_KEY}_2.11</artifactId>' \
                         '<version>1.1.1</version>' \
                         '<exclusions>' \
                             '<exclusion>' \
@@ -107,6 +113,10 @@ RUN apt-get clean \
                             '<exclusion>' \
                                 '<groupId>io.netty</groupId>' \
                                 '<artifactId>*</artifactId>' \
+                            '</exclusion>' \
+                            '<exclusion>' \
+                                '<groupId>com.fasterxml.jackson.core</groupId>' \
+                                '<artifactId>jackson-annotations</artifactId>' \
                             '</exclusion>' \
                         '</exclusions> ' \
                     '</dependency>' \
