@@ -1,4 +1,4 @@
-# Submitting a Job
+# Submitting an Application
 Submitting a job to your Spark cluster in this package mimics the experience of a typical standalone cluster. A spark job will be submitted to the system and run to completion.
 
 ## Spark-Submit
