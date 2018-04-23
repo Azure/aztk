@@ -85,6 +85,17 @@ RUN apt-get clean \
                     '</exclusions> ' \
                     '</dependency>' \
                     '<dependency>' \
+                        '<groupId>org.apache.hadoop</groupId>' \
+                        '<artifactId>hadoop-azure</artifactId>' \
+                        '<version>2.8.3</version>' \
+                    '<exclusions>' \
+                        '<exclusion>' \
+                            '<groupId>org.apache.hadoop</groupId>' \
+                            '<artifactId>hadoop-common</artifactId>' \
+                        '</exclusion>' \
+                    '</exclusions> ' \
+                    '</dependency>' \
+                    '<dependency>' \
                         '<groupId>com.microsoft.sqlserver</groupId>' \
                         '<artifactId>mssql-jdbc</artifactId>' \
                         '<version>6.4.0.jre8</version>' \
@@ -102,7 +113,7 @@ RUN apt-get clean \
                     '</dependency>' \
                     '<dependency>' \
                         '<groupId>com.microsoft.azure</groupId>' \
-                        '<artifactId>azure-cosmosdb-spark_2.2.0_2.11</artifactId>' \ 
+                        '<artifactId>azure-cosmosdb-spark_2.2.0_2.11</artifactId>' \
                         '<version>1.1.1</version>' \
                         '<exclusions>' \
                             '<exclusion>' \

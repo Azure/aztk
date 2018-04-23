@@ -85,6 +85,17 @@ RUN apt-get clean \
                     '</exclusions> ' \
                     '</dependency>' \
                     '<dependency>' \
+                        '<groupId>org.apache.hadoop</groupId>' \
+                        '<artifactId>hadoop-azure</artifactId>' \
+                        '<version>2.8.3</version>' \
+                    '<exclusions>' \
+                        '<exclusion>' \
+                            '<groupId>org.apache.hadoop</groupId>' \
+                            '<artifactId>hadoop-common</artifactId>' \
+                        '</exclusion>' \
+                    '</exclusions> ' \
+                    '</dependency>' \
+                    '<dependency>' \
                         '<groupId>com.microsoft.sqlserver</groupId>' \
                         '<artifactId>mssql-jdbc</artifactId>' \
                         '<version>6.4.0.jre8</version>' \
@@ -93,6 +104,12 @@ RUN apt-get clean \
                         '<groupId>com.microsoft.azure</groupId>' \
                         '<artifactId>azure-storage</artifactId>' \
                         '<version>2.2.0</version>' \
+                        '<exclusions>' \
+                            '<exclusion>' \
+                                '<groupId>com.fasterxml.jackson.core</groupId>' \
+                                '<artifactId>jackson-core</artifactId>' \
+                            '</exclusion>' \
+                        '</exclusions>' \
                     '</dependency>' \
                     '<dependency>' \
                         '<groupId>com.microsoft.azure</groupId>' \
@@ -110,6 +127,10 @@ RUN apt-get clean \
                             '<exclusion>' \
                                 '<groupId>io.netty</groupId>' \
                                 '<artifactId>*</artifactId>' \
+                            '</exclusion>' \
+                            '<exclusion>' \
+                                '<groupId>com.fasterxml.jackson.core</groupId>' \
+                                '<artifactId>jackson-annotations</artifactId>' \
                             '</exclusion>' \
                         '</exclusions> ' \
                     '</dependency>' \
