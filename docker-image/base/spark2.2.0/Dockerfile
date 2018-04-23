@@ -94,7 +94,7 @@ RUN apt-get clean \
                         '<artifactId>azure-storage</artifactId>' \
                         '<version>2.2.0</version>' \
                         '<exclusions>' \
-                            '<exclusiuon>' \
+                            '<exclusion>' \
                                 '<groupId>com.fasterxml.jackson.core</groupId>' \
                                 '<artifactId>jackson-core</artifactId>' \
                             '</exclusion>' \
