@@ -1,6 +1,9 @@
 # Ubuntu 16.04 (Xenial)
 FROM ubuntu:16.04
 
+# set AZTK version compatibility
+ENV AZTK_VERSION_COMPATIBILITY 0.7.0
+
 # set version of python required for aztk
 ENV AZTK_PYTHON_VERSION=3.5.2
 
