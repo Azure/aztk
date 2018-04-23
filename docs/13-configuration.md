@@ -126,3 +126,8 @@ spark.jars $spark_home/jars/my_jar_file_1.jar,$spark_home/jars/my_jar_file_2.jar
 ````
 
 Note: _This tool automatically registers several JARS for default cloud storage in the spark-default.conf file. If you want to modify this file, simply append any additional JARS to the end of this list_.
+
+
+## Next Steps
+- [Add plugins](./15-plugins.md)
+- [Set up your Cloud Storage](./30-cloud-storage.md)

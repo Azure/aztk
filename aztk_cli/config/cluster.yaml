@@ -27,11 +27,13 @@ docker_repo:
 # To add your cluster to a virtual network provide the full arm resoruce id below
 # subnet_id: /subscriptions/********-****-****-****-************/resourceGroups/********/providers/Microsoft.Network/virtualNetworks/*******/subnets/******
 
-# To define plugins
-# plugins:
-#   - name: rstudio_server
-#     args:
-#       version: 1.2.3
+# Enable plugins
+plugins:
+  # - name: spark_ui_proxy
+  # - name: jupyterlab
+  # - name: jupyter
+  # - name: hdfs
+  # - name: rstudio_server
 
 # wait: <true/false>
 wait: false

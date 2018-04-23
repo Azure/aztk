@@ -78,25 +78,26 @@ def execute(args: typing.NamedTuple):
 
 
 def print_plugin_ports(cluster_config: ClusterConfiguration):
-
     if cluster_config and cluster_config.plugins:
         plugins = cluster_config.plugins
         has_ports = False
+        plugin_ports = {}
         for plugin in plugins:
+            plugin_ports[plugin.name] = []
             for port in plugin.ports:
                 if port.expose_publicly:
                     has_ports = True
-                    break
-
-        if has_ports > 0:
+                    plugin_ports[plugin.name].append(port)
+        
+        if has_ports:
             log.info("plugins:")
-            for plugin in plugins:
-                for port in plugin.ports:
-                    if port.expose_publicly:
-                        label = "  - open {}".format(plugin.name)
 
-                        if port.name:
-                            label += " {}".format(port.name)
-
-                        url = "{0}{1}".format(http_prefix, port.public_port)
-                        utils.log_property(label, url)
+        for plugin in plugin_ports:
+            if plugin_ports[plugin]:
+                log.info("  " + plugin)
+                for port in plugin_ports[plugin]:
+                    label = "    - open"
+                    if port.name:
+                        label += " {}".format(port.name)
+                    url = "{0}{1}".format(http_prefix, port.public_port)
+                    utils.log_property(label, url)
