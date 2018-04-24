@@ -70,8 +70,8 @@ cluster_config = ClusterConfiguration(
 
 AZTK provide a few environment variables that can be used in your plugin script
 
-* `AZTK_IS_MASTER`: Is the plugin running on the master node
-* `AZTK_IS_WORKER`: Is a worker setup on the current node(This might also be a master if you have `worker_on_master` set to true)
+* `AZTK_IS_MASTER`: Is the plugin running on the master node. Can be either `true` or `false`
+* `AZTK_IS_WORKER`: Is a worker setup on the current node(This might also be a master if you have `worker_on_master` set to true) Can be either `true` or `false`
 * `AZTK_MASTER_IP`: Internal ip of the master
 
 ## Debug your plugin

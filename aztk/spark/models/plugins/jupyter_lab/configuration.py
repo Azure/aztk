@@ -15,7 +15,7 @@ class JupyterLabPlugin(PluginConfiguration):
                     public=True,
                 ),
             ],
-            run_on=PluginTargetRole.All,
+            target_role=PluginTargetRole.All,
             execute="jupyter_lab.sh",
             files=[
                 PluginFile("jupyter_lab.sh", os.path.join(dir_path, "jupyter_lab.sh")),

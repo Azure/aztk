@@ -59,7 +59,7 @@ echo '<?xml version="1.0" encoding="UTF-8"?>
     </configuration>' > $HADOOP_HOME/etc/hadoop/hdfs-site.xml
 
 # run HDFS
-if [ "$AZTK_IS_MASTER" -eq "1" ]; then
+if [ "$AZTK_IS_MASTER" -eq "true" ]; then
     echo 'starting namenode and datanode'
     hdfs namenode -format
     $HADOOP_HOME/sbin/hadoop-daemon.sh --config $HADOOP_CONF_DIR --script hdfs start namenode

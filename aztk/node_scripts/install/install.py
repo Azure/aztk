@@ -29,9 +29,13 @@ def setup_host(docker_repo: str):
     master_node = config.batch_client.compute_node.get(config.pool_id, master_node_id)
 
     if is_master:
-        os.environ["AZTK_IS_MASTER"] = "1"
+        os.environ["AZTK_IS_MASTER"] = "true"
+    else:
+        os.environ["AZTK_IS_MASTER"] = "false"
     if is_worker:
-        os.environ["AZTK_IS_WORKER"] = "1"
+        os.environ["AZTK_IS_WORKER"] = "true"
+    else:
+        os.environ["AZTK_IS_WORKER"] = "false"
 
     os.environ["AZTK_MASTER_IP"] = master_node.ip_address
 
@@ -49,8 +53,8 @@ def setup_spark_container():
     """
     Code run in the main spark container
     """
-    is_master = os.environ["AZTK_IS_MASTER"]
-    is_worker = os.environ["AZTK_IS_WORKER"]
+    is_master = os.environ.get("AZTK_IS_MASTER") == "true"
+    is_worker = os.environ.get("AZTK_IS_WORKER") == "true"
     print("Setting spark container. Master: ", is_master, ", Worker: ", is_worker)
 
     print("Copying spark setup config")
