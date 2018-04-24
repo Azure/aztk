@@ -6,7 +6,7 @@ All error should inherit from `AztkError`
 
 
 class AztkError(Exception):
-    def __init__(self, message: str = None):
+    def __init__(self, message: str=None):
         super().__init__(message)
 
 class ClusterNotReadyError(AztkError):

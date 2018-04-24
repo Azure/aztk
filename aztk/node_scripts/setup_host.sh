@@ -2,12 +2,13 @@
 
 # Entry point for the start task. It will install all dependencies and start docker.
 # Usage:
-# setup_node.sh [container_name] [gpu_enabled] [docker_repo] [docker_cmd]
+# setup_host.sh [container_name] [docker_repo_name]
+
+export AZTK_WORKING_DIR=/mnt/batch/tasks/startup/wd
+export PYTHONUNBUFFERED=TRUE
 
 container_name=$1
-gpu_enabled=$2
-repo_name=$3
-docker_run_cmd=$4
+docker_repo_name=$2
 
 echo "Installing pre-reqs"
 apt-get -y install linux-image-extra-$(uname -r) linux-image-extra-virtual
@@ -15,6 +16,7 @@ apt-get -y install apt-transport-https
 apt-get -y install curl
 apt-get -y install ca-certificates
 apt-get -y install software-properties-common
+apt-get -y install python3-pip python-dev build-essential libssl-dev
 echo "Done installing pre-reqs"
 
 # Install docker
@@ -30,7 +32,13 @@ if ! host $HOSTNAME ; then
     echo $(hostname -I | awk '{print $1}') $HOSTNAME >> /etc/hosts
 fi
 
-if [ $gpu_enabled == "True" ]; then
+# Install docker-compose
+echo "Installing Docker-Componse"
+sudo curl -L https://github.com/docker/compose/releases/download/1.19.0/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+echo "Done installing Docker-Compose"
+
+if [ $AZTK_GPU_ENABLED == "True" ]; then
     echo "running nvidia install"
     sudo apt-get -y install nvidia-384
     sudo apt-get -y install nvidia-modprobe
@@ -47,12 +55,12 @@ else
     docker login $DOCKER_ENDPOINT --username $DOCKER_USERNAME --password $DOCKER_PASSWORD
 fi
 
-echo "Pulling $repo_name"
-(time docker pull $repo_name) 2>&1
+echo "Pulling $docker_repo_name"
+(time docker pull $docker_repo_name) 2>&1
 
 # Unzip resource files and set permissions
 apt-get -y install unzip
-chmod 777 $AZ_BATCH_TASK_WORKING_DIR/aztk/node_scripts/docker_main.sh
+chmod 777 $AZTK_WORKING_DIR/aztk/node_scripts/docker_main.sh
 
 # Check docker is running
 docker info > /dev/null 2>&1
@@ -67,16 +75,26 @@ if [ "$(docker ps -a -q -f name=$container_name)" ]; then
     docker restart $container_name
 else
     echo "Creating docker container."
-    # Start docker
-    eval $docker_run_cmd
+
+    echo "Node python version:"
+    python3 --version
+    # Install python dependencies
+    pip3 install -r $(dirname $0)/requirements.txt
+    export PYTHONPATH=$PYTHONPATH:$AZTK_WORKING_DIR
+
+    echo "Running setup python script"
+    python3 $(dirname $0)/main.py setup-node $docker_repo_name
 
     # wait until container is running
     until [ "`/usr/bin/docker inspect -f {{.State.Running}} $container_name`"=="true" ]; do
         sleep 0.1;
     done;
 
+
+
     # wait until container setup is complete
-    docker exec spark /bin/bash -c 'python $DOCKER_WORKING_DIR/aztk/node_scripts/wait_until_setup_complete.py'
+    echo "Waiting for spark docker container to setup."
+    docker exec spark /bin/bash -c 'python $AZTK_WORKING_DIR/aztk/node_scripts/wait_until_setup_complete.py'
 
     # Setup symbolic link for the docker logs
     docker_log=$(docker inspect --format='{{.LogPath}}' $container_name)

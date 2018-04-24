@@ -41,7 +41,7 @@ echo '<?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <property>
         <name>fs.defaultFS</name>
-        <value>hdfs://'$MASTER_IP':8020</value>
+        <value>hdfs://'$AZTK_MASTER_IP':8020</value>
     </property>
 </configuration>' > $HADOOP_HOME/etc/hadoop/core-site.xml
 
@@ -59,12 +59,12 @@ echo '<?xml version="1.0" encoding="UTF-8"?>
     </configuration>' > $HADOOP_HOME/etc/hadoop/hdfs-site.xml
 
 # run HDFS
-if [ $IS_MASTER -eq "1" ]; then
+if [ "$AZTK_IS_MASTER" -eq "1" ]; then
     echo 'starting namenode and datanode'
     hdfs namenode -format
     $HADOOP_HOME/sbin/hadoop-daemon.sh --config $HADOOP_CONF_DIR --script hdfs start namenode
     $HADOOP_HOME/sbin/hadoop-daemon.sh --config $HADOOP_CONF_DIR --script hdfs start datanode
 else
-    echo 'starting datanode - namenode at ' $MASTER_IP ':8020'
+    echo 'starting datanode - namenode at ' $AZTK_MASTER_IP ':8020'
     $HADOOP_HOME/sbin/hadoop-daemon.sh --config $HADOOP_CONF_DIR --script hdfs start datanode
 fi

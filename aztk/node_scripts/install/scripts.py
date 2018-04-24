@@ -14,7 +14,7 @@ def _read_yaml_file(path=None):
                 custom_scripts = yaml.load(stream)
             except yaml.YAMLError as err:
                 print("Error in cluster.yaml: {0}".format(err))
-    
+
     return custom_scripts
 
 
@@ -25,7 +25,7 @@ def _run_on_this_node(script_obj=None, is_master=False, is_worker=False):
         return True
     if script_obj['runOn'] == 'all-nodes':
         return True
-    
+
     return False
 
 
@@ -64,17 +64,7 @@ def _run_scripts_dir(root: str = None):
 
 
 def run_custom_scripts(is_master: bool = False, is_worker: bool = False):
-    if is_master:
-        os.environ["IS_MASTER"] = "1"
-    else:
-        os.environ["IS_MASTER"] = "0"
-
-    if is_worker:
-        os.environ["IS_WORKER"] = "1"
-    else:
-        os.environ["IS_WORKER"] = "0"
-
-    custom_scripts_dir = os.path.join(os.environ['DOCKER_WORKING_DIR'], 'custom-scripts')
+    custom_scripts_dir = os.path.join(os.environ['AZTK_WORKING_DIR'], 'custom-scripts')
 
     custom_scripts = _read_yaml_file(os.path.join(custom_scripts_dir, 'custom-scripts.yaml'))
 

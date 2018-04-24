@@ -1,4 +1,5 @@
 import sys
+import aztk.spark
 from install import install
 
 def run():
@@ -8,8 +9,10 @@ def run():
 
     action = sys.argv[1]
 
-    if action == "install":
-        install.setup_node()
+    if action == "setup-node":
+        install.setup_host(sys.argv[2])
+    elif action == "setup-spark-container":
+        install.setup_spark_container()
     else:
         print("Action not supported")
 

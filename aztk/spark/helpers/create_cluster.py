@@ -11,72 +11,16 @@ POOL_ADMIN_USER_IDENTITY = batch_models.UserIdentity(
         scope=batch_models.AutoUserScope.pool,
         elevation_level=batch_models.ElevationLevel.admin))
 
-'''
-Cluster create helper methods
-'''
-def __docker_run_cmd(docker_repo: str = None,
-                     gpu_enabled: bool = False,
-                     worker_on_master: bool = True,
-                     file_mounts = None,
-                     plugins = None,
-                     mixed_mode = False) -> str:
-    """
-        Build the docker run command by setting up the environment variables
-    """
-    if gpu_enabled:
-        cmd = CommandBuilder('nvidia-docker run')
-    else:
-        cmd = CommandBuilder('docker run')
-    cmd.add_option('--net', 'host')
-    cmd.add_option('--name', constants.DOCKER_SPARK_CONTAINER_NAME)
-    cmd.add_option('-v', '/mnt/batch/tasks:/mnt/batch/tasks')
-
-    if file_mounts:
-        for mount in file_mounts:
-            cmd.add_option('-v', '{0}:{0}'.format(mount.mount_path))
-
-    cmd.add_option('-e', 'DOCKER_WORKING_DIR=/mnt/batch/tasks/startup/wd')
-    cmd.add_option('-e', 'AZ_BATCH_ACCOUNT_NAME=$AZ_BATCH_ACCOUNT_NAME')
-    cmd.add_option('-e', 'BATCH_ACCOUNT_KEY=$BATCH_ACCOUNT_KEY')
-    cmd.add_option('-e', 'BATCH_SERVICE_URL=$BATCH_SERVICE_URL')
-    cmd.add_option('-e', 'STORAGE_ACCOUNT_NAME=$STORAGE_ACCOUNT_NAME')
-    cmd.add_option('-e', 'STORAGE_ACCOUNT_KEY=$STORAGE_ACCOUNT_KEY')
-    cmd.add_option('-e', 'STORAGE_ACCOUNT_SUFFIX=$STORAGE_ACCOUNT_SUFFIX')
-    cmd.add_option('-e', 'SP_TENANT_ID=$SP_TENANT_ID')
-    cmd.add_option('-e', 'SP_CLIENT_ID=$SP_CLIENT_ID')
-    cmd.add_option('-e', 'SP_CREDENTIAL=$SP_CREDENTIAL')
-    cmd.add_option('-e', 'SP_BATCH_RESOURCE_ID=$SP_BATCH_RESOURCE_ID')
-    cmd.add_option('-e', 'SP_STORAGE_RESOURCE_ID=$SP_STORAGE_RESOURCE_ID')
-    cmd.add_option('-e', 'AZ_BATCH_POOL_ID=$AZ_BATCH_POOL_ID')
-    cmd.add_option('-e', 'AZ_BATCH_NODE_ID=$AZ_BATCH_NODE_ID')
-    cmd.add_option(
-        '-e', 'AZ_BATCH_NODE_IS_DEDICATED=$AZ_BATCH_NODE_IS_DEDICATED')
+def _get_aztk_environment(worker_on_master, mixed_mode):
+    envs = []
+    envs.append(batch_models.EnvironmentSetting(name="AZTK_MIXED_MODE", value=mixed_mode))
     if worker_on_master is not None:
-        cmd.add_option('-e', 'WORKER_ON_MASTER={}'.format(worker_on_master))
+        envs.append(batch_models.EnvironmentSetting(
+                name="AZTK_WORKER_ON_MASTER", value=worker_on_master))
     else:
-        # default to True if not specified
-        cmd.add_option('-e', 'WORKER_ON_MASTER={}'.format(True))
-    cmd.add_option('-e', 'MIXED_MODE={}'.format(mixed_mode))
-    cmd.add_option('-e', 'SPARK_WEB_UI_PORT=$SPARK_WEB_UI_PORT')
-    cmd.add_option('-e', 'SPARK_WORKER_UI_PORT=$SPARK_WORKER_UI_PORT')
-    cmd.add_option('-e', 'SPARK_CONTAINER_NAME=$SPARK_CONTAINER_NAME')
-    cmd.add_option('-e', 'SPARK_SUBMIT_LOGS_FILE=$SPARK_SUBMIT_LOGS_FILE')
-    cmd.add_option('-e', 'SPARK_JOB_UI_PORT=$SPARK_JOB_UI_PORT')
-    cmd.add_option('-p', '8080:8080')       # Spark Master UI
-    cmd.add_option('-p', '7077:7077')       # Spark Master
-    cmd.add_option('-p', '7337:7337')       # Spark Shuffle Service
-    cmd.add_option('-p', '4040:4040')       # Job UI
-    cmd.add_option('-p', '18080:18080')     # Spark History Server UI
-    cmd.add_option('-p', '3022:3022')       # Docker SSH
-    if plugins:
-        for plugin in plugins:
-            for port in plugin.ports:
-                cmd.add_option('-p', '{0}:{1}'.format(port.internal, port.internal))       # Jupyter UI
-
-    cmd.add_option('-d', docker_repo)
-    cmd.add_argument('/bin/bash /mnt/batch/tasks/startup/wd/aztk/node_scripts/docker_main.sh')
-
-    return cmd.to_str()
+        envs.append(batch_models.EnvironmentSetting(
+                name="AZTK_WORKER_ON_MASTER", value=False))
+    return envs
 
 def __get_docker_credentials(spark_client):
     creds = []
@@ -162,12 +106,11 @@ def __cluster_install_cmd(zip_resource_file: batch_models.ResourceFile,
         'apt-get -y install unzip',
         'unzip $AZ_BATCH_TASK_WORKING_DIR/{0}'.format(
             zip_resource_file.file_path),
-        'chmod 777 $AZ_BATCH_TASK_WORKING_DIR/aztk/node_scripts/setup_node.sh',
-        '/bin/bash $AZ_BATCH_TASK_WORKING_DIR/aztk/node_scripts/setup_node.sh {0} {1} {2} "{3}"'.format(
+        'chmod 777 $AZ_BATCH_TASK_WORKING_DIR/aztk/node_scripts/setup_host.sh',
+        '/bin/bash $AZ_BATCH_TASK_WORKING_DIR/aztk/node_scripts/setup_host.sh {0} {1}'.format(
             constants.DOCKER_SPARK_CONTAINER_NAME,
-            gpu_enabled,
             docker_repo,
-            __docker_run_cmd(docker_repo, gpu_enabled, worker_on_master, file_mounts, plugins, mixed_mode)),
+        ),
     ]
 
     commands = shares + setup
@@ -208,7 +151,9 @@ def generate_cluster_start_task(
             name="SPARK_CONTAINER_NAME", value=spark_container_name),
         batch_models.EnvironmentSetting(
             name="SPARK_SUBMIT_LOGS_FILE", value=spark_submit_logs_file),
-    ] + __get_docker_credentials(spark_client)
+        batch_models.EnvironmentSetting(
+            name="AZTK_GPU_ENABLED", value=gpu_enabled),
+    ] + __get_docker_credentials(spark_client) + _get_aztk_environment(worker_on_master, mixed_mode)
 
     # start task command
     command = __cluster_install_cmd(zip_resource_file, gpu_enabled, docker_repo, plugins, worker_on_master, file_shares, mixed_mode)

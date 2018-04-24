@@ -1,8 +1,23 @@
-import inspect
-from typing import List, Union
 from enum import Enum
-from .plugin_file import PluginFile
+from typing import List, Union
 from aztk.internal import ConfigurationBase
+from aztk.error import InvalidPluginConfigurationError
+from .plugin_file import PluginFile
+
+class PluginTarget(Enum):
+    """
+    Where this plugin should run
+    """
+    SparkContainer = "spark-container",
+    Host = "host",
+
+
+class PluginTargetRole(Enum):
+    Master = "master"
+    Worker = "worker"
+    All = "all-nodes"
+
+
 
 class PluginPort:
     """
@@ -12,8 +27,7 @@ class PluginPort:
         :param name: [Optional] name to differentiate ports if you have multiple
     """
 
-    def __init__(self, internal: int, public: Union[int, bool] = False, name=None):
-
+    def __init__(self, internal: int, public: Union[int, bool]=False, name=None):
         self.internal = internal
         self.expose_publicly = bool(public)
         self.public_port = None
@@ -25,11 +39,6 @@ class PluginPort:
 
         self.name = name
 
-
-class PluginRunTarget(Enum):
-    Master = "master"
-    Worker = "worker"
-    All = "all-nodes"
 
 
 
@@ -45,15 +54,17 @@ class PluginConfiguration(ConfigurationBase):
 
     def __init__(self,
                  name: str,
-                 ports: List[PluginPort] = None,
-                 files: List[PluginFile] = None,
-                 execute: str = None,
+                 ports: List[PluginPort]=None,
+                 files: List[PluginFile]=None,
+                 execute: str=None,
                  args=None,
                  env=None,
-                 run_on: PluginRunTarget = PluginRunTarget.Master):
+                 target_role: PluginTargetRole=PluginTargetRole.Master,
+                 target: PluginTarget=PluginTarget.SparkContainer):
         self.name = name
         # self.docker_image = docker_image
-        self.run_on = run_on
+        self.target = target
+        self.target_role = target_role
         self.ports = ports or []
         self.files = files or []
         self.args = args or []
@@ -64,11 +75,18 @@ class PluginConfiguration(ConfigurationBase):
         for x in self.args:
             if x.name == name:
                 return True
-        else:
-            return False
+        return False
 
     def validate(self):
         self._validate_required([
             "name",
             "execute",
         ])
+
+        if not isinstance(self.target, PluginTarget):
+            raise InvalidPluginConfigurationError(
+                "Target must be of type Plugin target but was {0}".format(self.target))
+
+        if not isinstance(self.target_role, PluginTargetRole):
+            raise InvalidPluginConfigurationError(
+                "Target role must be of type Plugin target role but was {0}".format(self.target))

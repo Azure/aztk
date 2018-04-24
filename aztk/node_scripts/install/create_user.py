@@ -6,11 +6,11 @@ from Crypto.Cipher import AES, PKCS1_OAEP
 from datetime import datetime, timezone, timedelta
 import yaml
 '''
-    Creates a user if the user configuration file at $DOCKER_WORKING_DIR/user.yaml exists
+    Creates a user if the user configuration file at $AZTK_WORKING_DIR/user.yaml exists
 '''
 
 def create_user(batch_client):
-    path = os.path.join(os.environ['DOCKER_WORKING_DIR'], "user.yaml")
+    path = os.path.join(os.environ['AZTK_WORKING_DIR'], "user.yaml")
 
     if not os.path.isfile(path):
         print("No user to create.")
@@ -43,7 +43,7 @@ def decrypt_password(user_conf):
     tag = user_conf['tag']
 
     # Read private key
-    with open(os.path.join(os.environ['DOCKER_WORKING_DIR'], 'id_rsa'), encoding='UTF-8') as f:
+    with open(os.path.join(os.environ['AZTK_WORKING_DIR'], 'id_rsa'), encoding='UTF-8') as f:
         private_key = RSA.import_key(f.read())
     # Decrypt the session key with the public RSA key
     cipher_rsa = PKCS1_OAEP.new(private_key)
