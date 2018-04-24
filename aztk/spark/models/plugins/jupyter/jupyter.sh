@@ -10,7 +10,7 @@
 
 echo "Is master: $AZTK_IS_MASTER"
 
-if  [ "$AZTK_IS_MASTER" = "1" ]; then
+if  [ "$AZTK_IS_MASTER" = "true" ]; then
     pip install jupyter --upgrade
     pip install notebook --upgrade
 
