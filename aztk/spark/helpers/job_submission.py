@@ -22,7 +22,7 @@ def __app_cmd():
     docker_exec.add_argument("spark /bin/bash >> output.log 2>&1 -c \"" \
                              "source ~/.bashrc; " \
                              "export PYTHONPATH=$PYTHONPATH:\$AZTK_WORKING_DIR; " \
-                             "/root/.env/bin/python \$AZTK_WORKING_DIR/aztk/node_scripts/job_submission.py\"")
+                             "$AZTK_WORKING_DIR/.aztk-env/.venv/bin/python \$AZTK_WORKING_DIR/aztk/node_scripts/job_submission.py\"")
     return docker_exec.to_str()
 
 

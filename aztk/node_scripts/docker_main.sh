@@ -29,12 +29,13 @@ done
 # activate virtualenv and setup docker container
 echo "Starting setup using Docker"
 
-/root/.env/bin/pip install -r $(dirname $0)/requirements.txt
+# $AZTK_WORKING_DIR/.aztk-env/.venv/bin/pip install -r $(dirname $0)/requirements.txt
+$AZTK_WORKING_DIR/.aztk-env/.venv/bin/pip freeze
 export PYTHONPATH=$PYTHONPATH:$AZTK_WORKING_DIR
 echo 'export PYTHONPATH=$PYTHONPATH:$AZTK_WORKING_DIR' >> ~/.bashrc
 
 echo "Running main.py script"
-/root/.env/bin/python $(dirname $0)/main.py setup-spark-container
+$AZTK_WORKING_DIR/.aztk-env/.venv/bin/python $(dirname $0)/main.py setup-spark-container
 
 # sleep to keep container running
 while true; do sleep 1; done

@@ -17,7 +17,7 @@ apt-get -y install apt-transport-https
 apt-get -y install curl
 apt-get -y install ca-certificates
 apt-get -y install software-properties-common
-apt-get -y install python3-pip python-dev build-essential libssl-dev
+apt-get -y install python3-pip python3-venv python-dev build-essential libssl-dev
 echo "Done installing pre-reqs"
 
 # Install docker
@@ -79,12 +79,18 @@ else
 
     echo "Node python version:"
     python3 --version
+
+    # set up aztk python environment
+    mkdir -p $AZTK_WORKING_DIR/.aztk-env
+    /usr/bin/python3.5m -m venv $AZTK_WORKING_DIR/.aztk-env/.venv
+    $AZTK_WORKING_DIR/.aztk-env/.venv/bin/pip install --upgrade pip setuptools wheel
+
     # Install python dependencies
-    pip3 install -r $(dirname $0)/requirements.txt
+    $AZTK_WORKING_DIR/.aztk-env/.venv/bin/pip install -r $(dirname $0)/requirements.txt
     export PYTHONPATH=$PYTHONPATH:$AZTK_WORKING_DIR
 
     echo "Running setup python script"
-    python3 $(dirname $0)/main.py setup-node $docker_repo_name
+    $AZTK_WORKING_DIR/.aztk-env/.venv/bin/python $(dirname $0)/main.py setup-node $docker_repo_name
 
     # wait until container is running
     until [ "`/usr/bin/docker inspect -f {{.State.Running}} $container_name`"=="true" ]; do
