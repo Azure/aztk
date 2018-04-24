@@ -1,4 +1,4 @@
-FROM aztk/staging:spark2.1.0-hadoop2.8.3-nopyenv
+FROM aztk/staging:v0.1.0-spark2.1.0-base
 
 ARG MINICONDA_VERISON=Miniconda3-4.4.10
 
