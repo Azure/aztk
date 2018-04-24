@@ -51,12 +51,9 @@ RUN apt-get clean \
     && apt-get update -y \
     # install java
     && apt-get install -y --no-install-recommends default-jdk \
-    # set up user python and aztk python
+    # set up user python
     && ln -s /usr/bin/python3.5 /usr/bin/python \
     && /usr/bin/python -m pip install --upgrade pip setuptools wheel \
-    && /usr/bin/python3.5m -m venv /root/.env \
-    && /root/.env/bin/pip install --upgrade pip setuptools wheel \
-    && apt-get remove -y python3-pip \
     # build and install spark
     && git clone https://github.com/apache/spark.git \
     && cd spark \
@@ -139,7 +136,7 @@ RUN apt-get clean \
     && cd /tmp \
     && mvn dependency:copy-dependencies -DoutputDirectory="${SPARK_HOME}/jars/" \
     # cleanup
-    && apt-get --purge autoremove -y maven \
+    && apt-get --purge autoremove -y maven python3-pip \
     && apt-get autoremove -y \
     && apt-get autoclean -y \
     && rm -rf /tmp/* \
