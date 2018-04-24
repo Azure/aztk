@@ -1,4 +1,4 @@
-FROM aztk/staging:v0.1.0-spark2.2.0-base
+FROM aztk/staging:v0.1.0-spark2.1.0-base
 
 ARG ANACONDA_VERSION=Anaconda3-5.1.0
 
