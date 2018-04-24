@@ -90,6 +90,10 @@ RUN apt-get clean \
                             '<groupId>org.apache.hadoop</groupId>' \
                             '<artifactId>hadoop-common</artifactId>' \
                         '</exclusion>' \
+                        '<exclusion>' \
+                            '<groupId>com.fasterxml.jackson.core</groupId>' \
+                            '<artifactId>jackson-core</artifactId>' \
+                        '</exclusion>' \
                     '</exclusions> ' \
                     '</dependency>' \
                     '<dependency>' \
