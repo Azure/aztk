@@ -1,10 +1,12 @@
 #!/bin/bash
 
-if  [ "$IS_MASTER" = "1" ]; then
+# Demo plugin. Not actually meant to be used.
+
+if  [ "$AZTK_IS_MASTER" = "1" ]; then
     echo "This is a custom script running on just the master!"
 fi
 
-if  [ "$IS_WORKER" = "1" ]; then
+if  [ "$AZTK_IS_WORKER" = "1" ]; then
     echo "This is a custom script running on just the workers!"
 fi
 

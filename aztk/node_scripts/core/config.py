@@ -16,14 +16,14 @@ RESOURCE_ID_PATTERN = re.compile('^/subscriptions/(?P<subscription>[^/]+)'
                                  '/providers/[^/]+'
                                  '/[^/]+Accounts/(?P<account>[^/]+)$')
 
-batch_account_name = os.environ["AZ_BATCH_ACCOUNT_NAME"]
-batch_account_key = os.environ["BATCH_ACCOUNT_KEY"]
-batch_service_url = os.environ["BATCH_SERVICE_URL"]
-tenant_id = os.environ["SP_TENANT_ID"]
-client_id = os.environ["SP_CLIENT_ID"]
-credential = os.environ["SP_CREDENTIAL"]
-batch_resource_id = os.environ["SP_BATCH_RESOURCE_ID"]
-storage_resource_id = os.environ["SP_STORAGE_RESOURCE_ID"]
+batch_account_name = os.environ.get("AZ_BATCH_ACCOUNT_NAME")
+batch_account_key = os.environ.get("BATCH_ACCOUNT_KEY")
+batch_service_url = os.environ.get("BATCH_SERVICE_URL")
+tenant_id = os.environ.get("SP_TENANT_ID")
+client_id = os.environ.get("SP_CLIENT_ID")
+credential = os.environ.get("SP_CREDENTIAL")
+batch_resource_id = os.environ.get("SP_BATCH_RESOURCE_ID")
+storage_resource_id = os.environ.get("SP_STORAGE_RESOURCE_ID")
 
 pool_id = os.environ["AZ_BATCH_POOL_ID"]
 node_id = os.environ["AZ_BATCH_NODE_ID"]
@@ -33,9 +33,9 @@ spark_web_ui_port = os.environ["SPARK_WEB_UI_PORT"]
 spark_worker_ui_port = os.environ["SPARK_WORKER_UI_PORT"]
 spark_job_ui_port = os.environ["SPARK_JOB_UI_PORT"]
 
-storage_account_name = os.environ["STORAGE_ACCOUNT_NAME"]
-storage_account_key = os.environ["STORAGE_ACCOUNT_KEY"]
-storage_account_suffix = os.environ["STORAGE_ACCOUNT_SUFFIX"]
+storage_account_name = os.environ.get("STORAGE_ACCOUNT_NAME")
+storage_account_key = os.environ.get("STORAGE_ACCOUNT_KEY")
+storage_account_suffix = os.environ.get("STORAGE_ACCOUNT_SUFFIX")
 
 def get_blob_client() -> blob.BlockBlobService:
     if not storage_resource_id:

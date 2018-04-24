@@ -3,25 +3,24 @@ import json
 import yaml
 import subprocess
 from pathlib import Path
+from aztk.models.plugins import PluginTarget, PluginTargetRole
 
 
-log_folder = os.path.join(os.environ['DOCKER_WORKING_DIR'], 'logs','plugins')
+log_folder = os.path.join(os.environ['AZTK_WORKING_DIR'], 'logs','plugins')
 
 def _read_manifest_file(path=None):
-    custom_scripts = None
     if not os.path.isfile(path):
         print("Plugins manifest file doesn't exist at {0}".format(path))
     else:
         with open(path, 'r', encoding='UTF-8') as stream:
             try:
-                custom_scripts = yaml.load(stream)
+                return yaml.load(stream)
             except json.JSONDecodeError as err:
                 print("Error in plugins manifest: {0}".format(err))
 
-    return custom_scripts
 
 
-def setup_plugins(is_master: bool = False, is_worker: bool = False):
+def setup_plugins(target: PluginTarget, is_master: bool = False, is_worker: bool = False):
 
     plugins_dir = _plugins_dir()
     plugins_manifest = _read_manifest_file(
@@ -31,39 +30,33 @@ def setup_plugins(is_master: bool = False, is_worker: bool = False):
         os.makedirs(log_folder)
 
     if plugins_manifest is not None:
-        _setup_plugins(plugins_manifest, is_master, is_worker)
+        _setup_plugins(plugins_manifest, target, is_master, is_worker)
 
 
 def _plugins_dir():
-    return os.path.join(os.environ['DOCKER_WORKING_DIR'], 'plugins')
+    return os.path.join(os.environ['AZTK_WORKING_DIR'], 'plugins')
 
 
-def _run_on_this_node(plugin_obj=None, is_master=False, is_worker=False):
-    if plugin_obj['runOn'] == 'master' and is_master is True:
+def _run_on_this_node(plugin_obj, target: PluginTarget, is_master, is_worker):
+    if plugin_obj['target'] != target.value:
+        print("Ignoring ", plugin_obj["execute"], " as target is for ", plugin_obj['target'], " but is currently running in ", target.value)
+        return False
+
+    if plugin_obj['target_role'] == PluginTargetRole.Master.value and is_master is True:
         return True
-    if plugin_obj['runOn'] == 'worker' and is_worker is True:
+    if plugin_obj['target_role'] == PluginTargetRole.Worker.value and is_worker is True:
         return True
-    if plugin_obj['runOn'] == 'all-nodes':
+    if plugin_obj['target_role'] == PluginTargetRole.All.value:
         return True
 
     return False
 
 
-def _setup_plugins(plugins_manifest, is_master=False, is_worker=False):
+def _setup_plugins(plugins_manifest, target: PluginTarget, is_master, is_worker):
     plugins_dir = _plugins_dir()
 
-    if is_master:
-        os.environ["IS_MASTER"] = "1"
-    else:
-        os.environ["IS_MASTER"] = "0"
-
-    if is_worker:
-        os.environ["IS_WORKER"] = "1"
-    else:
-        os.environ["IS_WORKER"] = "0"
-
     for plugin in plugins_manifest:
-        if _run_on_this_node(plugin, is_master, is_worker):
+        if _run_on_this_node(plugin, target, is_master, is_worker):
             path = os.path.join(plugins_dir, plugin['execute'])
             _run_script(plugin.get("name"), path, plugin.get('args'), plugin.get('env'))
 

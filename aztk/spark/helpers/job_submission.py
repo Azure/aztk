@@ -19,10 +19,10 @@ def __app_cmd():
     docker_exec.add_argument("-i")
     docker_exec.add_option("-e", "AZ_BATCH_TASK_WORKING_DIR=$AZ_BATCH_TASK_WORKING_DIR")
     docker_exec.add_option("-e", "AZ_BATCH_JOB_ID=$AZ_BATCH_JOB_ID")
-    docker_exec.add_argument("spark /bin/bash >> output.log 2>&1 -c \""\
-                             "source ~/.bashrc; "\
+    docker_exec.add_argument("spark /bin/bash >> output.log 2>&1 -c \"" \
+                             "source ~/.bashrc; " \
                              "export PYTHONPATH=$PYTHONPATH:\$DOCKER_WORKING_DIR; " \
-                             "/root/.env/bin/python \$DOCKER_WORKING_DIR/aztk/node_scripts/job_submission.py\"")
+                             "/root/.env/bin/python \$AZTK_WORKING_DIR/aztk/node_scripts/job_submission.py\"")
     return docker_exec.to_str()
 
 

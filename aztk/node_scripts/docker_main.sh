@@ -4,12 +4,13 @@
 
 set -e
 source ~/.bashrc
+echo "Initializing spark container"
 
 # --------------------
 # Setup custom scripts
 # --------------------
-custom_script_dir=$DOCKER_WORKING_DIR/custom-scripts
-aztk_dir=$DOCKER_WORKING_DIR/aztk
+custom_script_dir=$AZTK_WORKING_DIR/custom-scripts
+aztk_dir=$AZTK_WORKING_DIR/aztk
 
 # -----------------------
 # Preload jupyter samples
@@ -29,12 +30,11 @@ done
 echo "Starting setup using Docker"
 
 /root/.env/bin/pip install -r $(dirname $0)/requirements.txt
-
-export PYTHONPATH=$PYTHONPATH:$DOCKER_WORKING_DIR
-echo 'export PYTHONPATH=$PYTHONPATH:$DOCKER_WORKING_DIR' >> ~/.bashrc
+export PYTHONPATH=$PYTHONPATH:$AZTK_WORKING_DIR
+echo 'export PYTHONPATH=$PYTHONPATH:$AZTK_WORKING_DIR' >> ~/.bashrc
 
 echo "Running main.py script"
-/root/.env/bin/python $(dirname $0)/main.py install
+/root/.env/bin/python $(dirname $0)/main.py setup-spark-container
 
 # sleep to keep container running
 while true; do sleep 1; done

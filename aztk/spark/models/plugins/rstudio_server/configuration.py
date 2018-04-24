@@ -1,5 +1,5 @@
 import os
-from aztk.models.plugins.plugin_configuration import PluginConfiguration, PluginPort, PluginRunTarget
+from aztk.models.plugins.plugin_configuration import PluginConfiguration, PluginPort, PluginTargetRole
 from aztk.models.plugins.plugin_file import PluginFile
 from aztk.utils import constants
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -15,7 +15,7 @@ class RStudioServerPlugin(PluginConfiguration):
                     public=True,
                 ),
             ],
-            run_on=PluginRunTarget.Master,
+            target_role=PluginTargetRole.Master,
             execute="rstudio_server.sh",
             files=[
                 PluginFile("rstudio_server.sh", os.path.join(dir_path, "rstudio_server.sh")),

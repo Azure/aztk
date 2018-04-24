@@ -9,8 +9,6 @@ import socketserver as SocketServer
 import sys
 from concurrent.futures import ThreadPoolExecutor
 
-import paramiko
-
 from . import helpers
 
 
@@ -19,6 +17,7 @@ def connect(hostname,
             username=None,
             password=None,
             pkey=None):
+    import paramiko
 
     client = paramiko.SSHClient()
 

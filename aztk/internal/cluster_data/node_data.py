@@ -1,11 +1,10 @@
 import fnmatch
 import io
-import json
 import os
-import yaml
 import zipfile
 from pathlib import Path
 from typing import List
+import yaml
 from aztk.spark import models
 from aztk.utils import constants, file_utils, secure_utils
 from aztk.error import InvalidCustomScriptError
@@ -147,7 +146,8 @@ class NodeData:
                     execute='{0}/{1}'.format(plugin.name, plugin.execute),
                     args=plugin.args,
                     env=plugin.env,
-                    runOn=plugin.run_on.value,
+                    target=plugin.target.value,
+                    target_role=plugin.target_role.value,
                 ))
 
         self.zipf.writestr(os.path.join('plugins', 'plugins-manifest.yaml'), yaml.dump(data))

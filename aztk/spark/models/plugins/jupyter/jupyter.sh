@@ -8,7 +8,9 @@
 #  - aztk/python:spark2.1.0-python3.6.2-base
 #  - aztk/python:spark2.1.0-python3.6.2-gpu
 
-if  [ "$IS_MASTER" = "1" ]; then
+echo "Is master: $AZTK_IS_MASTER"
+
+if  [ "$AZTK_IS_MASTER" = "1" ]; then
     pip install jupyter --upgrade
     pip install notebook --upgrade
 
@@ -45,7 +47,7 @@ if  [ "$IS_MASTER" = "1" ]; then
     "env": {
         "SPARK_HOME": "$SPARK_HOME",
         "PYSPARK_PYTHON": "python",
-        "PYSPARK_SUBMIT_ARGS": "--master spark://$MASTER_IP:7077 pyspark-shell"
+        "PYSPARK_SUBMIT_ARGS": "--master spark://$AZTK_MASTER_IP:7077 pyspark-shell"
     }
 }
 EOF

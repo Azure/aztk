@@ -1,5 +1,5 @@
 import os
-from aztk.models.plugins.plugin_configuration import PluginConfiguration, PluginPort, PluginRunTarget
+from aztk.models.plugins.plugin_configuration import PluginConfiguration, PluginPort, PluginTargetRole
 from aztk.models.plugins.plugin_file import PluginFile
 from aztk.utils import constants
 
@@ -16,7 +16,7 @@ class SparkUIProxyPlugin(PluginConfiguration):
                     public=True
                 )
             ],
-            run_on=PluginRunTarget.Master,
+            target_role=PluginTargetRole.Master,
             execute="spark_ui_proxy.sh",
             args=["localhost:8080", "9999"],
             files=[
