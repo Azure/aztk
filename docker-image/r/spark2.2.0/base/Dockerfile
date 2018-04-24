@@ -1,4 +1,4 @@
-FROM aztk/staging:spark2.2.0-hadoop2.8.3-nopyenv
+FROM aztk/staging:v0.1.0-spark2.2.0-base
 
 ARG R_VERSION=3.4.4
 ARG R_BASE_VERSION=${R_VERSION}-1xenial0

@@ -1,4 +1,4 @@
-FROM aztk/staging:v0.1.0-spark2.1.0-gpu
+FROM aztk/staging:v0.1.0-spark2.3.0-gpu
 
 ARG R_VERSION=3.4.4
 ARG R_BASE_VERSION=${R_VERSION}-1xenial0
