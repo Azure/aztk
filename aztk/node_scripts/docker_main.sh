@@ -26,7 +26,7 @@ done
 # ----------------------------
 # Run aztk setup python scripts
 # ----------------------------
-# activate virtualenv and setup docker container
+# setup docker container
 echo "Starting setup using Docker"
 
 # $AZTK_WORKING_DIR/.aztk-env/.venv/bin/pip install -r $(dirname $0)/requirements.txt
