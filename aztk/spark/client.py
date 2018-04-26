@@ -15,13 +15,27 @@ from aztk.internal.cluster_data import NodeData
 
 
 class Client(BaseClient):
+    """
+    Aztk Spark Client
+    This is the main entry point for using aztk for spark
+
+    Args:
+        secrets_config(aztk.spark.models.models.SecretsConfiguration): Configuration with all the needed credentials
+    """
     def __init__(self, secrets_config):
         super().__init__(secrets_config)
 
-    '''
-    Spark client public interface
-    '''
     def create_cluster(self, cluster_conf: models.ClusterConfiguration, wait: bool = False):
+        """
+        Create a new aztk spark cluster
+
+        Args:
+            cluster_conf(aztk.spark.models.models.ClusterConfiguration): Configuration for the the cluster to be created
+            wait(bool): If you should wait for the cluster to be ready before returning
+
+        Returns:
+            aztk.spark.models.Cluster
+        """
         cluster_conf.validate()
         cluster_data = self._get_cluster_data(cluster_conf.cluster_id)
         try:

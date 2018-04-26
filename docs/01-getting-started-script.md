@@ -9,7 +9,7 @@ The script will create and configure the following resources:
 - Azure Active Directory application and service principal
 <!-- - Virtual network with a configured subnet -->
 
-The script outputs all of the necessary information to use `aztk`, just copy the output into the `.aztk/secrets.yaml` file created when running `aztk spark init`. 
+The script outputs all of the necessary information to use `aztk`, just copy the output into the `.aztk/secrets.yaml` file created when running `aztk spark init`.
 
 ## Usage
 Copy and paste the following into an [Azure Cloud Shell](https://shell.azure.com):
@@ -41,4 +41,4 @@ service_principal:
 
 Copy the entire `service_principal` section in your `.aztk/secrets.yaml`. If you do not have a `secrets.yaml` file, you can create one in your current working directory by running `aztk spark init`.
 
-Now you are ready to create your first `aztk` cluster. See [Creating a Cluster](./10-clusters.md#creating-a-cluster).
+Now you are ready to create your first `aztk` cluster. See [Creating a Cluster](./10-clusters.html#creating-a-cluster).

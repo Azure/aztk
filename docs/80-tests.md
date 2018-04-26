@@ -1,8 +1,8 @@
 # Tests
 
-AZTK comes with a testing library that can be used for verification, and debugging. Please note that some tests will provision and test real resources in Azure, and as a result, will cost money to run. See [Integration Tests](#IntegrationTests) for more details.
+AZTK comes with a testing library that can be used for verification, and debugging. Please note that some tests will provision and test real resources in Azure, and as a result, will cost money to run. See [Integration Tests](#integration-tests) for more details.
 
-## <a name="IntegrationTests"></a> Integration Tests
+## Integration Tests
 
 Integration tests use the credentials given in your `.aztk/secrets.yaml` file to spin up real Clusters and Jobs to verify the functionality of the library. Please note that these tests __will__ cost money to run. All created Clusters nad Jobs will be deleted when the test completes.
 

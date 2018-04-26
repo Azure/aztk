@@ -1,6 +1,6 @@
 # GPU
 
-Use GPUs to accelerate your Spark applications. When using a [GPU enabled Azure VM](https://azure.microsoft.com/en-us/pricing/details/batch/), your docker image will contain CUDA-8.0 and cuDnn-6.0 by default. See [Docker Image](./12-docker-image.md) for more information about the AZTK Docker images.
+Use GPUs to accelerate your Spark applications. When using a [GPU enabled Azure VM](https://azure.microsoft.com/en-us/pricing/details/batch/), your docker image will contain CUDA-8.0 and cuDnn-6.0 by default. See [Docker Image](./12-docker-image.html) for more information about the AZTK Docker images.
 
 [NOTE: Azure does not have GPU enabled VMs in all regions. Please use this [link](https://azure.microsoft.com/en-us/pricing/details/batch/) to make sure that your Batch account is in a region that has GPU enabled VMs]
 

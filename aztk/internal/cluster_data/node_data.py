@@ -5,7 +5,7 @@ import zipfile
 from pathlib import Path
 from typing import List
 import yaml
-from aztk.spark import models
+from aztk import models
 from aztk.utils import constants, file_utils, secure_utils
 from aztk.error import InvalidCustomScriptError
 
@@ -61,10 +61,12 @@ class NodeData:
         for file in file_paths:
             self.add_file(file, zip_dir, binary)
 
-    def add_dir(self, path: str, dest: str = None, exclude: List[str] = []):
+    def add_dir(self, path: str, dest: str = None, exclude: List[str] = None):
         """
             Zip all the files in the given directory into the zip file handler
         """
+        exclude = exclude or []
+
         for base, _, files in os.walk(path):
             relative_folder = os.path.relpath(base, path)
             for file in files:
@@ -156,7 +158,8 @@ class NodeData:
     def _add_node_scripts(self):
         self.add_dir(os.path.join(ROOT_PATH, NODE_SCRIPT_FOLDER), NODE_SCRIPT_FOLDER, exclude=['*.pyc*'])
 
-    def _includeFile(self, filename: str, exclude: List[str] = []) -> bool:
+    def _includeFile(self, filename: str, exclude: List[str]) -> bool:
+        exclude = exclude or []
         for pattern in exclude:
             if fnmatch.fnmatch(filename, pattern):
                 return False

@@ -1,14 +1,11 @@
-# Azure Distributed Data Engineering Toolkit
-The Azure Distributed Data Engineering Toolkit is a project that allows Sparks users to easily spin up a Spark cluster in Azure.
-
-## Getting Started
+# Getting Started
 The minimum requirements to get started with this package are:
 - Python 3.5+, pip 9.0.1+
 - An Azure account
 - An Azure Batch account
 - An Azure Storage account
 
-### Cloning and installing the project
+## Cloning and installing the project
 1. Clone the repo
 2. Make sure you are running python 3.5 or greater.
     _If the default version on your machine is python 2 make sure to run the following commands with **pip3** instead of **pip**._
@@ -40,12 +37,12 @@ The minimum requirements to get started with this package are:
     This will put default configuration files in your home directory, *~/*. Please note that configuration files in your current working directory will take precident over global configuration files in your home directory.
 
 
-### Setting up your accounts
+## Setting up your accounts
 
-#### Using the account setup script
-A script to create and configure the Azure resources required to use `aztk` is provided. For more more information and usage, see [Getting Started Script](./01-getting-started-script.md).
+### Using the account setup script
+A script to create and configure the Azure resources required to use `aztk` is provided. For more more information and usage, see [Getting Started Script](01-getting-started-script.html)
 
-#### Manual resource creation
+### Manual resource creation
 To finish setting up, you need to fill out your Azure Batch and Azure Storage secrets in *.aztk/secrets.yaml*. We'd also recommend that you enter SSH key info in this file too.
 
 Please note that if you use ssh keys and a have a non-standard ssh key file name or path, you will need to specify the location of your ssh public and private keys. To do so, set them as shown below:
@@ -64,7 +61,7 @@ If you do not already have an Azure account, go to [https://azure.microsoft.com/
     Once you have one, simply log in and go to the [Azure Portal](https://portal.azure.com) to start creating your Azure Batch account and Azure Storage account.
 
 
-##### Using AAD
+#### Using AAD
 To get the required keys for your Azure Active Directory (AAD) Service Principal, Azure Batch Account and Azure Storage Account, please follow these instructions. Note that this is the recommended path for use with AZTK, as some features require AAD and are disabled if using Shared Key authentication.
 
 1. Register an Azure Active Directory (AAD) Application
@@ -135,7 +132,7 @@ service_principal:
     storage_account_resource_id: </storage/account/resource/id>
 ```
 
-#### Using Shared Keys
+### Using Shared Keys
 _Please note that using Shared Keys prevents the use of certain AZTK features including Mixed Mode clusters and support for VNETs._
 
 To get the required keys for Azure Batch and Azure Storage, please follow the below instructions:
@@ -167,13 +164,13 @@ To get the required keys for Azure Batch and Azure Storage, please follow the be
 - Go to the accounts in the Azure portal and copy pase the account names, keys and other information needed into the
 secrets file.
 
-#### Storage account
+### Storage account
 
 For the Storage account, copy the name and one of the two keys:
 
 ![](./misc/Storage_secrets.png)
 
-#### Batch account
+### Batch account
 
 For the Batch account, copy the name, the url and one of the two keys:
 
@@ -181,5 +178,5 @@ For the Batch account, copy the name, the url and one of the two keys:
 
 
 ## Next Steps
-- [Create a cluster](./10-clusters.md)
-- [Run a Spark job](./20-spark-submit.md)
+- [Create a cluster](10-clusters.html)
+- [Run a Spark job](./20-spark-submit.html)

@@ -39,3 +39,7 @@ tmp/
 
 # PyTest
 .cache/
+
+
+# Built docs
+docs/_build/

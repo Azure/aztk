@@ -17,7 +17,7 @@ aztk spark cluster submit --id spark --name pipy examples/src/main/python/pi.py 
 NOTE: The job name (--name) must be atleast 3 characters long, can only contain alphanumeric characters including hyphens but excluding underscores, and cannot contain uppercase letters. Each job you submit **must** have a unique name.
 
 ## Monitoring job
-If you have set up a [SSH tunnel](./10-clusters.md#ssh-and-port-forwarding) with port fowarding, you can naviate to http://localhost:8080 and http://localhost:4040 to view the progess of the job using the Spark UI
+If you have set up a [SSH tunnel](./10-clusters.html#ssh-and-port-forwarding) with port fowarding, you can naviate to http://localhost:8080 and http://localhost:4040 to view the progess of the job using the Spark UI
 
 
 ## Getting output logs

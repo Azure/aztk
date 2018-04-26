@@ -4,7 +4,7 @@ In the Azure Distributed Data Engineering Toolkit, a cluster is primarily design
 ## Creating a Cluster
 Creating a Spark cluster only takes a few simple steps after which you will be able to SSH into the master node of the cluster and interact with Spark. You will be able to view the Spark Web UI, Spark Jobs UI, submit Spark jobs (with *spark-submit*), and even interact with Spark in a Jupyter notebook.
 
-For the advanced user, please note that the default cluster settings are preconfigured in the *.aztk/cluster.yaml* file that is generated when you run `aztk spark init`. More information on cluster config [here.](./13-configuration.md)
+For the advanced user, please note that the default cluster settings are preconfigured in the *.aztk/cluster.yaml* file that is generated when you run `aztk spark init`. More information on cluster config [here.](./13-configuration.html)
 
 ### Commands
 Create a Spark cluster:
@@ -33,7 +33,7 @@ You can create clusters with a mixed of [low-priority](https://docs.microsoft.co
 Please note, to use Mixed Mode clusters, you need to authenticate using Azure Active Directory (AAD) by configuring the Service Principal in `.aztk/secrets.yaml`. You also need to create a [Virtual Network \(VNET\)](https://azure.microsoft.com/en-us/services/virtual-network/), and provide the resource ID to a Subnet within the VNET in your ./aztk/cluster.yaml` configuration file.
 
 #### Setting your Spark and/or Python versions
-By default, the Azure Distributed Data Engineering Toolkit will use **Spark v2.2.0** and **Python v3.5.4**. However, you can set your Spark and/or Python versions by [configuring the base Docker image used by this package](./12-docker-image.md).
+By default, the Azure Distributed Data Engineering Toolkit will use **Spark v2.2.0** and **Python v3.5.4**. However, you can set your Spark and/or Python versions by [configuring the base Docker image used by this package](./12-docker-image.html).
 
 ### Listing clusters
 You can list all clusters currently running in your account by running
@@ -161,9 +161,9 @@ __Please be careful sharing the output of the `debug` command as secrets and app
 
 
 ### Interact with your Spark cluster
-By default, the `aztk spark cluster ssh` command port forwards the Spark Web UI to *localhost:8080*, Spark Jobs UI to *localhost:4040*, and Spark History Server to your *locahost:18080*. This can be [configured in *.aztk/ssh.yaml*](../docs/13-configuration.md##sshyaml).
+By default, the `aztk spark cluster ssh` command port forwards the Spark Web UI to *localhost:8080*, Spark Jobs UI to *localhost:4040*, and Spark History Server to your *locahost:18080*. This can be [configured in *.aztk/ssh.yaml*](../docs/13-configuration.html#sshyaml).
 
 ## Next Steps
-- [Run a Spark job](./20-spark-submit.md)
-- [Configure the Spark cluster using custom commands](./11-custom-scripts.md)
-- [Bring your own Docker image or choose between a variety of our supported base images to manage your Spark and Python versions](./12-docker-image.md)
+- [Run a Spark job](20-spark-submit.html)
+- [Configure the Spark cluster using custom commands](11-custom-scripts.html)
+- [Bring your own Docker image or choose between a variety of our supported base images to manage your Spark and Python versions](12-docker-image.html)

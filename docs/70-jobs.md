@@ -13,25 +13,25 @@ Creating a Job starts with defining the necessary properties in your `.aztk/job.
 Each Job has one or more applications given as a List in Job.yaml. Applications are defined using the following properties:
 ```yaml
   applications:
-    - name: 
-      application: 
-      application_args: 
-        - 
-      main_class: 
-      jars: 
-        - 
-      py_files: 
-        - 
+    - name:
+      application:
+      application_args:
+        -
+      main_class:
+      jars:
+        -
+      py_files:
+        -
       files:
-        - 
-      driver_java_options: 
-        - 
-      driver_library_path: 
-      driver_class_path: 
-      driver_memory: 
-      executor_memory: 
-      driver_cores: 
-      executor_cores: 
+        -
+      driver_java_options:
+        -
+      driver_library_path:
+      driver_class_path:
+      driver_memory:
+      executor_memory:
+      driver_cores:
+      executor_cores:
 ```
 _Please note: the only required fields are name and application. All other fields may be removed or left blank._
 
@@ -44,7 +44,7 @@ Jobs also require a definition of the cluster on which the Applications will run
     size: <the number of nodes in the Cluster>
     docker_repo: <Docker Image to download on all nodes>
     subnet_id: <resource ID of a subnet to use (optional)>
-    custom_scripts: 
+    custom_scripts:
       - List
       - of
       - paths
@@ -52,7 +52,7 @@ Jobs also require a definition of the cluster on which the Applications will run
       - custom
       - scripts
 ```
-_Please Note: For more information about Azure VM sizes, see [Azure Batch Pricing](https://azure.microsoft.com/en-us/pricing/details/batch/). And for more information about Docker repositories see [Docker](./12-docker-iamge.md)._
+_Please Note: For more information about Azure VM sizes, see [Azure Batch Pricing](https://azure.microsoft.com/en-us/pricing/details/batch/). And for more information about Docker repositories see [Docker](./12-docker-iamge.html)._
 
 _The only required fields are vm_size and either size or size_low_pri, all other fields can be left blank or removed._
 
@@ -75,15 +75,15 @@ job:
   cluster_configuration:
     vm_size: standard_f2
     size: 3
- 
+
   applications:
     - name: pipy100
       application: /path/to/pi.py
-      application_args: 
+      application_args:
         - 100
     - name: pipy200
       application: /path/to/pi.py
-      application_args: 
+      application_args:
         - 200
 ```
 Once submitted, this Job will run two applications, pipy100 and pipy200, on an automatically provisioned Cluster with 3 dedicated Standard_f2 size Azure VMs. Immediately after both pipy100 and pipy200 have completed the Cluster will be destroyed. Application logs will be persisted and available.

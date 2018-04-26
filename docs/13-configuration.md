@@ -22,7 +22,7 @@ size: 2
 # username: <username for the linux user to be created> (optional)
 username: spark
 
-# docker_repo: <name of docker image repo (for more information, see https://github.com/Azure/aztk/blob/master/docs/12-docker-image.md)>
+# docker_repo: <name of docker image repo (for more information, see https://github.com/Azure/aztk/blob/master/docs/12-docker-image.html)>
 docker_repo: aztk/base:spark2.2.0
 
 # custom_script: <path to custom script to run on each node> (optional)
@@ -102,14 +102,14 @@ spark.eventLog.dir              <path>
 spark.history.fs.logDirectory   <path>
  ```
 
-Please note that the path for `spark.eventLog.dir` and `spark.history.fs.logDirectory` should most likely match so that the history server reads the logs that each Spark job writes. Also note that while the paths can be local (`file:/`), it is recommended that the paths be accessible by every node in the cluster so that the history server, which runs on the Spark master node, has access to all application logs. HDFS, WASB, ADL, or any other Hadoop API compliant storage system may be used. 
+Please note that the path for `spark.eventLog.dir` and `spark.history.fs.logDirectory` should most likely match so that the history server reads the logs that each Spark job writes. Also note that while the paths can be local (`file:/`), it is recommended that the paths be accessible by every node in the cluster so that the history server, which runs on the Spark master node, has access to all application logs. HDFS, WASB, ADL, or any other Hadoop API compliant storage system may be used.
 
-If using WASB, ADL or other cloud storage services, be sure to set your keys in `.aztk/core-site.xml`. For more information, see the [Cloud Storage](./30-cloud-storage.md) documentation.
+If using WASB, ADL or other cloud storage services, be sure to set your keys in `.aztk/core-site.xml`. For more information, see the [Cloud Storage](./30-cloud-storage.html) documentation.
 
 
 ## Configuring Spark Storage
 
-The Spark cluster can be configured to use different cloud supported storage offerrings (such as Azure Storage Blobs, Azure Data Lake Storage, or any other supported Spark file system). More information can be found in the [Cloud Storage](./30-cloud-storage.md) documentation.
+The Spark cluster can be configured to use different cloud supported storage offerrings (such as Azure Storage Blobs, Azure Data Lake Storage, or any other supported Spark file system). More information can be found in the [Cloud Storage](./30-cloud-storage.html) documentation.
 
 ## Placing JARS
 
@@ -129,5 +129,5 @@ Note: _This tool automatically registers several JARS for default cloud storage 
 
 
 ## Next Steps
-- [Add plugins](./15-plugins.md)
-- [Set up your Cloud Storage](./30-cloud-storage.md)
+- [Add plugins](./15-plugins.html)
+- [Set up your Cloud Storage](./30-cloud-storage.html)

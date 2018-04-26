@@ -1,7 +1,6 @@
-import yaml
 import logging
+import yaml
 import azure.common
-from azure.storage.blob import BlockBlobService
 from .node_data import NodeData
 from .blob_data import BlobData
 
@@ -15,7 +14,7 @@ class ClusterData:
     APPLICATIONS_DIR = "applications"
     CLUSTER_CONFIG_FILE = "config.yaml"
 
-    def __init__(self, blob_client: BlockBlobService, cluster_id: str):
+    def __init__(self, blob_client, cluster_id: str):
         self.blob_client = blob_client
         self.cluster_id = cluster_id
         self._ensure_container()
