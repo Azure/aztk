@@ -400,3 +400,24 @@ def read_cluster_config(cluster_id: str, blob_client: blob.BlockBlobService):
         logging.warn(
             "Cluster %s contains invalid cluster configuration in blob",
             cluster_id)
+
+
+def bool_env(value: bool):
+    """
+    Takes a boolean value(or None) and return the serialized version to be used as an environemnt variable
+
+    Examples:
+        >>> bool_env(True)
+        "true"
+
+        >>> bool_env(False)
+        "false"
+
+        >>> bool_env(None)
+        "false"
+    """
+
+    if value is True:
+        return "true"
+    else:
+        return "false"

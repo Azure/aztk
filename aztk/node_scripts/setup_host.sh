@@ -38,7 +38,7 @@ sudo curl -L https://github.com/docker/compose/releases/download/1.19.0/docker-c
 sudo chmod +x /usr/local/bin/docker-compose
 echo "Done installing Docker-Compose"
 
-if [ $AZTK_GPU_ENABLED == "True" ]; then
+if [ $AZTK_GPU_ENABLED == "true" ]; then
     echo "running nvidia install"
     sudo apt-get -y install nvidia-384
     sudo apt-get -y install nvidia-modprobe

@@ -13,13 +13,9 @@ POOL_ADMIN_USER_IDENTITY = batch_models.UserIdentity(
 
 def _get_aztk_environment(worker_on_master, mixed_mode):
     envs = []
-    envs.append(batch_models.EnvironmentSetting(name="AZTK_MIXED_MODE", value=mixed_mode))
-    if worker_on_master is not None:
-        envs.append(batch_models.EnvironmentSetting(
-                name="AZTK_WORKER_ON_MASTER", value=worker_on_master))
-    else:
-        envs.append(batch_models.EnvironmentSetting(
-                name="AZTK_WORKER_ON_MASTER", value=False))
+    envs.append(batch_models.EnvironmentSetting(name="AZTK_MIXED_MODE", value=helpers.bool_env(mixed_mode)))
+    envs.append(batch_models.EnvironmentSetting(
+            name="AZTK_WORKER_ON_MASTER", value=helpers.bool_env(worker_on_master)))
     return envs
 
 def __get_docker_credentials(spark_client):
@@ -152,7 +148,7 @@ def generate_cluster_start_task(
         batch_models.EnvironmentSetting(
             name="SPARK_SUBMIT_LOGS_FILE", value=spark_submit_logs_file),
         batch_models.EnvironmentSetting(
-            name="AZTK_GPU_ENABLED", value=gpu_enabled),
+            name="AZTK_GPU_ENABLED", value=helpers.bool_env(gpu_enabled)),
     ] + __get_docker_credentials(spark_client) + _get_aztk_environment(worker_on_master, mixed_mode)
 
     # start task command
