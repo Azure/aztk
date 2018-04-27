@@ -14,11 +14,16 @@ class ConfigurationBase:
         The dict is cleaned from null values and passed expanded to the constructor
         """
         try:
-            clean = dict((k, v) for k, v in args.items() if v)
-            return cls(**clean)
-        except TypeError as e:
+            return cls._from_dict(args)
+        except (ValueError, TypeError) as e:
             pretty_args = yaml.dump(args, default_flow_style=False)
             raise AztkError("{0} {1}\n{2}".format(cls.__name__, str(e), pretty_args))
+
+
+    @classmethod
+    def _from_dict(cls, args: dict):
+        clean = dict((k, v) for k, v in args.items() if v)
+        return cls(**clean)
 
     def validate(self):
         raise NotImplementedError("Validate not implemented")

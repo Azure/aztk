@@ -37,34 +37,52 @@ cluster_config = ClusterConfiguration(
 ## Parameters
 
 ### `PluginConfiguration`
-| Name         | Required? | Type                            | Description                                                                                                                                                     |
-|--------------|-----------|---------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `name`       | required  | string                          | Name of your plugin(This will be used for creating folder, it is recommended to have a simple letter, dash, underscore only name)                               |
-| `files`      | required  | List[PluginFile|PluginTextFile] | List of files to upload                                                                                                                                         |
-| `execute`    | required  | str                             | Script to execute. This script must be defined in the files above and must match its remote path                                                                |
-| `args`       | optional  | List[str]                       | List of arguments to be passed to your execute scripts                                                                                                          |
-| `env`        | optional  | dict                            | List of environment variables to access in the script(This can be used to pass arguments to your script instead of args)                                        |
-| `ports`      | optional  | List[PluginPort]                | List of ports to open if the script is running in a container. A port can also be specific public and it will then be accessible when ssh into the master node. |
-| `target`     | optional  | PluginTarget                    | Define where the execute script should be running. Potential values are `PluginTarget.SparkContainer(Default)` and `PluginTarget.Host`                          |
-| `taget_role` | optional  | PluginTargetRole                | If the plugin should be run only on the master worker or all. You can use environment variables(See below to have different master/worker config)               |             |
+
+#### name  `required`  | `string`
+Name of your plugin(This will be used for creating folder, it is recommended to have a simple letter, dash, underscore only name)
+
+#### files `required`  | `List[PluginFile|PluginTextFile]`
+List of files to upload
+
+#### execute `required`  | `str`
+Script to execute. This script must be defined in the files above and must match its remote path
+
+#### args `optional`  | List[str]
+List of arguments to be passed to your execute scripts
+
+#### env `optional`  | dict
+List of environment variables to access in the script(This can be used to pass arguments to your script instead of args)
+
+#### ports  `optional`  | `List[PluginPort]`
+List of ports to open if the script is running in a container. A port can also be specific public and it will then be accessible when ssh into the master node.
+
+#### target     | `optional`  | `PluginTarget`
+Define where the execute script should be running. Potential values are `PluginTarget.SparkContainer(Default)` and `PluginTarget.Host`
+
+#### `taget_role` | `optional`  | `PluginTargetRole`
+If the plugin should be run only on the master worker or all. You can use environment variables(See below to have different master/worker config)
 
 ### `PluginFile`
-| Name         | Required? | Type | Description                                                                  |
-|--------------|-----------|------|------------------------------------------------------------------------------|
-| `target`     | required  | str  | Where the file should be dropped relative to the plugin working directory    |
-| `local_path` | required  | str  | Path to the local file you want to upload(Could form the plugins parameters) |
+
+#### `target`      `required`  | `str`
+Where the file should be dropped relative to the plugin working directory
+
+#### `local_path` | `required`  | `str`
+Path to the local file you want to upload(Could form the plugins parameters)
 
 ### `TextPluginFile`
-| Name      | Required? | Type              | Description                                                                  |
-|-----------|-----------|-------------------|------------------------------------------------------------------------------|
-| `target`  | required  | str               | Where the file should be dropped relative to the plugin working directory    |
-| `content` | required  | str | io.StringIO | Path to the local file you want to upload(Could form the plugins parameters) |
+
+#### target  | `required`  | `str`
+ Where the file should be dropped relative to the plugin working directory
+
+#### content | `required`  | `str` | `io.StringIO`
+ Path to the local file you want to upload(Could form the plugins parameters)
 
 ### `PluginPort`
-| Name       | Required? | Type | Description                                           |
-|------------|-----------|------|-------------------------------------------------------|
-| `internal` | required  | int  | Internal port to open on the docker container         |
-| `public`   | optional  | bool | If the port should be open publicly(Default: `False`) |
+#### internal | `required`  | `int`
+ Internal port to open on the docker container
+#### public   | `optional`  | `bool`
+ If the port should be open publicly(Default: `False`)
 
 ## Environment variables availables in the plugin
 

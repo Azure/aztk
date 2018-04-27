@@ -1,5 +1,4 @@
 import argparse
-import os
 import typing
 
 import aztk.spark

@@ -1,4 +1,7 @@
 # Custom scripts
+
+**Custom scripts are _DEPRECATED_. Use [plugins](15-plugins.html) instead.**
+
 Custom scripts allow for additional cluster setup steps when the cluster is being provisioned. This is useful
 if you want to install additional software, and if you need to modify the default cluster configuration for things such as modifying spark.conf, adding jars or downloading any files you need in the cluster.
 
@@ -18,7 +21,7 @@ custom_scripts:
 
 The first script, simple.sh, will run on all nodes and will be executed first. The next script, master-only.sh will run only on nodes that are Spark masters and after simple.sh. The next script, worker-only.sh, will run last and only on nodes that are Spark workers.
 
-Directories may also be provided in the custom_scripts section of `.aztk/cluster.yaml`. 
+Directories may also be provided in the custom_scripts section of `.aztk/cluster.yaml`.
 
 ```yaml
 custom_scripts:
@@ -50,11 +53,11 @@ A custom-script to install HDFS (2.8.2) is provided at `custom-scripts/hdfs.sh` 
 To enable HDFS, add this snippet to the custom_scripts section of your `.aztk/cluster.yaml` configuration file:
 
 ```yaml
-custom_scripts: 
+custom_scripts:
   - script: ./custom-scripts/hdfs.sh
     runOn: all-nodes
 ```
 
-When SSHing into the cluster, you will have access to the Namenode UI at the default port 50070. This port can be changed in the ssh.yaml file in your `.aztk/` directory, or by passing the `--namenodeui` flag to the `aztk spark cluster ssh` command. 
+When SSHing into the cluster, you will have access to the Namenode UI at the default port 50070. This port can be changed in the ssh.yaml file in your `.aztk/` directory, or by passing the `--namenodeui` flag to the `aztk spark cluster ssh` command.
 
 When enabled on the cluster, HDFS can be used to read or write data locally during program execution.

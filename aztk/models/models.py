@@ -134,6 +134,9 @@ class ClusterConfiguration(ConfigurationBase):
                 "You must configure a VNET to use AZTK in mixed mode (dedicated and low priority nodes). Set the VNET's subnet_id in your cluster.yaml."
             )
 
+        if self.custom_scripts:
+            logging.warning("Custom scripts are DEPRECATED and will be removed in 0.8.0. Use plugins instead See https://aztk.readthedocs.io/en/latest/15-plugins.html")
+
 
 class RemoteLogin:
     def __init__(self, ip_address, port):

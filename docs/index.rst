@@ -39,5 +39,15 @@ This toolkit is built on top of Azure Batch but does not require any Azure Batch
    :maxdepth: 2
    :caption: Developper documentation:
 
-   docs
-   80-tests
+   dev/docs
+   dev/writing-models
+   dev/tests
+
+
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`

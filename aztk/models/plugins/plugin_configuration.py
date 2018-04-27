@@ -8,15 +8,14 @@ class PluginTarget(Enum):
     """
     Where this plugin should run
     """
-    SparkContainer = "spark-container",
-    Host = "host",
+    SparkContainer = "spark-container"
+    Host = "host"
 
 
 class PluginTargetRole(Enum):
     Master = "master"
     Worker = "worker"
     All = "all-nodes"
-
 
 
 class PluginPort:
@@ -54,17 +53,17 @@ class PluginConfiguration(ConfigurationBase):
 
     def __init__(self,
                  name: str,
-                 ports: List[PluginPort]=None,
-                 files: List[PluginFile]=None,
-                 execute: str=None,
+                 ports: List[PluginPort] = None,
+                 files: List[PluginFile] = None,
+                 execute: str = None,
                  args=None,
                  env=None,
-                 target_role: PluginTargetRole=PluginTargetRole.Master,
-                 target: PluginTarget=PluginTarget.SparkContainer):
+                 target_role: PluginTargetRole = None,
+                 target: PluginTarget = None):
         self.name = name
         # self.docker_image = docker_image
-        self.target = target
-        self.target_role = target_role
+        self.target = target or PluginTarget.SparkContainer
+        self.target_role = target_role or PluginTargetRole.Master
         self.ports = ports or []
         self.files = files or []
         self.args = args or []

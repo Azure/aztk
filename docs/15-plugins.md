@@ -1,5 +1,9 @@
 # Plugins
 
+Plugins are a successor to [custom scripts](11-custom-scripts.html) and are the reconmmended way of running custom code on the cluster.
+
+Plugins can either be one of the Aztk [supported plugins](#supported-plugins) or the path to a [local file](#custom-script-plugin).
+
 ## Supported Plugins
 AZTK ships with a library of default plugins that enable auxillary services to use with your Spark cluster.
 
@@ -22,7 +26,8 @@ plugins:
     - name: hdfs
     - name: spark_ui_proxy
     - name: rsutio_server
-      version: "1.1.383"
+      args:
+        version: "1.1.383"
 ```
 
 ### Enable a plugin using the SDK
@@ -38,3 +43,26 @@ cluster_config = ClusterConfiguration(
   ]
 )
 ```
+
+
+## Custom script plugin
+
+This allows you to run your custom code on the cluster
+### Run a custom script plugin with the CLI
+
+#### Example
+```yaml
+plugins:
+    - script: path/to/my/script.sh
+    - name: friendly-name
+      script: path/to/my-other/script.sh
+      target: host
+      target_role: all-nodes
+```
+
+#### Options
+
+* `script`: **Required** Path to the script you want to run
+* `name`: **Optional** Friendly name. By default will be the name of the script file
+* `target`: **Optional** Target on where to run the plugin(Default: `spark-container`). Can be `spark-container` or `host`
+* `target_role`: **Optional** What should be the role of the node where this script run(Default: `master`). Can be `master`, `worker` or `all-nodes`
