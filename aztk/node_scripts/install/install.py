@@ -41,6 +41,7 @@ def setup_host(docker_repo: str):
 
     cluster_conf = read_cluster_config()
 
+    #TODO pass azure file shares
     spark_container.start_spark_container(
         docker_repo=docker_repo,
         gpu_enabled=os.environ.get("AZTK_GPU_ENABLED") == "true",

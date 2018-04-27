@@ -18,7 +18,7 @@ def start_spark_container(
     if file_mounts:
         for mount in file_mounts:
             cmd.share_folder(mount.mount_path)
-    cmd.share_folder('/mnt/batch/tasks')
+    cmd.share_folder('/mnt')
 
     cmd.pass_env('AZTK_WORKING_DIR')
     cmd.pass_env('AZ_BATCH_ACCOUNT_NAME')
