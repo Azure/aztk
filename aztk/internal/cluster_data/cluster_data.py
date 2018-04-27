@@ -1,3 +1,4 @@
+import io
 import logging
 import yaml
 import azure.common
@@ -39,8 +40,12 @@ class ClusterData:
         self.blob_client.create_blob_from_path(self.cluster_id, blob_path, local_path)
         return BlobData(self.blob_client, self.cluster_id, blob_path)
 
+    def upload_bytes(self, blob_path: str, bytes_io: io.BytesIO) -> BlobData:
+        self.blob_client.create_blob_from_bytes(self.cluster_id, blob_path, bytes_io.getvalue())
+        return BlobData(self.blob_client, self.cluster_id, blob_path)
+
     def upload_cluster_file(self, blob_path: str, local_path: str) -> BlobData:
-        blob_data = self.upload_file(self.CLUSTER_DIR + "/" + blob_path, local_path)
+        blob_data = self.upload_bytes(self.CLUSTER_DIR + "/" + blob_path, local_path)
         blob_data.dest = blob_path
         return blob_data
 

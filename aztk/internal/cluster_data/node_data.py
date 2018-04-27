@@ -24,9 +24,8 @@ class NodeData:
     """
 
     def __init__(self, cluster_config: models.ClusterConfiguration):
-        self.zip_path = os.path.join(ROOT_PATH, "tmp/node-scripts.zip")
+        self.zip_path = io.BytesIO()
         self.cluster_config = cluster_config
-        file_utils.ensure_dir(self.zip_path)
         self.zipf = zipfile.ZipFile(self.zip_path, "w", zipfile.ZIP_DEFLATED)
 
     def add_core(self):
