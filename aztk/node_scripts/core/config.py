@@ -25,6 +25,7 @@ credential = os.environ.get("SP_CREDENTIAL")
 batch_resource_id = os.environ.get("SP_BATCH_RESOURCE_ID")
 storage_resource_id = os.environ.get("SP_STORAGE_RESOURCE_ID")
 
+cluster_id = os.environ.get("AZTK_CLUSTER_ID")
 pool_id = os.environ["AZ_BATCH_POOL_ID"]
 node_id = os.environ["AZ_BATCH_NODE_ID"]
 is_dedicated = os.environ["AZ_BATCH_NODE_IS_DEDICATED"]

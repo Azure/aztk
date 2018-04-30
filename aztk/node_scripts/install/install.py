@@ -6,7 +6,7 @@ from aztk.models.plugins import PluginTarget
 from aztk.internal import cluster_data
 
 def read_cluster_config():
-    data = cluster_data.ClusterData(config.blob_client, config.pool_id)
+    data = cluster_data.ClusterData(config.blob_client, config.cluster_id)
     cluster_config = data.read_cluster_config()
     print("Got cluster config", cluster_config)
     return cluster_config

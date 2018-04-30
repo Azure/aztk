@@ -11,11 +11,12 @@ POOL_ADMIN_USER_IDENTITY = batch_models.UserIdentity(
         scope=batch_models.AutoUserScope.pool,
         elevation_level=batch_models.ElevationLevel.admin))
 
-def _get_aztk_environment(worker_on_master, mixed_mode):
+def _get_aztk_environment(cluster_id, worker_on_master, mixed_mode):
     envs = []
     envs.append(batch_models.EnvironmentSetting(name="AZTK_MIXED_MODE", value=helpers.bool_env(mixed_mode)))
     envs.append(batch_models.EnvironmentSetting(
             name="AZTK_WORKER_ON_MASTER", value=helpers.bool_env(worker_on_master)))
+    envs.append(batch_models.EnvironmentSetting(name="AZTK_CLUSTER_ID", value=cluster_id))
     return envs
 
 def __get_docker_credentials(spark_client):
@@ -115,6 +116,7 @@ def __cluster_install_cmd(zip_resource_file: batch_models.ResourceFile,
 def generate_cluster_start_task(
         spark_client,
         zip_resource_file: batch_models.ResourceFile,
+        cluster_id: str,
         gpu_enabled: bool,
         docker_repo: str = None,
         file_shares: List[aztk_models.FileShare] = None,
@@ -149,7 +151,7 @@ def generate_cluster_start_task(
             name="SPARK_SUBMIT_LOGS_FILE", value=spark_submit_logs_file),
         batch_models.EnvironmentSetting(
             name="AZTK_GPU_ENABLED", value=helpers.bool_env(gpu_enabled)),
-    ] + __get_docker_credentials(spark_client) + _get_aztk_environment(worker_on_master, mixed_mode)
+    ] + __get_docker_credentials(spark_client) + _get_aztk_environment(cluster_id, worker_on_master, mixed_mode)
 
     # start task command
     command = __cluster_install_cmd(zip_resource_file, gpu_enabled, docker_repo, plugins, worker_on_master, file_shares, mixed_mode)
