@@ -5,10 +5,12 @@ import asyncio
 import io
 import os
 import select
+import socket
 import socketserver as SocketServer
 import sys
 from concurrent.futures import ThreadPoolExecutor
 
+from aztk.error import AztkError
 from . import helpers
 
 
@@ -16,11 +18,11 @@ def connect(hostname,
             port=22,
             username=None,
             password=None,
-            pkey=None):
+            pkey=None,
+            timeout=None):
     import paramiko
 
     client = paramiko.SSHClient()
-
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
     if pkey:
@@ -28,19 +30,20 @@ def connect(hostname,
     else:
         ssh_key = None
 
-    client.connect(
-        hostname,
-        port=port,
-        username=username,
-        password=password,
-        pkey=ssh_key
-    )
+    timeout = timeout or 20
+    try:
+        client.connect(hostname, port=port, username=username, password=password, pkey=ssh_key, timeout=timeout)
+    except socket.timeout:
+        raise AztkError("Connection timed out to: {}".format(hostname))
 
     return client
 
 
-def node_exec_command(node_id, command, username, hostname, port, ssh_key=None, password=None, container_name=None):
-    client = connect(hostname=hostname, port=port, username=username, password=password, pkey=ssh_key)
+def node_exec_command(node_id, command, username, hostname, port, ssh_key=None, password=None, container_name=None, timeout=None):
+    try:
+        client = connect(hostname=hostname, port=port, username=username, password=password, pkey=ssh_key, timeout=timeout)
+    except AztkError as e:
+        return (node_id, e)
     if container_name:
         cmd = 'sudo docker exec 2>&1 -t {0} /bin/bash -c \'set -e; set -o pipefail; {1}; wait\''.format(container_name, command)
     else:
@@ -51,7 +54,7 @@ def node_exec_command(node_id, command, username, hostname, port, ssh_key=None, 
     return (node_id, output)
 
 
-async def clus_exec_command(command, username, nodes, ports=None, ssh_key=None, password=None, container_name=None):
+async def clus_exec_command(command, username, nodes, ports=None, ssh_key=None, password=None, container_name=None, timeout=None):
     return await asyncio.gather(
         *[asyncio.get_event_loop().run_in_executor(ThreadPoolExecutor(),
                                                    node_exec_command,
@@ -62,12 +65,16 @@ async def clus_exec_command(command, username, nodes, ports=None, ssh_key=None, 
                                                    node_rls.port,
                                                    ssh_key,
                                                    password,
-                                                   container_name) for node, node_rls in nodes]
+                                                   container_name,
+                                                   timeout) for node, node_rls in nodes]
     )
 
 
-def copy_from_node(node_id, source_path, destination_path, username, hostname, port, ssh_key=None, password=None, container_name=None):
-    client = connect(hostname=hostname, port=port, username=username, password=password, pkey=ssh_key)
+def copy_from_node(node_id, source_path, destination_path, username, hostname, port, ssh_key=None, password=None, container_name=None, timeout=None):
+    try:
+        client = connect(hostname=hostname, port=port, username=username, password=password, pkey=ssh_key, timeout=timeout)
+    except AztkError as e:
+        return (node_id, False, e)
     sftp_client = client.open_sftp()
     try:
         destination_path = os.path.join(os.path.dirname(destination_path), node_id, os.path.basename(destination_path))
@@ -82,8 +89,11 @@ def copy_from_node(node_id, source_path, destination_path, username, hostname, p
         client.close()
 
 
-def node_copy(node_id, source_path, destination_path, username, hostname, port, ssh_key=None, password=None, container_name=None):
-    client = connect(hostname=hostname, port=port, username=username, password=password, pkey=ssh_key)
+def node_copy(node_id, source_path, destination_path, username, hostname, port, ssh_key=None, password=None, container_name=None, timeout=None):
+    try:
+        client = connect(hostname=hostname, port=port, username=username, password=password, pkey=ssh_key, timeout=timeout)
+    except AztkError as e:
+        return (node_id, False, e)
     sftp_client = client.open_sftp()
     try:
         if container_name:
@@ -108,7 +118,7 @@ def node_copy(node_id, source_path, destination_path, username, hostname, port, 
     #TODO: progress bar
 
 
-async def clus_copy(username, nodes, source_path, destination_path, ssh_key=None, password=None, container_name=None, get=False):
+async def clus_copy(username, nodes, source_path, destination_path, ssh_key=None, password=None, container_name=None, get=False, timeout=None):
     return await asyncio.gather(
         *[asyncio.get_event_loop().run_in_executor(ThreadPoolExecutor(),
                                                    copy_from_node if get else node_copy,
@@ -120,5 +130,6 @@ async def clus_copy(username, nodes, source_path, destination_path, ssh_key=None
                                                    node_rls.port,
                                                    ssh_key,
                                                    password,
-                                                   container_name) for node, node_rls in nodes]
+                                                   container_name,
+                                                   timeout) for node, node_rls in nodes]
     )

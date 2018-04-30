@@ -28,5 +28,8 @@ def print_execute_result(node_id, result):
     print("-" * (len(node_id) + 6))
     print("| ", node_id, " |")
     print("-" * (len(node_id) + 6))
-    for line in result:
-        print(line)
+    if isinstance(result, Exception):
+        print(result + "\n")
+    else:
+        for line in result:
+            print(line)

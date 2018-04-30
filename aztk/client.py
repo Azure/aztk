@@ -229,7 +229,7 @@ class Client:
             concurrent.futures.wait(futures)
 
 
-    def __cluster_run(self, cluster_id, command, internal, container_name=None):
+    def __cluster_run(self, cluster_id, command, internal, container_name=None, timeout=None):
         pool, nodes = self.__get_pool_details(cluster_id)
         nodes = [node for node in nodes]
         if internal:
@@ -242,14 +242,15 @@ class Client:
                                                                                            'aztk',
                                                                                            cluster_nodes,
                                                                                            ssh_key=ssh_key.exportKey().decode('utf-8'),
-                                                                                           container_name=container_name))
+                                                                                           container_name=container_name,
+                                                                                           timeout=timeout))
             return output
         except OSError as exc:
             raise exc
         finally:
             self.__delete_user_on_pool('aztk', pool.id, nodes)
 
-    def __cluster_copy(self, cluster_id, source_path, destination_path, container_name=None, internal=False, get=False):
+    def __cluster_copy(self, cluster_id, source_path, destination_path, container_name=None, internal=False, get=False, timeout=None):
         pool, nodes = self.__get_pool_details(cluster_id)
         nodes = [node for node in nodes]
         if internal:
@@ -265,7 +266,8 @@ class Client:
                                   source_path=source_path,
                                   destination_path=destination_path,
                                   ssh_key=ssh_key.exportKey().decode('utf-8'),
-                                  get=get))
+                                  get=get,
+                                  timeout=timeout))
             return output
         except (OSError, batch_error.BatchErrorException) as exc:
             raise exc
