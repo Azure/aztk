@@ -70,8 +70,7 @@ class NodeData:
             relative_folder = os.path.relpath(base, path)
             for file in files:
                 if self._includeFile(file, exclude):
-                    with io.open(os.path.join(base, file), 'r', encoding='UTF-8') as f:
-                        self.zipf.writestr(os.path.join(dest, relative_folder, file), f.read().replace('\r\n', '\n'))
+                    self.add_file(os.path.join(base, file), os.path.join(dest, relative_folder), binary = False)
 
     def _add_custom_scripts(self):
         data = []
@@ -155,7 +154,7 @@ class NodeData:
         return zipf
 
     def _add_node_scripts(self):
-        self.add_dir(os.path.join(ROOT_PATH, NODE_SCRIPT_FOLDER), NODE_SCRIPT_FOLDER, exclude=['*.pyc*'])
+        self.add_dir(os.path.join(ROOT_PATH, NODE_SCRIPT_FOLDER), NODE_SCRIPT_FOLDER, exclude=['*.pyc*', '*.png'])
 
     def _includeFile(self, filename: str, exclude: List[str]) -> bool:
         exclude = exclude or []
