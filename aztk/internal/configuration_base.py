@@ -1,5 +1,5 @@
 import yaml
-from aztk.error import AztkError
+from aztk.error import AztkError, InvalidModelError
 
 class ConfigurationBase:
     """
@@ -38,7 +38,7 @@ class ConfigurationBase:
     def _validate_required(self, attrs):
         for attr in attrs:
             if not getattr(self, attr):
-                raise AztkError("{0} missing {1}.".format(self.__class__.__name__, attr))
+                raise InvalidModelError("{0} missing {1}.".format(self.__class__.__name__, attr))
 
     def _merge_attributes(self, other, attrs):
         for attr in attrs:

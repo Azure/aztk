@@ -1,10 +1,17 @@
-import io
-from Crypto.PublicKey import RSA
 from typing import List
+from Crypto.PublicKey import RSA
+import azure.batch.models as batch_models
 import aztk.models
 from aztk import error
 from aztk.utils import constants, helpers
-import azure.batch.models as batch_models
+
+class SparkToolkit(aztk.models.Toolkit):
+    def __init__(self, version: str, environment: str = None, environment_version: str = None):
+        super().__init__(
+            version=version,
+            environment=environment,
+            environment_version=environment_version,
+        )
 
 
 class Cluster(aztk.models.Cluster):
@@ -97,7 +104,7 @@ class ClusterConfiguration(aztk.models.ClusterConfiguration):
             vm_low_pri_count=0,
             vm_size=None,
             subnet_id=None,
-            docker_repo: str = None,
+            toolkit: SparkToolkit = None,
             user_configuration: UserConfiguration = None,
             spark_configuration: SparkConfiguration = None,
             worker_on_master: bool = None):
@@ -107,7 +114,7 @@ class ClusterConfiguration(aztk.models.ClusterConfiguration):
             vm_count=vm_count,
             vm_low_pri_count=vm_low_pri_count,
             vm_size=vm_size,
-            docker_repo=docker_repo,
+            toolkit=toolkit,
             subnet_id=subnet_id,
             file_shares=file_shares,
             user_configuration=user_configuration,
@@ -115,12 +122,9 @@ class ClusterConfiguration(aztk.models.ClusterConfiguration):
         self.spark_configuration = spark_configuration
         self.worker_on_master = worker_on_master
 
-    def gpu_enabled(self):
-        return helpers.is_gpu_enabled(self.vm_size)
-
     def merge(self, other):
         super().merge(other)
-        self._merge_attributes(other, ["worker_on_master"])
+        self._merge_attributes(other, ["spark_configuration", "worker_on_master"])
 
 
 class SecretsConfiguration(aztk.models.SecretsConfiguration):
@@ -206,7 +210,7 @@ class JobConfiguration:
             vm_size,
             custom_scripts=None,
             spark_configuration=None,
-            docker_repo=None,
+            toolkit=None,
             max_dedicated_nodes=0,
             max_low_pri_nodes=0,
             subnet_id=None,
@@ -217,7 +221,7 @@ class JobConfiguration:
         self.spark_configuration = spark_configuration
         self.vm_size = vm_size
         self.gpu_enabled = helpers.is_gpu_enabled(vm_size)
-        self.docker_repo = docker_repo
+        self.toolkit = toolkit
         self.max_dedicated_nodes = max_dedicated_nodes
         self.max_low_pri_nodes = max_low_pri_nodes
         self.subnet_id = subnet_id
@@ -225,9 +229,9 @@ class JobConfiguration:
 
     def to_cluster_config(self):
         return ClusterConfiguration(
-            cluster_id =  self.id,
-            custom_scripts = self.custom_scripts,
-            docker_repo=self.docker_repo,
+            cluster_id=self.id,
+            custom_scripts=self.custom_scripts,
+            toolkit=self.toolkit,
             vm_size=self.vm_size,
             vm_count=self.max_dedicated_nodes,
             vm_low_pri_count=self.max_low_pri_nodes,
@@ -239,11 +243,20 @@ class JobConfiguration:
     def mixed_mode(self) -> bool:
         return self.max_dedicated_nodes > 0 and self.max_low_pri_nodes > 0
 
+    def get_docker_repo(self) -> str:
+        return self.toolkit.get_docker_repo(self.gpu_enabled)
+
     def validate(self) -> bool:
         """
         Validate the config at its current state.
         Raises: Error if invalid
         """
+        if self.toolkit is None:
+            raise error.InvalidModelError(
+                "Please supply a toolkit in the cluster configuration")
+
+        self.toolkit.validate()
+
         if self.id is None:
             raise error.AztkError("Please supply an ID for the Job in your configuration.")
 

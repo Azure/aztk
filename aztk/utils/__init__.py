@@ -1,3 +1,4 @@
+from .deprecation import deprecated, deprecate
 from . import azure_api
 from . import command_builder
 from . import constants

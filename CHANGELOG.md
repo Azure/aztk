@@ -1,4 +1,11 @@
+
 # Changelog
+
+## Next
+
+**Breaking changes**
+
+- Moved `docker_repo` under a new `toolkit` key. `docker_repo` is now optional if you want to use the default docker images
 
 ## 0.6.0 Mixed Mode, Cluster Run & Copy
 

@@ -14,6 +14,10 @@ from aztk.spark.utils import util
 from aztk.internal.cluster_data import NodeData
 
 
+DEFAULT_CLUSTER_CONFIG = models.ClusterConfiguration(
+    worker_on_master=True,
+)
+
 class Client(BaseClient):
     """
     Aztk Spark Client
@@ -25,7 +29,7 @@ class Client(BaseClient):
     def __init__(self, secrets_config):
         super().__init__(secrets_config)
 
-    def create_cluster(self, cluster_conf: models.ClusterConfiguration, wait: bool = False):
+    def create_cluster(self, configuration: models.ClusterConfiguration, wait: bool = False):
         """
         Create a new aztk spark cluster
 
@@ -36,6 +40,9 @@ class Client(BaseClient):
         Returns:
             aztk.spark.models.Cluster
         """
+        cluster_conf = models.ClusterConfiguration()
+        cluster_conf.merge(DEFAULT_CLUSTER_CONFIG)
+        cluster_conf.merge(configuration)
         cluster_conf.validate()
         cluster_data = self._get_cluster_data(cluster_conf.cluster_id)
         try:
@@ -47,7 +54,7 @@ class Client(BaseClient):
                                                                            zip_resource_files,
                                                                            cluster_conf.cluster_id,
                                                                            cluster_conf.gpu_enabled(),
-                                                                           cluster_conf.docker_repo,
+                                                                           cluster_conf.get_docker_repo(),
                                                                            cluster_conf.file_shares,
                                                                            cluster_conf.plugins,
                                                                            cluster_conf.mixed_mode(),
@@ -211,7 +218,7 @@ class Client(BaseClient):
                                                                            zip_resource_files,
                                                                            job_configuration.id,
                                                                            job_configuration.gpu_enabled,
-                                                                           job_configuration.docker_repo,
+                                                                           job_configuration.get_docker_repo(),
                                                                            mixed_mode=job_configuration.mixed_mode(),
                                                                            worker_on_master=job_configuration.worker_on_master)
 

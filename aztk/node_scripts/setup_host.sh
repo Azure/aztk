@@ -3,6 +3,7 @@
 # Entry point for the start task. It will install all dependencies and start docker.
 # Usage:
 # setup_host.sh [container_name] [docker_repo_name]
+set -e
 
 export AZTK_WORKING_DIR=/mnt/batch/tasks/startup/wd
 export PYTHONUNBUFFERED=TRUE

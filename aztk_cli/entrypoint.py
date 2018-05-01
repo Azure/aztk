@@ -5,12 +5,20 @@
     pip install -e .
 """
 import argparse
+import warnings
 from typing import NamedTuple
 import azure.batch.models.batch_error as batch_error
 import aztk
 from aztk_cli import logger, log, utils, constants
 from aztk_cli.spark.endpoints import spark
-from . import plugins
+from . import plugins, toolkit
+
+
+# Makes sure the warnings are displayed nicely in the CLI without a stacktrace
+def _show_warn(message, *_args):
+    log.warning(message)
+
+warnings.showwarning = _show_warn
 
 def main():
     parser = argparse.ArgumentParser(prog=constants.CLI_EXE)
@@ -24,9 +32,12 @@ def main():
         "spark", help="Commands to run spark jobs")
     plugins_parser = subparsers.add_parser(
         "plugins", help="Commands to list and view plugins")
+    toolkit_parser = subparsers.add_parser(
+        "toolkit", help="List current toolkit information and browse available ones")
 
     spark.setup_parser(spark_parser)
     plugins.setup_parser(plugins_parser)
+    toolkit.setup_parser(toolkit_parser)
     args = parser.parse_args()
 
     parse_common_args(args)
@@ -58,6 +69,7 @@ def run_software(args: NamedTuple):
     softwares = {}
     softwares[aztk.models.Software.spark] = spark.execute
     softwares["plugins"] = plugins.execute
+    softwares["toolkit"] = toolkit.execute
 
     func = softwares[args.software]
     func(args)

@@ -4,16 +4,24 @@
 #   For more information see the documentation at: https://github.com/Azure/aztk/blob/v0.7.0/docs/70-jobs.md
 
 job:
-    id: 
+    id:
     cluster_configuration:
         vm_size: standard_d2_v2
         size: 2
         size_low_pri: 0
-        subnet_id: 
-        docker_repo: # defaults to aztk/base:spark2.2.0
-        # custom_scripts:
-        #     - script: </path/to/script.sh or /path/to/script/directory/>
-        #       runOn: <master/worker/all-nodes>
+        subnet_id:
+        # Toolkit configuration [Required]
+        toolkit:
+          software: spark
+          version: 2.2.0
+          # Which environemnt is needed for spark anaconda, r, miniconda
+          environment: {environment}
+          # Optional version for the environment
+          # environment_version:
+
+          # Optional docker repository(To bring your custom docker image. Just specify the Toolkit software, version and environemnt if using default images)
+          # docker_repo: <name of docker image repo (for more information, see https://github.com/Azure/aztk/blob/master/docs/12-docker-image.md)>
+
 
     spark_configuration:
         spark_defaults_conf: .aztk/spark-defaults.conf
@@ -24,54 +32,54 @@ job:
     applications:
       - name: # unique ID
         application: # /path/to/application
-        application_args: 
-          - 
-        main_class: 
-        jars: 
-          - 
-        py_files: 
-          - 
+        application_args:
+          -
+        main_class:
+        jars:
+          -
+        py_files:
+          -
         files:
-          - 
-        driver_java_options: 
-        driver_library_path: 
-        driver_class_path: 
-        driver_memory: 
-        executor_memory: 
-        driver_cores: 
-        executor_cores: 
-      
+          -
+        driver_java_options:
+        driver_library_path:
+        driver_class_path:
+        driver_memory:
+        executor_memory:
+        driver_cores:
+        executor_cores:
+
       - name: # unique ID
         application: # /path/to/application
-        application_args: 
-          - 
-        main_class: 
-        jars: 
-          - 
-        py_files: 
-          - 
+        application_args:
+          -
+        main_class:
+        jars:
+          -
+        py_files:
+          -
         files:
-          - 
-        driver_java_options: 
-        driver_library_path: 
-        driver_class_path: 
-        driver_memory: 
-        executor_memory: 
-        driver_cores: 
-        executor_cores: 
+          -
+        driver_java_options:
+        driver_library_path:
+        driver_class_path:
+        driver_memory:
+        executor_memory:
+        driver_cores:
+        executor_cores:
 
 # # Functioning example, execute from the root of the repo
 # job:
 #   cluster_configuration:
 #     vm_size: standard_f2
 #     size: 3
- 
+
 #   applications:
 #     - name: pipy100
 #       application: ./examples/src/main/python/pi.py
-#       application_args: 
+#       application_args:
 #         - 100
 #     - name: pipy200
 #       application: ./examples/src/main/python/pi.py
-#       application_args: 
+#       application_args:
 #         - 200

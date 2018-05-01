@@ -2,6 +2,7 @@ import os
 """
     DOCKER
 """
+DOCKER_IMAGE_VERSION = "0.1.0"
 DEFAULT_DOCKER_REPO = "aztk/spark:v0.1.0-spark2.3.0-base"
 DEFAULT_DOCKER_REPO_GPU = "aztk/spark:v0.1.0-spark2.3.0-gpu"
 DEFAULT_SPARK_PYTHON_DOCKER_REPO = "aztk/spark:v0.1.0-spark2.3.0-miniconda-base"

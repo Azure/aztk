@@ -1,12 +1,11 @@
 import io
 from typing import List
-from aztk import error
-from aztk.utils import constants
 import azure.batch.models as batch_models
+from aztk import error
+from aztk.utils import helpers, deprecate
 from aztk.models.plugins import PluginConfiguration
 from aztk.internal import ConfigurationBase
-import yaml
-import logging
+from .toolkit import Toolkit
 
 
 class FileShare:
@@ -27,7 +26,7 @@ class File:
 
 
 class CustomScript:
-    def __init__(self, name: str = None, script = None, run_on=None):
+    def __init__(self, name: str = None, script=None, run_on=None):
         self.name = name
         self.script = script
         self.run_on = run_on
@@ -49,13 +48,20 @@ class UserConfiguration(ConfigurationBase):
             "password",
         ])
 
+    def validate(self):
+        pass
+
 
 class ClusterConfiguration(ConfigurationBase):
     """
     Cluster configuration model
+
+    Args:
+        toolkit
     """
 
     def __init__(self,
+                 toolkit: Toolkit = None,
                  custom_scripts: List[CustomScript] = None,
                  file_shares: List[FileShare] = None,
                  cluster_id: str = None,
@@ -63,10 +69,10 @@ class ClusterConfiguration(ConfigurationBase):
                  vm_low_pri_count=0,
                  vm_size=None,
                  subnet_id=None,
-                 docker_repo: str = None,
                  plugins: List[PluginConfiguration] = None,
                  user_configuration: UserConfiguration = None):
         super().__init__()
+        self.toolkit = toolkit
         self.custom_scripts = custom_scripts
         self.file_shares = file_shares
         self.cluster_id = cluster_id
@@ -74,7 +80,6 @@ class ClusterConfiguration(ConfigurationBase):
         self.vm_size = vm_size
         self.vm_low_pri_count = vm_low_pri_count
         self.subnet_id = subnet_id
-        self.docker_repo = docker_repo
         self.user_configuration = user_configuration
         self.plugins = plugins
 
@@ -85,12 +90,12 @@ class ClusterConfiguration(ConfigurationBase):
         """
 
         self._merge_attributes(other, [
+            "toolkit",
             "custom_scripts",
             "file_shares",
             "cluster_id",
             "vm_size",
             "subnet_id",
-            "docker_repo",
             "vm_count",
             "vm_low_pri_count",
             "plugins",
@@ -109,11 +114,23 @@ class ClusterConfiguration(ConfigurationBase):
     def mixed_mode(self) -> bool:
         return self.vm_count > 0 and self.vm_low_pri_count > 0
 
+
+    def gpu_enabled(self):
+        return helpers.is_gpu_enabled(self.vm_size)
+
+    def get_docker_repo(self):
+        return self.toolkit.get_docker_repo(self.gpu_enabled())
+
     def validate(self) -> bool:
         """
         Validate the config at its current state.
         Raises: Error if invalid
         """
+        if self.toolkit is None:
+            raise error.InvalidModelError(
+                "Please supply a toolkit for the cluster")
+
+        self.toolkit.validate()
 
         if self.cluster_id is None:
             raise error.AztkError(
@@ -135,7 +152,7 @@ class ClusterConfiguration(ConfigurationBase):
             )
 
         if self.custom_scripts:
-            logging.warning("Custom scripts are DEPRECATED and will be removed in 0.8.0. Use plugins instead See https://aztk.readthedocs.io/en/latest/15-plugins.html")
+            deprecate("Custom scripts are DEPRECATED and will be removed in 0.8.0. Use plugins instead See https://aztk.readthedocs.io/en/latest/15-plugins.html")
 
 
 class RemoteLogin:

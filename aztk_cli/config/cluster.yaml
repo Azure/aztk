@@ -2,6 +2,19 @@
 
 # id: <id of the cluster to be created, reccommended to specify with --id command line parameter>
 
+# Toolkit configuration [Required] You can use `aztk toolkit` command to find which are the available tookits
+toolkit:
+  software: spark
+  version: 2.2.0
+  # Which environemnt is needed for spark anaconda, r, miniconda
+  environment: {environment}
+  # Optional version for the environment
+  # environment_version:
+
+  # Optional docker repository(To bring your custom docker image. Just specify the Toolkit software, version and environemnt if using default images)
+  # docker_repo: <name of docker image repo (for more information, see https://github.com/Azure/aztk/blob/master/docs/12-docker-image.md)>
+
+
 # vm_size: <vm-size, see available options here: https://azure.microsoft.com/en-us/pricing/details/virtual-machines/linux/>
 vm_size: standard_a2
 
@@ -14,10 +27,7 @@ size: 2
 # username: <username for the linux user to be created> (optional)
 username: spark
 
-# docker_repo: <name of docker image repo (for more information, see https://github.com/Azure/aztk/blob/v0.7.0/docs/12-docker-image.md)>
-docker_repo: 
-
-# # optional custom scripts to run on the Spark master, Spark worker or all nodes in the cluster
+# **DEPRECATED** Use plugins instead
 # custom_scripts:
 #   - script: </path/to/script.sh or /path/to/script/directory/>
 #     runOn: <master/worker/all-nodes>

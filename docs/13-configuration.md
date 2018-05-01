@@ -11,6 +11,18 @@ This is the default cluster configuration:
 # id: <id of the cluster to be created>
 id: spark_cluster
 
+# Toolkit configuration [Required] You can use `aztk toolkit` command to find which are the available tookits
+toolkit:
+  software: spark
+  version: 2.2
+  # environment: python
+  # Optional version for the environment
+  # environment_version:
+
+  # Optional docker repository(To bring your custom docker image. Just specify the Toolkit software, version and environemnt if using default images)
+  # docker_repo: <name of docker image repo (for more information, see https://github.com/Azure/aztk/blob/master/docs/12-docker-image.md)>
+
+
 # vm_size: <vm-size, see available options here: https://azure.microsoft.com/pricing/details/batch//>
 vm_size: standard_a2
 
@@ -21,9 +33,6 @@ size: 2
 
 # username: <username for the linux user to be created> (optional)
 username: spark
-
-# docker_repo: <name of docker image repo (for more information, see https://github.com/Azure/aztk/blob/v0.7.0/docs/12-docker-image.md)>
-docker_repo: aztk/base:v0.1.0-spark2.3.0-base
 
 # Enable plugins
 plugins:

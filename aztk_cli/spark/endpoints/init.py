@@ -2,7 +2,7 @@ import argparse
 import os
 import typing
 from distutils.dir_util import copy_tree
-
+from aztk_cli import log
 import aztk.utils.constants as constants
 
 
@@ -10,7 +10,8 @@ def setup_parser(parser: argparse.ArgumentParser):
     parser.add_argument('--global', dest='global_flag', action='store_true',
                         help="Create a .aztk/ folder in your home directory for global configurations.")
     software_parser = parser.add_mutually_exclusive_group()
-    software_parser.add_argument('--python', action="store_true", required=False)
+    software_parser.add_argument('--miniconda', action="store_true", required=False)
+    software_parser.add_argument('--annaconda', action="store_true", required=False)
     software_parser.add_argument('--r', '--R', action="store_true", required=False)
     software_parser.add_argument('--java', action="store_true", required=False)
     software_parser.add_argument('--scala', action="store_true", required=False)
@@ -18,22 +19,28 @@ def setup_parser(parser: argparse.ArgumentParser):
 
 def execute(args: typing.NamedTuple):
     # software_specific init
-    if args.python:
-        docker_repo = constants.DEFAULT_SPARK_PYTHON_DOCKER_REPO
+    if args.miniconda:
+        environment = "miniconda"
+    elif args.annaconda:
+        environment = "annaconda"
     elif args.r:
-        docker_repo = constants.DEFAULT_SPARK_R_BASE_DOCKER_REPO
+        environment = "r"
     else:
-        docker_repo = constants.DEFAULT_DOCKER_REPO
+        environment = ""
 
     if args.global_flag:
-        create_directory(constants.GLOBAL_INIT_DIRECTORY_DEST, docker_repo)
+        create_directory(constants.GLOBAL_INIT_DIRECTORY_DEST, environment)
     else:
-        create_directory(constants.LOCAL_INIT_DIRECTORY_DEST, docker_repo)
+        create_directory(constants.LOCAL_INIT_DIRECTORY_DEST, environment)
 
 
-def create_directory(dest_path: str, docker_repo: str):
+def create_directory(dest_path: str, environment: str):
     config_src_path = constants.INIT_DIRECTORY_SOURCE
     config_dest_path = dest_path
+
+    if os.path.isdir(config_dest_path):
+        log.warning("This directory has already been initialized.")
+        return
 
     copy_tree(config_src_path, config_dest_path, update=1)
 
@@ -51,6 +58,6 @@ def create_directory(dest_path: str, docker_repo: str):
     if os.path.isfile(cluster_path):
         with open(cluster_path, 'r', encoding='UTF-8') as stream:
             cluster_yaml = stream.read()
-        cluster_yaml = cluster_yaml.replace("docker_repo: \n", "docker_repo: {}\n".format(docker_repo))
+        cluster_yaml = cluster_yaml.replace("{environment}", "{}\n".format(environment))
         with open(cluster_path, 'w', encoding='UTF-8') as file:
             file.write(cluster_yaml)

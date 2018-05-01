@@ -10,7 +10,7 @@
           "request": "launch",
           "stopOnEntry": false,
           "pythonPath": "${config:python.pythonPath}",
-          "program": "${workspaceFolder}/cli/entrypoint.py",
+          "program": "${workspaceFolder}/aztk_cli/entrypoint.py",
           "cwd": "${workspaceFolder}",
           "console": "integratedTerminal",
           "args": [
@@ -28,7 +28,7 @@
           "request": "launch",
           "stopOnEntry": false,
           "pythonPath": "${config:python.pythonPath}",
-          "program": "${workspaceFolder}/cli/entrypoint.py",
+          "program": "${workspaceFolder}/aztk_cli/entrypoint.py",
           "console": "integratedTerminal",
           "cwd": "${workspaceFolder}",
           "args": [

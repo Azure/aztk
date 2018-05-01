@@ -42,7 +42,9 @@ Jobs also require a definition of the cluster on which the Applications will run
   cluster_configuration:
     vm_size: <the Azure VM size>
     size: <the number of nodes in the Cluster>
-    docker_repo: <Docker Image to download on all nodes>
+    toolkit:
+      software: spark
+      version: 2.2
     subnet_id: <resource ID of a subnet to use (optional)>
     custom_scripts:
       - List
