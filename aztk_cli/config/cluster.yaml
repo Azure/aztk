@@ -35,5 +35,8 @@ plugins:
   # - name: hdfs
   # - name: rstudio_server
 
+# Allow master node to also be a worker <true/false> (Default: true)
+# worker_on_master: true
+
 # wait: <true/false>
 wait: false

@@ -25,7 +25,16 @@ username: spark
 # docker_repo: <name of docker image repo (for more information, see https://github.com/Azure/aztk/blob/v0.7.0/docs/12-docker-image.md)>
 docker_repo: aztk/base:v0.1.0-spark2.3.0-base
 
-# custom_script: <path to custom script to run on each node> (optional)
+# Enable plugins
+plugins:
+  # - name: spark_ui_proxy
+  # - name: jupyterlab
+  # - name: jupyter
+  # - name: hdfs
+  # - name: rstudio_server
+
+# Allow master node to also be a worker <true/false> (Default: true)
+# worker_on_master: true
 
 # wait: <true/false>
 wait: true
