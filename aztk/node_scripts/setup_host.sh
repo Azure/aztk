@@ -11,12 +11,13 @@ container_name=$1
 docker_repo_name=$2
 
 echo "Installing pre-reqs"
-apt-get -y install linux-image-extra-$(uname -r) linux-image-extra-virtual
-apt-get -y install apt-transport-https
-apt-get -y install curl
-apt-get -y install ca-certificates
-apt-get -y install software-properties-common
-apt-get -y install python3-pip python-dev build-essential libssl-dev
+apt-get -y update
+apt-get install -y --no-install-recommends linux-image-extra-$(uname -r) linux-image-extra-virtual
+apt-get install -y --no-install-recommends apt-transport-https
+apt-get install -y --no-install-recommends curl
+apt-get install -y --no-install-recommends ca-certificates
+apt-get install -y --no-install-recommends software-properties-common
+apt-get install -y --no-install-recommends python3-pip python3-venv python-dev build-essential libssl-dev
 echo "Done installing pre-reqs"
 
 # Install docker
@@ -78,12 +79,25 @@ else
 
     echo "Node python version:"
     python3 --version
+
+    # set up aztk python environment
+    export LC_ALL=C.UTF-8
+    export LANG=C.UTF-8
+    python3 -m pip install pipenv
+    mkdir -p $AZTK_WORKING_DIR/.aztk-env
+    cp $AZTK_WORKING_DIR/aztk/node_scripts/Pipfile $AZTK_WORKING_DIR/.aztk-env
+    cp $AZTK_WORKING_DIR/aztk/node_scripts/Pipfile.lock $AZTK_WORKING_DIR/.aztk-env
+    cd $AZTK_WORKING_DIR/.aztk-env
+    export PIPENV_VENV_IN_PROJECT=true
+    pipenv install --python /usr/bin/python3.5m
+    pipenv run pip install --upgrade setuptools wheel #TODO: add pip when pipenv is compatible with pip10
+
     # Install python dependencies
-    pip3 install -r $(dirname $0)/requirements.txt
+    $AZTK_WORKING_DIR/.aztk-env/.venv/bin/pip install -r $(dirname $0)/requirements.txt
     export PYTHONPATH=$PYTHONPATH:$AZTK_WORKING_DIR
 
     echo "Running setup python script"
-    python3 $(dirname $0)/main.py setup-node $docker_repo_name
+    $AZTK_WORKING_DIR/.aztk-env/.venv/bin/python $(dirname $0)/main.py setup-node $docker_repo_name
 
     # wait until container is running
     until [ "`/usr/bin/docker inspect -f {{.State.Running}} $container_name`"=="true" ]; do
@@ -94,7 +108,7 @@ else
 
     # wait until container setup is complete
     echo "Waiting for spark docker container to setup."
-    docker exec spark /bin/bash -c 'python $AZTK_WORKING_DIR/aztk/node_scripts/wait_until_setup_complete.py'
+    docker exec spark /bin/bash -c '$AZTK_WORKING_DIR/.aztk-env/.venv/bin/python $AZTK_WORKING_DIR/aztk/node_scripts/wait_until_setup_complete.py'
 
     # Setup symbolic link for the docker logs
     docker_log=$(docker inspect --format='{{.LogPath}}' $container_name)

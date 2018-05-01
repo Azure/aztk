@@ -3,6 +3,7 @@
 # This file is the entry point of the docker container.
 
 set -e
+source ~/.bashrc
 echo "Initializing spark container"
 
 # --------------------
@@ -25,15 +26,14 @@ done
 # ----------------------------
 # Run aztk setup python scripts
 # ----------------------------
-# use python v3.5.4 to run aztk software
+# setup docker container
 echo "Starting setup using Docker"
 
-$(pyenv root)/versions/$AZTK_PYTHON_VERSION/bin/pip install -r $(dirname $0)/requirements.txt
 export PYTHONPATH=$PYTHONPATH:$AZTK_WORKING_DIR
 echo 'export PYTHONPATH=$PYTHONPATH:$AZTK_WORKING_DIR' >> ~/.bashrc
 
 echo "Running main.py script"
-$(pyenv root)/versions/$AZTK_PYTHON_VERSION/bin/python $(dirname $0)/main.py setup-spark-container
+$AZTK_WORKING_DIR/.aztk-env/.venv/bin/python $(dirname $0)/main.py setup-spark-container
 
 # sleep to keep container running
 while true; do sleep 1; done

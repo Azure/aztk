@@ -1,36 +1,9 @@
 # Docker
 Azure Distributed Data Engineering Toolkit runs Spark on Docker.
 
-Supported Azure Distributed Data Engineering Toolkit images are hosted publicly on [Docker Hub](https://hub.docker.com/r/aztk/base/tags).
+Supported Azure Distributed Data Engineering Toolkit images are hosted publicly on [Docker Hub](https://hub.docker.com/r/aztk/spark/).
 
-## Versioning with Docker
-The default image that this package uses is a the __aztk-base__ Docker image that comes with **Spark v2.2.0**.
-
-You can use several versions of the __aztk-base__ image:
-- Spark 2.2.0 - aztk/base:spark2.2.0 (default)
-- Spark 2.1.0 - aztk/base:spark2.1.0
-- Spark 1.6.3 - aztk/base:spark1.6.3
-
-To enable GPUs you may use any of the following images, which are based upong the __aztk-base__ images. Each of these images are contain CUDA-8.0 and cuDNN-6.0. By default, these images are used if the VM type used has a GPU.
-- Spark 2.2.0 - aztk/gpu:spark2.2.0 (default)
-- Spark2.1.0 - aztk/gpu:spark2.1.0
-- Spark 1.6.3 - aztk/gpu:spark1.6.3
-
-We also provide two other image types tailored for the Python and R users: __aztk-r__ and __aztk-python__. You can choose between the following:
-- Anaconda3-5.0.0 (Python 3.6.2) / Spark 2.2.0 - aztk/python:spark2.2.0-python3.6.2-base
-- Anaconda3-5.0.0 (Python 3.6.2) / Spark 2.1.0 - aztk/python:spark2.1.0-python3.6.2-base
-- Anaconda3-5.0.0 (Python 3.6.2) / Spark 1.6.3 - aztk/python:spark1.6.3-python3.6.2-base
-- R 3.4.1 / Spark v2.2.0 - aztk/r-base:spark2.2.0-r3.4.1-base
-- R 3.4.1 / Spark v2.1.0 - aztk/r-base:spark2.1.0-r3.4.1-base
-- R 3.4.1 / Spark v1.6.3 - aztk/r-base:spark1.6.3-r3.4.1-base
-
-
-Please note that each of these images also have GPU enabled versions. To use these versions, replace the "-base" part of the Docker image tag with "-gpu":
-- Anaconda3-5.0.0 (Python 3.6.2) / Spark 2.2.0 (GPU) - aztk/python:spark2.2.0-python3.6.2-gpu
-- Anaconda3-5.0.0 (Python 3.6.2) / Spark 2.1.0 (GPU) - aztk/python:spark2.1.0-python3.6.2-gpu
-- Anaconda3-5.0.0 (Python 3.6.2) / Spark 1.6.3 (GPU) - aztk/python:spark1.6.3-python3.6.2-gpu
-
-*Today, these supported images are hosted on Docker Hub under the repo ["base/gpu/python/r-base:<tag>"](https://hub.docker.com/r/aztk).*
+By default, the `aztk/spark:v0.1.0-spark2.3.0-base` image will be used.
 
 To select an image other than the default, you can set your Docker image at cluster creation time with the optional **--docker-repo** parameter:
 
@@ -38,17 +11,13 @@ To select an image other than the default, you can set your Docker image at clus
 aztk spark cluster create ... --docker-repo <name_of_docker_image_repo>
 ```
 
-For example, if I wanted to use Spark v1.6.3, I could run the following cluster create command:
+For example, if I wanted to use Spark v2.2.0, I could run the following cluster create command:
 ```sh
 aztk spark cluster create ... --docker-repo aztk/base:spark1.6.3
 ```
 
 ## Using a custom Docker Image
-What if I wanted to use my own Docker image?
-
-You can build your own Docker image on top or beneath one of our supported base images _OR_ you can modify the [supported Dockerfile](../docker-image) and build your own image that way.
-
-Please refer to ['../docker-image'](../docker-image) for more information on building your own image.
+You can build your own Docker image on top or beneath one of our supported base images _OR_ you can modify the [supported Dockerfiles](https://github.com/Azure/aztk/tree/v0.7.0/docker-image) and build your own image that way.
 
 Once you have your Docker image built and hosted publicly, you can then use the **--docker-repo** parameter in your **aztk spark cluster create** command to point to it.
 
@@ -70,3 +39,57 @@ docker:
     password: <mypassword>
     endpoint: <https://my-custom-docker-endpoint.com>
 ```
+
+### Building Your Own Docker Image
+Building your own Docker Image provides more customization over your cluster's environment. For some, this may look like installing specific, and even private, libraries that their Spark jobs require. For others, it may just be setting up a version of Spark, Python or R that fits their particular needs.
+
+The Azure Distributed Data Engineering Toolkit supports custom Docker images. To guarantee that your Spark deployment works, we recommend that you build on top of one of our supported images.
+
+To build your own image, can either build _on top_ or _beneath_ one of our supported images _OR_ you can just modify one of the supported Dockerfiles to build your own.
+
+### Building on top 
+You can build on top of our images by referencing the __aztk/spark__ image in the **FROM** keyword of your Dockerfile:
+```sh
+# Your custom Dockerfile
+
+FROM aztk/spark:v0.1.0-spark2.3.0-base
+...
+
+```
+
+### Building beneath 
+To build beneath one of our images, modify one of our Dockerfiles so that the **FROM** keyword pulls from your Docker image's location (as opposed to the default which is a base Ubuntu image):
+```sh
+# One of the Dockerfiles that AZTK supports
+# Change the FROM statement to point to your hosted image repo
+
+FROM my_username/my_repo:latest
+...
+```
+
+Please note that for this method to work, your Docker image must have been built on Ubuntu.
+
+## Custom Docker Image Rquirements
+If you are building your own custom image and __not__ building on top of a supported image, the following requirements are necessary.
+
+Please make sure that the following environment variables are set: 
+- AZTK_DOCKER_IMAGE_VERSION
+- JAVA_HOME
+- SPARK_HOME
+
+You also need to make sure that __PATH__ is correctly configured with $SPARK_HOME
+- PATH=$SPARK_HOME/bin:$PATH
+
+By default, these are set as follows:
+``` sh
+ENV JAVA_HOME /usr/lib/jvm/java-1.8.0-openjdk-amd64
+ENV SPARK_HOME /home/spark-current
+ENV PATH $SPARK_HOME/bin:$PATH
+```
+
+If you are using your own version of Spark, make that it is symlinked by "/home/spark-current". **$SPARK_HOME**, must also point to "/home/spark-current".
+
+## Hosting your Docker Image
+By default, this toolkit assumes that your Docker images are publicly hosted on Docker Hub. However, we also support hosting your images privately.
+
+See [here](https://github.com/Azure/aztk/blob/v0.7.0/docs/12-docker-image.md#using-a-custom-docker-image-that-is-privately-hosted) to learn more about using privately hosted Docker Images.

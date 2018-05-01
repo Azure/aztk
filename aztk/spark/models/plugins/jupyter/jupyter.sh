@@ -13,13 +13,13 @@ echo "Is master: $AZTK_IS_MASTER"
 if  [ "$AZTK_IS_MASTER" = "true" ]; then
     pip install jupyter --upgrade
     pip install notebook --upgrade
-
-    PYSPARK_DRIVER_PYTHON="/.pyenv/versions/${USER_PYTHON_VERSION}/bin/jupyter"
-    JUPYTER_KERNELS="/.pyenv/versions/${USER_PYTHON_VERSION}/share/jupyter/kernels"
+    
+    PYSPARK_DRIVER_PYTHON="/opt/conda/bin/jupyter"
+    JUPYTER_KERNELS="/opt/conda/share/jupyter/kernels"
 
     # disable password/token on jupyter notebook
     jupyter notebook --generate-config --allow-root
-    JUPYTER_CONFIG='/.jupyter/jupyter_notebook_config.py'
+    JUPYTER_CONFIG='/root/.jupyter/jupyter_notebook_config.py'
     echo >> $JUPYTER_CONFIG
     echo -e 'c.NotebookApp.token=""' >> $JUPYTER_CONFIG
     echo -e 'c.NotebookApp.password=""' >> $JUPYTER_CONFIG

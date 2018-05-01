@@ -1,4 +1,4 @@
-FROM  aztk/base:spark2.2.0
+FROM  aztk/spark:v0.1.0-spark2.2.0-base
 
 LABEL com.nvidia.volumes.needed="nvidia_driver"
 

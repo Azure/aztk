@@ -11,6 +11,7 @@ if  [ "$AZTK_IS_MASTER" = "true" ]; then
 
     ## Download and install Rstudio Server
     wget https://download2.rstudio.org/rstudio-server-$RSTUDIO_SERVER_VERSION-amd64.deb
+    apt-get install -y --no-install-recommends gdebi-core
     gdebi rstudio-server-$RSTUDIO_SERVER_VERSION-amd64.deb --non-interactive
     echo "server-app-armor-enabled=0" | tee -a /etc/rstudio/rserver.conf
     rm rstudio-server-$RSTUDIO_SERVER_VERSION-amd64.deb

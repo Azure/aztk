@@ -27,7 +27,7 @@ This toolkit is built on top of Azure Batch but does not require any Azure Batch
 ```
 3. Login or register for an [Azure Account](https://azure.microsoft.com), navigate to [Azure Cloud Shell](https://shell.azure.com), and run:
 ```sh
-wget -q https://raw.githubusercontent.com/Azure/aztk/master/account_setup.sh -O account_setup.sh &&
+wget -q https://raw.githubusercontent.com/Azure/aztk/v0.7.0/account_setup.sh -O account_setup.sh &&
 chmod 755 account_setup.sh &&
 /bin/bash account_setup.sh
 ```

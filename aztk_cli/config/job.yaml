@@ -1,7 +1,7 @@
 # Job Configuration
 #   An Aztk Job is a cluster and an array of Spark applications to run on that cluster
 #   AZTK Spark Jobs will automatically manage the lifecycle of the cluster
-#   For more information see the documentation at: https://github.com/Azure/aztk/blob/master/docs/70-jobs.md
+#   For more information see the documentation at: https://github.com/Azure/aztk/blob/v0.7.0/docs/70-jobs.md
 
 job:
     id: 
