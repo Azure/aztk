@@ -4,18 +4,34 @@ Cluster state
 .. graphviz::
 
     digraph foo {
-        graph [ordering="out"];
+        graph [fontname="Arial"];
+        node [shape=record;fontname="Arial"];
+        edge [fontname="Arial"];
+
         rankdir=LR;
+
+        Ready -> Preempted -> Booting[color=orange]
+
+        Ready -> Booting[label=Rebooting,color=orange]
+
+        ElectingMaster -> ElectingMasterFailed[color=red]
+
+        Setup -> SetupFailed[color=red]
+
+        subgraph Temporary {
+            rank=3;
+            Preempted;
+        }
 
         subgraph Pipeline {
             rank=same;
-            "Ready" -> "Booting"[label="Rebooting",color=orange]
-            "Allocating" -> "Booting" -> "ElectingMaster" -> "Setup" -> "Ready"[color=green];
+            Allocating -> Booting -> ElectingMaster -> Setup -> Ready[color=green];
         }
 
-        "ElectingMaster" -> "ElectingMasterFailed"[color=red]
-
-        "Setup" -> "SetupFailed"[color=red]
-
+        subgraph ErrorStates {
+            rank=same;
+            ElectingMasterFailed[color=darkred];
+            SetupFailed[color=darkred];
+        }
 
     }

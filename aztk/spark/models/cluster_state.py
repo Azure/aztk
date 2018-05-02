@@ -39,3 +39,9 @@ class ClusterState(Enum):
     """
     Master is ready. This cluster can start running spark jobs
     """
+
+    Preempted = "Preempted"
+    """
+    This means the master has been preempted. This can only happen if the cluster is 100% low priority nodes which is not reconmended.
+    Preempted master will prevent any usage of the cluster and any running application before going to this state will have to be restarted from scratch.
+    """
