@@ -37,7 +37,7 @@ Cluster state
     }
 
 
-.. autoclass:: aztk.spark.models.ClusterState
+.. autoclass:: aztk.models.MasterState
     :members:
     :undoc-members:
     :show-inheritance:

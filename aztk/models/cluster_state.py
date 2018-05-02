@@ -1,6 +1,6 @@
 from enum import Enum
 
-class ClusterState(Enum):
+class MasterState(Enum):
     """
     State giving information of the Spark cluster status
     """
@@ -42,6 +42,8 @@ class ClusterState(Enum):
 
     Preempted = "Preempted"
     """
-    This means the master has been preempted. This can only happen if the cluster is 100% low priority nodes which is not reconmended.
-    Preempted master will prevent any usage of the cluster and any running application before going to this state will have to be restarted from scratch.
+    This means the master has been preempted.
+    This can only happen if the cluster is 100% low priority nodes which is not reconmended.
+    Being in a preempted state will prevent any usage of the cluster.
+    Going to preempted state will abort any running application forcing you to restart it.
     """
