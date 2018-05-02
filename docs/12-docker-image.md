@@ -90,6 +90,6 @@ ENV PATH $SPARK_HOME/bin:$PATH
 If you are using your own version of Spark, make that it is symlinked by "/home/spark-current". **$SPARK_HOME**, must also point to "/home/spark-current".
 
 ## Hosting your Docker Image
-By default, this toolkit assumes that your Docker images are publicly hosted on Docker Hub. However, we also support hosting your images privately.
+By default, aztk assumes that your Docker images are publicly hosted on Docker Hub. However, we also support hosting your images privately.
 
 See [here](https://github.com/Azure/aztk/blob/v0.7.0/docs/12-docker-image.md#using-a-custom-docker-image-that-is-privately-hosted) to learn more about using privately hosted Docker Images.

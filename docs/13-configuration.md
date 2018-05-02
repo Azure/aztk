@@ -110,8 +110,6 @@ The following settings available in `spark-defaults.conf` and `spark-env.sh` are
 `spark-defaults.conf`:
 - spark.master
 
-Also note that this toolkit pre-loads wasb jars, so loading them elsewhere is not necessary.
-
 ### History Server
 If you want to use Spark's history server, please set the following values in your `.aztk/spark-defaults.conf` file:
 ```

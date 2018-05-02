@@ -22,6 +22,7 @@ This toolkit is built on top of Azure Batch but does not require any Azure Batch
    30-cloud-storage
    60-gpu
    70-jobs
+   80-migration
 
 .. _sdk-docs:
 .. toctree::

@@ -152,7 +152,7 @@ class ClusterConfiguration(ConfigurationBase):
             )
 
         if self.custom_scripts:
-            deprecate("Custom scripts are DEPRECATED and will be removed in 0.8.0. Use plugins instead See https://aztk.readthedocs.io/en/latest/15-plugins.html")
+            deprecate("Custom scripts are DEPRECATED and will be removed in 0.8.0. Use plugins instead See https://aztk.readthedocs.io/en/v0.7.0/15-plugins.html")
 
 
 class RemoteLogin:

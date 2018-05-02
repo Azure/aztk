@@ -25,7 +25,7 @@ major = 0
 minor = 7
 patch = 0
 
-suffix = 'b20'
+suffix = ''
 
 __version__ = "{major}.{minor}.{patch}{suffix}".format(
     major=major,
