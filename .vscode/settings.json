@@ -9,11 +9,12 @@
     "*.egg-info": true,
   },
   "python.autoComplete.extraPaths": [
-    "${workspaceRoot}/node_scripts"
+    "${workspaceRoot}/.venv/Lib/site-packages",
   ],
   "python.formatting.provider": "yapf",
   "python.formatting.yapfArgs": [
     "--style=.style.yapf"
   ],
-  "python.pythonPath": "${workspaceFolder}\\ENV\\Scripts\\python.exe"
+  "python.venvPath": "${workspaceFolder}/.venv",
+  "python.pythonPath": "${workspaceFolder}/.venv/Scripts/python.exe"
 }

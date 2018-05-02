@@ -17,7 +17,6 @@ class SparkToolkit(aztk.models.Toolkit):
 class Cluster(aztk.models.Cluster):
     def __init__(self, pool: batch_models.CloudPool = None, nodes: batch_models.ComputeNodePaged = None):
         super().__init__(pool, nodes)
-        self.master_node_id = self.__get_master_node_id()
         self.gpu_enabled = helpers.is_gpu_enabled(pool.vm_size)
 
     def is_pool_running_spark(self, pool: batch_models.CloudPool):
@@ -30,18 +29,6 @@ class Cluster(aztk.models.Cluster):
 
         return False
 
-    def __get_master_node_id(self):
-        """
-            :returns: the id of the node that is the assigned master of this pool
-        """
-        if self.pool.metadata is None:
-            return None
-
-        for metadata in self.pool.metadata:
-            if metadata.name == constants.MASTER_NODE_METADATA_KEY:
-                return metadata.value
-
-        return None
 
 
 class RemoteLogin(aztk.models.RemoteLogin):
