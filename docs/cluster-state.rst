@@ -3,7 +3,7 @@ Cluster state
 
 .. graphviz::
 
-    digraph foo {
+    digraph MasterState {
         graph [fontname="Arial"];
         node [shape=record;fontname="Arial"];
         edge [fontname="Arial"];
@@ -41,3 +41,4 @@ Cluster state
     :members:
     :undoc-members:
     :show-inheritance:
+

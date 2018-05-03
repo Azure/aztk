@@ -1,5 +1,4 @@
 from enum import Enum
-import azure.batch.models
 
 class MasterState(Enum):
     """
