@@ -71,32 +71,32 @@ if [ $? -ne 0 ]; then
   exit 3
 fi
 
+echo "Node python version:"
+python3 --version
+
+# set up aztk python environment
+export LC_ALL=C.UTF-8
+export LANG=C.UTF-8
+python3 -m pip install pipenv
+mkdir -p $AZTK_WORKING_DIR/.aztk-env
+cp $AZTK_WORKING_DIR/aztk/node_scripts/Pipfile $AZTK_WORKING_DIR/.aztk-env
+cp $AZTK_WORKING_DIR/aztk/node_scripts/Pipfile.lock $AZTK_WORKING_DIR/.aztk-env
+cd $AZTK_WORKING_DIR/.aztk-env
+export PIPENV_VENV_IN_PROJECT=true
+pipenv install --python /usr/bin/python3.5m
+pipenv run pip install --upgrade setuptools wheel #TODO: add pip when pipenv is compatible with pip10
+
+# Install python dependencies
+$AZTK_WORKING_DIR/.aztk-env/.venv/bin/pip install -r $(dirname $0)/requirements.txt
+export PYTHONPATH=$PYTHONPATH:$AZTK_WORKING_DIR
+
 # If the container already exists just restart. Otherwise create it
 if [ "$(docker ps -a -q -f name=$container_name)" ]; then
     echo "Docker container is already setup. Restarting it."
     docker restart $container_name
 else
     echo "Creating docker container."
-
-    echo "Node python version:"
-    python3 --version
-
-    # set up aztk python environment
-    export LC_ALL=C.UTF-8
-    export LANG=C.UTF-8
-    python3 -m pip install pipenv
-    mkdir -p $AZTK_WORKING_DIR/.aztk-env
-    cp $AZTK_WORKING_DIR/aztk/node_scripts/Pipfile $AZTK_WORKING_DIR/.aztk-env
-    cp $AZTK_WORKING_DIR/aztk/node_scripts/Pipfile.lock $AZTK_WORKING_DIR/.aztk-env
-    cd $AZTK_WORKING_DIR/.aztk-env
-    export PIPENV_VENV_IN_PROJECT=true
-    pipenv install --python /usr/bin/python3.5m
-    pipenv run pip install --upgrade setuptools wheel #TODO: add pip when pipenv is compatible with pip10
-
-    # Install python dependencies
-    $AZTK_WORKING_DIR/.aztk-env/.venv/bin/pip install -r $(dirname $0)/requirements.txt
-    export PYTHONPATH=$PYTHONPATH:$AZTK_WORKING_DIR
-
+  
     echo "Running setup python script"
     $AZTK_WORKING_DIR/.aztk-env/.venv/bin/python $(dirname $0)/main.py setup-node $docker_repo_name
 
@@ -104,8 +104,6 @@ else
     until [ "`/usr/bin/docker inspect -f {{.State.Running}} $container_name`"=="true" ]; do
         sleep 0.1;
     done;
-
-
 
     # wait until container setup is complete
     echo "Waiting for spark docker container to setup."
