@@ -8,6 +8,7 @@ from aztk.utils import constants, helpers
 class SparkToolkit(aztk.models.Toolkit):
     def __init__(self, version: str, environment: str = None, environment_version: str = None):
         super().__init__(
+            software="spark",
             version=version,
             environment=environment,
             environment_version=environment_version,

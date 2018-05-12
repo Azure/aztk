@@ -35,20 +35,19 @@ def wait_until_cluster_deleted(cluster_id: str):
 
 def test_create_cluster():
     test_id = "test-create-"
+    # TODO: make Cluster Configuration more robust, test each value
+    cluster_configuration = aztk.spark.models.ClusterConfiguration(
+        cluster_id=test_id+base_cluster_id,
+        vm_count=2,
+        vm_low_pri_count=0,
+        vm_size="standard_f2",
+        subnet_id=None,
+        custom_scripts=None,
+        file_shares=None,
+        toolkit=aztk.spark.models.SparkToolkit(version="2.3.0"),
+        spark_configuration=None
+    )
     try:
-        # TODO: make Cluster Configuration more robust, test each value
-        cluster_configuration = aztk.spark.models.ClusterConfiguration(
-            cluster_id=test_id+base_cluster_id,
-            vm_count=2,
-            vm_low_pri_count=0,
-            vm_size="standard_f2",
-            subnet_id=None,
-            custom_scripts=None,
-            file_shares=None,
-            docker_repo=None,
-            spark_configuration=None
-        )
-
         cluster = spark_client.create_cluster(cluster_configuration, wait=True)
 
         assert cluster.pool is not None
@@ -65,25 +64,22 @@ def test_create_cluster():
 
     finally:
         success = spark_client.delete_cluster(cluster_id=cluster_configuration.cluster_id)
-        wait_until_cluster_deleted(cluster_id=cluster_configuration.cluster_id)
 
 
 def test_get_cluster():
     test_id = "test-get-"
-
+    cluster_configuration = aztk.spark.models.ClusterConfiguration(
+        cluster_id=test_id+base_cluster_id,
+        vm_count=2,
+        vm_low_pri_count=0,
+        vm_size="standard_f2",
+        subnet_id=None,
+        custom_scripts=None,
+        file_shares=None,
+        toolkit=aztk.spark.models.SparkToolkit(version="2.3.0"),
+        spark_configuration=None
+    )
     try:
-        cluster_configuration = aztk.spark.models.ClusterConfiguration(
-            cluster_id=test_id+base_cluster_id,
-            vm_count=2,
-            vm_low_pri_count=0,
-            vm_size="standard_f2",
-            subnet_id=None,
-            custom_scripts=None,
-            file_shares=None,
-            docker_repo=None,
-            spark_configuration=None
-        )
-
         spark_client.create_cluster(cluster_configuration, wait=True)
         cluster = spark_client.get_cluster(cluster_id=cluster_configuration.cluster_id)
 
@@ -101,26 +97,23 @@ def test_get_cluster():
 
     finally:
         success = spark_client.delete_cluster(cluster_id=cluster_configuration.cluster_id)
-        wait_until_cluster_deleted(cluster_id=cluster_configuration.cluster_id)
 
 
 
 def test_list_clusters():
     test_id = "test-list-"
+    cluster_configuration = aztk.spark.models.ClusterConfiguration(
+        cluster_id=test_id+base_cluster_id,
+        vm_count=2,
+        vm_low_pri_count=0,
+        vm_size="standard_f2",
+        subnet_id=None,
+        custom_scripts=None,
+        file_shares=None,
+        toolkit=aztk.spark.models.SparkToolkit(version="2.3.0"),
+        spark_configuration=None
+    )
     try:
-
-        cluster_configuration = aztk.spark.models.ClusterConfiguration(
-            cluster_id=test_id+base_cluster_id,
-            vm_count=2,
-            vm_low_pri_count=0,
-            vm_size="standard_f2",
-            subnet_id=None,
-            custom_scripts=None,
-            file_shares=None,
-            docker_repo=None,
-            spark_configuration=None
-        )
-
         spark_client.create_cluster(cluster_configuration, wait=True)
         clusters = spark_client.list_clusters()
 
@@ -131,27 +124,23 @@ def test_list_clusters():
 
     finally:
         success = spark_client.delete_cluster(cluster_id=cluster_configuration.cluster_id)
-        wait_until_cluster_deleted(cluster_id=cluster_configuration.cluster_id)
 
 
 
 def test_get_remote_login_settings():
     test_id = "test-get-remote-login-"
+    cluster_configuration = aztk.spark.models.ClusterConfiguration(
+        cluster_id=test_id+base_cluster_id,
+        vm_count=2,
+        vm_low_pri_count=0,
+        vm_size="standard_f2",
+        subnet_id=None,
+        custom_scripts=None,
+        file_shares=None,
+        toolkit=aztk.spark.models.SparkToolkit(version="2.3.0"),
+        spark_configuration=None
+    )
     try:
-
-        cluster_configuration = aztk.spark.models.ClusterConfiguration(
-            cluster_id=test_id+base_cluster_id,
-            vm_count=2,
-            vm_low_pri_count=0,
-            vm_size="standard_f2",
-            subnet_id=None,
-            custom_scripts=None,
-            file_shares=None,
-            docker_repo=None,
-            spark_configuration=None
-        )
-
-
         spark_client.create_cluster(cluster_configuration, wait=True)
         cluster = spark_client.get_cluster(cluster_id=cluster_configuration.cluster_id)
         rls = spark_client.get_remote_login_settings(cluster_id=cluster.id, node_id=cluster.master_node_id)
@@ -159,34 +148,33 @@ def test_get_remote_login_settings():
         assert rls.ip_address is not None
         assert rls.port is not None
 
-    except (AztkError, BatchErrorException):
+    except (AztkError, BatchErrorException) as e:
+        raise e
         assert False
 
     finally:
         success = spark_client.delete_cluster(cluster_id=cluster_configuration.cluster_id)
-        wait_until_cluster_deleted(cluster_id=cluster_configuration.cluster_id)
 
 
 
 def test_submit():
     test_id = "test-submit-"
+    cluster_configuration = aztk.spark.models.ClusterConfiguration(
+        cluster_id=test_id+base_cluster_id,
+        vm_count=2,
+        vm_low_pri_count=0,
+        vm_size="standard_f2",
+        subnet_id=None,
+        custom_scripts=None,
+        file_shares=None,
+        toolkit=aztk.spark.models.SparkToolkit(version="2.3.0"),
+        spark_configuration=None
+    )
     try:
-        cluster_configuration = aztk.spark.models.ClusterConfiguration(
-            cluster_id=test_id+base_cluster_id,
-            vm_count=2,
-            vm_low_pri_count=0,
-            vm_size="standard_f2",
-            subnet_id=None,
-            custom_scripts=None,
-            file_shares=None,
-            docker_repo=None,
-            spark_configuration=None
-        )
-
         spark_client.create_cluster(cluster_configuration, wait=True)
         application_configuration = aztk.spark.models.ApplicationConfiguration(
             name="pipy100",
-            application="examples/src/main/python/pi.py",
+            application="./src/main/python/pi.py",
             application_args=[100],
             main_class=None,
             jars=[],
@@ -208,29 +196,27 @@ def test_submit():
 
     finally:
         success = spark_client.delete_cluster(cluster_id=cluster_configuration.cluster_id)
-        wait_until_cluster_deleted(cluster_id=cluster_configuration.cluster_id)
 
 
 
 def test_get_application_log():
     test_id = "test-get-app-log-"
+    cluster_configuration = aztk.spark.models.ClusterConfiguration(
+        cluster_id=test_id+base_cluster_id,
+        vm_count=2,
+        vm_low_pri_count=0,
+        vm_size="standard_f2",
+        subnet_id=None,
+        custom_scripts=None,
+        file_shares=None,
+        toolkit=aztk.spark.models.SparkToolkit(version="2.3.0"),
+        spark_configuration=None
+    )
     try:
-        cluster_configuration = aztk.spark.models.ClusterConfiguration(
-            cluster_id=test_id+base_cluster_id,
-            vm_count=2,
-            vm_low_pri_count=0,
-            vm_size="standard_f2",
-            subnet_id=None,
-            custom_scripts=None,
-            file_shares=None,
-            docker_repo=None,
-            spark_configuration=None
-        )
-
         spark_client.create_cluster(cluster_configuration, wait=True)
         application_configuration = aztk.spark.models.ApplicationConfiguration(
             name="pipy100",
-            application="examples/src/main/python/pi.py",
+            application="./src/main/python/pi.py",
             application_args=[100],
             main_class=None,
             jars=[],
@@ -260,7 +246,6 @@ def test_get_application_log():
 
     finally:
         success = spark_client.delete_cluster(cluster_id=cluster_configuration.cluster_id)
-        wait_until_cluster_deleted(cluster_id=cluster_configuration.cluster_id)
 
 
 
@@ -276,24 +261,22 @@ def test_create_user_ssh_key():
 
 def test_get_application_status_complete():
     test_id = "test-app-status-complete-"
-
+    cluster_configuration = aztk.spark.models.ClusterConfiguration(
+        cluster_id=test_id+base_cluster_id,
+        vm_count=2,
+        vm_low_pri_count=0,
+        vm_size="standard_f2",
+        subnet_id=None,
+        custom_scripts=None,
+        file_shares=None,
+        toolkit=aztk.spark.models.SparkToolkit(version="2.3.0"),
+        spark_configuration=None
+    )
     try:
-        cluster_configuration = aztk.spark.models.ClusterConfiguration(
-            cluster_id=test_id+base_cluster_id,
-            vm_count=2,
-            vm_low_pri_count=0,
-            vm_size="standard_f2",
-            subnet_id=None,
-            custom_scripts=None,
-            file_shares=None,
-            docker_repo=None,
-            spark_configuration=None
-        )
-
         spark_client.create_cluster(cluster_configuration, wait=True)
         application_configuration = aztk.spark.models.ApplicationConfiguration(
             name="pipy100",
-            application="examples/src/main/python/pi.py",
+            application="./examples/src/main/python/pi.py",
             application_args=[100],
             main_class=None,
             jars=[],
@@ -319,28 +302,26 @@ def test_get_application_status_complete():
 
     finally:
         success = spark_client.delete_cluster(cluster_id=cluster_configuration.cluster_id)
-        wait_until_cluster_deleted(cluster_id=cluster_configuration.cluster_id)
 
 
 
 def test_delete_cluster():
     test_id = "test-delete-"
-    try:
-        cluster_configuration = aztk.spark.models.ClusterConfiguration(
-            cluster_id=test_id+base_cluster_id,
-            vm_count=2,
-            vm_low_pri_count=0,
-            vm_size="standard_f2",
-            subnet_id=None,
-            custom_scripts=None,
-            file_shares=None,
-            docker_repo=None,
-            spark_configuration=None
-        )
+    cluster_configuration = aztk.spark.models.ClusterConfiguration(
+        cluster_id=test_id+base_cluster_id,
+        vm_count=2,
+        vm_low_pri_count=0,
+        vm_size="standard_f2",
+        subnet_id=None,
+        custom_scripts=None,
+        file_shares=None,
+        toolkit=aztk.spark.models.SparkToolkit(version="2.3.0"),
+        spark_configuration=None
+    )
 
+    try:
         spark_client.create_cluster(cluster_configuration, wait=True)
         success = spark_client.delete_cluster(cluster_id=cluster_configuration.cluster_id)
-        wait_until_cluster_deleted(cluster_id=cluster_configuration.cluster_id)
 
         assert success is True
 
@@ -348,5 +329,7 @@ def test_delete_cluster():
         assert False
 
     finally:
-        success = spark_client.delete_cluster(cluster_id=cluster_configuration.cluster_id)
-        wait_until_cluster_deleted(cluster_id=cluster_configuration.cluster_id)
+        try:
+            success = spark_client.delete_cluster(cluster_id=cluster_configuration.cluster_id)
+        except Exception:
+            pass

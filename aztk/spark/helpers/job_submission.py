@@ -22,7 +22,8 @@ def __app_cmd():
     docker_exec.add_argument("spark /bin/bash >> output.log 2>&1 -c \"" \
                              "source ~/.bashrc; " \
                              "export PYTHONPATH=$PYTHONPATH:\$AZTK_WORKING_DIR; " \
-                             "$AZTK_WORKING_DIR/.aztk-env/.venv/bin/python \$AZTK_WORKING_DIR/aztk/node_scripts/job_submission.py\"")
+                             "cd \$AZ_BATCH_TASK_WORKING_DIR; " \
+                             "\$AZTK_WORKING_DIR/.aztk-env/.venv/bin/python \$AZTK_WORKING_DIR/aztk/node_scripts/job_submission.py\"")
     return docker_exec.to_str()
 
 
@@ -195,5 +196,6 @@ def wait_until_job_finished(spark_client, job_id):
     job_state = spark_client.batch_client.job_schedule.get(job_id).state
 
     while job_state != batch_models.JobScheduleState.completed:
+        print(job_state)
         time.sleep(3)
         job_state = spark_client.batch_client.job_schedule.get(job_id).state
