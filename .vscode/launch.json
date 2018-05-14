@@ -35,7 +35,7 @@
             "spark", "cluster", "create", "--id", "spark-debug"
           ],
           "env": {},
-          "envFile": "${workspaceFolder}/.env",
+          "envFile": "${workspaceFolder}/.venv",
           "debugOptions": [
               "RedirectOutput"
           ]

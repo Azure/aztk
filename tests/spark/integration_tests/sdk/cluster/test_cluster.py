@@ -22,17 +22,6 @@ base_cluster_id = "cluster-{}".format(current_time)
 spark_client = aztk.spark.Client(config.load_aztk_secrets())
 
 
-# helper method
-def wait_until_cluster_deleted(cluster_id: str):
-    while True:
-        try:
-            spark_client.get_cluster(cluster_id)
-            time.sleep(1)
-        except AztkError:
-            # break when the cluster is not found
-            break
-
-
 def test_create_cluster():
     test_id = "test-create-"
     # TODO: make Cluster Configuration more robust, test each value
@@ -63,8 +52,7 @@ def test_create_cluster():
         assert False
 
     finally:
-        success = spark_client.delete_cluster(cluster_id=cluster_configuration.cluster_id)
-
+        clean_up_cluster(cluster_configuration.cluster_id)
 
 def test_get_cluster():
     test_id = "test-get-"
@@ -96,8 +84,7 @@ def test_get_cluster():
         assert False
 
     finally:
-        success = spark_client.delete_cluster(cluster_id=cluster_configuration.cluster_id)
-
+        clean_up_cluster(cluster_configuration.cluster_id)
 
 
 def test_list_clusters():
@@ -123,8 +110,7 @@ def test_list_clusters():
         assert False
 
     finally:
-        success = spark_client.delete_cluster(cluster_id=cluster_configuration.cluster_id)
-
+        clean_up_cluster(cluster_configuration.cluster_id)
 
 
 def test_get_remote_login_settings():
@@ -153,8 +139,7 @@ def test_get_remote_login_settings():
         assert False
 
     finally:
-        success = spark_client.delete_cluster(cluster_id=cluster_configuration.cluster_id)
-
+        clean_up_cluster(cluster_configuration.cluster_id)
 
 
 def test_submit():
@@ -195,8 +180,7 @@ def test_submit():
         assert False
 
     finally:
-        success = spark_client.delete_cluster(cluster_id=cluster_configuration.cluster_id)
-
+        clean_up_cluster(cluster_configuration.cluster_id)
 
 
 def test_get_application_log():
@@ -245,8 +229,7 @@ def test_get_application_log():
         assert False
 
     finally:
-        success = spark_client.delete_cluster(cluster_id=cluster_configuration.cluster_id)
-
+        clean_up_cluster(cluster_configuration.cluster_id)
 
 
 def test_create_user_password():
@@ -291,8 +274,6 @@ def test_get_application_status_complete():
             max_retry_count=None
         )
         spark_client.submit(cluster_id=cluster_configuration.cluster_id, application=application_configuration, wait=True)
-        spark_client.submit(cluster_configuration.cluster_id, application_configuration)
-        spark_client.wait_until_application_done(cluster_id=cluster_configuration.cluster_id, task_id=application_configuration.name)
         status = spark_client.get_application_status(cluster_id=cluster_configuration.cluster_id, app_name=application_configuration.name)
 
         assert status == "completed"
@@ -301,8 +282,7 @@ def test_get_application_status_complete():
         assert False
 
     finally:
-        success = spark_client.delete_cluster(cluster_id=cluster_configuration.cluster_id)
-
+        clean_up_cluster(cluster_configuration.cluster_id)
 
 
 def test_delete_cluster():
@@ -329,7 +309,11 @@ def test_delete_cluster():
         assert False
 
     finally:
-        try:
-            success = spark_client.delete_cluster(cluster_id=cluster_configuration.cluster_id)
-        except Exception:
-            pass
+        clean_up_cluster(cluster_configuration.cluster_id)
+
+def clean_up_cluster(cluster_id):
+    try:
+        success = spark_client.delete_cluster(cluster_id=cluster_id)
+    except (BatchErrorException, AztkError):
+        # pass in the event that the cluster does not exist
+        pass

@@ -39,7 +39,6 @@ def test_submit_job():
         max_low_pri_nodes=0
     )
     try:
-
         job = spark_client.submit_job(job_configuration=job_configuration)
         spark_client.wait_until_job_finished(job_id=job_configuration.id)
 
@@ -50,7 +49,7 @@ def test_submit_job():
         raise e
 
     finally:
-        spark_client.delete_job(job_configuration.id)
+        clean_up_job(job_configuration.id)
 
 
 def test_list_jobs():
@@ -88,7 +87,7 @@ def test_list_jobs():
         raise e
 
     finally:
-        spark_client.delete_job(job_configuration.id)
+        clean_up_job(job_configuration.id)
 
 
 def test_list_applications():
@@ -128,7 +127,7 @@ def test_list_applications():
         raise e
 
     finally:
-        spark_client.delete_job(job_configuration.id)
+        clean_up_job(job_configuration.id)
 
 
 def test_get_job():
@@ -166,7 +165,7 @@ def test_get_job():
         raise e
 
     finally:
-        spark_client.delete_job(job_configuration.id)
+        clean_up_job(job_configuration.id)
 
 
 def test_get_application():
@@ -197,7 +196,7 @@ def test_get_application():
     except (AztkError, BatchErrorException) as e:
         raise e
     finally:
-        spark_client.delete_job(job_configuration.id)
+        clean_up_job(job_configuration.id)
 
 
 def test_get_application_log():
@@ -233,7 +232,7 @@ def test_get_application_log():
         raise e
 
     finally:
-        spark_client.delete_job(job_configuration.id)
+        clean_up_job(job_configuration.id)
 
 
 def test_delete_job():
@@ -266,7 +265,11 @@ def test_delete_job():
     except (AztkError, BatchErrorException) as e:
         raise e
     finally:
-        try:
-            spark_client.delete_job(job_configuration.id)
-        except Exception:
-            pass
+        clean_up_job(job_configuration.id)
+
+
+def clean_up_job(job_id):
+    try:
+        spark_client.delete_job(job_id)
+    except (BatchErrorException, AztkError):
+        pass
