@@ -196,6 +196,5 @@ def wait_until_job_finished(spark_client, job_id):
     job_state = spark_client.batch_client.job_schedule.get(job_id).state
 
     while job_state != batch_models.JobScheduleState.completed:
-        print(job_state)
         time.sleep(3)
         job_state = spark_client.batch_client.job_schedule.get(job_id).state

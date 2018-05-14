@@ -1,3 +1,4 @@
+import os
 import subprocess
 from datetime import datetime
 
@@ -14,7 +15,30 @@ base_job_id = "job-{}".format(time)
 
 # load secrets
 # note: this assumes secrets are set up in .aztk/secrets
-spark_client = aztk.spark.Client(config.load_aztk_secrets())
+tenant_id = os.environ.get("ID_RSA")
+client_id = os.environ.get("CLIENT_ID")
+credential = os.environ.get("CREDENTIAL")
+batch_account_resource_id = os.environ.get("BATCH_ACCOUNT_RESOURCE_ID")
+storage_account_resource_id = os.environ.get("STORAGE_ACCOUNT_RESOURCE_ID")
+ssh_pub_key = os.environ.get("ID_RSA_PUB")
+ssh_priv_key = os.environ.get("ID_RSA")
+keys = [tenant_id, client_id, credential, batch_account_resource_id,
+        storage_account_resource_id, ssh_pub_key, ssh_priv_key]
+if all(keys):
+    spark_client = aztk.spark.Client(
+        aztk.spark.models.SecretsConfiguration(
+            service_principal=aztk.spark.models.ServicePrincipalConfiguration(
+                tenant_id=tenant_id,
+                client_id=client_id,
+                credential=credential,
+                batch_account_resource_id=batch_account_resource_id,
+                storage_account_resource_id=storage_account_resource_id
+            )
+        )
+    )
+else:
+    # fallback to local secrets if envrionment variables don't exist
+    spark_client = aztk.spark.Client(config.load_aztk_secrets())
 
 
 def test_submit_job():
@@ -72,7 +96,8 @@ def test_list_jobs():
         spark_configuration=None,
         toolkit=aztk.spark.models.SparkToolkit(version="2.3.0"),
         max_dedicated_nodes=1,
-        max_low_pri_nodes=0
+        max_low_pri_nodes=0,
+        worker_on_master=True
     )
     try:
         spark_client.submit_job(job_configuration=job_configuration)
@@ -149,8 +174,9 @@ def test_get_job():
         custom_scripts=None,
         spark_configuration=None,
         toolkit=aztk.spark.models.SparkToolkit(version="2.3.0"),
-        max_dedicated_nodes=None,
-        max_low_pri_nodes=1
+        max_dedicated_nodes=1,
+        max_low_pri_nodes=0,
+        worker_on_master=True
     )
     try:
         spark_client.submit_job(job_configuration=job_configuration)
@@ -227,7 +253,7 @@ def test_get_application_log():
         assert application_log.exit_code == 0
         assert application_log.name == "pipy100"
         assert application_log.total_bytes != 0
-        
+
     except (AztkError, BatchErrorException) as e:
         raise e
 
@@ -250,7 +276,8 @@ def test_delete_job():
         spark_configuration=None,
         toolkit=aztk.spark.models.SparkToolkit(version="2.3.0"),
         max_dedicated_nodes=1,
-        max_low_pri_nodes=0
+        max_low_pri_nodes=0,
+        worker_on_master=True
     )
     try:
         spark_client.submit_job(job_configuration=job_configuration)

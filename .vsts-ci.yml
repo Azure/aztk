@@ -1,0 +1,19 @@
+steps:
+
+- script: |
+    pip install -r requirements.txt
+    pip install -e .
+  workingDirectory: $(Agent.HomeDirectory)
+  env:
+    MyName: $(Agent.MachineName)
+  condition: and(succeeded(), eq(variables['agent.os'], 'linux'))
+  displayName: Greeting from Windows machine
+
+- script: |
+    pylint -E aztk
+    pytest
+  workingDirectory: $(Agent.HomeDirectory)
+  env:
+    MyName: $(Agent.MachineName)
+  condition: and(succeeded(), in(variables['agent.os'], 'linux'))
+  displayName: Greeting from macOS or Linux machine
