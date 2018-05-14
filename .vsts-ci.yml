@@ -6,6 +6,8 @@ steps:
     architecture: 'x64'
 
 - script: |
+    pwd
+    ls
     pip install -r requirements.txt
     pip install -e .
   workingDirectory: $(Agent.HomeDirectory)
