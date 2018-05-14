@@ -1,6 +1,13 @@
 
 # Changelog
 
+##  0.7.1 (2018-05-11)
+
+**Bug Fixes**
+* Fix: create virtual environment even if container exists ([2db7b00](https://github.com/jafreck/aztk/commit/2db7b00))
+* Fix: gitattributes for jar files (#548) ([a18660b](https://github.com/jafreck/aztk/commit/a18660b)), closes [#548](https://github.com/jafreck/aztk/issues/548)
+* Fix: pass docker repo command back to the cluster config (#538) ([a99bbe1](https://github.com/jafreck/aztk/commit/a99bbe1)), closes [#538](https://github.com/jafreck/aztk/issues/538)
+
 ##  0.7.0 (2018-05-01)
 
 [AZTK is now published on pip!](https://pypi.org/project/aztk/) [Documentation has migrated to readthedocs](aztk.readthedocs.io)
