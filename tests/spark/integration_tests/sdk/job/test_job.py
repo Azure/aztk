@@ -23,10 +23,8 @@ storage_account_resource_id = os.environ.get("STORAGE_ACCOUNT_RESOURCE_ID")
 ssh_pub_key = os.environ.get("ID_RSA_PUB")
 ssh_priv_key = os.environ.get("ID_RSA")
 keys = [tenant_id, client_id, credential, batch_account_resource_id,
-        storage_account_resource_id]
-for key in keys:
-    print(key)
-keys.append(ssh_priv_key, ssh_pub_key)
+        storage_account_resource_id, ssh_priv_key, ssh_pub_key]
+
 if all(keys):
     spark_client = aztk.spark.Client(
         aztk.spark.models.SecretsConfiguration(
