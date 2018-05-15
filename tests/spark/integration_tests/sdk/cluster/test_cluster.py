@@ -20,7 +20,7 @@ base_cluster_id = "cluster-{}".format(current_time)
 
 # load secrets
 # note: this assumes secrets are set up in .aztk/secrets
-tenant_id = os.environ.get("ID_RSA")
+tenant_id = os.environ.get("TENANT_ID")
 client_id = os.environ.get("CLIENT_ID")
 credential = os.environ.get("CREDENTIAL")
 batch_account_resource_id = os.environ.get("BATCH_ACCOUNT_RESOURCE_ID")
@@ -29,7 +29,7 @@ ssh_pub_key = os.environ.get("ID_RSA_PUB")
 ssh_priv_key = os.environ.get("ID_RSA")
 keys = [tenant_id, client_id, credential, batch_account_resource_id,
         storage_account_resource_id, ssh_pub_key, ssh_priv_key]
-print("keys", keys)
+
 if all(keys):
     spark_client = aztk.spark.Client(
         aztk.spark.models.SecretsConfiguration(
@@ -39,7 +39,9 @@ if all(keys):
                 credential=credential,
                 batch_account_resource_id=batch_account_resource_id,
                 storage_account_resource_id=storage_account_resource_id
-            )
+            ),
+            ssh_pub_key=ssh_pub_key,
+            ssh_priv_key=ssh_priv_key
         )
     )
 else:
