@@ -1,3 +1,7 @@
+trgiger:
+  - master
+  - bug/spark-fix-integration-tests-toolkit
+
 steps:
 - task: UsePythonVersion@0
   inputs:
