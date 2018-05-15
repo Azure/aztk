@@ -14,7 +14,7 @@ steps:
   displayName: install aztk
 
 - script: |
-    pytest
+    pytest -n 50
   env:
     MyName: $(Agent.MachineName)
   condition: and(succeeded(), in(variables['agent.os'], 'linux'))
