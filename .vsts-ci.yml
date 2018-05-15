@@ -12,14 +12,10 @@ steps:
 - script: |
     pip install -r requirements.txt
     pip install -e .
-  env:
-    MyName: $(Agent.MachineName)
   condition: and(succeeded(), eq(variables['agent.os'], 'linux'))
   displayName: install aztk
 
 - script: |
     pytest -n 50
-  env:
-    MyName: $(Agent.MachineName)
   condition: and(succeeded(), in(variables['agent.os'], 'linux'))
   displayName: pytest
