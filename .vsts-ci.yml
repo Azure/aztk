@@ -1,4 +1,4 @@
-trgiger:
+trigger:
   - master
   - bug/spark-fix-integration-tests-toolkit
 
