@@ -5,7 +5,7 @@
 # Toolkit configuration [Required] You can use `aztk toolkit` command to find which are the available tookits
 toolkit:
   software: spark
-  version: 2.2.0
+  version: 2.3.0
   # Which environemnt is needed for spark anaconda, r, miniconda
   environment: {environment}
   # Optional version for the environment
@@ -16,7 +16,7 @@ toolkit:
 
 
 # vm_size: <vm-size, see available options here: https://azure.microsoft.com/en-us/pricing/details/virtual-machines/linux/>
-vm_size: standard_a2
+vm_size: standard_f2
 
 # size: <number of dedicated nodes in the cluster, not that clusters must contain all dedicated or all low priority nodes>
 size: 2
@@ -39,11 +39,13 @@ username: spark
 
 # Enable plugins
 plugins:
-  # - name: spark_ui_proxy
   # - name: jupyterlab
   # - name: jupyter
   # - name: hdfs
   # - name: rstudio_server
+  # - name: spark_ui_proxy
+  # - name: openblas
+  # - name: nvblas
 
 # Allow master node to also be a worker <true/false> (Default: true)
 # worker_on_master: true

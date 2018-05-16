@@ -58,7 +58,7 @@ RUN apt-get clean \
     && cd spark \
     && git checkout tags/v${SPARK_VERSION_KEY} \
     && export MAVEN_OPTS="-Xmx3g -XX:ReservedCodeCacheSize=1024m" \
-    && ./make-distribution.sh --name custom-spark --tgz -Phive -Phive-thriftserver -Dhadoop.version=${HADOOP_VERSION} -Phadoop-2.6 -DskipTests \
+    && ./make-distribution.sh --name custom-spark --tgz -Pnetlib-lgpl -Phive -Phive-thriftserver -Dhadoop.version=${HADOOP_VERSION} -Phadoop-2.6 -DskipTests \
     && tar -xvzf /spark/spark-${SPARK_VERSION_KEY}-bin-custom-spark.tgz --directory=/home \
     && ln -s "/home/spark-${SPARK_VERSION_KEY}-bin-custom-spark" /home/spark-current \
     && rm -rf /spark \ 

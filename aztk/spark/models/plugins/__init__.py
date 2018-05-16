@@ -5,3 +5,5 @@ from .resource_monitor import ResourceMonitorPlugin
 from .rstudio_server import RStudioServerPlugin
 from .simple import SimplePlugin
 from .spark_ui_proxy import SparkUIProxyPlugin
+from .openblas import OpenBLASPlugin
+from .nvblas import NvBLASPlugin
