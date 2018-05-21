@@ -8,7 +8,7 @@ import uuid
 import yaml
 from azure.common import credentials
 from azure.graphrbac import GraphRbacManagementClient
-from azure.graphrbac.models import ApplicationCreateParameters, PasswordCredential, ServicePrincipalCreateParameters
+from azure.graphrbac.models import ApplicationCreateParameters, ApplicationUpdateParameters, PasswordCredential, ServicePrincipalCreateParameters
 from azure.graphrbac.models.graph_error import GraphErrorException
 from azure.mgmt.authorization import AuthorizationManagementClient
 from azure.mgmt.batch import BatchManagementClient
@@ -189,6 +189,7 @@ def create_aad_user(credentials, tenant_id, **kwargs):
                 display_name=display_name,
                 password_credentials=[
                     PasswordCredential(
+                        start_date=datetime(2000, 1, 1, 0, 0, 0, 0, tzinfo=timezone.utc),
                         end_date=datetime(2299, 12, 31, 0, 0, 0, 0, tzinfo=timezone.utc),
                         value=application_credential,
                         key_id=uuid.uuid4()
@@ -210,7 +211,21 @@ def create_aad_user(credentials, tenant_id, **kwargs):
             confirmation_prompt = "Previously created application with name {} found. "\
                                   "Would you like to use it? (y/n): ".format(application.display_name)
             prompt_for_confirmation(confirmation_prompt, e, ValueError("Response not recognized. Please try again."))
-
+            password_credentials = list(graph_rbac_client.applications.list_password_credentials(application_object_id=application.object_id))
+            password_credentials.append(
+                PasswordCredential(
+                    start_date=datetime(2000, 1, 1, 0, 0, 0, 0, tzinfo=timezone.utc),
+                    end_date=datetime(2299, 12, 31, 0, 0, 0, 0, tzinfo=timezone.utc),
+                    value=application_credential,
+                    key_id=uuid.uuid4()
+                )
+            )
+            graph_rbac_client.applications.patch(
+                application_object_id=application.object_id,
+                parameters=ApplicationUpdateParameters(
+                    password_credentials=password_credentials
+                )
+            )
             service_principal = next(graph_rbac_client.service_principals.list(
                 filter="appId eq '{}'".format(application.app_id)))
         else:
@@ -254,7 +269,7 @@ def create_role_assignment(credentials, subscription_id, scope, principal_id):
 
 def format_secrets(**kwargs):
     '''
-    Retuns the secrets for the created resources to be placed in secrets.yaml
+    Returns the secrets for the created resources to be placed in secrets.yaml
     The following form is returned:
 
         service_principal:
@@ -381,7 +396,7 @@ if __name__ == "__main__":
     with Spinner():
         storage_account_id = create_storage_account(creds, subscription_id, **kwargs)
         kwargs["storage_account_id"] = storage_account_id
-    print("Created Storage group.")
+    print("Created Storage account.")
 
     # create batch account
     with Spinner():
@@ -397,8 +412,8 @@ if __name__ == "__main__":
         aad_cred, subscirption_id, tenant_id = profile.get_login_credentials(
             resource=AZURE_PUBLIC_CLOUD.endpoints.active_directory_graph_resource_id
         )
-
         application_id, service_principal_object_id, application_credential = create_aad_user(aad_cred, tenant_id, **kwargs)
+    
     print("Created Azure Active Directory service principal.")
 
     with Spinner():
