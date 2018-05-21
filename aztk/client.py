@@ -12,7 +12,7 @@ import aztk.utils.ssh as ssh_lib
 import aztk.models as models
 import azure.batch.models as batch_models
 from azure.batch.models import batch_error
-from Crypto.PublicKey import RSA
+from Cryptodome.PublicKey import RSA
 from aztk.internal import cluster_data
 
 class Client:

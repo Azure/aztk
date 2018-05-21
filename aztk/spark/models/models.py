@@ -1,5 +1,5 @@
 from typing import List
-from Crypto.PublicKey import RSA
+from Cryptodome.PublicKey import RSA
 import azure.batch.models as batch_models
 import aztk.models
 from aztk import error

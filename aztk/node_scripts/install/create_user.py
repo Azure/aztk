@@ -1,8 +1,8 @@
 import os
 import azure.batch.models as batch_models
 import azure.batch.models.batch_error as batch_error
-from Crypto.PublicKey import RSA
-from Crypto.Cipher import AES, PKCS1_OAEP
+from Cryptodome.PublicKey import RSA
+from Cryptodome.Cipher import AES, PKCS1_OAEP
 from datetime import datetime, timezone, timedelta
 import yaml
 '''

@@ -46,7 +46,7 @@ setup(
         "azure-mgmt-storage==1.5.0",
         "azure-storage-blob==1.1.0",
         "pyyaml>=3.12",
-        "pycryptodome>=3.4",
+        "pycryptodomex>=3.4",
         "paramiko>=2.4",
     ],
     package_data={
