@@ -13,7 +13,9 @@ Currently the following plugins are supported:
 - Jupyter
 - HDFS
 - RStudioServer
-- Spark UI Proxy
+- TensorflowOnSpark
+- OpenBLAS
+- mvBLAS
 
 ### Enable a plugin using the CLI
 If you are uing the `aztk` CLI and wish to enable a supported plugin, you need to update you `.aztk/cluster.yaml` configuration file.
@@ -38,7 +40,6 @@ cluster_config = ClusterConfiguration(
   ...# Other config,
   plugins=[
     JupyterPlugin(),
-    RStudioServerPlugin(version="1.1.383"),
     HDFSPlugin(),
   ]
 )

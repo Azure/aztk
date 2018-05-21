@@ -23,6 +23,7 @@ class PluginManager:
         hdfs=plugins.HDFSPlugin,
         simple=plugins.SimplePlugin,
         spark_ui_proxy=plugins.SparkUIProxyPlugin,
+        tensorflow_on_spark=plugins.TensorflowOnSparkPlugin,
         openblas=plugins.OpenBLASPlugin,
         nvblas=plugins.NvBLASPlugin,
     )
