@@ -45,4 +45,3 @@ def wait_for_master_to_be_ready(client, cluster_id: str):
                     "Master didn't become ready before timeout.")
 
             time.sleep(10)
-    time.sleep(5)
