@@ -17,17 +17,21 @@ def __get_node(spark_client, node_id: str, cluster_id: str) -> batch_models.Comp
     return spark_client.batch_client.compute_node.get(cluster_id, node_id)
 
 
-def generate_task(spark_client, container_id, application):
+def generate_task(spark_client, container_id, application, remote=False):
     resource_files = []
 
-    app_resource_file = helpers.upload_file_to_container(container_name=container_id,
-                                                         application_name=application.name,
-                                                         file_path=application.application,
-                                                         blob_client=spark_client.blob_client,
-                                                         use_full_path=False)
+    # The application provided is not hosted remotely and therefore must be uploaded
+    if not remote:
+        app_resource_file = helpers.upload_file_to_container(container_name=container_id,
+                                                            application_name=application.name,
+                                                            file_path=application.application,
+                                                            blob_client=spark_client.blob_client,
+                                                            use_full_path=False)
 
-    # Upload application file
-    resource_files.append(app_resource_file)
+        # Upload application file
+        resource_files.append(app_resource_file)
+
+        application.application = '$AZ_BATCH_TASK_WORKING_DIR/' + os.path.basename(application.application)
 
     # Upload dependent JARS
     jar_resource_file_paths = []
@@ -64,7 +68,6 @@ def generate_task(spark_client, container_id, application):
         resource_files.append(files_resource_file_path)
 
     # Upload application definition
-    application.application = os.path.basename(application.application)
     application.jars = [os.path.basename(jar) for jar in application.jars]
     application.py_files = [os.path.basename(py_files) for py_files in application.py_files]
     application.files = [os.path.basename(files) for files in application.files]
@@ -112,11 +115,11 @@ def affinitize_task_to_master(spark_client, cluster_id, task):
     return task
 
 
-def submit_application(spark_client, cluster_id, application, wait: bool = False):
+def submit_application(spark_client, cluster_id, application, remote: bool = False, wait: bool = False):
     """
     Submit a spark app
     """
-    task = generate_task(spark_client, cluster_id, application)
+    task = generate_task(spark_client, cluster_id, application, remote)
     task = affinitize_task_to_master(spark_client, cluster_id, task)
 
 

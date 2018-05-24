@@ -109,9 +109,9 @@ class Client(BaseClient):
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
-    def submit(self, cluster_id: str, application: models.ApplicationConfiguration, wait: bool = False):
+    def submit(self, cluster_id: str, application: models.ApplicationConfiguration, remote: bool = False, wait: bool = False):
         try:
-            cluster_submit_helper.submit_application(self, cluster_id, application, wait)
+            cluster_submit_helper.submit_application(self, cluster_id, application, remote, wait)
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 

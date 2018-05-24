@@ -114,7 +114,7 @@ def __app_submit_cmd(
         spark_submit_cmd.add_option('--executor-cores', str(executor_cores))
 
     spark_submit_cmd.add_argument(
-        os.environ['AZ_BATCH_TASK_WORKING_DIR'] + '/' + app + ' ' +
+        os.path.expandvars(app) + ' ' + 
         ' '.join(['\'' + str(app_arg) + '\'' for app_arg in (app_args or [])]))
 
     with open("spark-submit.txt", mode="w", encoding="UTF-8") as stream:
@@ -156,7 +156,7 @@ def recieve_submit_request(application_file_path):
 
     cmd = __app_submit_cmd(
         name=application['name'],
-        app=os.path.basename(application['application']),
+        app=application['application'],
         app_args=application['application_args'],
         main_class=application['main_class'],
         jars=application['jars'],

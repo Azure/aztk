@@ -9,9 +9,14 @@ Run a Spark job:
 aztk spark cluster submit --id <name_of_spark_cluster> --name <name_of_spark_job> <executable> <executable_params>
 ```
 
-For example, run a local pi.py file on a Spark cluster
+For example, to run a local pi.py file on a Spark cluster, simply specify the local path of the file:
 ```sh
 aztk spark cluster submit --id spark --name pipy examples/src/main/python/pi.py 100
+```
+
+To run a remotely hosted pi.py file on a Spark cluster, specify the remote path of the file and use the '--remote' flag:
+```sh
+aztk spark cluster submit --id spark --name pipy --remote wasbs://path@remote/pi.py 100
 ```
 
 NOTE: The job name (--name) must be atleast 3 characters long, can only contain alphanumeric characters including hyphens but excluding underscores, and cannot contain uppercase letters. Each job you submit **must** have a unique name.

@@ -70,9 +70,16 @@ def setup_parser(parser: argparse.ArgumentParser):
                         help='Path to the file you wish to output to. If not \
                               specified, output is printed to stdout')
 
+    parser.add_argument('--remote', action='store_true',
+                        help='Do not upload the app to the cluster, assume it is \
+                              already accessible at the given path')
+
     parser.add_argument('app',
-                        help='App jar OR python file to execute. Use absolute \
-                              path to reference file.')
+                        help='App jar OR python file to execute. A path to a local \
+                              file is expected, unless used in conjunction with \
+                              the --remote flag. When the --remote flag is set, a \
+                              remote path that is accessible from the cluster is \
+                              expected. Remote paths are not validated up-front.')
 
     parser.add_argument('app_args', nargs='*',
                         help='Arguments for the application')
@@ -146,6 +153,7 @@ def execute(args: typing.NamedTuple):
             executor_cores=args.executor_cores,
             max_retry_count=args.max_retry_count
         ),
+        remote=args.remote,
         wait=False
     )
 
