@@ -1,15 +1,11 @@
 import os
 import yaml
-from aztk_cli import log
 import aztk.spark
 from aztk.spark.models import (
     SecretsConfiguration,
-    ServicePrincipalConfiguration,
-    SharedKeyConfiguration,
-    DockerConfiguration,
     ClusterConfiguration,
-    UserConfiguration,
 )
+from aztk.utils import deprecate
 from aztk.models import Toolkit
 from aztk.models.plugins.internal import PluginReference
 
@@ -19,11 +15,9 @@ def load_aztk_secrets() -> SecretsConfiguration:
     """
     secrets = SecretsConfiguration()
     # read global ~/secrets.yaml
-    global_config = _load_secrets_config(
-        os.path.join(aztk.utils.constants.HOME_DIRECTORY_PATH, '.aztk',
-                     'secrets.yaml'))
+    global_config = _load_config_file(os.path.join(aztk.utils.constants.HOME_DIRECTORY_PATH, '.aztk', 'secrets.yaml'))
     # read current working directory secrets.yaml
-    local_config = _load_secrets_config()
+    local_config = _load_config_file(aztk.utils.constants.DEFAULT_SECRETS_PATH)
 
     if not global_config and not local_config:
         raise aztk.error.AztkError("There is no secrets.yaml in either ./.aztk/secrets.yaml or .aztk/secrets.yaml")
@@ -37,12 +31,7 @@ def load_aztk_secrets() -> SecretsConfiguration:
     secrets.validate()
     return secrets
 
-
-def _load_secrets_config(
-        path: str = aztk.utils.constants.DEFAULT_SECRETS_PATH):
-    """
-        Loads the secrets.yaml file in the .aztk directory
-    """
+def _load_config_file(path: str):
     if not os.path.isfile(path):
         return None
 
@@ -51,74 +40,16 @@ def _load_secrets_config(
             return yaml.load(stream)
         except yaml.YAMLError as err:
             raise aztk.error.AztkError(
-                "Error in secrets.yaml: {0}".format(err))
+                "Error in {0}:\n {1}".format(path, err))
 
 
 def _merge_secrets_dict(secrets: SecretsConfiguration, secrets_config):
-    service_principal_config = secrets_config.get('service_principal')
-    if service_principal_config:
-        secrets.service_principal = ServicePrincipalConfiguration(
-            tenant_id=service_principal_config.get('tenant_id'),
-            client_id=service_principal_config.get('client_id'),
-            credential=service_principal_config.get('credential'),
-            batch_account_resource_id=service_principal_config.get(
-                'batch_account_resource_id'),
-            storage_account_resource_id=service_principal_config.get(
-                'storage_account_resource_id'),
-        )
+    if 'default' in secrets_config:
+        deprecate("default key in secrets.yaml is deprecated. Place all child parameters directly at the root")
+        secrets_config = dict(**secrets_config, **secrets_config.pop('default'))
 
-    shared_key_config = secrets_config.get('shared_key')
-    batch = secrets_config.get('batch')
-    storage = secrets_config.get('storage')
-
-    if shared_key_config and (batch or storage):
-        raise aztk.error.AztkError(
-            "Shared keys must be configured either under 'sharedKey:' or under 'batch:' and 'storage:', not both."
-        )
-
-    if shared_key_config:
-        secrets.shared_key = SharedKeyConfiguration(
-            batch_account_name=shared_key_config.get('batch_account_name'),
-            batch_account_key=shared_key_config.get('batch_account_key'),
-            batch_service_url=shared_key_config.get('batch_service_url'),
-            storage_account_name=shared_key_config.get('storage_account_name'),
-            storage_account_key=shared_key_config.get('storage_account_key'),
-            storage_account_suffix=shared_key_config.get(
-                'storage_account_suffix'),
-        )
-    elif batch or storage:
-        secrets.shared_key = SharedKeyConfiguration()
-        if batch:
-            log.warning(
-                "Your secrets.yaml format is deprecated. To use shared key authentication use the shared_key key. See config/secrets.yaml.template"
-            )
-            secrets.shared_key.batch_account_name = batch.get(
-                'batchaccountname')
-            secrets.shared_key.batch_account_key = batch.get('batchaccountkey')
-            secrets.shared_key.batch_service_url = batch.get('batchserviceurl')
-
-        if storage:
-            secrets.shared_key.storage_account_name = storage.get(
-                'storageaccountname')
-            secrets.shared_key.storage_account_key = storage.get(
-                'storageaccountkey')
-            secrets.shared_key.storage_account_suffix = storage.get(
-                'storageaccountsuffix')
-
-    docker_config = secrets_config.get('docker')
-    if docker_config:
-        secrets.docker = DockerConfiguration(
-            endpoint=docker_config.get('endpoint'),
-            username=docker_config.get('username'),
-            password=docker_config.get('password'),
-        )
-
-    default_config = secrets_config.get('default')
-    # Check for ssh keys if they are provided
-    if default_config:
-        secrets.ssh_priv_key = default_config.get('ssh_priv_key')
-        secrets.ssh_pub_key = default_config.get('ssh_pub_key')
-
+    other = SecretsConfiguration.from_dict(secrets_config)
+    secrets.merge(other)
 
 def read_cluster_config(
         path: str = aztk.utils.constants.DEFAULT_CLUSTER_CONFIG_PATH
@@ -126,82 +57,25 @@ def read_cluster_config(
     """
         Reads the config file in the .aztk/ directory (.aztk/cluster.yaml)
     """
-    if not os.path.isfile(path):
-        return None
-
-    with open(path, 'r', encoding='UTF-8') as stream:
-        try:
-            config_dict = yaml.load(stream)
-        except yaml.YAMLError as err:
-            raise aztk.error.AztkError(
-                "Error in cluster.yaml: {0}".format(err))
-
-        if config_dict is None:
-            return None
-
-        return cluster_config_from_dict(config_dict)
-
+    config_dict = _load_config_file(path)
+    return cluster_config_from_dict(config_dict)
 
 def cluster_config_from_dict(config: dict):
-    output = ClusterConfiguration()
     wait = False
-    if config.get('id') is not None:
-        output.cluster_id = config['id']
-
-    if config.get('vm_size') is not None:
-        output.vm_size = config['vm_size']
-
-    if config.get('size'):
-        output.vm_count = config['size']
-
-    if config.get('size_low_pri'):
-        output.vm_low_pri_count = config['size_low_pri']
-
-    if config.get('subnet_id') is not None:
-        output.subnet_id = config['subnet_id']
-
-    if config.get('username') is not None:
-        output.user_configuration = UserConfiguration(
-            username=config['username'])
-
-        if config.get('password') is not None:
-            output.user_configuration.password = config['password']
-
-    if config.get('custom_scripts') not in [[None], None]:
-        output.custom_scripts = []
-        for custom_script in config['custom_scripts']:
-            output.custom_scripts.append(
-                aztk.spark.models.CustomScript(
-                    script=custom_script['script'],
-                    run_on=custom_script['runOn']))
-
-    if config.get('azure_files') not in [[None], None]:
-        output.file_shares = []
-        for file_share in config['azure_files']:
-            output.file_shares.append(
-                aztk.spark.models.FileShare(
-                    storage_account_name=file_share['storage_account_name'],
-                    storage_account_key=file_share['storage_account_key'],
-                    file_share_path=file_share['file_share_path'],
-                    mount_path=file_share['mount_path'],
-                ))
-
-    if config.get('toolkit') is not None:
-        output.toolkit = Toolkit.from_dict(config['toolkit'])
-
     if config.get('plugins') not in [[None], None]:
-        output.plugins = []
+        plugins = []
         for plugin in config['plugins']:
             ref = PluginReference.from_dict(plugin)
-            output.plugins.append(ref.get_plugin())
+            plugins.append(ref.get_plugin())
+        config["plugins"] = plugins
 
-    if config.get('worker_on_master') is not None:
-        output.worker_on_master = config['worker_on_master']
+    if config.get('username') is not None:
+        config['user_configuration'] = dict(username=config.pop('username'))
 
     if config.get('wait') is not None:
-        wait = config['wait']
+        wait = config.pop('wait')
 
-    return output, wait
+    return ClusterConfiguration.from_dict(config), wait
 
 
 class SshConfig:
@@ -321,8 +195,8 @@ class JobConfig():
             self.toolkit = Toolkit.from_dict(cluster_configuration.get('toolkit'))
             if cluster_configuration.get('size') is not None:
                 self.max_dedicated_nodes = cluster_configuration.get('size')
-            if cluster_configuration.get('size_low_pri') is not None:
-                self.max_low_pri_nodes = cluster_configuration.get('size_low_pri')
+            if cluster_configuration.get('size_low_priority') is not None:
+                self.max_low_pri_nodes = cluster_configuration.get('size_low_priority')
             self.custom_scripts = cluster_configuration.get('custom_scripts')
             self.subnet_id = cluster_configuration.get('subnet_id')
             self.worker_on_master = cluster_configuration.get("worker_on_master")

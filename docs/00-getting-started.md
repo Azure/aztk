@@ -47,12 +47,11 @@ To finish setting up, you need to fill out your Azure Batch and Azure Storage se
 
 Please note that if you use ssh keys and a have a non-standard ssh key file name or path, you will need to specify the location of your ssh public and private keys. To do so, set them as shown below:
 ```yaml
-default:
-    # SSH keys used to create a user and connect to a server.
-    # The public key can either be the public key itself(ssh-rsa ...) or the path to the ssh key.
-    # The private key must be the path to the key.
-    ssh_pub_key: ~/.ssh/my-public-key.pub
-    ssh_priv_key: ~/.ssh/my-private-key
+# SSH keys used to create a user and connect to a server.
+# The public key can either be the public key itself(ssh-rsa ...) or the path to the ssh key.
+# The private key must be the path to the key.
+ssh_pub_key: ~/.ssh/my-public-key.pub
+ssh_priv_key: ~/.ssh/my-private-key
 ```
 
 0. Log into Azure

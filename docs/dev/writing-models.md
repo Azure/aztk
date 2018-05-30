@@ -6,57 +6,50 @@ In `aztk/models` create a new file with the name of your model `my_model.py`
 
 In `aztk/models/__init__.py` add `from .my_model import MyModel`
 
-Create a new class `MyModel` that inherit `ConfigurationBase`
+Create a new class `MyModel` that inherit `Modle`
 ```python
-from aztk.internal import ConfigurationBase
+from aztk.core.models import Model, fields
 
-class MyModel(ConfigurationBase):
+class MyModel(Model):
     """
     MyModel is an sample model
 
     Args:
         input1 (str): This is the first input
     """
-    def __init__(self, input1: str):
-        self.input1 = input1
 
-    def validate(self):
+    input1 = fields.String()
+
+    def __validate__(self):
         pass
 
 ```
 
+### Available fields types
+
+Check `aztk/core/models/fields.py` for the sources
+
+* `Field`: Base field class
+* `String`: Field that validate it is given a string
+* `Integer`: Field that validate it is given a int
+* `Float`: Field that validate it is given a float
+* `Boolean`: Field that validate it is given a boolean
+* `List`: Field that validate it is given a list and can also automatically convert entries to the given model type.
+* `Model`: Field that map to another model. If passed a dict it will automatically try to convert to the Model type
+* `Enum`: Field which value should be an enum. It will convert automatically to the enum if given the value.
+
 ## Add validation
+The fields provide basic validation automatically. A field without a default will be marked as required.
 
-In `def validate` do any kind of checks and raise a `InvalidModelError` if there is any problems with the values
-
-### Validate required
-To validate required attributes call the parent `_validate_required` method. Method takes a list of attributes which should not be None
+To provide model wide validation implement a `__validate__` method  and raise a `InvalidModelError` if there is any problems with the values
 
 ```python
-def validate(self) -> bool:
-    self._validate_required(["input1"])
-```
-
-### Custom validation
-```python
-    def validate(self) -> bool:
-        if "foo" in self.input1:
-            raise InvalidModelError("foo cannot be in input1")
+def __validate__(self):
+    if 'secret' in self.input1:
+        raise InvalidModelError("Input1 contains secrets")
 
 ```
 
 ## Convert dict to model
 
-When inheriting from `ConfigurationBase` it comes with a `from_dict` class method which allows to convert a dict to this class
-It works great for simple case where values are simple types(str, int, etc). If however you need to process it you can override the `_from_dict` method.
-
-** Important: Do not override the `from_dict` method as this one will handle error and display them nicely **
-
-```python
-@classmethod
-def _from_dict(cls, args: dict):
-    if "input1" in args:
-        args["input1"] = MyInput1Model.from_dict(args["input1"])
-
-    return super()._from_dict(args)
-```
+When inheriting from `Model` it comes with a `from_dict` class method which allows to convert a dict to this class

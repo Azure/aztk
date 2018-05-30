@@ -46,9 +46,9 @@ class PluginManager:
     def get_args_for(self, cls):
         signature = inspect.signature(cls)
         args = dict()
-
-        for k, v in signature.parameters.items():
-            args[k] = PluginArgument(k, default=v.default, required=v.default is inspect.Parameter.empty)
+        for key, param in signature.parameters.items():
+            if param.kind == param.POSITIONAL_OR_KEYWORD or param.kind == param.KEYWORD_ONLY:
+                args[key] = PluginArgument(key, default=param.default, required=param.default is inspect.Parameter.empty)
 
         return args
 

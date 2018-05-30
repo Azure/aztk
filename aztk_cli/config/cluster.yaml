@@ -21,7 +21,7 @@ vm_size: standard_f2
 # size: <number of dedicated nodes in the cluster, not that clusters must contain all dedicated or all low priority nodes>
 size: 2
 
-# size_low_pri: <number of low priority nodes in the cluster, mutually exclusive with size setting>
+# size_low_priority: <number of low priority nodes in the cluster, mutually exclusive with size setting>
 
 
 # username: <username for the linux user to be created> (optional)

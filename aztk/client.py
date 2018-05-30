@@ -90,7 +90,7 @@ class Client:
             network_conf = batch_models.NetworkConfiguration(
                 subnet_id=cluster_conf.subnet_id)
         auto_scale_formula = "$TargetDedicatedNodes={0}; $TargetLowPriorityNodes={1}".format(
-            cluster_conf.vm_count, cluster_conf.vm_low_pri_count)
+            cluster_conf.size, cluster_conf.size_low_priority)
 
         # Confiure the pool
         pool = batch_models.PoolAddParameter(
@@ -110,7 +110,7 @@ class Client:
                 batch_models.MetadataItem(
                     name=constants.AZTK_SOFTWARE_METADATA_KEY, value=software_metadata_key),
                 batch_models.MetadataItem(
-                        name=constants.AZTK_MODE_METADATA_KEY, value=constants.AZTK_CLUSTER_MODE_METADATA)
+                    name=constants.AZTK_MODE_METADATA_KEY, value=constants.AZTK_CLUSTER_MODE_METADATA)
             ])
 
         # Create the pool + create user for the pool

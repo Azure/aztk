@@ -13,11 +13,6 @@ from aztk.spark.helpers import cluster_diagnostic_helper
 from aztk.spark.utils import util
 from aztk.internal.cluster_data import NodeData
 
-
-DEFAULT_CLUSTER_CONFIG = models.ClusterConfiguration(
-    worker_on_master=True,
-)
-
 class Client(BaseClient):
     """
     Aztk Spark Client
@@ -29,7 +24,7 @@ class Client(BaseClient):
     def __init__(self, secrets_config):
         super().__init__(secrets_config)
 
-    def create_cluster(self, configuration: models.ClusterConfiguration, wait: bool = False):
+    def create_cluster(self, cluster_conf: models.ClusterConfiguration, wait: bool = False):
         """
         Create a new aztk spark cluster
 
@@ -40,10 +35,8 @@ class Client(BaseClient):
         Returns:
             aztk.spark.models.Cluster
         """
-        cluster_conf = models.ClusterConfiguration()
-        cluster_conf.merge(DEFAULT_CLUSTER_CONFIG)
-        cluster_conf.merge(configuration)
         cluster_conf.validate()
+
         cluster_data = self._get_cluster_data(cluster_conf.cluster_id)
         try:
             zip_resource_files = None

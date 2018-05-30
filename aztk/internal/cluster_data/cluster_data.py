@@ -1,9 +1,13 @@
 import io
 import logging
-import yaml
+
 import azure.common
-from .node_data import NodeData
+import yaml
+
+from aztk.models import ClusterConfiguration
+
 from .blob_data import BlobData
+from .node_data import NodeData
 
 
 class ClusterData:

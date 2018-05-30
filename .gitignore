@@ -49,3 +49,6 @@ tmp/
 
 # Built docs
 docs/_build/
+
+# PyCharm
+.idea/

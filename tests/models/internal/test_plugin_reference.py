@@ -1,6 +1,6 @@
 import pytest
 
-from aztk.error import AztkError
+from aztk.error import AztkError, AztkAttributeError
 from aztk.models.plugins.internal import PluginReference, PluginTarget, PluginTargetRole
 
 
@@ -19,7 +19,7 @@ def test_from_dict():
 
 
 def test_from_dict_invalid_param():
-    with pytest.raises(AztkError):
+    with pytest.raises(AztkAttributeError):
         PluginReference.from_dict(dict(
             name2="invalid"
         ))

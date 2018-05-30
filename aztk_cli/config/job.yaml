@@ -8,7 +8,7 @@ job:
     cluster_configuration:
         vm_size: standard_d2_v2
         size: 2
-        size_low_pri: 0
+        size_low_priority: 0
         subnet_id:
         # Toolkit configuration [Required]
         toolkit:

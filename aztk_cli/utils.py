@@ -3,6 +3,7 @@ import getpass
 import sys
 import threading
 import time
+import yaml
 from subprocess import call
 from typing import List
 import azure.batch.models as batch_models
@@ -420,14 +421,12 @@ def utc_to_local(utc_dt):
 
 def print_cluster_conf(cluster_conf: ClusterConfiguration, wait: bool):
     user_configuration = cluster_conf.user_configuration
-
     log.info("-------------------------------------------")
     log.info("cluster id:              %s", cluster_conf.cluster_id)
-    log.info("cluster toolkit:         %s %s", cluster_conf.toolkit.software,  cluster_conf.toolkit.version)
-    log.info("cluster size:            %s",
-             cluster_conf.vm_count + cluster_conf.vm_low_pri_count)
-    log.info(">        dedicated:      %s", cluster_conf.vm_count)
-    log.info(">     low priority:      %s", cluster_conf.vm_low_pri_count)
+    log.info("cluster toolkit:         %s %s", cluster_conf.toolkit.software, cluster_conf.toolkit.version)
+    log.info("cluster size:            %s", cluster_conf.size + cluster_conf.size_low_priority)
+    log.info(">        dedicated:      %s", cluster_conf.size)
+    log.info(">     low priority:      %s", cluster_conf.size_low_priority)
     log.info("cluster vm size:         %s", cluster_conf.vm_size)
     log.info("custom scripts:          %s", len(cluster_conf.custom_scripts) if cluster_conf.custom_scripts else 0)
     log.info("subnet ID:               %s", cluster_conf.subnet_id)

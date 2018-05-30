@@ -56,7 +56,7 @@ Jobs also require a definition of the cluster on which the Applications will run
 ```
 _Please Note: For more information about Azure VM sizes, see [Azure Batch Pricing](https://azure.microsoft.com/en-us/pricing/details/batch/). And for more information about Docker repositories see [Docker](./12-docker-iamge.html)._
 
-_The only required fields are vm_size and either size or size_low_pri, all other fields can be left blank or removed._
+_The only required fields are vm_size and either size or size_low_priority, all other fields can be left blank or removed._
 
 A Job definition may also include a default Spark Configuration. The following are the properties to define a Spark Configuration:
 ```yaml

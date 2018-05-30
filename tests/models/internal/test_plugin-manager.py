@@ -8,9 +8,8 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 fake_plugin_dir = os.path.join(dir_path, "fake_plugins")
 
 
-class RequiredArgPlugin(PluginConfiguration):
-    def __init__(self, req_arg):
-        super().__init__(name="required-arg")
+def RequiredArgPlugin(req_arg):
+    return PluginConfiguration(name="required-arg")
 
 
 def test_missing_plugin():

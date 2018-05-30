@@ -29,7 +29,7 @@ def setup_parser(parser: argparse.ArgumentParser):
 
     parser.add_argument('--no-wait', dest='wait', action='store_false')
     parser.add_argument('--wait', dest='wait', action='store_true')
-    parser.set_defaults(wait=None, size=None, size_low_pri=None)
+    parser.set_defaults(wait=None, size=None, size_low_priority=None)
 
 
 def execute(args: typing.NamedTuple):
@@ -42,8 +42,8 @@ def execute(args: typing.NamedTuple):
     cluster_conf.merge(file_config)
     cluster_conf.merge(ClusterConfiguration(
         cluster_id=args.cluster_id,
-        vm_count=args.size,
-        vm_low_pri_count=args.size_low_pri,
+        size=args.size,
+        size_low_priority=args.size_low_priority,
         vm_size=args.vm_size,
         subnet_id=args.subnet_id,
         user_configuration=UserConfiguration(
@@ -71,6 +71,7 @@ def execute(args: typing.NamedTuple):
     else:
         cluster_conf.user_configuration = None
 
+    cluster_conf.validate()
     utils.print_cluster_conf(cluster_conf, wait)
     with utils.Spinner():
         # create spark cluster

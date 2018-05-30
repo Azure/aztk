@@ -1,14 +1,14 @@
 import os
 
 from aztk.error import InvalidModelError
-from aztk.internal import ConfigurationBase
+from aztk.core.models import Model, fields
 from aztk.models import PluginConfiguration
 from aztk.models.plugins import PluginFile, PluginTarget, PluginTargetRole
 
 from .plugin_manager import plugin_manager
 
 
-class PluginReference(ConfigurationBase):
+class PluginReference(Model):
     """
     Contains the configuration to use a plugin
 
@@ -20,27 +20,12 @@ class PluginReference(ConfigurationBase):
         target_role (PluginTargetRole): Target role default to All nodes. This can only be used if providing a script
         args: (dict): If using name this is the arguments to pass to the plugin
     """
-    def __init__(self,
-                 name: str = None,
-                 script: str = None,
-                 target: PluginTarget = None,
-                 target_role: PluginTargetRole = None,
-                 args: dict = None):
-        super().__init__()
-        self.name = name
-        self.script = script
-        self.target = target
-        self.target_role = target_role
-        self.args = args or dict()
 
-    @classmethod
-    def _from_dict(cls, args: dict):
-        if "target" in args:
-            args["target"] = PluginTarget(args["target"])
-        if "target_role" in args:
-            args["target_role"] = PluginTargetRole(args["target_role"])
-
-        return super()._from_dict(args)
+    name = fields.String(default=None)
+    script = fields.String(default=None)
+    target = fields.Enum(PluginTarget, default=None)
+    target_role = fields.Enum(PluginTargetRole, default=None)
+    args = fields.String(default=None)
 
     def get_plugin(self) -> PluginConfiguration:
         self.validate()
@@ -50,7 +35,7 @@ class PluginReference(ConfigurationBase):
 
         return plugin_manager.get_plugin(self.name, self.args)
 
-    def validate(self) -> bool:
+    def __validate__(self):
         if not self.name and not self.script:
             raise InvalidModelError("Plugin must either specify a name of an existing plugin or the path to a script.")
 

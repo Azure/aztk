@@ -4,6 +4,7 @@ import azure.batch.models as batch_models
 import aztk.models
 from aztk import error
 from aztk.utils import constants, helpers
+from aztk.core.models import Model, fields
 
 class SparkToolkit(aztk.models.Toolkit):
     def __init__(self, version: str, environment: str = None, environment_version: str = None):
@@ -53,12 +54,14 @@ class File(aztk.models.File):
     pass
 
 
-class SparkConfiguration():
-    def __init__(self, spark_defaults_conf=None, spark_env_sh=None, core_site_xml=None, jars=None):
-        self.spark_defaults_conf = spark_defaults_conf
-        self.spark_env_sh = spark_env_sh
-        self.core_site_xml = core_site_xml
-        self.jars = jars
+class SparkConfiguration(Model):
+    spark_defaults_conf = fields.String()
+    spark_env_sh = fields.String()
+    core_site_xml = fields.String()
+    jars = fields.List()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.ssh_key_pair = self.__generate_ssh_key_pair()
 
     def __generate_ssh_key_pair(self):
@@ -96,37 +99,8 @@ class PluginConfiguration(aztk.models.PluginConfiguration):
 
 
 class ClusterConfiguration(aztk.models.ClusterConfiguration):
-    def __init__(
-            self,
-            custom_scripts: List[CustomScript] = None,
-            file_shares: List[FileShare] = None,
-            cluster_id: str = None,
-            vm_count=0,
-            vm_low_pri_count=0,
-            vm_size=None,
-            subnet_id=None,
-            toolkit: SparkToolkit = None,
-            user_configuration: UserConfiguration = None,
-            spark_configuration: SparkConfiguration = None,
-            worker_on_master: bool = None):
-        super().__init__(
-            custom_scripts=custom_scripts,
-            cluster_id=cluster_id,
-            vm_count=vm_count,
-            vm_low_pri_count=vm_low_pri_count,
-            vm_size=vm_size,
-            toolkit=toolkit,
-            subnet_id=subnet_id,
-            file_shares=file_shares,
-            user_configuration=user_configuration,
-        )
-        self.spark_configuration = spark_configuration
-        self.worker_on_master = worker_on_master
-
-    def merge(self, other):
-        super().merge(other)
-        self._merge_attributes(other, ["spark_configuration", "worker_on_master"])
-
+    spark_configuration = fields.Model(SparkConfiguration, default=None)
+    worker_on_master = fields.Boolean(default=True)
 
 class SecretsConfiguration(aztk.models.SecretsConfiguration):
     pass
@@ -234,8 +208,8 @@ class JobConfiguration:
             custom_scripts=self.custom_scripts,
             toolkit=self.toolkit,
             vm_size=self.vm_size,
-            vm_count=self.max_dedicated_nodes,
-            vm_low_pri_count=self.max_low_pri_nodes,
+            size=self.max_dedicated_nodes,
+            size_low_priority=self.max_low_pri_nodes,
             subnet_id=self.subnet_id,
             worker_on_master=self.worker_on_master,
             spark_configuration=self.spark_configuration,
