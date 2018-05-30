@@ -4,6 +4,8 @@ from install import pick_master, spark, scripts, create_user, plugins, spark_con
 import wait_until_master_selected
 from aztk.models.plugins import PluginTarget
 from aztk.internal import cluster_data
+from .node_scheduling import setup_node_scheduling
+
 
 def read_cluster_config():
     data = cluster_data.ClusterData(config.blob_client, config.cluster_id)
@@ -40,6 +42,8 @@ def setup_host(docker_repo: str):
     os.environ["AZTK_MASTER_IP"] = master_node.ip_address
 
     cluster_conf = read_cluster_config()
+
+    setup_node_scheduling(client, cluster_conf, is_master)
 
     #TODO pass azure file shares
     spark_container.start_spark_container(

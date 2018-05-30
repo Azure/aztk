@@ -1,7 +1,8 @@
 import pytest
 
-from aztk.models import ClusterConfiguration, Toolkit, UserConfiguration
+from aztk.models import ClusterConfiguration, Toolkit, UserConfiguration, SchedulingTarget
 from aztk.spark.models.plugins import JupyterPlugin, HDFSPlugin
+from aztk.error import InvalidModelError
 
 def test_vm_count_deprecated():
     with pytest.warns(DeprecationWarning):
@@ -11,6 +12,24 @@ def test_vm_count_deprecated():
     with pytest.warns(DeprecationWarning):
         config = ClusterConfiguration(vm_low_pri_count=10)
         assert config.size_low_priority == 10
+
+    with pytest.warns(DeprecationWarning):
+        config = ClusterConfiguration(size=10)
+        assert config.vm_count == 10
+
+    with pytest.warns(DeprecationWarning):
+        config = ClusterConfiguration(size_low_priority=10)
+        assert config.vm_low_pri_count == 10
+
+    with pytest.warns(DeprecationWarning):
+        config = ClusterConfiguration(size=10)
+        config.vm_count = 20
+        assert config.size == 20
+
+    with pytest.warns(DeprecationWarning):
+        config = ClusterConfiguration(size_low_priority=10)
+        config.vm_low_pri_count = 20
+        assert config.size_low_priority == 20
 
 def test_size_none():
     config = ClusterConfiguration(size=None, size_low_priority=2)
@@ -59,3 +78,16 @@ def test_cluster_configuration():
     assert len(config.plugins) == 2
     assert config.plugins[0].name == 'jupyter'
     assert config.plugins[1].name == 'hdfs'
+
+def test_scheduling_target_dedicated_with_no_dedicated_nodes_raise_error():
+    with pytest.raises(InvalidModelError, match="Scheduling target cannot be Dedicated if dedicated vm size is 0"):
+        conf = ClusterConfiguration(
+            cluster_id="abc",
+            scheduling_target=SchedulingTarget.Dedicated,
+            vm_size="standard_a2",
+            vm_count=0,
+            vm_low_pri_count=2,
+            toolkit=Toolkit(software="spark", version="1.6.3"),
+        )
+
+        conf.validate()

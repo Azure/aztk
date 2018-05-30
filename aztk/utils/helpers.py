@@ -20,7 +20,7 @@ _STANDARD_OUT_FILE_NAME = 'stdout.txt'
 _STANDARD_ERROR_FILE_NAME = 'stderr.txt'
 
 
-def is_gpu_enabled(vm_size):
+def is_gpu_enabled(vm_size: str):
     return bool(re.search('nv|nc', vm_size, flags=re.IGNORECASE))
 
 

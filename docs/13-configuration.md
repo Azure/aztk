@@ -45,6 +45,9 @@ plugins:
 # Allow master node to also be a worker <true/false> (Default: true)
 # worker_on_master: true
 
+# Where do you want to run the driver <dedicated/master/any> (Default: dedicated if at least one dedicated node or any otherwise)
+# scheduling_target: dedicated
+
 # wait: <true/false>
 wait: true
 ```

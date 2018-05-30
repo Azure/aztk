@@ -21,7 +21,7 @@ def deprecated(reason: str = None):
 
         @functools.wraps(func)
         def new_func(*args, **kwargs):
-            deprecate(msg.format(func.__name__, reason))
+            deprecate(msg.format(name=func.__name__, reason=reason))
             return func(*args, **kwargs)
         return new_func
 

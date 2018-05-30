@@ -1,10 +1,9 @@
 import argparse
-import time
 import typing
 
 import aztk.spark
-from aztk_cli import config, log, utils
-from aztk_cli.config import JobConfig, load_aztk_spark_config
+from aztk_cli import config
+from aztk_cli.config import JobConfig
 
 
 def setup_parser(parser: argparse.ArgumentParser):
@@ -44,7 +43,8 @@ def execute(args: typing.NamedTuple):
         max_dedicated_nodes=job_conf.max_dedicated_nodes,
         max_low_pri_nodes=job_conf.max_low_pri_nodes,
         subnet_id=job_conf.subnet_id,
-        worker_on_master=job_conf.worker_on_master
+        worker_on_master=job_conf.worker_on_master,
+        scheduling_target=job_conf.scheduling_target,
     )
 
     #TODO: utils.print_job_conf(job_configuration)

@@ -4,6 +4,7 @@ import logging
 import azure.batch.batch_service_client as batch
 import azure.storage.blob as blob
 import azure.batch.batch_auth as batchauth
+from core import log
 from azure.common.credentials import ServicePrincipalCredentials
 from azure.mgmt.batch import BatchManagementClient
 from azure.mgmt.storage import StorageManagementClient
@@ -28,7 +29,7 @@ storage_resource_id = os.environ.get("SP_STORAGE_RESOURCE_ID")
 cluster_id = os.environ.get("AZTK_CLUSTER_ID")
 pool_id = os.environ["AZ_BATCH_POOL_ID"]
 node_id = os.environ["AZ_BATCH_NODE_ID"]
-is_dedicated = os.environ["AZ_BATCH_NODE_IS_DEDICATED"]
+is_dedicated = os.environ["AZ_BATCH_NODE_IS_DEDICATED"] == "true"
 
 spark_web_ui_port = os.environ["SPARK_WEB_UI_PORT"]
 spark_worker_ui_port = os.environ["SPARK_WORKER_UI_PORT"]
@@ -87,7 +88,7 @@ def get_batch_client() -> batch.BatchServiceClient:
 batch_client = get_batch_client()
 blob_client = get_blob_client()
 
-logging.info("Pool id is %s", pool_id)
-logging.info("Node id is %s", node_id)
-logging.info("Batch account name %s", batch_account_name)
-logging.info("Is dedicated %s", is_dedicated)
+log.info("Pool id is %s", pool_id)
+log.info("Node id is %s", node_id)
+log.info("Batch account name %s", batch_account_name)
+log.info("Is dedicated %s", is_dedicated)

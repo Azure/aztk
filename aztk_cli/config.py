@@ -4,6 +4,7 @@ import aztk.spark
 from aztk.spark.models import (
     SecretsConfiguration,
     ClusterConfiguration,
+    SchedulingTarget,
 )
 from aztk.utils import deprecate
 from aztk.models import Toolkit
@@ -182,6 +183,7 @@ class JobConfig():
         self.core_site_xml = None
         self.subnet_id = None
         self.worker_on_master = None
+        self.scheduling_target = None
 
     def _merge_dict(self, config):
         config = config.get('job')
@@ -200,6 +202,10 @@ class JobConfig():
             self.custom_scripts = cluster_configuration.get('custom_scripts')
             self.subnet_id = cluster_configuration.get('subnet_id')
             self.worker_on_master = cluster_configuration.get("worker_on_master")
+            scheduling_target = cluster_configuration.get("scheduling_target")
+            if scheduling_target:
+                self.scheduling_target = SchedulingTarget(scheduling_target)
+
 
         applications = config.get('applications')
         if applications:

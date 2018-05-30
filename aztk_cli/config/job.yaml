@@ -22,6 +22,8 @@ job:
           # Optional docker repository(To bring your custom docker image. Just specify the Toolkit software, version and environemnt if using default images)
           # docker_repo: <name of docker image repo (for more information, see https://github.com/Azure/aztk/blob/master/docs/12-docker-image.md)>
 
+        # Where do you want to run the driver <dedicated/master/any> (Default: dedicated if at least one dedicated node or any otherwise)
+        # scheduling_target: dedicated
 
     spark_configuration:
         spark_defaults_conf: .aztk/spark-defaults.conf

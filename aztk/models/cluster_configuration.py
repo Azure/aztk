@@ -1,13 +1,13 @@
 import aztk.error as error
 from aztk.core.models import Model, fields
-from aztk.utils import deprecate, helpers
+from aztk.utils import deprecated,deprecate, helpers
 
 from .custom_script import CustomScript
 from .file_share import FileShare
 from .plugins import PluginConfiguration
 from .toolkit import Toolkit
 from .user_configuration import UserConfiguration
-
+from .scheduling_target import SchedulingTarget
 
 class ClusterConfiguration(Model):
     """
@@ -37,6 +37,7 @@ class ClusterConfiguration(Model):
     custom_scripts = fields.List(CustomScript)
     file_shares = fields.List(FileShare)
     user_configuration = fields.Model(UserConfiguration, default=None)
+    scheduling_target = fields.Enum(SchedulingTarget, default=None)
 
     def __init__(self, *args, **kwargs):
         if 'vm_count' in kwargs:
@@ -48,6 +49,26 @@ class ClusterConfiguration(Model):
             kwargs['size_low_priority'] = kwargs.pop('vm_low_pri_count')
 
         super().__init__(*args, **kwargs)
+
+    @property
+    @deprecated()
+    def vm_count(self):
+        return self.size
+
+    @vm_count.setter
+    @deprecated()
+    def vm_count(self, value):
+        self.size = value
+
+    @property
+    @deprecated()
+    def vm_low_pri_count(self):
+        return self.size_low_priority
+
+    @vm_low_pri_count.setter
+    @deprecated()
+    def vm_low_pri_count(self, value):
+        self.size_low_priority = value
 
     def mixed_mode(self) -> bool:
         """
@@ -81,3 +102,6 @@ class ClusterConfiguration(Model):
 
         if self.custom_scripts:
             deprecate("Custom scripts are DEPRECATED and will be removed in 0.8.0. Use plugins instead See https://aztk.readthedocs.io/en/v0.7.0/15-plugins.html")
+
+        if self.scheduling_target == SchedulingTarget.Dedicated and self.vm_count == 0:
+            raise error.InvalidModelError("Scheduling target cannot be Dedicated if dedicated vm size is 0")
