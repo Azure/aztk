@@ -8,14 +8,17 @@ from aztk.error import InvalidModelFieldError, AztkAttributeError
 
 # pylint: disable=C1801
 
+
 class UserState(Enum):
     Creating = "creating"
     Ready = "ready"
     Deleting = "deleting"
 
+
 class UserInfo(Model):
     name = fields.String()
     age = fields.Integer()
+
 
 class User(Model):
     info = fields.Model(UserInfo)
@@ -38,6 +41,7 @@ def test_models():
     assert user.enabled is False
     assert user.state == UserState.Creating
 
+
 def test_inherited_models():
     class ServiceUser(User):
         service = fields.String()
@@ -58,6 +62,7 @@ def test_inherited_models():
     assert user.state == UserState.Ready
     assert user.service == "bus"
 
+
 def test_raise_error_if_extra_parameters():
     class SimpleNameModel(Model):
         name = fields.String()
@@ -65,17 +70,18 @@ def test_raise_error_if_extra_parameters():
     with pytest.raises(AztkAttributeError, match="SimpleNameModel doesn't have an attribute called abc"):
         SimpleNameModel(name="foo", abc="123")
 
+
 def test_enum_invalid_type_raise_error():
     class SimpleStateModel(Model):
         state = fields.Enum(UserState)
 
-
     with pytest.raises(
-        InvalidModelFieldError,
-        match="SimpleStateModel state unknown is not a valid option. Use one of \\['creating', 'ready', 'deleting'\\]"):
+            InvalidModelFieldError,
+            match="SimpleStateModel state unknown is not a valid option. Use one of \\['creating', 'ready', 'deleting'\\]"):
 
         obj = SimpleStateModel(state="unknown")
         obj.validate()
+
 
 def test_enum_parse_string():
     class SimpleStateModel(Model):
@@ -85,7 +91,6 @@ def test_enum_parse_string():
     obj.validate()
 
     assert obj.state == UserState.Creating
-
 
 
 def test_convert_nested_dict_to_model():
@@ -103,6 +108,7 @@ def test_convert_nested_dict_to_model():
     assert user.enabled is False
     assert user.state == UserState.Deleting
 
+
 def test_raise_error_if_missing_required_field():
     class SimpleRequiredModel(Model):
         name = fields.String()
@@ -111,6 +117,7 @@ def test_raise_error_if_missing_required_field():
 
     with pytest.raises(InvalidModelFieldError, match="SimpleRequiredModel name is required"):
         missing.validate()
+
 
 def test_raise_error_if_string_field_invalid_type():
     class SimpleStringModel(Model):
@@ -121,6 +128,7 @@ def test_raise_error_if_string_field_invalid_type():
     with pytest.raises(InvalidModelFieldError, match="SimpleStringModel name 123 should be a string"):
         missing.validate()
 
+
 def test_raise_error_if_int_field_invalid_type():
     class SimpleIntegerModel(Model):
         age = fields.Integer()
@@ -130,6 +138,7 @@ def test_raise_error_if_int_field_invalid_type():
     with pytest.raises(InvalidModelFieldError, match="SimpleIntegerModel age 123 should be an integer"):
         missing.validate()
 
+
 def test_raise_error_if_bool_field_invalid_type():
     class SimpleBoolModel(Model):
         enabled = fields.Boolean()
@@ -138,6 +147,7 @@ def test_raise_error_if_bool_field_invalid_type():
 
     with pytest.raises(InvalidModelFieldError, match="SimpleBoolModel enabled false should be a boolean"):
         missing.validate()
+
 
 def test_merge_with_default_value():
     class SimpleMergeModel(Model):
@@ -164,13 +174,9 @@ def test_merge_nested_model_merge_strategy():
         info=dict(
             name="John",
             age=29,
-        )
+        ),
     )
-    obj2 = ComplexModel(
-        info=dict(
-            age=38,
-        )
-    )
+    obj2 = ComplexModel(info=dict(age=38))
 
     assert obj1.info.age == 29
     assert obj2.info.age == 38
@@ -178,6 +184,7 @@ def test_merge_nested_model_merge_strategy():
     obj1.merge(obj2)
     assert obj1.info.name == "John"
     assert obj1.info.age == 38
+
 
 def test_merge_nested_model_override_strategy():
     class ComplexModel(Model):
@@ -188,13 +195,9 @@ def test_merge_nested_model_override_strategy():
         info=dict(
             name="John",
             age=29,
-        )
+        ),
     )
-    obj2 = ComplexModel(
-        info=dict(
-            age=38,
-        )
-    )
+    obj2 = ComplexModel(info=dict(age=38))
 
     assert obj1.info.age == 29
     assert obj2.info.age == 38
@@ -202,6 +205,7 @@ def test_merge_nested_model_override_strategy():
     obj1.merge(obj2)
     assert obj1.info.name is None
     assert obj1.info.age == 38
+
 
 def test_list_field_convert_model_correctly():
     class UserList(Model):
@@ -212,8 +216,8 @@ def test_list_field_convert_model_correctly():
             dict(
                 name="John",
                 age=29,
-            )
-        ]
+            ),
+        ],
     )
     obj.validate()
 
@@ -222,6 +226,7 @@ def test_list_field_convert_model_correctly():
     assert obj.infos[0].name == "John"
     assert obj.infos[0].age == 29
 
+
 def test_list_field_is_never_required():
     class UserList(Model):
         infos = fields.List(UserInfo)
@@ -229,7 +234,7 @@ def test_list_field_is_never_required():
     obj = UserList()
     obj.validate()
 
-    assert isinstance(obj.infos, (list,))
+    assert isinstance(obj.infos, (list, ))
     assert len(obj.infos) == 0
 
     infos = obj.infos
@@ -237,8 +242,9 @@ def test_list_field_is_never_required():
     assert len(obj.infos) == 1
 
     obj2 = UserList(infos=None)
-    assert isinstance(obj2.infos, (list,))
+    assert isinstance(obj2.infos, (list, ))
     assert len(obj2.infos) == 0
+
 
 def test_list_field_ignore_none_entries():
     class UserList(Model):
@@ -247,8 +253,9 @@ def test_list_field_ignore_none_entries():
     obj = UserList(infos=[None, None])
     obj.validate()
 
-    assert isinstance(obj.infos, (list,))
+    assert isinstance(obj.infos, (list, ))
     assert len(obj.infos) == 0
+
 
 def test_merge_nested_model_append_strategy():
     class UserList(Model):
@@ -259,14 +266,17 @@ def test_merge_nested_model_append_strategy():
             dict(
                 name="John",
                 age=29,
-            )
-        ]
+            ),
+        ],
     )
+
     obj2 = UserList(
-        infos=[dict(
-            name="Frank",
-            age=38,
-        )]
+        infos=[
+            dict(
+                name="Frank",
+                age=38,
+            ),
+        ],
     )
 
     assert len(obj1.infos) == 1
@@ -295,6 +305,7 @@ def test_serialize_simple_model_to_yaml():
     assert isinstance(info_parsed, UserInfo)
     assert info_parsed.name == "John"
     assert info_parsed.age == 29
+
 
 def test_serialize_nested_model_to_yaml():
     user = User(

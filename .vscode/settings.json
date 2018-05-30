@@ -12,9 +12,6 @@
     "${workspaceRoot}/node_scripts"
   ],
   "python.formatting.provider": "yapf",
-  "python.formatting.yapfArgs": [
-    "--style=.style.yapf"
-  ],
   "python.venvPath": "${workspaceFolder}/.venv/",
   "python.pythonPath": "${workspaceFolder}/.venv/Scripts/python.exe",
   "python.unitTest.pyTestEnabled": true

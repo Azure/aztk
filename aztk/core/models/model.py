@@ -68,7 +68,7 @@ class Model(metaclass=ModelMeta):
         """
         For pickle serialization. This update the current model with the given state
         """
-        self._update(state)
+        self._update(state, ignore_missing=True)
 
     def validate(self):
         """
@@ -110,9 +110,13 @@ class Model(metaclass=ModelMeta):
     def __str__(self):
         return yaml.dump(self.to_dict(), default_flow_style=False)
 
-    def _update(self, values):
+    def _update(self, values, ignore_missing=False):
         for k, v in values.items():
-            self[k] = v
+            try:
+                self[k] = v
+            except AztkAttributeError as e:
+                if not ignore_missing:
+                    raise e
 
     def _process_field_error(self, e: InvalidModelFieldError, field: str):
         if not e.field:

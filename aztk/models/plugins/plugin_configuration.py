@@ -30,16 +30,17 @@ class PluginPort(Model):
     public = fields.Field(default=None)
     name = fields.Integer()
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.expose_publicly = bool(self.public)
-        self.public_port = None
+    @property
+    def expose_publicly(self):
+        return bool(self.public)
+
+    @property
+    def public_port(self):
         if self.expose_publicly:
             if self.public is True:
-                self.public_port = self.internal
-            else:
-                self.public_port = self.public
-
+                return self.internal
+            return self.public
+        return None
 
 class PluginConfiguration(Model):
     """
