@@ -142,7 +142,7 @@ class Client(BaseClient):
             master_node_id = cluster.master_node_id
             if not master_node_id:
                 raise error.ClusterNotReadyError("The master has not yet been picked, a user cannot be added.")
-            self.__create_user(cluster.id, master_node_id, username, password, ssh_key)
+            self.__create_user_on_pool(username, cluster.id, cluster.nodes, ssh_key, password)
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 

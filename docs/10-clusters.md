@@ -96,7 +96,7 @@ The file will be securely copied to each node using SFTP.
 
 ### Interactive Mode
 
-All other interaction with the cluster is done via SSH and SSH tunneling. If you didn't create a user during cluster create (`aztk spark cluster create`), the first step is to enable to add a user to the master node.
+All other interaction with the cluster is done via SSH and SSH tunneling. If you didn't create a user during cluster create (`aztk spark cluster create`), the first step is to add a user to each node in the cluster.
 
 Make sure that the *.aztk/secrets.yaml* file has your SSH key (or path to the SSH key), and it will automatically use it to make the SSH connection.
 

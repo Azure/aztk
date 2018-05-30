@@ -162,7 +162,7 @@ class Client:
             :param password: password of the user to add
             :param ssh_key: ssh_key of the user to add
         """
-        # Create new ssh user for the master node
+        # Create new ssh user for the given node
         self.batch_client.compute_node.add_user(
             pool_id,
             node_id,
@@ -184,7 +184,6 @@ class Client:
         # Delete a user on the given node
         self.batch_client.compute_node.delete_user(pool_id, node_id, username)
 
-
     def __get_remote_login_settings(self, pool_id: str, node_id: str):
         """
         Get the remote_login_settings for node
@@ -196,19 +195,17 @@ class Client:
             pool_id, node_id)
         return models.RemoteLogin(ip_address=result.remote_login_ip_address, port=str(result.remote_login_port))
 
-    def __create_user_on_node(self, username, pool_id, node_id, ssh_key):
+    def __create_user_on_node(self, username, pool_id, node_id, ssh_key=None, password=None):
         try:
-            self.__create_user(pool_id=pool_id, node_id=node_id, username=username, ssh_key=ssh_key)
+            self.__create_user(pool_id=pool_id, node_id=node_id, username=username, ssh_key=ssh_key, password=password)
         except batch_error.BatchErrorException as error:
             try:
                 self.__delete_user(pool_id, node_id, username)
                 self.__create_user(pool_id=pool_id, node_id=node_id, username=username, ssh_key=ssh_key)
             except batch_error.BatchErrorException as error:
-                print(error)
                 raise error
-        return ssh_key
 
-    def __create_user_on_pool(self, username, pool_id, nodes):
+    def __generate_user_on_pool(self, username, pool_id, nodes):
         ssh_key = RSA.generate(2048)
         ssh_pub_key = ssh_key.publickey().exportKey('OpenSSH').decode('utf-8')
         with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -220,11 +217,20 @@ class Client:
             concurrent.futures.wait(futures)
         return ssh_key
 
+    def __create_user_on_pool(self, username, pool_id, nodes, ssh_pub_key=None, password=None):
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            futures = {executor.submit(self.__create_user_on_node,
+                                       username,
+                                       pool_id,
+                                       node.id,
+                                       ssh_pub_key,
+                                       password): node for node in nodes}
+            concurrent.futures.wait(futures)
+
     def __delete_user_on_pool(self, username, pool_id, nodes):
         with concurrent.futures.ThreadPoolExecutor() as exector:
             futures = [exector.submit(self.__delete_user, pool_id, node.id, username) for node in nodes]
             concurrent.futures.wait(futures)
-
 
     def __cluster_run(self, cluster_id, command, internal, container_name=None, timeout=None):
         pool, nodes = self.__get_pool_details(cluster_id)
@@ -234,13 +240,17 @@ class Client:
         else:
             cluster_nodes = [(node, self.__get_remote_login_settings(pool.id, node.id)) for node in nodes]
         try:
-            ssh_key = self.__create_user_on_pool('aztk', pool.id, nodes)
-            output = asyncio.get_event_loop().run_until_complete(ssh_lib.clus_exec_command(command,
-                                                                                           'aztk',
-                                                                                           cluster_nodes,
-                                                                                           ssh_key=ssh_key.exportKey().decode('utf-8'),
-                                                                                           container_name=container_name,
-                                                                                           timeout=timeout))
+            ssh_key = self.__generate_user_on_pool('aztk', pool.id, nodes)
+            output = asyncio.get_event_loop().run_until_complete(
+                ssh_lib.clus_exec_command(
+                    command,
+                    'aztk',
+                    cluster_nodes,
+                    ssh_key=ssh_key.exportKey().decode('utf-8'),
+                    container_name=container_name,
+                    timeout=timeout
+                )
+            )
             return output
         except OSError as exc:
             raise exc
@@ -255,16 +265,19 @@ class Client:
         else:
             cluster_nodes = [(node, self.__get_remote_login_settings(pool.id, node.id)) for node in nodes]
         try:
-            ssh_key = self.__create_user_on_pool('aztk', pool.id, nodes)
+            ssh_key = self.__generate_user_on_pool('aztk', pool.id, nodes)
             output = asyncio.get_event_loop().run_until_complete(
-                ssh_lib.clus_copy(container_name=container_name,
-                                  username='aztk',
-                                  nodes=cluster_nodes,
-                                  source_path=source_path,
-                                  destination_path=destination_path,
-                                  ssh_key=ssh_key.exportKey().decode('utf-8'),
-                                  get=get,
-                                  timeout=timeout))
+                ssh_lib.clus_copy(
+                    container_name=container_name,
+                    username='aztk',
+                    nodes=cluster_nodes,
+                    source_path=source_path,
+                    destination_path=destination_path,
+                    ssh_key=ssh_key.exportKey().decode('utf-8'),
+                    get=get,
+                    timeout=timeout
+                )
+            )
             return output
         except (OSError, batch_error.BatchErrorException) as exc:
             raise exc
