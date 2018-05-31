@@ -97,17 +97,16 @@ def __cluster_install_cmd(zip_resource_file: batch_models.ResourceFile,
             ))
 
     setup = [
-        'apt-get -y clean',
-        'apt-get -y update',
-        'apt-get install --fix-missing',
-        'apt-get -y install unzip',
-        'unzip -o $AZ_BATCH_TASK_WORKING_DIR/{0}'.format(
-            zip_resource_file.file_path),
-        'chmod 777 $AZ_BATCH_TASK_WORKING_DIR/aztk/node_scripts/setup_host.sh',
+        'time('\
+            'apt-get -y update;'\
+            'apt-get -y --no-install-recommends install unzip;'\
+            'unzip -o $AZ_BATCH_TASK_WORKING_DIR/{0};'\
+            'chmod 777 $AZ_BATCH_TASK_WORKING_DIR/aztk/node_scripts/setup_host.sh;'\
+        ') 2>&1'.format(zip_resource_file.file_path),
         '/bin/bash $AZ_BATCH_TASK_WORKING_DIR/aztk/node_scripts/setup_host.sh {0} {1}'.format(
             constants.DOCKER_SPARK_CONTAINER_NAME,
             docker_repo,
-        ),
+        )
     ]
 
     commands = shares + setup
