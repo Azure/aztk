@@ -449,3 +449,14 @@ def print_cluster_conf(cluster_conf: ClusterConfiguration, wait: bool):
 def log_property(label: str, value: str):
     label += ":"
     log.info("{0:30} {1}".format(label, value))
+
+
+def log_execute_result(node_id, result):
+    log.info("-" * (len(node_id) + 4))
+    log.info("| %s |", node_id)
+    log.info("-" * (len(node_id) + 4))
+    if isinstance(result, Exception):
+        log.info("%s\n", result)
+    else:
+        for line in result:
+            print(line)

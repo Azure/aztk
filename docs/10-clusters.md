@@ -86,6 +86,14 @@ aztk spark cluster run --id <your_cluster_id> "<command>"
 
 The command is executed through an SSH tunnel.
 
+### Run a command on a specific node in the cluster
+To run a command on all nodes in the cluster, run:
+```sh
+aztk spark cluster run --id <your_cluster_id> --node-id <your_node_id> "<command>"
+```
+This command is executed through a SSH tunnel.
+To get the id of nodes in your cluster, run `aztk spark cluster get --id <your_cluster_id>`.
+
 ### Copy a file to all nodes in the cluster
 To securely copy a file to all nodes, run:
 ```sh

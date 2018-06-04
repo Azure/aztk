@@ -1,6 +1,10 @@
+import random
+import string
+
+from Cryptodome.Cipher import AES, PKCS1_OAEP
 from Cryptodome.PublicKey import RSA
 from Cryptodome.Random import get_random_bytes
-from Cryptodome.Cipher import AES, PKCS1_OAEP
+
 
 def encrypt_password(ssh_pub_key, password):
     if not password:
@@ -16,3 +20,7 @@ def encrypt_password(ssh_pub_key, password):
     cipher_aes = AES.new(session_key, AES.MODE_EAX)
     ciphertext, tag = cipher_aes.encrypt_and_digest(password.encode())
     return [encrypted_aes_session_key, cipher_aes.nonce, tag, ciphertext]
+
+
+def generate_random_string(charset=string.ascii_uppercase + string.ascii_lowercase, length=16):
+    return ''.join(random.SystemRandom().choice(charset) for _ in range(length))
