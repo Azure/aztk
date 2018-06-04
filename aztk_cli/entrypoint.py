@@ -18,7 +18,6 @@ from . import plugins, toolkit
 def _show_warn(message, *_args):
     log.warning(message)
 
-warnings.showwarning = _show_warn
 
 def main():
     parser = argparse.ArgumentParser(prog=constants.CLI_EXE)
@@ -62,6 +61,7 @@ def parse_common_args(args: NamedTuple):
         logger.setup_logging(True)
         log.debug("Verbose logging enabled")
     else:
+        warnings.showwarning = _show_warn
         logger.setup_logging(False)
 
 
