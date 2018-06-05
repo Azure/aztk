@@ -3,7 +3,7 @@ import os
 import typing
 
 import aztk
-from aztk_cli import config, utils
+from aztk_cli import config, utils, log
 
 
 def setup_parser(parser: argparse.ArgumentParser):
@@ -36,4 +36,4 @@ def execute(args: typing.NamedTuple):
                 with open(os.path.abspath(os.path.expanduser(args.output)), "w", encoding="UTF-8") as f:
                     f.write(app_log.log)
         else:
-            print(app_log.log)
+            log.print(app_log.log)

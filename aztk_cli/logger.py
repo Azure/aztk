@@ -1,10 +1,11 @@
 import logging
 import platform
+import sys
 
 root = logging.getLogger("aztk")
 
 DEFAULT_FORMAT = '%(message)s'
-VERBOSE_FORMAT = '%(asctime)s: %(levelname)s: %(message)s'
+VERBOSE_FORMAT = '[%(asctime)s] [%(filename)s:%(module)s:%(funcName)s:%(lineno)d] %(levelname)s - %(message)s'
 
 
 def add_coloring_to_emit_windows(fn):
@@ -61,6 +62,8 @@ def add_coloring_to_emit_windows(fn):
             color = FOREGROUND_YELLOW | FOREGROUND_INTENSITY
         elif levelno >= 20:
             color = FOREGROUND_GREEN
+        elif levelno >= 19:
+            color = FOREGROUND_WHITE
         elif levelno >= 10:
             color = FOREGROUND_MAGENTA
         else:
@@ -86,6 +89,8 @@ def add_coloring_to_emit_ansi(fn):
             color = '\x1b[33m'  # yellow
         elif levelno >= 20:
             color = '\x1b[32m'  # green
+        elif levelno >= 19:
+            color = '\x1b[0m'   # normal
         elif levelno >= 10:
             color = '\x1b[35m'  # pink
         else:
@@ -104,10 +109,20 @@ else:
     logging.StreamHandler.emit = add_coloring_to_emit_ansi(logging.StreamHandler.emit)
 
 
+logging.PRINT = 19
+logging.addLevelName(logging.PRINT, "PRINT")
+
+def print_level(self, message, *args, **kwargs):
+    self._log(logging.PRINT, message, args, **kwargs)
+
+
 def setup_logging(verbose=False):
     if verbose:
         root.setLevel(logging.DEBUG)
-        logging.basicConfig(format=VERBOSE_FORMAT, datefmt="%Y-%m-%d  %H:%M:%S")
+        logging.basicConfig(format=VERBOSE_FORMAT, datefmt="%Y-%m-%d  %H:%M:%S", stream=sys.stdout)
     else:
-        root.setLevel(logging.INFO)
-        logging.basicConfig(format=DEFAULT_FORMAT)
+        root.setLevel(logging.PRINT)
+        logging.basicConfig(format=DEFAULT_FORMAT, stream=sys.stdout)
+
+    # add custom levels
+    logging.Logger.print = print_level

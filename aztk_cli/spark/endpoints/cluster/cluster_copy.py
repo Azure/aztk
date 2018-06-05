@@ -3,7 +3,7 @@ import sys
 import typing
 
 import aztk.spark
-from aztk_cli import config, utils
+from aztk_cli import config, log, utils
 
 
 def setup_parser(parser: argparse.ArgumentParser):
@@ -35,10 +35,10 @@ def execute(args: typing.NamedTuple):
 
 
 def print_copy_result(node_id, success, err):
-    print("-" * (len(node_id) + 6))
-    print("| ", node_id, " |")
-    print("-" * (len(node_id) + 6))
+    log.print("-" * (len(node_id) + 6))
+    log.print("| %s |", node_id)
+    log.print("-" * (len(node_id) + 6))
     if success:
-        print("Copy successful")
+        log.print("Copy successful")
     else:
-        print(err)
+        log.print(err)

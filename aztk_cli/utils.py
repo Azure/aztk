@@ -4,7 +4,6 @@ import subprocess
 import sys
 import threading
 import time
-import yaml
 from subprocess import call
 from typing import List
 
@@ -131,7 +130,7 @@ def stream_logs(client, cluster_id, application_name):
             application_name=application_name,
             tail=True,
             current_bytes=current_bytes)
-        print(app_logs.log, end="")
+        log.print(app_logs.log)
         if app_logs.application_state == 'completed':
             return app_logs.exit_code
         current_bytes = app_logs.total_bytes
@@ -466,4 +465,4 @@ def log_execute_result(node_id, result):
         log.info("%s\n", result)
     else:
         for line in result:
-            print(line)
+            log.print(line)
