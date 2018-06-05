@@ -1,16 +1,20 @@
 import datetime
 import getpass
+import subprocess
 import sys
 import threading
 import time
 import yaml
 from subprocess import call
 from typing import List
+
 import azure.batch.models as batch_models
+
 from aztk import error, utils
-from aztk.utils import get_ssh_key, helpers
 from aztk.models import ClusterConfiguration
 from aztk.spark import models
+from aztk.utils import get_ssh_key, helpers
+
 from . import log
 
 
@@ -153,6 +157,8 @@ def ssh_in_master(
         :param ports: an list of local and remote ports
         :type ports: [[<local-port>, <remote-port>]]
     """
+    # check if ssh is available, this throws OSError if ssh is not present
+    subprocess.call(["ssh"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     # Get master node id from task (job and task are both named pool_id)
     cluster = client.get_cluster(cluster_id)
@@ -213,6 +219,7 @@ def ssh_in_master(
 
     if connect:
         call(command, shell=True)
+
     return '\n\t{}\n'.format(command)
 
 def print_batch_exception(batch_exception):

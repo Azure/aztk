@@ -147,6 +147,14 @@ Now that you're in, you can change directory to your familiar `$SPARK_HOME`
 cd $SPARK_HOME
 ```
 
+To view the SSH command being called, pass the `--no-connect` flag:
+```
+aztk spark cluster ssh --id spark --no-connect
+```
+
+Note that an SSH tunnel and shell will be opened with the default SSH client if one is present. Otherwise, a pure python SSH tunnel is created to forward the necessary ports. The pure python SSH tunnel will not open a shell.
+
+
 ### Debugging your Spark Cluster
 
 If your cluster is in an unknown or unusbale state, you can debug by running:

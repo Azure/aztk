@@ -8,6 +8,8 @@ from aztk.models import ClusterConfiguration
 from aztk_cli import config, log, utils
 from aztk_cli.config import SshConfig
 
+from aztk.spark.models import PortForwardingSpecification
+
 
 def setup_parser(parser: argparse.ArgumentParser):
     parser.add_argument('--id', dest="cluster_id", help='The unique id of your spark cluster')
@@ -15,6 +17,7 @@ def setup_parser(parser: argparse.ArgumentParser):
     parser.add_argument('--jobui', help='Local port to port spark\'s job UI to')
     parser.add_argument('--jobhistoryui', help='Local port to port spark\'s job history UI to')
     parser.add_argument('-u', '--username', help='Username to spark cluster')
+    parser.add_argument('--password', help='Password for the specified ssh user')
     parser.add_argument('--host', dest="host", action='store_true', help='Connect to the host of the Spark container')
     parser.add_argument('--no-connect', dest="connect", action='store_false',
                         help='Do not create the ssh session. Only print out the command to run.')
@@ -52,7 +55,71 @@ def execute(args: typing.NamedTuple):
     utils.log_property("connect", ssh_conf.connect)
     log.info("-------------------------------------------")
 
-    # get ssh command
+    try:
+        shell_out_ssh(spark_client, ssh_conf)
+    except OSError:
+        # no ssh client is found, falling back to pure python
+        native_python_ssh_into_master(spark_client, cluster, ssh_conf, args.password)
+
+
+def print_plugin_ports(cluster_config: ClusterConfiguration):
+    if cluster_config and cluster_config.plugins:
+        plugins = cluster_config.plugins
+        has_ports = False
+        plugin_ports = {}
+        for plugin in plugins:
+            plugin_ports[plugin.name] = []
+            for port in plugin.ports:
+                if port.expose_publicly:
+                    has_ports = True
+                    plugin_ports[plugin.name].append(port)
+
+        if has_ports:
+            log.info("plugins:")
+
+        for plugin in plugin_ports:
+            if plugin_ports[plugin]:
+                log.info(" %s ", plugin)
+                for port in plugin_ports[plugin]:
+                    label = "    - open"
+                    if port.name:
+                        label += " {}".format(port.name)
+                    url = "{0}{1}".format(http_prefix, port.public_port)
+                    utils.log_property(label, url)
+
+
+def native_python_ssh_into_master(spark_client, cluster, ssh_conf, password):
+    if not ssh_conf.connect:
+        log.warning("No ssh client found, using pure python connection.")
+        return
+
+    configuration = spark_client.get_cluster_config(cluster.id)
+    plugin_ports = []
+    if configuration and configuration.plugins:
+        ports = [
+            PortForwardingSpecification(
+                port.internal,
+                port.public_port) for plugin in configuration.plugins for port in plugin.ports if port.expose_publicly
+        ]
+        plugin_ports.extend(ports)
+
+    print("Press ctrl+c to exit...")
+    spark_client.cluster_ssh_into_master(
+        cluster.id,
+        cluster.master_node_id,
+        ssh_conf.username,
+        ssh_key=None,
+        password=password,
+        port_forward_list=[
+            PortForwardingSpecification(remote_port=8080, local_port=8080),      # web ui
+            PortForwardingSpecification(remote_port=4040, local_port=4040),      # job ui
+            PortForwardingSpecification(remote_port=18080, local_port=18080),    # job history ui
+        ] + plugin_ports,
+        internal=ssh_conf.internal
+    )
+
+
+def shell_out_ssh(spark_client, ssh_conf):
     try:
         ssh_cmd = utils.ssh_in_master(
             client=spark_client,
@@ -75,29 +142,3 @@ def execute(args: typing.NamedTuple):
             raise aztk.error.AztkError("The cluster you are trying to connect to does not exist.")
         else:
             raise
-
-
-def print_plugin_ports(cluster_config: ClusterConfiguration):
-    if cluster_config and cluster_config.plugins:
-        plugins = cluster_config.plugins
-        has_ports = False
-        plugin_ports = {}
-        for plugin in plugins:
-            plugin_ports[plugin.name] = []
-            for port in plugin.ports:
-                if port.expose_publicly:
-                    has_ports = True
-                    plugin_ports[plugin.name].append(port)
-        
-        if has_ports:
-            log.info("plugins:")
-
-        for plugin in plugin_ports:
-            if plugin_ports[plugin]:
-                log.info("  " + plugin)
-                for port in plugin_ports[plugin]:
-                    label = "    - open"
-                    if port.name:
-                        label += " {}".format(port.name)
-                    url = "{0}{1}".format(http_prefix, port.public_port)
-                    utils.log_property(label, url)

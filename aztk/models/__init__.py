@@ -16,4 +16,5 @@ from .vm_image import VmImage
 from .software import Software
 from .cluster import Cluster
 from .scheduling_target import SchedulingTarget
+from .port_forward_specification import PortForwardingSpecification
 from .plugins import *

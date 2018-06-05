@@ -49,6 +49,8 @@ class Cluster(aztk.models.Cluster):
 class RemoteLogin(aztk.models.RemoteLogin):
     pass
 
+class PortForwardingSpecification(aztk.models.PortForwardingSpecification):
+    pass
 
 class File(aztk.models.File):
     pass
@@ -93,6 +95,7 @@ class SharedKeyConfiguration(aztk.models.SharedKeyConfiguration):
 
 class DockerConfiguration(aztk.models.DockerConfiguration):
     pass
+
 
 class PluginConfiguration(aztk.models.PluginConfiguration):
     pass

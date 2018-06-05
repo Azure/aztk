@@ -210,6 +210,12 @@ class Client(BaseClient):
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
+    def cluster_ssh_into_master(self, cluster_id, node_id, username, ssh_key=None, password=None, port_forward_list=None, internal=False):
+        try:
+            self.__ssh_into_node(cluster_id, node_id, username, ssh_key, password, port_forward_list, internal)
+        except batch_error.BatchErrorException as e:
+            raise error.AztkError(helpers.format_batch_exception(e))
+
     '''
         job submission
     '''

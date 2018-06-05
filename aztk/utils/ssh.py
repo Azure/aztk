@@ -3,15 +3,65 @@
 '''
 import asyncio
 import io
+import logging
 import os
 import select
 import socket
 import socketserver as SocketServer
-import sys
+import threading
 from concurrent.futures import ThreadPoolExecutor
 
 from aztk.error import AztkError
-from . import helpers
+
+
+class ForwardServer(SocketServer.ThreadingTCPServer):
+    daemon_threads = True
+    allow_reuse_address = True
+
+# pylint: disable=no-member
+class Handler(SocketServer.BaseRequestHandler):
+    def handle(self):
+        try:
+            channel = self.ssh_transport.open_channel('direct-tcpip',
+                                                      (self.chain_host, self.chain_port),
+                                                      self.request.getpeername())
+        except Exception as e:
+            logging.debug('Incoming request to %s:%d failed: %s', self.chain_host,
+                                                              self.chain_port,
+                                                              repr(e))
+            return
+        if channel is None:
+            logging.debug('Incoming request to %s:%d was rejected by the SSH server.', self.chain_host, self.chain_port)
+            return
+
+        logging.debug('Connected!  Tunnel open %r -> %r -> %r', self.request.getpeername(), channel.getpeername(), (self.chain_host, self.chain_port))
+        while True:
+            r, w, x = select.select([self.request, channel], [], [])
+            if self.request in r:
+                data = self.request.recv(1024)
+                if len(data) == 0:
+                    break
+                channel.send(data)
+            if channel in r:
+                data = channel.recv(1024)
+                if len(data) == 0:
+                    break
+                self.request.send(data)
+
+        peername = self.request.getpeername()
+        channel.close()
+        self.request.close()
+        logging.debug('Tunnel closed from %r', peername)
+
+
+def forward_tunnel(local_port, remote_host, remote_port, transport):
+    class SubHandler(Handler):
+        chain_host = remote_host
+        chain_port = remote_port
+        ssh_transport = transport
+    thread = threading.Thread(target=ForwardServer(('', local_port), SubHandler).serve_forever, daemon=True)
+    thread.start()
+    return thread
 
 
 def connect(hostname,
@@ -37,6 +87,23 @@ def connect(hostname,
         raise AztkError("Connection timed out to: {}".format(hostname))
 
     return client
+
+
+def forward_ports(client, port_forward_list):
+    threads = []
+    if not port_forward_list:
+        return threads
+
+    for port_forwarding_specification in port_forward_list:
+        threads.append(
+            forward_tunnel(
+                port_forwarding_specification.remote_port,
+                "127.0.0.1",
+                port_forwarding_specification.local_port,
+                client.get_transport()
+            )
+        )
+    return threads
 
 
 def node_exec_command(node_id, command, username, hostname, port, ssh_key=None, password=None, container_name=None, timeout=None):
@@ -133,3 +200,26 @@ async def clus_copy(username, nodes, source_path, destination_path, ssh_key=None
                                                    container_name,
                                                    timeout) for node, node_rls in nodes]
     )
+
+
+def node_ssh(username, hostname, port, ssh_key=None, password=None, port_forward_list=None, timeout=None):
+    try:
+        client = connect(
+            hostname=hostname,
+            port=port,
+            username=username,
+            password=password,
+            pkey=ssh_key,
+            timeout=timeout
+        )
+        threads = forward_ports(client=client, port_forward_list=port_forward_list)
+    except AztkError as e:
+        raise e
+
+    try:
+        import time
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        # catch and ignore so stacktrace isn't printed
+        pass
