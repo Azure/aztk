@@ -3,6 +3,7 @@ import typing
 
 import aztk.spark
 from aztk.spark.models import ClusterConfiguration, UserConfiguration
+from aztk.utils import deprecate
 from aztk_cli import config, log, utils
 from aztk_cli.config import load_aztk_spark_config
 
@@ -13,6 +14,8 @@ def setup_parser(parser: argparse.ArgumentParser):
     parser.add_argument('--size', type=int,
                         help='Number of vms in your cluster')
     parser.add_argument('--size-low-pri', type=int,
+                        help='Number of low priority vms in your cluster (Deprecated, use --size-low-priority)')
+    parser.add_argument('--size-low-priority', type=int,
                         help='Number of low priority vms in your cluster')
     parser.add_argument('--vm-size',
                         help='VM size for nodes in your cluster')
@@ -29,7 +32,7 @@ def setup_parser(parser: argparse.ArgumentParser):
 
     parser.add_argument('--no-wait', dest='wait', action='store_false')
     parser.add_argument('--wait', dest='wait', action='store_true')
-    parser.set_defaults(wait=None, size=None, size_low_priority=None)
+    parser.set_defaults(wait=None, size=None, size_low_pri=None, size_low_priority=None)
 
 
 def execute(args: typing.NamedTuple):
@@ -37,9 +40,13 @@ def execute(args: typing.NamedTuple):
     cluster_conf = ClusterConfiguration()
     cluster_conf.spark_configuration = load_aztk_spark_config()
 
-    # read cluster.yaml configuartion file, overwrite values with args
+    # read cluster.yaml configuration file, overwrite values with args
     file_config, wait = config.read_cluster_config()
     cluster_conf.merge(file_config)
+    if args.size_low_pri is not None:
+        deprecate("--size-low-pri has been deprecated. Please use --size-low-priority")
+        args.size_low_priority = args.size_low_pri
+
     cluster_conf.merge(ClusterConfiguration(
         cluster_id=args.cluster_id,
         size=args.size,
