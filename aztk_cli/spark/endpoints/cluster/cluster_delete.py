@@ -7,7 +7,8 @@ from aztk_cli import config, log
 
 def setup_parser(parser: argparse.ArgumentParser):
     parser.add_argument('--id',
-                        dest='cluster_id',
+                        dest='cluster_ids',
+                        nargs='*',
                         required=True,
                         help='The unique id of your spark cluster')
     parser.add_argument('--force', '-f',
@@ -25,19 +26,21 @@ def setup_parser(parser: argparse.ArgumentParser):
 
 def execute(args: typing.NamedTuple):
     spark_client = aztk.spark.Client(config.load_aztk_secrets())
-    cluster_id = args.cluster_id
+    cluster_ids = args.cluster_ids
 
-    if not args.force:
-        if not args.keep_logs:
-            log.warn("All logs persisted for this cluster will be deleted.")
+    for cluster_id in cluster_ids:
+        if not args.force:
+            if not args.keep_logs:
+                log.warning("All logs persisted for this cluster will be deleted.")
 
-        confirmation_cluster_id = input("Please confirm the id of the cluster you wish to delete: ")
+            confirmation_cluster_id = input(
+                "Please confirm the id of the cluster you wish to delete [{}]: ".format(cluster_id))
 
-        if confirmation_cluster_id  != cluster_id:
-            log.error("Confirmation cluster id does not match. Please try again.")
-            return
+            if confirmation_cluster_id != cluster_id:
+                log.error("Confirmation cluster id does not match. Please try again.")
+                return
 
-    if spark_client.delete_cluster(cluster_id, args.keep_logs):
-        log.info("Deleting cluster %s", cluster_id)
-    else:
-        log.error("Cluster with id '%s' doesn't exist or was already deleted.", cluster_id)
+        if spark_client.delete_cluster(cluster_id, args.keep_logs):
+            log.info("Deleting cluster %s", cluster_id)
+        else:
+            log.error("Cluster with id '%s' doesn't exist or was already deleted.", cluster_id)

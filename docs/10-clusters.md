@@ -76,6 +76,13 @@ aztk spark cluster delete --id <your_cluster_id>
 ```
 Deleting a cluster also permanently deletes any data or logs associated with that cluster. If you wish to persist this data, use the `--keep-logs` flag.
 
+To delete all clusters:
+```sh
+aztk spark cluster delete --id $(aztk spark cluster list -q)
+```
+
+Skip delete confirmation by using the `--force` flag.
+
 __You are charged for the cluster as long as the nodes are provisioned in your account.__ Make sure to delete any clusters you are not using to avoid unwanted costs.
 
 ### Run a command on all nodes in the cluster

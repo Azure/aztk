@@ -21,7 +21,7 @@ def get_ssh_key_or_prompt(ssh_key, username, password, secrets_config):
     ssh_key = get_ssh_key.get_user_public_key(ssh_key, secrets_config)
 
     if username is not None and password is None and ssh_key is None:
-        log.warn("It is reccomended to use an SSH key for user creation instead of a password.")
+        log.warning("It is reccomended to use an SSH key for user creation instead of a password.")
         for i in range(3):
             if i > 0:
                 log.error("Please try again.")
@@ -121,6 +121,11 @@ def print_clusters(clusters: List[models.Cluster]):
                 node_count
             )
         )
+
+
+def print_clusters_quiet(clusters: List[models.Cluster]):
+    log.print('\n'.join([str(cluster.id) for cluster in clusters]))
+
 
 def stream_logs(client, cluster_id, application_name):
     current_bytes = 0

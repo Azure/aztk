@@ -32,7 +32,7 @@ def execute(args: typing.NamedTuple):
         spark_client.get_job(job_id)
 
         if not args.keep_logs:
-            log.warn("All logs persisted for this job will be deleted.")
+            log.warning("All logs persisted for this job will be deleted.")
 
         confirmation_cluster_id = input("Please confirm the id of the cluster you wish to delete: ")
 
