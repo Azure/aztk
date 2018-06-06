@@ -47,6 +47,21 @@ plugins:
   # - name: tensorflow_on_spark
   # - name: openblas
   # - name: nvblas
+  # - name: apt_get
+  #   args:
+  #     packages:
+  #       - 'vim'
+  #       - 'htop'
+  # - name: pip_install
+  #   args:
+  #     packages:
+  #       - 'numpy==1.14.2'
+  #       - 'requests'
+  # - name: conda_install
+  #   args:
+  #     packages:
+  #       - 'numpy=1.14.2'
+  #       - 'requests'
 
 # Allow master node to also be a worker <true/false> (Default: true)
 # worker_on_master: true

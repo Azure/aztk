@@ -26,6 +26,9 @@ class PluginManager:
         tensorflow_on_spark=plugins.TensorflowOnSparkPlugin,
         openblas=plugins.OpenBLASPlugin,
         nvblas=plugins.NvBLASPlugin,
+        apt_get=plugins.AptGetPlugin,
+        pip_install=plugins.PipPlugin,
+        conda_install=plugins.CondaPlugin
     )
 
     def __init__(self):

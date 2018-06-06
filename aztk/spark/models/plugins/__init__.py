@@ -8,3 +8,6 @@ from .spark_ui_proxy import SparkUIProxyPlugin
 from .tensorflow_on_spark import TensorflowOnSparkPlugin
 from .openblas import OpenBLASPlugin
 from .nvblas import NvBLASPlugin
+from .install.conda import CondaPlugin
+from .install.apt_get import AptGetPlugin
+from .install.pip import PipPlugin

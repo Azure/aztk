@@ -25,7 +25,7 @@ class PluginReference(Model):
     script = fields.String(default=None)
     target = fields.Enum(PluginTarget, default=None)
     target_role = fields.Enum(PluginTargetRole, default=None)
-    args = fields.String(default=None)
+    args = fields.Field(default=None)
 
     def get_plugin(self) -> PluginConfiguration:
         self.validate()

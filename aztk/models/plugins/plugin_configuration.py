@@ -51,7 +51,7 @@ class PluginConfiguration(Model):
         runOn: Where the plugin should run
         execute: Path to the file to execute(This must match the target of one of the files)
         files: List of files to upload
-        args: List of argumenets to pass to the executing script
+        args: List of arguments to pass to the executing script
         env: Dict of environment variables to pass to the script
     """
     name = fields.String()
