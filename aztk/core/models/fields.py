@@ -61,8 +61,8 @@ class Field:
 
     def merge(self, instance, value):
         """
-        Method called when merging 2 model together.
-        This is overriden in some of the fields where merge can be handled differently
+        Method called when merging 2 models together.
+        This is overridden in some of the fields where merge can be handled differently
         """
         if value is not None:
             instance._data[self] = value

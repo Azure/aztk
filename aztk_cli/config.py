@@ -23,7 +23,7 @@ def load_aztk_secrets() -> SecretsConfiguration:
     if not global_config and not local_config:
         raise aztk.error.AztkError("There is no secrets.yaml in either ./.aztk/secrets.yaml or .aztk/secrets.yaml")
 
-    if global_config:  # GLobal config is optional
+    if global_config:  # Global config is optional
         _merge_secrets_dict(secrets, global_config)
     if local_config:
         _merge_secrets_dict(secrets, local_config)

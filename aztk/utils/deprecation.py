@@ -46,7 +46,7 @@ def deprecate(message: str):
 
 def _get_deprecated_version():
     """
-    Returns the next version where the deprecated funtionality will be removed
+    Returns the next version where the deprecated functionality will be removed
     """
     if version.major == 0:
         return "0.{minor}.0".format(minor=version.minor + 1)

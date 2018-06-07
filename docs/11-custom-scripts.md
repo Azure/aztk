@@ -29,7 +29,7 @@ custom_scripts:
       runOn: all-nodes
 ```
 
-The above configuration takes the absolute path `/custom-scripts/` and uploads every file within it. These files will all be executed, although order of exection is not guarenteed. If your custom scripts have dependencies, specify the order by providing the full path to the file as seen in the first example.
+The above configuration takes the absolute path `/custom-scripts/` and uploads every file within it. These files will all be executed, although order of execution is not guaranteed. If your custom scripts have dependencies, specify the order by providing the full path to the file as seen in the first example.
 
 
 ## Scripting considerations
@@ -39,7 +39,7 @@ The above configuration takes the absolute path `/custom-scripts/` and uploads e
 - The default OS is Ubuntu 16.04.
 - The scripts run on the specified nodes in the cluster _after_ Spark has been installed.
 - The scripts execute in the order provided
-- If a script directory is provided, order of execution is not guarenteed
+- If a script directory is provided, order of execution is not guaranteed
 - The environment variable $SPARK_HOME points to the root Spark directory.
 - The environment variable $IS\_MASTER identifies if this is the node running the master role. The node running the master role _also_ runs a worker role on it.
 - The Spark cluster is set up using Standalone Mode

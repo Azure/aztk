@@ -84,7 +84,7 @@ Path to the local file you want to upload(Could form the plugins parameters)
 #### public   | `optional`  | `bool`
  If the port should be open publicly(Default: `False`)
 
-## Environment variables availables in the plugin
+## Environment variables available in the plugin
 
 AZTK provide a few environment variables that can be used in your plugin script
 
@@ -93,7 +93,7 @@ AZTK provide a few environment variables that can be used in your plugin script
 * `AZTK_MASTER_IP`: Internal ip of the master
 
 ## Debug your plugin
-When your plugin is not working as expected there is a few things you do to invesigate issues
+When your plugin is not working as expected there is a few things you do to investigate issues
 
 Check the logs, you can either use the debug tool or [BatchLabs](https://github.com/Azure/BatchLabs)
 Navigate to `startup/wd/logs/plugins`

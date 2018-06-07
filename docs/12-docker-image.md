@@ -69,7 +69,7 @@ FROM my_username/my_repo:latest
 
 Please note that for this method to work, your Docker image must have been built on Ubuntu.
 
-## Custom Docker Image Rquirements
+## Custom Docker Image Requirements
 If you are building your own custom image and __not__ building on top of a supported image, the following requirements are necessary.
 
 Please make sure that the following environment variables are set: 

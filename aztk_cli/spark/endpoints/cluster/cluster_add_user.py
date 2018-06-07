@@ -9,7 +9,7 @@ def setup_parser(parser: argparse.ArgumentParser):
     parser.add_argument('--id', dest='cluster_id', required=True,
                         help='The unique id of your spark cluster')
     parser.add_argument('-u', '--username',
-                        help='The usernameto access your spark cluster\'s head node')
+                        help='The username to access your spark cluster\'s head node')
 
     auth_group = parser.add_mutually_exclusive_group()
     auth_group.add_argument('-p', '--password',

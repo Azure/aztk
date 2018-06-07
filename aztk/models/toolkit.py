@@ -83,7 +83,7 @@ class Toolkit(Model):
 
     def _get_docker_tag(self, gpu: bool):
         environment = self.environment or "base"
-        environment_def = self._get_environent_definition()
+        environment_def = self._get_environment_definition()
         environment_version = self.environment_version or (environment_def and environment_def.default)
 
         array = [
@@ -98,7 +98,7 @@ class Toolkit(Model):
         return '-'.join(array)
 
 
-    def _get_environent_definition(self) -> ToolkitEnvironmentDefinition:
+    def _get_environment_definition(self) -> ToolkitEnvironmentDefinition:
         toolkit = TOOLKIT_MAP.get(self.software)
 
         if toolkit:

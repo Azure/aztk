@@ -1,5 +1,5 @@
 # Clusters
-In the Azure Distributed Data Engineering Toolkit, a cluster is primarily designed to run Spark jobs. This document describes how to create a cluster to use for Spark jobs. Alternitavely for getting started and debugging you can also use the cluster in _interactive mode_ which will allow you to log into the master node and interact with the cluster from there.
+In the Azure Distributed Data Engineering Toolkit, a cluster is primarily designed to run Spark jobs. This document describes how to create a cluster to use for Spark jobs. Alternatively for getting started and debugging you can also use the cluster in _interactive mode_ which will allow you to log into the master node and interact with the cluster from there.
 
 ## Creating a Cluster
 Creating a Spark cluster only takes a few simple steps after which you will be able to SSH into the master node of the cluster and interact with Spark. You will be able to view the Spark Web UI, Spark Jobs UI, submit Spark jobs (with *spark-submit*), and even interact with Spark in a Jupyter notebook.
@@ -28,7 +28,7 @@ By default, you cannot create clusters of more than 20 cores in total. Visit [th
 You can create your cluster with [low-priority](https://docs.microsoft.com/en-us/azure/batch/batch-low-pri-vms) VMs at an 80% discount by using `--size-low-pri` instead of `--size`. Note that these are great for experimental use, but can be taken away at any time. We recommend against this option when doing long running jobs or for critical workloads.
 
 #### Mixed Mode
-You can create clusters with a mixed of [low-priority](https://docs.microsoft.com/en-us/azure/batch/batch-low-pri-vms) and dedicated VMs to reach the optimal balance of price and availability. In Mixed Mode, your cluster will have both dedicated instances and low priority instances. To mimize the potential impact on your Spark workloads, the Spark master node will always be provisioned on one of the dedicated nodes while each of the low priority nodes will be Spark workers.
+You can create clusters with a mixed of [low-priority](https://docs.microsoft.com/en-us/azure/batch/batch-low-pri-vms) and dedicated VMs to reach the optimal balance of price and availability. In Mixed Mode, your cluster will have both dedicated instances and low priority instances. To minimize the potential impact on your Spark workloads, the Spark master node will always be provisioned on one of the dedicated nodes while each of the low priority nodes will be Spark workers.
 
 Please note, to use Mixed Mode clusters, you need to authenticate using Azure Active Directory (AAD) by configuring the Service Principal in `.aztk/secrets.yaml`. You also need to create a [Virtual Network \(VNET\)](https://azure.microsoft.com/en-us/services/virtual-network/), and provide the resource ID to a Subnet within the VNET in your ./aztk/cluster.yaml` configuration file.
 
@@ -51,7 +51,7 @@ aztk spark cluster get --id <your_cluster_id>
 
 Note that the cluster is not fully usable until a master node has been selected and it's state is `idle`.
 
-For example here cluster 'spark' has 2 nodes and node `tvm-257509324_2-20170820t200959z` is the mastesr and ready to run a job.
+For example here cluster 'spark' has 2 nodes and node `tvm-257509324_2-20170820t200959z` is the master and ready to run a job.
 
 ```sh
 Cluster         spark
@@ -164,7 +164,7 @@ Note that an SSH tunnel and shell will be opened with the default SSH client if 
 
 ### Debugging your Spark Cluster
 
-If your cluster is in an unknown or unusbale state, you can debug by running:
+If your cluster is in an unknown or unusable state, you can debug by running:
 
 ```sh
 aztk spark cluster debug --id <cluster-id> --output </path/to/output/directory/>
@@ -184,7 +184,7 @@ __Please be careful sharing the output of the `debug` command as secrets and app
 
 
 ### Interact with your Spark cluster
-By default, the `aztk spark cluster ssh` command port forwards the Spark Web UI to *localhost:8080*, Spark Jobs UI to *localhost:4040*, and Spark History Server to your *locahost:18080*. This can be [configured in *.aztk/ssh.yaml*](../docs/13-configuration.html#sshyaml).
+By default, the `aztk spark cluster ssh` command port forwards the Spark Web UI to *localhost:8080*, Spark Jobs UI to *localhost:4040*, and Spark History Server to your *localhost:18080*. This can be [configured in *.aztk/ssh.yaml*](../docs/13-configuration.html#sshyaml).
 
 ## Next Steps
 - [Run a Spark job](20-spark-submit.html)

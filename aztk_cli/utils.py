@@ -21,7 +21,7 @@ def get_ssh_key_or_prompt(ssh_key, username, password, secrets_config):
     ssh_key = get_ssh_key.get_user_public_key(ssh_key, secrets_config)
 
     if username is not None and password is None and ssh_key is None:
-        log.warning("It is reccomended to use an SSH key for user creation instead of a password.")
+        log.warning("It is recommended to use an SSH key for user creation instead of a password.")
         for i in range(3):
             if i > 0:
                 log.error("Please try again.")
@@ -34,7 +34,7 @@ def get_ssh_key_or_prompt(ssh_key, username, password, secrets_config):
             else:
                 break
         else:
-            raise error.AztkError("Failed to get valid password, cannot add user to cluster. It is recommended that you provide a ssh public key in .aztk/secrets.yaml. Or provide an ssh-key or password with commnad line parameters (--ssh-key or --password). You may also run the 'aztk spark cluster add-user' command to add a user to this cluster.")
+            raise error.AztkError("Failed to get valid password, cannot add user to cluster. It is recommended that you provide a ssh public key in .aztk/secrets.yaml. Or provide an ssh-key or password with command line parameters (--ssh-key or --password). You may also run the 'aztk spark cluster add-user' command to add a user to this cluster.")
     return ssh_key, password
 
 def print_cluster(client, cluster: models.Cluster, internal: bool = False):

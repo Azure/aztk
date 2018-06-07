@@ -11,7 +11,7 @@ def setup_parser(parser: argparse.ArgumentParser):
                         help="Create a .aztk/ folder in your home directory for global configurations.")
     software_parser = parser.add_mutually_exclusive_group()
     software_parser.add_argument('--miniconda', action="store_true", required=False)
-    software_parser.add_argument('--annaconda', action="store_true", required=False)
+    software_parser.add_argument('--anaconda', action="store_true", required=False)
     software_parser.add_argument('--r', '--R', action="store_true", required=False)
     software_parser.add_argument('--java', action="store_true", required=False)
     software_parser.add_argument('--scala', action="store_true", required=False)
@@ -21,8 +21,8 @@ def execute(args: typing.NamedTuple):
     # software_specific init
     if args.miniconda:
         environment = "miniconda"
-    elif args.annaconda:
-        environment = "annaconda"
+    elif args.anaconda:
+        environment = "anaconda"
     elif args.r:
         environment = "r"
     else:

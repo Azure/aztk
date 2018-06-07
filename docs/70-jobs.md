@@ -35,7 +35,7 @@ Each Job has one or more applications given as a List in Job.yaml. Applications 
 ```
 _Please note: the only required fields are name and application. All other fields may be removed or left blank._
 
-NOTE: The Applcaition name can only contain alphanumeric characters including hyphens and underscores, and cannot contain more than 64 characters. Each application **must** have a unique name.
+NOTE: The Application name can only contain alphanumeric characters including hyphens and underscores, and cannot contain more than 64 characters. Each application **must** have a unique name.
 
 Jobs also require a definition of the cluster on which the Applications will run. The following properties define a cluster:
 ```yaml
@@ -54,7 +54,7 @@ Jobs also require a definition of the cluster on which the Applications will run
       - custom
       - scripts
 ```
-_Please Note: For more information about Azure VM sizes, see [Azure Batch Pricing](https://azure.microsoft.com/en-us/pricing/details/batch/). And for more information about Docker repositories see [Docker](./12-docker-iamge.html)._
+_Please Note: For more information about Azure VM sizes, see [Azure Batch Pricing](https://azure.microsoft.com/en-us/pricing/details/batch/). And for more information about Docker repositories see [Docker](./12-docker-image.html)._
 
 _The only required fields are vm_size and either size or size_low_priority, all other fields can be left blank or removed._
 
@@ -141,7 +141,7 @@ aztk spark job delete --id <your_job_id>
 ```
 Deleting a Job also permanently deletes any data or logs associated with that cluster. If you wish to persist this data, use the `--keep-logs` flag.
 
-__You are only charged for the job while it is active, Jobs handle provisioning and destorying infrastructure, so you are only charged for the time that your applications are running.__
+__You are only charged for the job while it is active, Jobs handle provisioning and destroying infrastructure, so you are only charged for the time that your applications are running.__
 
 
 ### Stopping a Job

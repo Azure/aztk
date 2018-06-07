@@ -11,7 +11,7 @@ This is the default cluster configuration:
 # id: <id of the cluster to be created>
 id: spark_cluster
 
-# Toolkit configuration [Required] You can use `aztk toolkit` command to find which are the available tookits
+# Toolkit configuration [Required] You can use `aztk toolkit` command to find which toolkits are available
 toolkit:
   software: spark
   version: 2.2
@@ -19,7 +19,7 @@ toolkit:
   # Optional version for the environment
   # environment_version:
 
-  # Optional docker repository(To bring your custom docker image. Just specify the Toolkit software, version and environemnt if using default images)
+  # Optional docker repository(To bring your custom docker image. Just specify the Toolkit software, version and environment if using default images)
   # docker_repo: <name of docker image repo (for more information, see https://github.com/Azure/aztk/blob/master/docs/12-docker-image.md)>
 
 
@@ -91,11 +91,11 @@ connect: true
 
 Running the command `aztk spark cluster ssh --id <cluster_id>` will ssh into the master node of the Spark cluster. It will also forward the Spark Job UI to localhost:4040, the Spark master's web UI to localhost:8080, and Jupyter to localhost:8888.
 
-Note that all of the settings in ssh.yaml will be overrided by parameters passed on the command line.
+Note that all of the settings in ssh.yaml will be overridden by parameters passed on the command line.
 
 ## Spark Configuration
 
-The repository comes with default Spark configuration files which provision your Spark cluster just the same as you would locally. After running `aztk spark init` to initialize your working environment, you can view and edit these files at `.aztk/spark-defaults.conf`, `.aztk/spark-env.sh` and `.aztk/core-site.xml`. Please note that you can bring your own Spark configuration files by copying your `spark-defaults.conf`, `spark-env.sh` and `core-site.xml` into your `.aztk/` direcotry.
+The repository comes with default Spark configuration files which provision your Spark cluster just the same as you would locally. After running `aztk spark init` to initialize your working environment, you can view and edit these files at `.aztk/spark-defaults.conf`, `.aztk/spark-env.sh` and `.aztk/core-site.xml`. Please note that you can bring your own Spark configuration files by copying your `spark-defaults.conf`, `spark-env.sh` and `core-site.xml` into your `.aztk/` directory.
 
 If using `aztk` job submission, please note that both `spark.shuffle.service.enabled` and `spark.dynamicAllocation.enabled` must be set to true so that the number of executors registered with an application can scale as nodes in the job's cluster come online.
 
@@ -128,7 +128,7 @@ If using WASB, ADL or other cloud storage services, be sure to set your keys in 
 
 ## Configuring Spark Storage
 
-The Spark cluster can be configured to use different cloud supported storage offerrings (such as Azure Storage Blobs, Azure Data Lake Storage, or any other supported Spark file system). More information can be found in the [Cloud Storage](./30-cloud-storage.html) documentation.
+The Spark cluster can be configured to use different cloud supported storage offerings (such as Azure Storage Blobs, Azure Data Lake Storage, or any other supported Spark file system). More information can be found in the [Cloud Storage](./30-cloud-storage.html) documentation.
 
 ## Placing JARS
 

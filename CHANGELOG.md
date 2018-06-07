@@ -20,7 +20,7 @@ This release includes a number of breaking changes. [Please follow the migration
 - Docker images have been refactored and moved to a different Dockerhub repository. The new supported images are not backwards compatible. See [the documentation on configuration files.](https://aztk.readthedocs.io/en/v0.7.0/13-configuration.html#cluster-yaml)
 
 **Deprecated Features**
-- Custom scripts have been removed in favor of Plugins, which are more robust. See, [the documenation on Plugins.](https://aztk.readthedocs.io/en/v0.7.0/15-plugins.html)
+- Custom scripts have been removed in favor of Plugins, which are more robust. See, [the documentation on Plugins.](https://aztk.readthedocs.io/en/v0.7.0/15-plugins.html)
 
 **Added Features**
 * add internal flag to node commands (#482) ([1eaa1b6](https://github.com/Azure/aztk/commit/1eaa1b6)), closes [#482](https://github.com/Azure/aztk/issues/482)
@@ -33,7 +33,7 @@ This release includes a number of breaking changes. [Please follow the migration
 * match cluster submit exit code in cli (#478) ([8889059](https://github.com/Azure/aztk/commit/8889059)), closes [#478](https://github.com/Azure/aztk/issues/478)
 * Plugin V2: Running plugin on host (#461) ([de78983](https://github.com/Azure/aztk/commit/de78983)), closes [#461](https://github.com/Azure/aztk/issues/461)
 * Plugins (#387) ([c724d94](https://github.com/Azure/aztk/commit/c724d94)), closes [#387](https://github.com/Azure/aztk/issues/387)
-* Pypi auto deployement  (#428) ([c237501](https://github.com/Azure/aztk/commit/c237501)), closes [#428](https://github.com/Azure/aztk/issues/428)
+* Pypi auto deployment  (#428) ([c237501](https://github.com/Azure/aztk/commit/c237501)), closes [#428](https://github.com/Azure/aztk/issues/428)
 * Readthedocs support (#497) ([e361c3b](https://github.com/Azure/aztk/commit/e361c3b)), closes [#497](https://github.com/Azure/aztk/issues/497)
 * refactor docker images (#510) ([779bffb](https://github.com/Azure/aztk/commit/779bffb)), closes [#510](https://github.com/Azure/aztk/issues/510)
 * Spark add output logs flag (#468) ([32de752](https://github.com/Azure/aztk/commit/32de752)), closes [#468](https://github.com/Azure/aztk/issues/468)
@@ -93,7 +93,7 @@ This release includes a number of breaking changes. [Please follow the migration
 **Bug Fixes:**
 - load jars in `.aztk/jars/` in job submission mode
 - replace outdated error in cluster_create
-- fix type error crash if not jars are specificed in job submission
+- fix type error crash if no jars are specified in job submission
 - stop using mutable default parameters
 - print job application code if exit_code is 0
 - job submission crash if executor or driver cores specified

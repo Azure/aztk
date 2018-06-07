@@ -18,5 +18,5 @@ class SchedulingTarget(Enum):
 
     Any = "any"
     """
-    Any node(Not reconmmended if using low pri)
+    Any node(Not recommended if using low pri)
     """

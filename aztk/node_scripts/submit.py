@@ -114,7 +114,7 @@ def __app_submit_cmd(
         spark_submit_cmd.add_option('--executor-cores', str(executor_cores))
 
     spark_submit_cmd.add_argument(
-        os.path.expandvars(app) + ' ' + 
+        os.path.expandvars(app) + ' ' +
         ' '.join(['\'' + str(app_arg) + '\'' for app_arg in (app_args or [])]))
 
     with open("spark-submit.txt", mode="w", encoding="UTF-8") as stream:
@@ -145,7 +145,7 @@ def upload_log(blob_client, application):
         use_full_path=False)
 
 
-def recieve_submit_request(application_file_path):
+def receive_submit_request(application_file_path):
 
     '''
         Handle the request to submit a task
@@ -195,7 +195,7 @@ def upload_error_log(error, application_file_path):
 if __name__ == "__main__":
     return_code = 1
     try:
-        return_code = recieve_submit_request(os.path.join(os.environ['AZ_BATCH_TASK_WORKING_DIR'], 'application.yaml'))
+        return_code = receive_submit_request(os.path.join(os.environ['AZ_BATCH_TASK_WORKING_DIR'], 'application.yaml'))
     except Exception as e:
         upload_error_log(str(e), os.path.join(os.environ['AZ_BATCH_TASK_WORKING_DIR'], 'application.yaml'))
 

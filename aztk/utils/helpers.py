@@ -404,7 +404,7 @@ def read_cluster_config(cluster_id: str, blob_client: blob.BlockBlobService):
 
 def bool_env(value: bool):
     """
-    Takes a boolean value(or None) and return the serialized version to be used as an environemnt variable
+    Takes a boolean value(or None) and return the serialized version to be used as an environment variable
 
     Examples:
         >>> bool_env(True)

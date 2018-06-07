@@ -1,11 +1,11 @@
 # Plugins
 
-Plugins are a successor to [custom scripts](11-custom-scripts.html) and are the reconmmended way of running custom code on the cluster.
+Plugins are a successor to [custom scripts](11-custom-scripts.html) and are the recommended way of running custom code on the cluster.
 
 Plugins can either be one of the Aztk [supported plugins](#supported-plugins) or the path to a [local file](#custom-script-plugin).
 
 ## Supported Plugins
-AZTK ships with a library of default plugins that enable auxillary services to use with your Spark cluster.
+AZTK ships with a library of default plugins that enable auxiliary services to use with your Spark cluster.
 
 Currently the following plugins are supported:
 
@@ -18,7 +18,7 @@ Currently the following plugins are supported:
 - mvBLAS
 
 ### Enable a plugin using the CLI
-If you are uing the `aztk` CLI and wish to enable a supported plugin, you need to update you `.aztk/cluster.yaml` configuration file.
+If you are using the `aztk` CLI and wish to enable a supported plugin, you need to update you `.aztk/cluster.yaml` configuration file.
 
 Add or uncomment the `plugins` section and set the plugins you desire to enable as follows:
 ```yaml
@@ -33,7 +33,7 @@ plugins:
 ```
 
 ### Enable a plugin using the SDK
-If you are uing the `aztk` SDK and wish to enable a supported plugin, you need to import the necessary plugins from the `aztk.spark.models.plugin` module and add them to your ClusterConfiguration object's plugin list:
+If you are using the `aztk` SDK and wish to enable a supported plugin, you need to import the necessary plugins from the `aztk.spark.models.plugin` module and add them to your ClusterConfiguration object's plugin list:
 ```python
 from aztk.spark.models.plugins import RStudioServerPlugin, HDFSPlugin
 cluster_config = ClusterConfiguration(

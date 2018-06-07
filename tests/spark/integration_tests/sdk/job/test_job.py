@@ -38,7 +38,7 @@ if all(keys):
         )
     )
 else:
-    # fallback to local secrets if envrionment variables don't exist
+    # fallback to local secrets if environment variables don't exist
     spark_client = aztk.spark.Client(config.load_aztk_secrets())
 
 

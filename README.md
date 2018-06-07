@@ -32,7 +32,7 @@ chmod 755 account_setup.sh &&
 /bin/bash account_setup.sh
 ```
 
-4. Follow the on screen prompts to create the necessary Azure resources and copy the output into your `.aztk/secrets.yaml` file. For more infomration see [Getting Started Scripts](./01-Getting-Started-Script).
+4. Follow the on screen prompts to create the necessary Azure resources and copy the output into your `.aztk/secrets.yaml` file. For more information see [Getting Started Scripts](./01-Getting-Started-Script).
 
 
 ## Quickstart Guide
@@ -98,8 +98,8 @@ aztk spark cluster submit \
     path\to\pi.py 1000
 ```
 - The `aztk spark cluster submit` command takes the same parameters as the standard [`spark-submit` command](https://spark.apache.org/docs/latest/submitting-applications.html), except instead of specifying `--master`, AZTK requires that you specify your cluster `--id` and a unique job `--name`
-- The job name, `--name`, argument must be atleast 3 characters long
-    - It can only contain alphanumeric characters including hypens but excluding underscores
+- The job name, `--name`, argument must be at least 3 characters long
+    - It can only contain alphanumeric characters including hyphens but excluding underscores
     - It cannot contain uppercase letters
 - Each job you submit **must** have a unique name
 - Use the `--no-wait` option for your command to return immediately

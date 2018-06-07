@@ -1,4 +1,4 @@
-# Writting docs
+# Writing docs
 
 Docs are located in the docs folder. We are using `sphinx` to generate the docs and then hosting them on `readthedocs`.
 

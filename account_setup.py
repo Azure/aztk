@@ -273,7 +273,7 @@ def format_secrets(**kwargs):
     The following form is returned:
 
         service_principal:
-            tenant_id: <AAD Diretory ID>
+            tenant_id: <AAD Directory ID>
             client_id: <AAD App Application ID>
             credential: <AAD App Password>
             batch_account_resource_id: </batch/account/resource/id>
@@ -409,16 +409,16 @@ if __name__ == "__main__":
     # create AAD application and service principal
     with Spinner():
         profile = credentials.get_cli_profile()
-        aad_cred, subscirption_id, tenant_id = profile.get_login_credentials(
+        aad_cred, subscription_id, tenant_id = profile.get_login_credentials(
             resource=AZURE_PUBLIC_CLOUD.endpoints.active_directory_graph_resource_id
         )
         application_id, service_principal_object_id, application_credential = create_aad_user(aad_cred, tenant_id, **kwargs)
-    
+
     print("Created Azure Active Directory service principal.")
 
     with Spinner():
         create_role_assignment(creds, subscription_id, resource_group_id, service_principal_object_id)
-    print("Configured permsisions.")
+    print("Configured permissions.")
 
     secrets = format_secrets(
         **{

@@ -19,10 +19,10 @@ To run a remotely hosted pi.py file on a Spark cluster, specify the remote path 
 aztk spark cluster submit --id spark --name pipy --remote wasbs://path@remote/pi.py 100
 ```
 
-NOTE: The job name (--name) must be atleast 3 characters long, can only contain alphanumeric characters including hyphens but excluding underscores, and cannot contain uppercase letters. Each job you submit **must** have a unique name.
+NOTE: The job name (--name) must be at least 3 characters long, can only contain alphanumeric characters including hyphens but excluding underscores, and cannot contain uppercase letters. Each job you submit **must** have a unique name.
 
 ## Monitoring job
-If you have set up a [SSH tunnel](./10-clusters.html#ssh-and-port-forwarding) with port fowarding, you can naviate to http://localhost:8080 and http://localhost:4040 to view the progess of the job using the Spark UI
+If you have set up a [SSH tunnel](./10-clusters.html#ssh-and-port-forwarding) with port forwarding, you can navigate to http://localhost:8080 and http://localhost:4040 to view the progress of the job using the Spark UI
 
 
 ## Getting output logs

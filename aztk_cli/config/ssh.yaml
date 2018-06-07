@@ -1,6 +1,6 @@
 # ssh configuration
 
-# cluster_id: <id of the cluster to connect to, reccommended to specify with --id command line parameter>
+# cluster_id: <id of the cluster to connect to, recommended to specify with --id command line parameter>
 
 # username: <name of the user account to ssh into>
 username: spark

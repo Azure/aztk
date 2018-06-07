@@ -14,12 +14,12 @@ job:
         toolkit:
           software: spark
           version: 2.2.0
-          # Which environemnt is needed for spark anaconda, r, miniconda
+          # Which environment is needed for spark anaconda, r, miniconda
           environment: {environment}
           # Optional version for the environment
           # environment_version:
 
-          # Optional docker repository(To bring your custom docker image. Just specify the Toolkit software, version and environemnt if using default images)
+          # Optional docker repository(To bring your custom docker image. Just specify the Toolkit software, version and environment if using default images)
           # docker_repo: <name of docker image repo (for more information, see https://github.com/Azure/aztk/blob/master/docs/12-docker-image.md)>
 
         # Where do you want to run the driver <dedicated/master/any> (Default: dedicated if at least one dedicated node or any otherwise)

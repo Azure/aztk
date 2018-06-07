@@ -34,7 +34,7 @@ The minimum requirements to get started with this package are:
     ```bash
     aztk spark init --global
     ```
-    This will put default configuration files in your home directory, *~/*. Please note that configuration files in your current working directory will take precident over global configuration files in your home directory.
+    This will put default configuration files in your home directory, *~/*. Please note that configuration files in your current working directory will take precedence over global configuration files in your home directory.
 
 
 ## Setting up your accounts
@@ -65,7 +65,7 @@ To get the required keys for your Azure Active Directory (AAD) Service Principal
 
 1. Register an Azure Active Directory (AAD) Application
 
-- Navigate to Azure Active Direcotry by searching in "All Services". Click "Properties" and record the value in the "Directory ID" field. This is your __tenant ID__.
+- Navigate to Azure Active Directory by searching in "All Services". Click "Properties" and record the value in the "Directory ID" field. This is your __tenant ID__.
 
 ![](./misc/AAD_1.png)
 
@@ -99,7 +99,7 @@ To get the required keys for your Azure Active Directory (AAD) Service Principal
 
 ![](./misc/Storage_4.png)
 
-3. Create a Batch Acccount
+3. Create a Batch Account
 
 - Click the '+' button at the top left of the screen and search for 'Compute'. Select 'Batch' and click 'Create'
 
@@ -121,7 +121,7 @@ To get the required keys for your Azure Active Directory (AAD) Service Principal
 
 - Open the secrets.yaml file in the *.aztk* folder in your current working directory (if *.aztk* doesn't exist, run `aztk spark init`). Fill in all of the fields as described below.
 
-- Fill in the Service princripal block with your recorded values as shown below:
+- Fill in the service_principal block with your recorded values as shown below:
 ```
 service_principal:
     tenant_id: <AAD Diretory ID>
@@ -160,7 +160,7 @@ To get the required keys for Azure Batch and Azure Storage, please follow the be
 
 - Open the secrets.yaml file in the *.aztk* folder in your current working directory (if *.aztk* doesn't exist, run `aztk spark init`). Fill in all of the fields as described below.
 
-- Go to the accounts in the Azure portal and copy pase the account names, keys and other information needed into the
+- Go to the accounts in the Azure portal and copy paste the account names, keys and other information needed into the
 secrets file.
 
 ### Storage account

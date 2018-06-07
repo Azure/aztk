@@ -67,7 +67,7 @@ def find_master(client: batch.BatchServiceClient) -> bool:
             result = try_assign_self_as_master(client, pool)
 
             if result:
-                print("Assignment was successfull! Node {0} is the new master.".format(config.node_id))
+                print("Assignment was successful! Node {0} is the new master.".format(config.node_id))
                 return True
 
     raise CannotAllocateMasterError("Unable to assign node as a master in 5 tries")

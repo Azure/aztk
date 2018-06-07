@@ -38,7 +38,7 @@ This toolkit is built on top of Azure Batch but does not require any Azure Batch
 
 .. toctree::
    :maxdepth: 2
-   :caption: Developper documentation:
+   :caption: Developer documentation:
 
    dev/docs
    dev/writing-models

@@ -1,5 +1,5 @@
 # Cloud storage
-Cloud stoarge for spark enables you to have a persisted storage system backed by a cloud provider. Spark supports this by placing the appropriate storage jars and updating the core-site.xml file accordingly.
+Cloud storage for spark enables you to have a persisted storage system backed by a cloud provider. Spark supports this by placing the appropriate storage jars and updating the core-site.xml file accordingly.
 
 ## Azure Storage Blobs (WASB)
 
@@ -26,9 +26,9 @@ dataframe.write.csv('wasbs://MY_CONTAINER@MY_STORAGE_ACCOUNt.blob.core.windows.n
 
 Pre-built into this package is native support for connecting your Spark cluster to Azure Data Lake (aka ADL). The required ADL jars are automatically placed in the Spark cluster and the permissions are pulled from your core-site.xml file under *.aztk/core-site.xml*.
 
-To connect to your Azure Storage account, make sure that the storage fields in your *.aztk/core-site.xml* file are properly filled out. This tool already has the the basic template for using ADL filled out inthe *.aztk/core-site.xml* file. Simply uncomment the in the "ADL (Azure Data Lake) Configuration" section and fill out the properties for MY\_AAD\_TENANT\_ID, MY\_AAD\_CLIENT\_ID and MY\_AAD\_CREDENTIAL.
+To connect to your Azure Storage account, make sure that the storage fields in your *.aztk/core-site.xml* file are properly filled out. This tool already has the the basic template for using ADL filled out in the *.aztk/core-site.xml* file. Simply uncomment the in the "ADL (Azure Data Lake) Configuration" section and fill out the properties for MY\_AAD\_TENANT\_ID, MY\_AAD\_CLIENT\_ID and MY\_AAD\_CREDENTIAL.
 
-Once you have correctly filled out the *.aztk/core-site.xml* with your Azure Data Lake credentials, you will be able to access your ADL stroage repositories from your Spark job.
+Once you have correctly filled out the *.aztk/core-site.xml* with your Azure Data Lake credentials, you will be able to access your ADL storage repositories from your Spark job.
 
 Reading and writing to and from Azure Data Lake Storage is easily achieved by using the `adl` syntax. For example, reading a csv file using Pyspark would be:
 

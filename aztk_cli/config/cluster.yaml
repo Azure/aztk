@@ -1,17 +1,17 @@
 ##  cluster settings
 
-# id: <id of the cluster to be created, reccommended to specify with --id command line parameter>
+# id: <id of the cluster to be created, recommended to specify with --id command line parameter>
 
-# Toolkit configuration [Required] You can use `aztk toolkit` command to find which are the available tookits
+# Toolkit configuration [Required] You can use `aztk toolkit` command to find which toolkits are available
 toolkit:
   software: spark
   version: 2.3.0
-  # Which environemnt is needed for spark anaconda, r, miniconda
+  # Which environment is needed for spark anaconda, r, miniconda
   environment: {environment}
   # Optional version for the environment
   # environment_version:
 
-  # Optional docker repository(To bring your custom docker image. Just specify the Toolkit software, version and environemnt if using default images)
+  # Optional docker repository(To bring your custom docker image. Just specify the Toolkit software, version and environment if using default images)
   # docker_repo: <name of docker image repo (for more information, see https://github.com/Azure/aztk/blob/master/docs/12-docker-image.md)>
 
 
@@ -34,7 +34,7 @@ username: spark
 #   - script: <./relative/path/to/other/script.sh or ./relative/path/to/other/script/directory/>
 #     runOn: <master/worker/all-nodes>
 
-# To add your cluster to a virtual network provide the full arm resoruce id below
+# To add your cluster to a virtual network provide the full arm resource id below
 # subnet_id: /subscriptions/********-****-****-****-************/resourceGroups/********/providers/Microsoft.Network/virtualNetworks/*******/subnets/******
 
 # Enable plugins

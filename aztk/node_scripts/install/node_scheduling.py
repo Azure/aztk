@@ -51,8 +51,8 @@ def setup_node_scheduling(
         enable = True
 
     if enable:
-        log.info("Scheduling will be enabled on this node as it satifies the right conditions")
+        log.info("Scheduling will be enabled on this node as it satisfies the right conditions")
         enable_scheduling(batch_client)
     else:
-        log.info("Scheduling will be disabled on this node as it does NOT satifies the right conditions")
+        log.info("Scheduling will be disabled on this node as it does NOT satisfy the right conditions")
         disable_scheduling(batch_client)

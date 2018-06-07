@@ -1,8 +1,8 @@
-# Using the Resrouce Monitor Plugin
+# Using the Resource Monitor Plugin
 
 The resource monitor plugin is useful for tracking performance counters on the cluster. These include counters such as Percent CPU used per core, Disk Read, Disk Write, Network In, Network out, and several others. Simply enabling the plugin in your cluster.yaml will deploy all the necessary components to start tracking metrics.
 
-This plugin takes advanage of the TICK monitoring stack. For more information please visit the [influx data](https://www.influxdata.com/time-series-platform/) web page.
+This plugin takes advantage of the TICK monitoring stack. For more information please visit the [influx data](https://www.influxdata.com/time-series-platform/) web page.
 
 > **IMPORTANT** All of the data is collected on the cluster's master node and will be lost once the cluster is thrown away. To persist data we recommend pushing to an off-cluster InfluxDB instance. Currently there is no supported way to persist the data from this plugin.
 
@@ -21,14 +21,14 @@ plugins:
 
 ```
 
-Once the cluster is created simply the cluster ssh command and all of the ports will automatically get forwareded.
+Once the cluster is created simply the cluster ssh command and all of the ports will automatically get forwarded.
 
 ```sh
 aztk spark cluster ssh --id <my_cluster>
 ```
 
 ### Ports
-url | desciption
+url | description
 --- | ---
 http://localhost:8890 | Cronograf UI
 

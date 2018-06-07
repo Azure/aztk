@@ -122,7 +122,7 @@ def copyfile(src, dest):
 
 def setup_conf():
     """
-        Copy spark conf files to spark_home if they were uplaoded
+        Copy spark conf files to spark_home if they were uploaded
     """
     copy_spark_env()
     copy_core_site()
@@ -220,7 +220,7 @@ def configure_history_server_log_path(path_to_log_file):
         if os.path.exists(directory):
             print('Skipping. Directory {} already exists.'.format(directory))
         else:
-            print('Create direcotory {}.'.format(directory))
+            print('Create directory {}.'.format(directory))
             os.makedirs(directory)
 
             # Make sure the directory can be accessed by all users

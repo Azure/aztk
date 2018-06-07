@@ -19,7 +19,7 @@ class Validator:
 
 class Required(Validator):
     """
-    Validate the field valiue is not `None`
+    Validate the field value is not `None`
     """
 
     def validate(self, value):
