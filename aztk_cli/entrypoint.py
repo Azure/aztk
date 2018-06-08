@@ -16,7 +16,7 @@ from . import plugins, toolkit
 
 # Makes sure the warnings are displayed nicely in the CLI without a stacktrace
 def _show_warn(message, *_args):
-    log.warning(message)
+    log.warning(str(message))
 
 
 def main():

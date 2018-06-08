@@ -28,17 +28,18 @@ def deprecated(reason: str = None):
     return decorator
 
 
-def deprecate(message: str):
+def deprecate(message: str, advice: str = ""):
     """
-    Print a deprecate warning.
+    Print a deprecation warning.
 
     Args:
-        message (str): Message to print
+        message (str): Sentence explaining what is deprecated.
+        advice (str): Sentence explaining alternatives to the deprecated functionality.
     """
 
     deprecated_version = _get_deprecated_version()
     warnings.simplefilter('always', DeprecationWarning)  # turn off filter
-    warnings.warn("{0} It will be removed in Aztk version {1}".format(message, deprecated_version),
+    warnings.warn("{0} It will be removed in Aztk version {1}. {2}".format(message, deprecated_version, advice),
                   category=DeprecationWarning,
                   stacklevel=2)
     warnings.simplefilter('default', DeprecationWarning)  # reset filter
