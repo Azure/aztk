@@ -53,7 +53,8 @@ spark_conf = aztk.spark.models.SparkConfiguration(
 # configure my cluster
 cluster_config = aztk.spark.models.ClusterConfiguration(
     cluster_id="sdk-test",
-    vm_low_pri_count=2,
+    toolkit=aztk.spark.models.SparkToolkit(version="2.3.0"),
+    size_low_priority=2,
     vm_size="standard_f2",
     plugins=plugins,
     spark_configuration=spark_conf
