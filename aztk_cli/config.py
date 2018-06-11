@@ -46,7 +46,7 @@ def _load_config_file(path: str):
 
 def _merge_secrets_dict(secrets: SecretsConfiguration, secrets_config):
     if 'default' in secrets_config:
-        deprecate("default key in secrets.yaml is deprecated.", "Place all child parameters directly at the root")
+        deprecate("0.9.0", "default key in secrets.yaml is deprecated.", "Place all child parameters directly at the root")
         secrets_config = dict(**secrets_config, **secrets_config.pop('default'))
 
     other = SecretsConfiguration.from_dict(secrets_config)

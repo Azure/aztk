@@ -41,7 +41,7 @@ class ClusterConfiguration(Model):
 
     def __init__(self, *args, **kwargs):
         if 'vm_count' in kwargs:
-            deprecate("vm_count is deprecated for ClusterConfiguration.", "Please use size instead.")
+            deprecate("0.9.0", "vm_count is deprecated for ClusterConfiguration.", "Please use size instead.")
             kwargs['size'] = kwargs.pop('vm_count')
 
         if 'vm_low_pri_count' in kwargs:
@@ -51,22 +51,22 @@ class ClusterConfiguration(Model):
         super().__init__(*args, **kwargs)
 
     @property
-    @deprecated()
+    @deprecated("0.9.0")
     def vm_count(self):
         return self.size
 
     @vm_count.setter
-    @deprecated()
+    @deprecated("0.9.0")
     def vm_count(self, value):
         self.size = value
 
     @property
-    @deprecated()
+    @deprecated("0.9.0")
     def vm_low_pri_count(self):
         return self.size_low_priority
 
     @vm_low_pri_count.setter
-    @deprecated()
+    @deprecated("0.9.0")
     def vm_low_pri_count(self, value):
         self.size_low_priority = value
 
@@ -101,7 +101,7 @@ class ClusterConfiguration(Model):
             )
 
         if self.custom_scripts:
-            deprecate("Custom scripts are DEPRECATED.", "Use plugins instead. See https://aztk.readthedocs.io/en/v0.7.0/15-plugins.html.")
+            deprecate("0.9.0", "Custom scripts are DEPRECATED.", "Use plugins instead. See https://aztk.readthedocs.io/en/v0.7.0/15-plugins.html.")
 
         if self.scheduling_target == SchedulingTarget.Dedicated and self.size == 0:
             raise error.InvalidModelError("Scheduling target cannot be Dedicated if dedicated vm size is 0")

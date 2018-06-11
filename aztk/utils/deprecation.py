@@ -1,34 +1,34 @@
 import warnings
 import functools
 import inspect
-import aztk.version as version
 
-def deprecated(reason: str = None):
+def deprecated(version: str, advice: str = None):
     """
     This is a decorator which can be used to mark functions
     as deprecated. It will result in a warning being emitted
     when the function is used.
 
     Args:
-        reason (str): Reason to why this class or function is being deprecated
+        version (str): The version in which the deprecated functionality will be removed
+        advice (str): Sentence explaining alternatives to the deprecated functionality.
     """
 
     def decorator(func):
         if inspect.isclass(func):
-            msg = "Call to deprecated class {name} ({reason})."
+            msg = "Call to deprecated class {name}."
         else:
-            msg = "Call to deprecated function {name} ({reason})."
+            msg = "Call to deprecated function {name}."
 
         @functools.wraps(func)
         def new_func(*args, **kwargs):
-            deprecate(msg.format(name=func.__name__, reason=reason))
+            deprecate(version=version, message=msg.format(name=func.__name__, advice=advice), advice=advice)
             return func(*args, **kwargs)
         return new_func
 
     return decorator
 
 
-def deprecate(message: str, advice: str = ""):
+def deprecate(version: str, message: str, advice: str = ""):
     """
     Print a deprecation warning.
 
@@ -37,18 +37,8 @@ def deprecate(message: str, advice: str = ""):
         advice (str): Sentence explaining alternatives to the deprecated functionality.
     """
 
-    deprecated_version = _get_deprecated_version()
     warnings.simplefilter('always', DeprecationWarning)  # turn off filter
-    warnings.warn("{0} It will be removed in Aztk version {1}. {2}".format(message, deprecated_version, advice),
+    warnings.warn("{0} It will be removed in Aztk version {1}. {2}".format(message, version, advice),
                   category=DeprecationWarning,
                   stacklevel=2)
     warnings.simplefilter('default', DeprecationWarning)  # reset filter
-
-
-def _get_deprecated_version():
-    """
-    Returns the next version where the deprecated functionality will be removed
-    """
-    if version.major == 0:
-        return "0.{minor}.0".format(minor=version.minor + 1)
-    return "{major}.0.0".format(major=version.major + 1)

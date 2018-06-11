@@ -85,8 +85,8 @@ def test_scheduling_target_dedicated_with_no_dedicated_nodes_raise_error():
             cluster_id="abc",
             scheduling_target=SchedulingTarget.Dedicated,
             vm_size="standard_a2",
-            vm_count=0,
-            vm_low_pri_count=2,
+            size=0,
+            size_low_priority=2,
             toolkit=Toolkit(software="spark", version="1.6.3"),
         )
 
