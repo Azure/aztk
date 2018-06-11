@@ -445,9 +445,10 @@ def print_cluster_conf(cluster_conf: ClusterConfiguration, wait: bool):
     log.info("gpu enabled:             %s", str(cluster_conf.gpu_enabled()))
     log.info("docker repo name:        %s", cluster_conf.get_docker_repo())
     log.info("wait for cluster:        %s", wait)
-    log.info("username:                %s", user_configuration.username)
-    if user_configuration.password:
-        log.info("Password: %s", '*' * len(user_configuration.password))
+    if user_configuration:
+        log.info("username:                %s", user_configuration.username)
+        if user_configuration.password:
+            log.info("Password: %s", '*' * len(user_configuration.password))
     log.info("Plugins:")
     if not cluster_conf.plugins:
         log.info("    None Configured")
