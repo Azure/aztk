@@ -57,9 +57,9 @@ class File(aztk.models.File):
 
 
 class SparkConfiguration(Model):
-    spark_defaults_conf = fields.String()
-    spark_env_sh = fields.String()
-    core_site_xml = fields.String()
+    spark_defaults_conf = fields.String(default=None)
+    spark_env_sh = fields.String(default=None)
+    core_site_xml = fields.String(default=None)
     jars = fields.List()
 
     def __init__(self, *args, **kwargs):

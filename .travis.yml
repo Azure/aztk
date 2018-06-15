@@ -9,7 +9,7 @@ install:
 
 script:
   - pylint -E aztk
-  - pytest --ignore=tests/spark/integration_tests
+  - pytest --ignore=tests/integration_tests
 
 branches:
   only:
