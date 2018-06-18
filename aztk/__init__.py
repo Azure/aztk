@@ -5,3 +5,6 @@ logging.getLogger("azure.storage").setLevel(logging.CRITICAL)
 
 # msrestazure logs warning for keyring
 logging.getLogger("msrestazure").setLevel(logging.CRITICAL)
+
+# msrest
+logging.getLogger("msrest").setLevel(logging.CRITICAL)
