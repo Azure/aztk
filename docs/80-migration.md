@@ -33,16 +33,16 @@ A number of changes have been made that affect previously init'ed aztk environme
 7. Create your new 0.7.0 cluster!
 
 ### cluster.yaml
-In cluster.yaml, the `toolkit` key has been added. It is used to select the default, supported Docker images. Please refer to [the configuration file documentation.](https://aztk.readthedocs.io/en/v0.7.0/13-configuration.html#cluster-yaml)
+In cluster.yaml, the `toolkit` key has been added. It is used to select the default, supported Docker images. Please refer to [the configuration file documentation.](13-configuration.html#cluster-yaml)
 
 ## Docker images
 A major backwards-incompatible refactor of the Docker images has occurred. Previous Docker images will no longer work with 0.7.0. To update to a new supported docker image, you will need to update your `.aztk/cluster.yaml` configuration file with the `toolkit` block in place of `docker_repo`. If you do not do so, cluster creation will fail!
 
-Please refer to the [the configuration file documentation](https://aztk.readthedocs.io/en/v0.7.0/13-configuration.html#cluster-yaml) for more information on the `toolkit` in `cluster.yaml`.
+Please refer to the [the configuration file documentation](13-configuration.html#cluster-yaml) for more information on the `toolkit` in `cluster.yaml`.
 
 
 ## Custom scripts depreciation and Plugins
-Custom scripts have been depreciated in favor of Plugins. Plugins have a number of advantages, including the ability to execute on the host (and not in the Spark Docker container). A number of supported plugins are shipped with aztk, please refer to [the plugin documentation to learn more.](https://aztk.readthedocs.io/en/v0.7.0/15-plugins.html)
+Custom scripts have been depreciated in favor of Plugins. Plugins have a number of advantages, including the ability to execute on the host (and not in the Spark Docker container). A number of supported plugins are shipped with aztk, please refer to [the plugin documentation to learn more.](15-plugins.html)
 
 ## Read the Docs
-[Documentation has migrated to readthedocs](https://aztk.readthedocs.io/en/v0.7.0).
+[Documentation has migrated to readthedocs](https://aztk.readthedocs.io/en/latest).
