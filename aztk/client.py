@@ -297,7 +297,7 @@ class Client:
         finally:
             self.__delete_user_on_pool(generated_username, pool.id, nodes)
 
-    def __cluster_copy(self, cluster_id, source_path, destination_path, container_name=None, internal=False, get=False, timeout=None):
+    def __cluster_copy(self, cluster_id, source_path, destination_path=None, container_name=None, internal=False, get=False, timeout=None):
         pool, nodes = self.__get_pool_details(cluster_id)
         nodes = list(nodes)
         if internal:

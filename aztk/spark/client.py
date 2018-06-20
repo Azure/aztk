@@ -184,12 +184,12 @@ class Client(BaseClient):
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
-    def cluster_copy(self, cluster_id: str, source_path: str, destination_path: str, host: bool = False, internal: bool = False, timeout=None):
+    def cluster_copy(self, cluster_id: str, source_path: str, destination_path: str, host: bool = False, internal: bool = False, timeout: int = None):
         try:
             container_name = None if host else 'spark'
             return self.__cluster_copy(cluster_id,
                                        source_path,
-                                       destination_path,
+                                       destination_path=destination_path,
                                        container_name=container_name,
                                        get=False,
                                        internal=internal,
@@ -197,12 +197,12 @@ class Client(BaseClient):
         except batch_error.BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
-    def cluster_download(self, cluster_id: str, source_path: str, destination_path: str, host: bool = False, internal: bool = False, timeout=None):
+    def cluster_download(self, cluster_id: str, source_path: str, destination_path: str = None, host: bool = False, internal: bool = False, timeout: int = None):
         try:
             container_name = None if host else 'spark'
             return self.__cluster_copy(cluster_id,
                                        source_path,
-                                       destination_path,
+                                       destination_path=destination_path,
                                        container_name=container_name,
                                        get=True,
                                        internal=internal,
@@ -333,7 +333,7 @@ class Client(BaseClient):
         for job in jobs:
             self.wait_until_job_finished(job)
 
-    def run_cluster_diagnostics(self, cluster_id, output_directory):
+    def run_cluster_diagnostics(self, cluster_id, output_directory=None):
         try:
             output = cluster_diagnostic_helper.run(self, cluster_id, output_directory)
             return output

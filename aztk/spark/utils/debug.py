@@ -10,7 +10,7 @@ import tarfile
 from subprocess import STDOUT, CalledProcessError, check_output
 from zipfile import ZIP_DEFLATED, ZipFile
 
-import docker # pylint: disable=import-error
+import docker    # pylint: disable=import-error
 
 
 def main():
@@ -86,7 +86,7 @@ def get_docker_containers(docker_client):
             # get docker container logs
             logs.append((container.name + "/docker.log", container.logs()))
             logs.append(get_docker_process_status(container))
-            if container.name == "spark": #TODO: find a more robust way to get specific info off specific containers
+            if container.name == "spark":    #TODO: find a more robust way to get specific info off specific containers
                 logs.extend(get_container_aztk_script(container))
                 logs.extend(get_spark_logs(container))
                 logs.extend(get_spark_app_logs(container))
@@ -112,7 +112,7 @@ def get_docker_process_status(container):
 def get_container_aztk_script(container):
     aztk_path = "/mnt/batch/tasks/startup/wd"
     try:
-        stream, _ = container.get_archive(aztk_path) # second item is stat info
+        stream, _ = container.get_archive(aztk_path)    # second item is stat info
         return extract_tar_in_memory(container, stream)
     except docker.errors.APIError as e:
         return (container.name + "/" + "aztk-scripts.err", e.__str__())
@@ -121,7 +121,7 @@ def get_container_aztk_script(container):
 def get_spark_logs(container):
     spark_logs_path = "/home/spark-current/logs"
     try:
-        stream, _ = container.get_archive(spark_logs_path) # second item is stat info
+        stream, _ = container.get_archive(spark_logs_path)    # second item is stat info
         return extract_tar_in_memory(container, stream)
     except docker.errors.APIError as e:
         return [(container.name + "/" + "spark-logs.err", e.__str__())]
@@ -139,9 +139,12 @@ def get_spark_app_logs(container):
 def filter_members(members):
     skip_files = ["id_rsa", "id_rsa.pub", "docker.log"]
     skip_extensions = [".pyc", ".zip"]
+    skip_directories = [".venv"]
     for tarinfo in members:
-        if (os.path.splitext(tarinfo.name)[1] not in skip_extensions and
-                os.path.basename(tarinfo.name) not in skip_files):
+        member_path = os.path.normpath(tarinfo.name).split(os.sep)
+        if (not any(directory in skip_directories for directory in member_path)
+                and os.path.basename(tarinfo.name) not in skip_files
+                and os.path.splitext(tarinfo.name)[1] not in skip_extensions):
             yield tarinfo
 
 

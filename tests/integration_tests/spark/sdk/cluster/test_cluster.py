@@ -2,6 +2,7 @@ import subprocess
 import os
 import time
 from datetime import datetime
+from zipfile import ZipFile
 
 import azure.batch.models as batch_models
 from azure.batch.models import BatchErrorException
@@ -56,6 +57,7 @@ def clean_up_cluster(cluster_id):
         # pass in the event that the cluster does not exist
         pass
 
+
 def ensure_spark_master(cluster_id):
     results = spark_client.cluster_run(cluster_id,
                 "if $AZTK_IS_MASTER ; then $SPARK_HOME/sbin/spark-daemon.sh status org.apache.spark.deploy.master.Master 1 ;" \
@@ -66,6 +68,7 @@ def ensure_spark_master(cluster_id):
         print(result[0])
         assert result[0] in ["org.apache.spark.deploy.master.Master is running.", "AZTK_IS_MASTER is false"]
 
+
 def ensure_spark_worker(cluster_id):
     results = spark_client.cluster_run(cluster_id,
                 "if $AZTK_IS_WORKER ; then $SPARK_HOME/sbin/spark-daemon.sh status org.apache.spark.deploy.worker.Worker 1 ;" \
@@ -75,9 +78,11 @@ def ensure_spark_worker(cluster_id):
             raise result
         assert result[0] in ["org.apache.spark.deploy.worker.Worker is running.", "AZTK_IS_WORKER is false"]
 
+
 def ensure_spark_processes(cluster_id):
     ensure_spark_master(cluster_id)
     ensure_spark_worker(cluster_id)
+
 
 def wait_for_all_nodes(cluster_id, nodes):
     while True:
@@ -88,6 +93,7 @@ def wait_for_all_nodes(cluster_id, nodes):
             nodes = spark_client.get_cluster(cluster_id).nodes
             continue
         break
+
 
 def test_create_cluster():
     test_id = "test-create-"
@@ -383,7 +389,7 @@ def test_delete_cluster():
         clean_up_cluster(cluster_configuration.cluster_id)
 
 def test_spark_processes_up():
-    test_id = "test-spark-processes-up"
+    test_id = "test-spark-processes-up-"
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
         cluster_id=test_id+base_cluster_id,
         vm_count=2,
@@ -403,6 +409,47 @@ def test_spark_processes_up():
 
         assert success is True
 
+    except (AztkError, BatchErrorException):
+        assert False
+
+    finally:
+        clean_up_cluster(cluster_configuration.cluster_id)
+
+
+def test_debug_tool():
+    test_id = "debug-tool-"
+    cluster_configuration = aztk.spark.models.ClusterConfiguration(
+        cluster_id=test_id+base_cluster_id,
+        size=2,
+        size_low_priority=0,
+        vm_size="standard_f2",
+        subnet_id=None,
+        custom_scripts=None,
+        file_shares=None,
+        toolkit=aztk.spark.models.SparkToolkit(version="2.3.0"),
+        spark_configuration=None
+    )
+    expected_members = [
+        "df.txt",
+        "hostname.txt",
+        "docker-images.txt",
+        "docker-containers.txt",
+        "spark/docker.log",
+        "spark/ps_aux.txt",
+        "spark/logs",
+        "spark/wd"
+    ]
+    try:
+        cluster = spark_client.create_cluster(cluster_configuration, wait=True)
+        nodes = [node for node in cluster.nodes]
+        wait_for_all_nodes(cluster.id, nodes)
+        cluster_output = spark_client.run_cluster_diagnostics(cluster_id=cluster.id)
+        for node_output in cluster_output:
+            node_output.output.seek(0) # tempfile requires seek 0 before reading
+            debug_zip = ZipFile(node_output.output)
+            assert node_output.id in [node.id for node in nodes]
+            assert node_output.error is None
+            assert any(member in name for name in debug_zip.namelist() for member in expected_members)
     except (AztkError, BatchErrorException):
         assert False
 

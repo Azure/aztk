@@ -463,12 +463,21 @@ def log_property(label: str, value: str):
     log.info("{0:30} {1}".format(label, value))
 
 
-def log_execute_result(node_id, result):
-    log.info("-" * (len(node_id) + 4))
-    log.info("| %s |", node_id)
-    log.info("-" * (len(node_id) + 4))
-    if isinstance(result, Exception):
-        log.info("%s\n", result)
+def log_node_copy_output(node_output):
+    log.info("-" * (len(node_output.id) + 4))
+    log.info("| %s |", node_output.id)
+    log.info("-" * (len(node_output.id) + 4))
+    if node_output.error:
+        log.error(node_output.error)
     else:
-        for line in result:
-            log.print(line)
+        log.print("Copy successful")
+
+
+def log_node_run_output(node_output):
+    log.info("-" * (len(node_output.id) + 4))
+    log.info("| %s |", node_output.id)
+    log.info("-" * (len(node_output.id) + 4))
+    if node_output.error:
+        log.error("%s\n", node_output.error)
+    else:
+        log.print(node_output.output)

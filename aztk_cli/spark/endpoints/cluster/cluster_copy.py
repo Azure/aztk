@@ -30,15 +30,5 @@ def execute(args: typing.NamedTuple):
             destination_path=args.dest_path,
             internal=args.internal
         )
-    [print_copy_result(node_id, result, err) for node_id, result, err in copy_output]
-    sys.exit(0 if all([result for _, result, _ in copy_output]) else 1)
-
-
-def print_copy_result(node_id, success, err):
-    log.print("-" * (len(node_id) + 6))
-    log.print("| %s |", node_id)
-    log.print("-" * (len(node_id) + 6))
-    if success:
-        log.print("Copy successful")
-    else:
-        log.print(err)
+    [utils.log_node_copy_output(node_output) for node_output in copy_output]
+    sys.exit(0 if not any([node_output.error for node_output in copy_output]) else 1)

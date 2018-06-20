@@ -13,6 +13,7 @@ from .file import File
 from .remote_login import RemoteLogin
 from .ssh_log import SSHLog
 from .vm_image import VmImage
+from .node_output import NodeOutput
 from .software import Software
 from .cluster import Cluster
 from .scheduling_target import SchedulingTarget
