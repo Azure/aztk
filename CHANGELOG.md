@@ -1,6 +1,15 @@
 # Changelog
 
-##  0.8.0 (2018-06-07)
+##  0.8.1 (2018-06-20)
+
+**Bug Fixes**
+* docs links version (#614) ([a8f8e92](https://github.com/Azure/aztk/commit/a8f8e92)), closes [#614](https://github.com/Azure/aztk/issues/614)
+* set defaults for SparkConfiguration, add tests (#606) ([5306a2a](https://github.com/Azure/aztk/commit/5306a2a)), closes [#606](https://github.com/Azure/aztk/issues/606)
+* spark debug tool filter out .venv, make debug tool testable (#612) ([4e0b1ec](https://github.com/Azure/aztk/commit/4e0b1ec)), closes [#612](https://github.com/Azure/aztk/issues/612)
+* Suppress msrest warnings (#611) ([883980d](https://github.com/Azure/aztk/commit/883980d)), closes [#611](https://github.com/Azure/aztk/issues/611)
+
+
+##  0.8.0 (2018-06-12)
 
 **Deprecated Features**
 * ClusterConfiguration fields vm_count and vm_count_low_pri have been renamed to size and size_low_priority
