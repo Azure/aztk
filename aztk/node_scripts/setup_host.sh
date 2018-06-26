@@ -13,7 +13,6 @@ docker_repo_name=$2
 
 echo "Installing pre-reqs"
 apt-get -y update
-apt-get install -y --no-install-recommends linux-image-extra-$(uname -r) linux-image-extra-virtual
 apt-get install -y --no-install-recommends apt-transport-https
 apt-get install -y --no-install-recommends curl
 apt-get install -y --no-install-recommends ca-certificates

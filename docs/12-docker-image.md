@@ -17,7 +17,7 @@ aztk spark cluster create ... --docker-repo aztk/base:spark1.6.3
 ```
 
 ## Using a custom Docker Image
-You can build your own Docker image on top or beneath one of our supported base images _OR_ you can modify the [supported Dockerfiles](https://github.com/Azure/aztk/tree/v0.7.0/docker-image) and build your own image that way.
+You can build your own Docker image on top or beneath one of our supported base images _OR_ you can modify the [supported Dockerfiles](https://github.com/Azure/aztk/tree/v0.7.2/docker-image) and build your own image that way.
 
 Once you have your Docker image built and hosted publicly, you can then use the **--docker-repo** parameter in your **aztk spark cluster create** command to point to it.
 
@@ -92,4 +92,4 @@ If you are using your own version of Spark, make that it is symlinked by "/home/
 ## Hosting your Docker Image
 By default, aztk assumes that your Docker images are publicly hosted on Docker Hub. However, we also support hosting your images privately.
 
-See [here](https://github.com/Azure/aztk/blob/v0.7.0/docs/12-docker-image.md#using-a-custom-docker-image-that-is-privately-hosted) to learn more about using privately hosted Docker Images.
+See [here](https://github.com/Azure/aztk/blob/v0.7.2/docs/12-docker-image.md#using-a-custom-docker-image-that-is-privately-hosted) to learn more about using privately hosted Docker Images.
