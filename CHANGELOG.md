@@ -1,6 +1,10 @@
 
 # Changelog
 
+##  0.7.2 (2018-06-26)
+**Bug Fixes**
+* Fix start task apt-get install bug (#619) ([cc8b2fc](https://github.com/Azure/aztk/commit/cc8b2fc)), closes [#619](https://github.com/Azure/aztk/issues/619)
+
 ##  0.7.1 (2018-05-11)
 
 **Bug Fixes**
