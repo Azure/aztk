@@ -27,8 +27,8 @@ def execute(args: typing.NamedTuple):
     spark_client = aztk.spark.Client(config.load_aztk_secrets())
     with utils.Spinner():
         if args.node_id:
-            results = [spark_client.node_run(args.cluster_id, args.node_id, args.command, args.host, args.internal)]
+            results = [spark_client.cluster.node_run(args.cluster_id, args.node_id, args.command, args.host, args.internal)]
         else:
-            results = spark_client.cluster_run(args.cluster_id, args.command, args.host, args.internal)
+            results = spark_client.cluster.run(args.cluster_id, args.command, args.host, args.internal)
 
     [utils.log_node_run_output(node_output) for node_output in results]

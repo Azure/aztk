@@ -30,7 +30,7 @@ def execute(args: typing.NamedTuple):
     if args.tail:
         utils.stream_logs(client=spark_client, cluster_id=args.cluster_id, application_name=args.app_name)
     else:
-        app_log = spark_client.get_application_log(cluster_id=args.cluster_id, application_name=args.app_name)
+        app_log = spark_client.cluster.get_application_log(id=args.cluster_id, application_name=args.app_name)
         if args.output:
             with utils.Spinner():
                 with open(os.path.abspath(os.path.expanduser(args.output)), "w", encoding="UTF-8") as f:

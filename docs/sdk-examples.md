@@ -5,25 +5,26 @@
 You can get the values for this by either running the [Getting Started script](getting-started) or using [Batch Labs](https://github.com/Azure/BatchLabs)
 
 ```python
-    import sys, os, time
-    import aztk.spark
-    from aztk.error import AztkError
+import os
+import sys
+import time
 
-    # set your secrets
-    secrets_confg = aztk.spark.models.SecretsConfiguration(
-        service_principal=aztk.spark.models.ServicePrincipalConfiguration(
-            tenant_id="<org>.onmicrosoft.com",
-            client_id="",
-            credential="",
-            batch_account_resource_id="",
-            storage_account_resource_id="",
-        ),
-        ssh_pub_key=""
-    )
+import aztk.spark
+from aztk.error import AztkError
 
+# set your secrets
+secrets_configuration = aztk.spark.models.SecretsConfiguration(
+    service_principal=aztk.spark.models.ServicePrincipalConfiguration(
+        tenant_id="<org>.onmicrosoft.com",
+        client_id="",
+        credential="",
+        batch_account_resource_id="",
+        storage_account_resource_id="",
+    ),
+    ssh_pub_key="")
 
-    # create a client
-    client = aztk.spark.Client(secrets_confg)
+# create a client
+client = aztk.spark.Client(secrets_configuration)
 ```
 
 
@@ -31,79 +32,55 @@ You can get the values for this by either running the [Getting Started script](g
 
 ```python
 # list available clusters
-clusters = client.list_clusters()
+clusters = client.cluster.list()
 ```
 
 ## Create a new cluster
 
 ```python
-# define a custom script
-plugins = [
-    aztk.spark.models.plugins.JupyterPlugin(),
-]
-
-# define spark configuration
-spark_conf = aztk.spark.models.SparkConfiguration(
-    spark_defaults_conf=os.path.join(ROOT_PATH, 'config', 'spark-defaults.conf'),
-    spark_env_sh=os.path.join(ROOT_PATH, 'config', 'spark-env.sh'),
-    core_site_xml=os.path.join(ROOT_PATH, 'config', 'core-site.xml'),
-    jars=[os.path.join(ROOT_PATH, 'config', 'jars', jar) for jar in os.listdir(os.path.join(ROOT_PATH, 'config', 'jars'))]
-)
+configuration_file_path = "/path/to/spark/configuration/files"
+spark_configuration = aztk.spark.models.SparkConfiguration(
+    spark_defaults_conf=os.path.join(configuration_file_path, 'spark-defaults.conf'),
+    spark_env_sh=os.path.join(configuration_file_path, 'spark-env.sh'),
+    core_site_xml=os.path.join(configuration_file_path, 'core-site.xml'),
+    jars=[
+        os.path.join(configuration_file_path, 'jars', jar)
+        for jar in os.listdir(os.path.join(configuration_file_path, 'jars'))
+    ])
 
 # configure my cluster
-cluster_config = aztk.spark.models.ClusterConfiguration(
+cluster_configuration = aztk.spark.models.ClusterConfiguration(
     cluster_id="sdk-test",
     toolkit=aztk.spark.models.SparkToolkit(version="2.3.0"),
-    size_low_priority=2,
+    size=2,
     vm_size="standard_f2",
-    plugins=plugins,
-    spark_configuration=spark_conf
-)
+    spark_configuration=spark_configuration)
 
 # create a cluster, and wait until it is ready
 try:
-    cluster = client.create_cluster(cluster_config)
-    cluster = client.wait_until_cluster_is_ready(cluster.id)
+    cluster = client.cluster.create(cluster_configuration, wait=True)
 except AztkError as e:
-    print(e.message)
-    sys.exit()
+    raise e
 
 ```
 
 ## Get an exiting cluster
 ```python
-    cluster = client.get_cluster(cluster_config.cluster_id)
+# get details of the cluster
+cluster = client.cluster.get(cluster.id)
 ```
 
 
 ## Run an application on the cluster
 ```python
-
-# create some apps to run
+# define a Spark application to run
 app1 = aztk.spark.models.ApplicationConfiguration(
     name="pipy1",
     application=os.path.join(ROOT_PATH, 'examples', 'src', 'main', 'python', 'pi.py'),
-    application_args="10"
-)
+    application_args="10")
 
-app2 = aztk.spark.models.ApplicationConfiguration(
-    name="pipy2",
-    application=os.path.join(ROOT_PATH, 'examples', 'src', 'main', 'python', 'pi.py'),
-    application_args="20"
-)
-
-app3 = aztk.spark.models.ApplicationConfiguration(
-    name="pipy3",
-    application=os.path.join(ROOT_PATH, 'examples', 'src', 'main', 'python', 'pi.py'),
-    application_args="30"
-)
-
-# submit an app and wait until it is finished running
-client.submit(cluster.id, app1)
-client.wait_until_application_done(cluster.id, app1.name)
-
-# submit some other apps to the cluster in parallel
-client.submit_all_applications(cluster.id, [app2, app3])
+# submit the application and wait until it is finished running
+client.cluster.submit(cluster.id, app1)
 ```
 
 
@@ -118,28 +95,27 @@ print(app1_logs.log)
 ## Get status of app
 
 ```python
-status = client.get_application_status(cluster_config.cluster_id, app2.name)
+# get status of application
+status = client.cluster.get_application_status(cluster_configuration.cluster_id, app1.name)
 ```
 
 ## Stream logs of app, print to console as it runs
 ```python
-
+# stream logs of app, print to console as it runs
 current_bytes = 0
 while True:
-    app2_logs = client.get_application_log(
-        cluster_id=cluster_config.cluster_id,
-        application_name=app2.name,
-        tail=True,
-        current_bytes=current_bytes)
+    app1_logs = client.cluster.get_application_log(
+        id=cluster_configuration.cluster_id, application_name=app1.name, tail=True, current_bytes=current_bytes)
 
-    print(app2_logs.log, end="")
+    print(app1_logs.log, end="")
 
-    if app2_logs.application_state == 'completed':
+    if app1_logs.application_state == 'completed':
         break
-    current_bytes = app2_logs.total_bytes
+    current_bytes = app1_logs.total_bytes
     time.sleep(1)
-
-# wait until all jobs finish, then delete the cluster
-client.wait_until_applications_done(cluster.id)
-client.delete_cluster(cluster.id)
+```
+## Stream logs of app, print to console as it runs
+```python
+# delete the cluster
+client.cluster.delete(cluster.id)
 ```

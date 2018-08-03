@@ -8,12 +8,19 @@ aztk.spark package
 aztk.spark.client module
 ------------------------
 
-.. automodule:: aztk.spark.client
+.. autoclass:: aztk.spark.client.Client
     :members:
     :undoc-members:
     :show-inheritance:
 
-.. automodule:: aztk.spark
+
+.. autoclass:: aztk.spark.client.cluster.ClusterOperations 
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+.. autoclass:: aztk.spark.client.job.JobOperations 
     :members:
     :undoc-members:
     :show-inheritance:

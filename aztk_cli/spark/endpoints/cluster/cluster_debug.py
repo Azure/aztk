@@ -22,5 +22,5 @@ def execute(args: typing.NamedTuple):
     if not args.output:
         args.output = os.path.join(os.getcwd(), "debug-{0}-{1}".format(args.cluster_id, timestr))
     with utils.Spinner():
-        spark_client.run_cluster_diagnostics(cluster_id=args.cluster_id, output_directory=args.output)
+        spark_client.cluster.diagnostics(id=args.cluster_id, output_directory=args.output)
     # TODO: analyze results, display some info about status

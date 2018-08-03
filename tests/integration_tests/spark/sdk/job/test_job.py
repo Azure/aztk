@@ -7,39 +7,11 @@ from azure.batch.models import BatchErrorException
 import aztk.spark
 from aztk.error import AztkError
 from aztk_cli import config
-
-dt = datetime.now()
-time = dt.microsecond
-base_job_id = "job-{}".format(time)
+from tests.integration_tests.spark.sdk.get_client import get_spark_client, get_test_suffix
 
 
-# load secrets
-# note: this assumes secrets are set up in .aztk/secrets
-tenant_id = os.environ.get("TENANT_ID")
-client_id = os.environ.get("CLIENT_ID")
-credential = os.environ.get("CREDENTIAL")
-batch_account_resource_id = os.environ.get("BATCH_ACCOUNT_RESOURCE_ID")
-storage_account_resource_id = os.environ.get("STORAGE_ACCOUNT_RESOURCE_ID")
-ssh_pub_key = os.environ.get("ID_RSA_PUB")
-ssh_priv_key = os.environ.get("ID_RSA")
-keys = [tenant_id, client_id, credential, batch_account_resource_id,
-        storage_account_resource_id, ssh_priv_key, ssh_pub_key]
-
-if all(keys):
-    spark_client = aztk.spark.Client(
-        aztk.spark.models.SecretsConfiguration(
-            service_principal=aztk.spark.models.ServicePrincipalConfiguration(
-                tenant_id=tenant_id,
-                client_id=client_id,
-                credential=credential,
-                batch_account_resource_id=batch_account_resource_id,
-                storage_account_resource_id=storage_account_resource_id
-            )
-        )
-    )
-else:
-    # fallback to local secrets if environment variables don't exist
-    spark_client = aztk.spark.Client(config.load_aztk_secrets())
+base_job_id = get_test_suffix("job")
+spark_client = get_spark_client()
 
 
 def test_submit_job():
@@ -47,12 +19,12 @@ def test_submit_job():
     app1 = aztk.spark.models.ApplicationConfiguration(
         name="pipy100",
         application="./examples/src/main/python/pi.py",
-        application_args=[100]
+        application_args=[10]
     )
     app2 = aztk.spark.models.ApplicationConfiguration(
         name="pipy101",
         application="./examples/src/main/python/pi.py",
-        application_args=[100]
+        application_args=[10]
     )
     job_configuration = aztk.spark.models.JobConfiguration(
         id=test_id+base_job_id,
@@ -64,8 +36,7 @@ def test_submit_job():
         max_low_pri_nodes=0
     )
     try:
-        job = spark_client.submit_job(job_configuration=job_configuration)
-        spark_client.wait_until_job_finished(job_id=job_configuration.id)
+        job = spark_client.job.submit(job_configuration=job_configuration, wait=True)
 
         assert job.id == job_configuration.id
         assert job.state is not None
@@ -82,12 +53,12 @@ def test_list_jobs():
     app1 = aztk.spark.models.ApplicationConfiguration(
         name="pipy100",
         application="./examples/src/main/python/pi.py",
-        application_args=[100]
+        application_args=[10]
     )
     app2 = aztk.spark.models.ApplicationConfiguration(
         name="pipy101",
         application="./examples/src/main/python/pi.py",
-        application_args=[100]
+        application_args=[10]
     )
     job_configuration = aztk.spark.models.JobConfiguration(
         id=test_id+base_job_id,
@@ -101,10 +72,9 @@ def test_list_jobs():
         worker_on_master=True
     )
     try:
-        spark_client.submit_job(job_configuration=job_configuration)
-        spark_client.wait_until_job_finished(job_configuration.id)
+        spark_client.job.submit(job_configuration=job_configuration, wait=True)
 
-        jobs = spark_client.list_jobs()
+        jobs = spark_client.job.list()
 
         assert jobs is not None
         assert job_configuration.id in [job.id for job in jobs]
@@ -121,12 +91,12 @@ def test_list_applications():
     app1 = aztk.spark.models.ApplicationConfiguration(
         name="pipy100",
         application="./examples/src/main/python/pi.py",
-        application_args=[100]
+        application_args=[10]
     )
     app2 = aztk.spark.models.ApplicationConfiguration(
         name="pipy101",
         application="./examples/src/main/python/pi.py",
-        application_args=[100]
+        application_args=[10]
     )
     job_configuration = aztk.spark.models.JobConfiguration(
         id=test_id+base_job_id,
@@ -139,10 +109,9 @@ def test_list_applications():
         max_low_pri_nodes=0
     )
     try:
-        spark_client.submit_job(job_configuration=job_configuration)
-        spark_client.wait_until_job_finished(job_configuration.id)
+        spark_client.job.submit(job_configuration=job_configuration, wait=True)
 
-        applications = spark_client.list_applications(job_id=job_configuration.id)
+        applications = spark_client.job.list_applications(id=job_configuration.id)
 
         assert applications not in (None, [])
         assert len(applications) == 2
@@ -161,12 +130,12 @@ def test_get_job():
     app1 = aztk.spark.models.ApplicationConfiguration(
         name="pipy100",
         application="./examples/src/main/python/pi.py",
-        application_args=[100]
+        application_args=[10]
     )
     app2 = aztk.spark.models.ApplicationConfiguration(
         name="pipy101",
         application="./examples/src/main/python/pi.py",
-        application_args=[100]
+        application_args=[10]
     )
     job_configuration = aztk.spark.models.JobConfiguration(
         id=test_id+base_job_id,
@@ -180,10 +149,9 @@ def test_get_job():
         worker_on_master=True
     )
     try:
-        spark_client.submit_job(job_configuration=job_configuration)
-        spark_client.wait_until_job_finished(job_configuration.id)
+        spark_client.job.submit(job_configuration=job_configuration, wait=True)
 
-        job = spark_client.get_job(job_id=job_configuration.id)
+        job = spark_client.job.get(id=job_configuration.id)
         assert job.id == job_configuration.id
         assert app1.name in [app.name for app in job.applications]
         assert app2.name in [app.name for app in job.applications]
@@ -200,7 +168,7 @@ def test_get_application():
     app1 = aztk.spark.models.ApplicationConfiguration(
         name="pipy100",
         application="./examples/src/main/python/pi.py",
-        application_args=[100]
+        application_args=[10]
     )
     job_configuration = aztk.spark.models.JobConfiguration(
         id=test_id+base_job_id,
@@ -213,9 +181,8 @@ def test_get_application():
         max_low_pri_nodes=0
     )
     try:
-        spark_client.submit_job(job_configuration=job_configuration)
-        spark_client.wait_until_job_finished(job_configuration.id)
-        application = spark_client.get_application(job_id=job_configuration.id, application_name=app1.name)
+        spark_client.job.submit(job_configuration=job_configuration, wait=True)
+        application = spark_client.job.get_application(id=job_configuration.id, application_name=app1.name)
         assert isinstance(application, aztk.spark.models.Application)
         assert application.exit_code == 0
         assert application.state == "completed"
@@ -231,7 +198,7 @@ def test_get_application_log():
     app1 = aztk.spark.models.ApplicationConfiguration(
         name="pipy100",
         application="./examples/src/main/python/pi.py",
-        application_args=[100]
+        application_args=[10]
     )
     job_configuration = aztk.spark.models.JobConfiguration(
         id=test_id+base_job_id,
@@ -244,10 +211,9 @@ def test_get_application_log():
         max_low_pri_nodes=0
     )
     try:
-        spark_client.submit_job(job_configuration=job_configuration)
-        spark_client.wait_until_job_finished(job_configuration.id)
+        spark_client.job.submit(job_configuration=job_configuration, wait=True)
 
-        application_log = spark_client.get_job_application_log(job_id=job_configuration.id, application_name=app1.name)
+        application_log = spark_client.job.get_application_log(id=job_configuration.id, application_name=app1.name)
 
         assert isinstance(application_log, aztk.spark.models.ApplicationLog)
         assert application_log.log is not None
@@ -267,7 +233,7 @@ def test_delete_job():
     app1 = aztk.spark.models.ApplicationConfiguration(
         name="pipy100",
         application="./examples/src/main/python/pi.py",
-        application_args=[100]
+        application_args=[10]
     )
     job_configuration = aztk.spark.models.JobConfiguration(
         id=test_id+base_job_id,
@@ -281,12 +247,11 @@ def test_delete_job():
         worker_on_master=True
     )
     try:
-        spark_client.submit_job(job_configuration=job_configuration)
-        spark_client.wait_until_job_finished(job_configuration.id)
-        spark_client.delete_job(job_configuration.id)
-        assert job_configuration.id not in spark_client.list_jobs()
+        spark_client.job.submit(job_configuration=job_configuration, wait=True)
+        spark_client.job.delete(job_configuration.id)
+        assert job_configuration.id not in spark_client.job.list()
         try:
-            spark_client.get_job(job_configuration.id)
+            spark_client.job.get(job_configuration.id)
         except AztkError:
             # this should fail
             assert True
@@ -298,6 +263,6 @@ def test_delete_job():
 
 def clean_up_job(job_id):
     try:
-        spark_client.delete_job(job_id)
-    except (BatchErrorException, AztkError):
+        spark_client.job.delete(job_id)
+    except Exception:
         pass

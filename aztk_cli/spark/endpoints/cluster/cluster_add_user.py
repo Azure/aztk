@@ -30,12 +30,12 @@ def execute(args: typing.NamedTuple):
     if args.ssh_key:
         ssh_key = args.ssh_key
     else:
-        ssh_key = spark_client.secrets_config.ssh_pub_key
+        ssh_key = spark_client.secrets_configuration.ssh_pub_key
 
-    ssh_key, password = utils.get_ssh_key_or_prompt(ssh_key, args.username, args.password, spark_client.secrets_config)
+    ssh_key, password = utils.get_ssh_key_or_prompt(ssh_key, args.username, args.password, spark_client.secrets_configuration)
 
-    spark_client.create_user(
-        cluster_id=args.cluster_id,
+    spark_client.cluster.create_user(
+        id=args.cluster_id,
         username=args.username,
         password=password,
         ssh_key=ssh_key

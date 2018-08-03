@@ -13,21 +13,38 @@ import aztk.utils.constants as constants
 import aztk.utils.get_ssh_key as get_ssh_key
 import aztk.utils.helpers as helpers
 import aztk.utils.ssh as ssh_lib
+from aztk.client.cluster import CoreClusterOperations
+from aztk.client.job import CoreJobOperations
 from aztk.internal import cluster_data
-from aztk.utils import secure_utils
+from aztk.utils import deprecated, secure_utils
 
 
-class Client:
-    def __init__(self, secrets_config: models.SecretsConfiguration):
-        self.secrets_config = secrets_config
+class CoreClient:
+    """The base AZTK client that all other clients inherit from.
 
-        azure_api.validate_secrets(secrets_config)
-        self.batch_client = azure_api.make_batch_client(secrets_config)
-        self.blob_client = azure_api.make_blob_client(secrets_config)
+    **This client should not be used directly. Only software specific clients
+    should be used.**
 
+    """
+    def _get_context(self, secrets_configuration: models.SecretsConfiguration):
+        self.secrets_configuration = secrets_configuration
+
+        azure_api.validate_secrets(secrets_configuration)
+        self.batch_client = azure_api.make_batch_client(secrets_configuration)
+        self.blob_client = azure_api.make_blob_client(secrets_configuration)
+        context = {
+            'batch_client': self.batch_client,
+            'blob_client': self.blob_client,
+            'secrets_configuration': self.secrets_configuration,
+        }
+        return context
+
+    # ALL THE FOLLOWING METHODS ARE DEPRECATED AND WILL BE REMOVED IN 0.10.0
+    @deprecated("0.10.0")
     def get_cluster_config(self, cluster_id: str) -> models.ClusterConfiguration:
         return self._get_cluster_data(cluster_id).read_cluster_config()
 
+    @deprecated("0.10.0")
     def _get_cluster_data(self, cluster_id: str) -> cluster_data.ClusterData:
         """
         Returns ClusterData object to manage data related to the given cluster id
@@ -38,6 +55,7 @@ class Client:
     General Batch Operations
     '''
 
+    @deprecated("0.10.0")
     def __delete_pool_and_job(self, pool_id: str, keep_logs: bool = False):
         """
             Delete a pool and it's associated job
@@ -67,6 +85,7 @@ class Client:
 
         return job_exists or pool_exists
 
+    @deprecated("0.10.0")
     def __create_pool_and_job(self, cluster_conf: models.ClusterConfiguration, software_metadata_key: str, start_task, VmImageModel):
         """
             Create a pool and job
@@ -128,6 +147,7 @@ class Client:
 
         return helpers.get_cluster(cluster_conf.cluster_id, self.batch_client)
 
+    @deprecated("0.10.0")
     def __get_pool_details(self, cluster_id: str):
         """
             Print the information for the given cluster
@@ -138,6 +158,7 @@ class Client:
         nodes = self.batch_client.compute_node.list(pool_id=cluster_id)
         return pool, nodes
 
+    @deprecated("0.10.0")
     def __list_clusters(self, software_metadata_key):
         """
             List all the cluster on your account.
@@ -155,6 +176,7 @@ class Client:
                 aztk_pools.append(pool)
         return aztk_pools
 
+    @deprecated("0.10.0")
     def __create_user(self, pool_id: str, node_id: str, username: str, password: str = None, ssh_key: str = None) -> str:
         """
             Create a pool user
@@ -173,9 +195,10 @@ class Client:
                 is_admin=True,
                 password=password,
                 ssh_public_key=get_ssh_key.get_user_public_key(
-                    ssh_key, self.secrets_config),
+                    ssh_key, self.secrets_configuration),
                 expiry_time=datetime.now(timezone.utc) + timedelta(days=365)))
 
+    @deprecated("0.10.0")
     def __delete_user(self, pool_id: str, node_id: str, username: str) -> str:
         """
             Create a pool user
@@ -186,6 +209,7 @@ class Client:
         # Delete a user on the given node
         self.batch_client.compute_node.delete_user(pool_id, node_id, username)
 
+    @deprecated("0.10.0")
     def __get_remote_login_settings(self, pool_id: str, node_id: str):
         """
         Get the remote_login_settings for node
@@ -197,6 +221,7 @@ class Client:
             pool_id, node_id)
         return models.RemoteLogin(ip_address=result.remote_login_ip_address, port=str(result.remote_login_port))
 
+    @deprecated("0.10.0")
     def __create_user_on_node(self, username, pool_id, node_id, ssh_key=None, password=None):
         try:
             self.__create_user(pool_id=pool_id, node_id=node_id, username=username, ssh_key=ssh_key, password=password)
@@ -207,6 +232,7 @@ class Client:
             except batch_error.BatchErrorException as error:
                 raise error
 
+    @deprecated("0.10.0")
     def __generate_user_on_node(self, pool_id, node_id):
         generated_username = secure_utils.generate_random_string()
         ssh_key = RSA.generate(2048)
@@ -214,6 +240,7 @@ class Client:
         self.__create_user_on_node(generated_username, pool_id, node_id, ssh_pub_key)
         return generated_username, ssh_key
 
+    @deprecated("0.10.0")
     def __generate_user_on_pool(self, pool_id, nodes):
         generated_username = secure_utils.generate_random_string()
         ssh_key = RSA.generate(2048)
@@ -228,6 +255,7 @@ class Client:
 
         return generated_username, ssh_key
 
+    @deprecated("0.10.0")
     def __create_user_on_pool(self, username, pool_id, nodes, ssh_pub_key=None, password=None):
         with concurrent.futures.ThreadPoolExecutor() as executor:
             futures = {executor.submit(self.__create_user_on_node,
@@ -238,11 +266,13 @@ class Client:
                                        password): node for node in nodes}
             concurrent.futures.wait(futures)
 
+    @deprecated("0.10.0")
     def __delete_user_on_pool(self, username, pool_id, nodes):
         with concurrent.futures.ThreadPoolExecutor() as executor:
             futures = [executor.submit(self.__delete_user, pool_id, node.id, username) for node in nodes]
             concurrent.futures.wait(futures)
 
+    @deprecated("0.10.0")
     def __node_run(self, cluster_id, node_id, command, internal, container_name=None, timeout=None):
         pool, nodes = self.__get_pool_details(cluster_id)
         try:
@@ -271,6 +301,7 @@ class Client:
         finally:
             self.__delete_user(cluster_id, node.id, generated_username)
 
+    @deprecated("0.10.0")
     def __cluster_run(self, cluster_id, command, internal, container_name=None, timeout=None):
         pool, nodes = self.__get_pool_details(cluster_id)
         nodes = list(nodes)
@@ -297,6 +328,7 @@ class Client:
         finally:
             self.__delete_user_on_pool(generated_username, pool.id, nodes)
 
+    @deprecated("0.10.0")
     def __cluster_copy(self, cluster_id, source_path, destination_path=None, container_name=None, internal=False, get=False, timeout=None):
         pool, nodes = self.__get_pool_details(cluster_id)
         nodes = list(nodes)
@@ -325,6 +357,7 @@ class Client:
         finally:
             self.__delete_user_on_pool(generated_username, pool.id, nodes)
 
+    @deprecated("0.10.0")
     def __ssh_into_node(self, pool_id, node_id, username, ssh_key=None, password=None, port_forward_list=None, internal=False):
         if internal:
             result = self.batch_client.compute_node.get(pool_id=pool_id, node_id=node_id)
@@ -342,6 +375,7 @@ class Client:
             port_forward_list=port_forward_list,
         )
 
+    @deprecated("0.10.0")
     def __submit_job(self,
                      job_configuration,
                      start_task,
@@ -429,44 +463,3 @@ class Client:
         self.batch_client.job_schedule.add(setup)
 
         return self.batch_client.job_schedule.get(job_schedule_id=job_configuration.id)
-
-
-    '''
-    Define Public Interface
-    '''
-
-    def create_cluster(self, cluster_conf, wait: bool = False):
-        raise NotImplementedError()
-
-    def create_clusters_in_parallel(self, cluster_confs):
-        raise NotImplementedError()
-
-    def delete_cluster(self, cluster_id: str):
-        raise NotImplementedError()
-
-    def get_cluster(self, cluster_id: str):
-        raise NotImplementedError()
-
-    def list_clusters(self):
-        raise NotImplementedError()
-
-    def wait_until_cluster_is_ready(self, cluster_id):
-        raise NotImplementedError()
-
-    def create_user(self, cluster_id: str, username: str, password: str = None, ssh_key: str = None) -> str:
-        raise NotImplementedError()
-
-    def get_remote_login_settings(self, cluster_id, node_id):
-        raise NotImplementedError()
-
-    def cluster_run(self, cluster_id, command):
-        raise NotImplementedError()
-
-    def cluster_copy(self, cluster_id, source_path, destination_path):
-        raise NotImplementedError()
-
-    def cluster_download(self, cluster_id, source_path, destination_path):
-        raise NotImplementedError()
-
-    def submit_job(self, job):
-        raise NotImplementedError()

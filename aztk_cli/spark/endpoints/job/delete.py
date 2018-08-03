@@ -29,7 +29,7 @@ def execute(args: typing.NamedTuple):
 
     if not args.force:
         # check if job exists before prompting for confirmation
-        spark_client.get_job(job_id)
+        spark_client.job.get(id=job_id)
 
         if not args.keep_logs:
             log.warning("All logs persisted for this job will be deleted.")
@@ -40,7 +40,7 @@ def execute(args: typing.NamedTuple):
             log.error("Confirmation cluster id does not match. Please try again.")
             return
 
-    if spark_client.delete_job(job_id, args.keep_logs):
+    if spark_client.job.delete(id=job_id, keep_logs=args.keep_logs):
         log.info("Deleting Job %s", job_id)
     else:
         log.error("Job with id '%s' doesn't exist or was already deleted.", job_id)

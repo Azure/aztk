@@ -17,18 +17,18 @@ class MasterInvalidStateError(Exception):
     pass
 
 
-def wait_for_master_to_be_ready(client, cluster_id: str):
+def wait_for_master_to_be_ready(core_operations, spark_operations, cluster_id: str):
 
     master_node_id = None
     start_time = datetime.datetime.now()
     while True:
         if not master_node_id:
-            master_node_id = client.get_cluster(cluster_id).master_node_id
+            master_node_id = spark_operations.get(cluster_id).master_node_id
             if not master_node_id:
                 time.sleep(5)
                 continue
 
-        master_node = client.batch_client.compute_node.get(cluster_id, master_node_id)
+        master_node = core_operations.batch_client.compute_node.get(cluster_id, master_node_id)
 
         if master_node.state in [batch_models.ComputeNodeState.idle,  batch_models.ComputeNodeState.running]:
             break

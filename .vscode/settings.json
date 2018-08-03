@@ -14,5 +14,5 @@
   "python.formatting.provider": "yapf",
   "python.venvPath": "${workspaceFolder}/.venv/",
   "python.pythonPath": "${workspaceFolder}/.venv/Scripts/python.exe",
-  "python.unitTest.pyTestEnabled": true
+  "python.unitTest.pyTestEnabled": true,
 }

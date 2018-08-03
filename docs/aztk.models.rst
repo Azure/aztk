@@ -6,3 +6,4 @@ aztk.models package
     :members:
     :show-inheritance:
     :imported-members:
+    :undoc-members:

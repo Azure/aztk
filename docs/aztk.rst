@@ -9,7 +9,25 @@ aztk package
 aztk.client module
 ------------------
 
-.. autoclass:: aztk.client.Client
+.. autoclass:: aztk.client.CoreClient
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+.. autoclass:: aztk.client.base.BaseOperations 
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+.. autoclass:: aztk.client.cluster.CoreClusterOperations 
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+.. autoclass:: aztk.client.job.CoreJobOperations 
     :members:
     :undoc-members:
     :show-inheritance:

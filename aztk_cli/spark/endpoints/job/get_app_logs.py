@@ -22,7 +22,7 @@ def setup_parser(parser: argparse.ArgumentParser):
 
 def execute(args: typing.NamedTuple):
     spark_client = aztk.spark.Client(config.load_aztk_secrets())
-    app_log = spark_client.get_job_application_log(args.job_id, args.app_name)
+    app_log = spark_client.job.get_application_log(args.job_id, args.app_name)
     if args.output:
         with utils.Spinner():
             with open(os.path.abspath(os.path.expanduser(args.output)), "w", encoding="UTF-8") as f:

@@ -17,10 +17,10 @@ class SparkToolkit(aztk.models.Toolkit):
 
 
 class Cluster(aztk.models.Cluster):
-    def __init__(self, pool: batch_models.CloudPool = None, nodes: batch_models.ComputeNodePaged = None):
-        super().__init__(pool, nodes)
+    def __init__(self, cluster: aztk.models.Cluster):
+        super().__init__(cluster.pool, cluster.nodes)
         self.master_node_id = self.__get_master_node_id()
-        self.gpu_enabled = helpers.is_gpu_enabled(pool.vm_size)
+        self.gpu_enabled = helpers.is_gpu_enabled(cluster.pool.vm_size)
 
     def is_pool_running_spark(self, pool: batch_models.CloudPool):
         if pool.metadata is None:
@@ -47,7 +47,9 @@ class Cluster(aztk.models.Cluster):
 
 
 class RemoteLogin(aztk.models.RemoteLogin):
-    pass
+    def __init__(self, remote_login: aztk.models.RemoteLogin):
+        super().__init__(remote_login.ip_address, remote_login.port)
+
 
 class PortForwardingSpecification(aztk.models.PortForwardingSpecification):
     pass
@@ -286,16 +288,16 @@ class Job():
         self.creation_time = cloud_job_schedule.creation_time
         self.applications = [Application(task) for task in (cloud_tasks or [])]
         if pool:
-            self.cluster = Cluster(pool, nodes)
+            self.cluster = Cluster(aztk.models.Cluster(pool, nodes))
         else:
             self.cluster = None
 
 
-class ApplicationLog():
-    def __init__(self, name: str, cluster_id: str, log: str, total_bytes: int, application_state: batch_models.TaskState, exit_code: int):
-        self.name = name
-        self.cluster_id = cluster_id  # TODO: change to something cluster/job agnostic
-        self.log = log
-        self.total_bytes = total_bytes
-        self.application_state = application_state
-        self.exit_code = exit_code
+class ApplicationLog(aztk.models.ApplicationLog):
+    def __init__(self, application_log: aztk.models.ApplicationLog):
+        self.name = application_log.name
+        self.cluster_id = application_log.cluster_id    # TODO: change to something cluster/job agnostic
+        self.log = application_log.log
+        self.total_bytes = application_log.total_bytes
+        self.application_state = application_log.application_state
+        self.exit_code = application_log.exit_code

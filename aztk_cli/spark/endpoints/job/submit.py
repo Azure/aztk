@@ -48,4 +48,4 @@ def execute(args: typing.NamedTuple):
     )
 
     #TODO: utils.print_job_conf(job_configuration)
-    spark_client.submit_job(job_configuration)
+    spark_client.job.submit(job_configuration)

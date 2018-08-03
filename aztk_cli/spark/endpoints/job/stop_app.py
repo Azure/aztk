@@ -20,7 +20,7 @@ def setup_parser(parser: argparse.ArgumentParser):
 def execute(args: typing.NamedTuple):
     spark_client = aztk.spark.Client(config.load_aztk_secrets())
 
-    if spark_client.stop_job_app(args.job_id, args.app_name):
+    if spark_client.job.stop_application(args.job_id, args.app_name):
         log.info("Stopped app {0}".format(args.app_name))
     else:
         log.error("App with name {0} does not exist or was already deleted")

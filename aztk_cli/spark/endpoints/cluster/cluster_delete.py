@@ -40,7 +40,7 @@ def execute(args: typing.NamedTuple):
                 log.error("Confirmation cluster id does not match. Please try again.")
                 return
 
-        if spark_client.delete_cluster(cluster_id, args.keep_logs):
+        if spark_client.cluster.delete(id=cluster_id, keep_logs=args.keep_logs):
             log.info("Deleting cluster %s", cluster_id)
         else:
             log.error("Cluster with id '%s' doesn't exist or was already deleted.", cluster_id)

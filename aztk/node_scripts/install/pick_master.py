@@ -1,10 +1,11 @@
 """
     This is the code that all nodes will run in their start task to try to allocate the master
 """
-
 import azure.batch.batch_service_client as batch
 import azure.batch.models as batchmodels
 import azure.batch.models.batch_error as batcherror
+from msrest.exceptions import ClientRequestError
+
 from core import config
 
 MASTER_NODE_METADATA_KEY = "_spark_master_node"
@@ -36,7 +37,7 @@ def try_assign_self_as_master(client: batch.BatchServiceClient, pool: batchmodel
             if_match=pool.e_tag,
         ))
         return True
-    except batcherror.BatchErrorException:
+    except (batcherror.BatchErrorException, ClientRequestError):
         print("Couldn't assign itself as master the pool because the pool was modified since last get.")
         return False
 

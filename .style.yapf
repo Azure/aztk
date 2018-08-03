@@ -3,5 +3,5 @@ based_on_style=pep8
 spaces_before_comment=4
 split_before_logical_operator=True
 indent_width=4
-column_limit=140
+column_limit=120
 split_arguments_when_comma_terminated=True
