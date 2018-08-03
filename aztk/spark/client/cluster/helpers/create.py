@@ -12,6 +12,7 @@ POOL_ADMIN_USER_IDENTITY = batch_models.UserIdentity(
     auto_user=batch_models.AutoUserSpecification(
         scope=batch_models.AutoUserScope.pool, elevation_level=batch_models.ElevationLevel.admin))
 
+
 def _default_scheduling_target(vm_count: int):
     if vm_count == 0:
         return models.SchedulingTarget.Any
@@ -27,7 +28,10 @@ def _apply_default_for_cluster_config(configuration: models.ClusterConfiguration
     return cluster_conf
 
 
-def create_cluster(core_cluster_operations, spark_cluster_operations, cluster_conf: models.ClusterConfiguration, wait: bool = False):
+def create_cluster(core_cluster_operations,
+                   spark_cluster_operations,
+                   cluster_conf: models.ClusterConfiguration,
+                   wait: bool = False):
     """
     Create a new aztk spark cluster
 
@@ -47,14 +51,15 @@ def create_cluster(core_cluster_operations, spark_cluster_operations, cluster_co
         node_data = NodeData(cluster_conf).add_core().done()
         zip_resource_files = cluster_data.upload_node_data(node_data).to_resource_file()
 
-        start_task = spark_cluster_operations._generate_cluster_start_task(core_cluster_operations, zip_resource_files, cluster_conf.cluster_id,
-                                                 cluster_conf.gpu_enabled(), cluster_conf.get_docker_repo(),
-                                                 cluster_conf.file_shares, cluster_conf.plugins,
-                                                 cluster_conf.mixed_mode(), cluster_conf.worker_on_master)
+        start_task = spark_cluster_operations._generate_cluster_start_task(
+            core_cluster_operations, zip_resource_files, cluster_conf.cluster_id, cluster_conf.gpu_enabled(),
+            cluster_conf.get_docker_repo(), cluster_conf.file_shares, cluster_conf.plugins, cluster_conf.mixed_mode(),
+            cluster_conf.worker_on_master)
 
         software_metadata_key = base_models.Software.spark
 
-        cluster = core_cluster_operations.create(cluster_conf, software_metadata_key, start_task, constants.SPARK_VM_IMAGE)
+        cluster = core_cluster_operations.create(cluster_conf, software_metadata_key, start_task,
+                                                 constants.SPARK_VM_IMAGE)
 
         # Wait for the master to be ready
         if wait:

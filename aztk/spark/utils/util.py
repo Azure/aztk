@@ -30,7 +30,7 @@ def wait_for_master_to_be_ready(core_operations, spark_operations, cluster_id: s
 
         master_node = core_operations.batch_client.compute_node.get(cluster_id, master_node_id)
 
-        if master_node.state in [batch_models.ComputeNodeState.idle,  batch_models.ComputeNodeState.running]:
+        if master_node.state in [batch_models.ComputeNodeState.idle, batch_models.ComputeNodeState.running]:
             break
         elif master_node.state is batch_models.ComputeNodeState.start_task_failed:
             raise MasterInvalidStateError("Start task failed on master")
@@ -41,7 +41,6 @@ def wait_for_master_to_be_ready(core_operations, spark_operations, cluster_id: s
 
             delta = now - start_time
             if delta.total_seconds() > constants.WAIT_FOR_MASTER_TIMEOUT:
-                raise MasterInvalidStateError(
-                    "Master didn't become ready before timeout.")
+                raise MasterInvalidStateError("Master didn't become ready before timeout.")
 
             time.sleep(10)

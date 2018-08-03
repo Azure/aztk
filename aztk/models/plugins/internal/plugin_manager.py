@@ -28,8 +28,7 @@ class PluginManager:
         nvblas=plugins.NvBLASPlugin,
         apt_get=plugins.AptGetPlugin,
         pip_install=plugins.PipPlugin,
-        conda_install=plugins.CondaPlugin
-    )
+        conda_install=plugins.CondaPlugin)
 
     def __init__(self):
         self.loaded = False
@@ -51,7 +50,8 @@ class PluginManager:
         args = dict()
         for key, param in signature.parameters.items():
             if param.kind == param.POSITIONAL_OR_KEYWORD or param.kind == param.KEYWORD_ONLY:
-                args[key] = PluginArgument(key, default=param.default, required=param.default is inspect.Parameter.empty)
+                args[key] = PluginArgument(
+                    key, default=param.default, required=param.default is inspect.Parameter.empty)
 
         return args
 
@@ -66,17 +66,14 @@ class PluginManager:
         for arg in plugin_args.values():
             if args.get(arg.name) is None:
                 if arg.required:
-                    message = "Missing a required argument {0} for plugin {1}".format(
-                        arg.name, plugin_cls.__name__)
+                    message = "Missing a required argument {0} for plugin {1}".format(arg.name, plugin_cls.__name__)
                     raise InvalidPluginReferenceError(message)
                 args[arg.name] = arg.default
-
 
     def _validate_no_extra_args(self, plugin_cls, plugin_args: dict, args: dict):
         for name in args:
             if not name in plugin_args:
-                message = "Plugin {0} doesn't have an argument called '{1}'".format(
-                    plugin_cls.__name__, name)
+                message = "Plugin {0} doesn't have an argument called '{1}'".format(plugin_cls.__name__, name)
                 raise InvalidPluginReferenceError(message)
 
 

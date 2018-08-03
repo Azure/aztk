@@ -5,8 +5,8 @@ import subprocess
 from pathlib import Path
 from aztk.models.plugins import PluginTarget, PluginTargetRole
 
+log_folder = os.path.join(os.environ['AZTK_WORKING_DIR'], 'logs', 'plugins')
 
-log_folder = os.path.join(os.environ['AZTK_WORKING_DIR'], 'logs','plugins')
 
 def _read_manifest_file(path=None):
     if not os.path.isfile(path):
@@ -19,12 +19,10 @@ def _read_manifest_file(path=None):
                 print("Error in plugins manifest: {0}".format(err))
 
 
-
 def setup_plugins(target: PluginTarget, is_master: bool = False, is_worker: bool = False):
 
     plugins_dir = _plugins_dir()
-    plugins_manifest = _read_manifest_file(
-        os.path.join(plugins_dir, 'plugins-manifest.yaml'))
+    plugins_manifest = _read_manifest_file(os.path.join(plugins_dir, 'plugins-manifest.yaml'))
 
     if not os.path.exists(log_folder):
         os.makedirs(log_folder)
@@ -39,14 +37,12 @@ def _plugins_dir():
 
 def _run_on_this_node(plugin_obj, target: PluginTarget, is_master, is_worker):
 
-    print("Loading plugin {} in {} on {}".format(
-        plugin_obj["execute"],
-        plugin_obj['target'],
-        plugin_obj['target_role']
-    ))
+    print("Loading plugin {} in {} on {}".format(plugin_obj["execute"], plugin_obj['target'],
+                                                 plugin_obj['target_role']))
 
     if plugin_obj['target'] != target.value:
-        print("Ignoring ", plugin_obj["execute"], "as target is for ", plugin_obj['target'], "but is currently running in ", target.value)
+        print("Ignoring ", plugin_obj["execute"], "as target is for ", plugin_obj['target'],
+              "but is currently running in ", target.value)
         return False
 
     if plugin_obj['target_role'] == PluginTargetRole.Master.value and is_master is True:
@@ -56,7 +52,8 @@ def _run_on_this_node(plugin_obj, target: PluginTarget, is_master, is_worker):
     if plugin_obj['target_role'] == PluginTargetRole.All.value:
         return True
 
-    print("Ignoring plugin", plugin_obj["execute"], "as target role is ", plugin_obj['target_role'], "and node is master: ", is_master, is_worker)
+    print("Ignoring plugin", plugin_obj["execute"], "as target role is ", plugin_obj['target_role'],
+          "and node is master: ", is_master, is_worker)
 
     return False
 
@@ -72,8 +69,7 @@ def _setup_plugins(plugins_manifest, target: PluginTarget, is_master, is_worker)
 
 def _run_script(name: str, script_path: str = None, args: dict = None, env: dict = None):
     if not os.path.isfile(script_path):
-        print("Cannot run plugin script: {0} file does not exist".format(
-            script_path))
+        print("Cannot run plugin script: {0} file does not exist".format(script_path))
         return
     file_stat = os.stat(script_path)
     os.chmod(script_path, file_stat.st_mode | 0o777)
@@ -90,11 +86,7 @@ def _run_script(name: str, script_path: str = None, args: dict = None, env: dict
 
     out_file = open(os.path.join(log_folder, '{0}.txt'.format(name)), 'w', encoding='UTF-8')
     try:
-        subprocess.call(
-            [script_path] + args,
-            env=my_env,
-            stdout=out_file,
-            stderr=out_file)
+        subprocess.call([script_path] + args, env=my_env, stdout=out_file, stderr=out_file)
         print("Finished running")
         print("------------------------------------------------------------------")
     except Exception as e:

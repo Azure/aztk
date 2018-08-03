@@ -2,6 +2,7 @@ import io
 from typing import Union
 from aztk.core.models import Model, fields
 
+
 class PluginFile(Model):
     """
     Reference to a file for a plugin.
@@ -15,7 +16,7 @@ class PluginFile(Model):
 
     def content(self):
         with open(self.local_path, "r", encoding='UTF-8') as f:
-            return  f.read()
+            return f.read()
 
 
 class TextPluginFile(Model):
@@ -29,7 +30,7 @@ class TextPluginFile(Model):
 
     target = fields.String()
 
-    def __init__(self, target: str, content: Union[str,io.StringIO]):
+    def __init__(self, target: str, content: Union[str, io.StringIO]):
         super().__init__(target=target)
         if isinstance(content, str):
             self._content = content

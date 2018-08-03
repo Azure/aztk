@@ -13,6 +13,7 @@ def read_cluster_config():
     print("Got cluster config", cluster_config)
     return cluster_config
 
+
 def setup_host(docker_repo: str):
     """
     Code to be run on the node(NOT in a container)

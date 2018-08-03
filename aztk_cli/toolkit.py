@@ -40,6 +40,7 @@ def print_available_softwares():
     for toolkit in TOOLKIT_MAP:
         log.info("  - %s", toolkit)
 
+
 def validate_software(software: str):
     if software not in TOOLKIT_MAP:
         log.error("Software '%s' is not supported.", software)
@@ -47,11 +48,13 @@ def validate_software(software: str):
         return False
     return True
 
+
 def print_available_software_version(software: str):
     toolkit_def = TOOLKIT_MAP.get(software)
     log.info("Available version for %s: ", software)
     for version in toolkit_def.versions:
         log.info("  - %s", version)
+
 
 def print_available_environments(software: str):
     toolkit_def = TOOLKIT_MAP.get(software)

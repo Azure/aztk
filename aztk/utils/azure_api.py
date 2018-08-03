@@ -10,7 +10,6 @@ from azure.mgmt.storage import StorageManagementClient
 from azure.storage.common import CloudStorageAccount
 from typing import Optional
 
-
 RESOURCE_ID_PATTERN = re.compile('^/subscriptions/(?P<subscription>[^/]+)'
                                  '/resourceGroups/(?P<resourcegroup>[^/]+)'
                                  '/providers/[^/]+'
@@ -39,9 +38,8 @@ def make_batch_client(secrets):
     if secrets.shared_key:
         # Set up SharedKeyCredentials
         base_url = secrets.shared_key.batch_service_url
-        credentials = batch_auth.SharedKeyCredentials(
-            secrets.shared_key.batch_account_name,
-            secrets.shared_key.batch_account_key)
+        credentials = batch_auth.SharedKeyCredentials(secrets.shared_key.batch_account_name,
+                                                      secrets.shared_key.batch_account_key)
     else:
         # Set up ServicePrincipalCredentials
         arm_credentials = ServicePrincipalCredentials(
@@ -60,9 +58,7 @@ def make_batch_client(secrets):
             resource='https://batch.core.windows.net/')
 
     # Set up Batch Client
-    batch_client = batch.BatchServiceClient(
-        credentials,
-        base_url=base_url)
+    batch_client = batch.BatchServiceClient(credentials, base_url=base_url)
 
     # Set retry policy
     batch_client.config.retry_policy.retries = 5
@@ -97,7 +93,8 @@ def make_blob_client(secrets):
         subscription = m.group('subscription')
         resourcegroup = m.group('resourcegroup')
         mgmt_client = StorageManagementClient(arm_credentials, subscription)
-        key = mgmt_client.storage_accounts.list_keys(resource_group_name=resourcegroup, account_name=accountname).keys[0].value
+        key = mgmt_client.storage_accounts.list_keys(
+            resource_group_name=resourcegroup, account_name=accountname).keys[0].value
         storage_client = CloudStorageAccount(accountname, key)
         blob_client = storage_client.create_block_blob_service()
 

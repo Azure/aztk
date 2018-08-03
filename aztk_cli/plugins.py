@@ -11,7 +11,7 @@ def setup_parser(parser: argparse.ArgumentParser):
 def execute(args: typing.NamedTuple):
     plugins = plugin_manager.plugins
     log.info("------------------------------------------------------")
-    log.info("                   Plugins (%i available)",len(plugins))
+    log.info("                   Plugins (%i available)", len(plugins))
     log.info("------------------------------------------------------")
     for name, plugin in plugins.items():
         log.info("- %s", name)

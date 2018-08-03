@@ -1,6 +1,3 @@
-
-
-
 import os
 
 from azure.batch.models import batch_error
@@ -11,7 +8,8 @@ from aztk.utils import helpers
 
 def _run(spark_cluster_operations, cluster_id, output_directory=None):
     # copy debug program to each node
-    output = spark_cluster_operations.copy(cluster_id, os.path.abspath("./aztk/spark/utils/debug.py"), "/tmp/debug.py", host=True)
+    output = spark_cluster_operations.copy(
+        cluster_id, os.path.abspath("./aztk/spark/utils/debug.py"), "/tmp/debug.py", host=True)
     ssh_cmd = _build_diagnostic_ssh_command()
     run_output = spark_cluster_operations.run(cluster_id, ssh_cmd, host=True)
     remote_path = "/tmp/debug.zip"

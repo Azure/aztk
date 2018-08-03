@@ -4,7 +4,13 @@ from aztk import error
 from aztk.utils import helpers
 
 
-def cluster_copy(core_cluster_operations, cluster_id: str, source_path: str, destination_path: str, host: bool = False, internal: bool = False, timeout: int = None):
+def cluster_copy(core_cluster_operations,
+                 cluster_id: str,
+                 source_path: str,
+                 destination_path: str,
+                 host: bool = False,
+                 internal: bool = False,
+                 timeout: int = None):
     try:
         container_name = None if host else 'spark'
         return core_cluster_operations.copy(

@@ -7,16 +7,11 @@ from aztk_cli import config, log, utils
 
 
 def setup_parser(parser: argparse.ArgumentParser):
-    parser.add_argument('--id',
-                        dest='job_id',
-                        required=True,
-                        help='The unique id of your AZTK job')
-    parser.add_argument('--name',
-                        dest='app_name',
-                        required=True,
-                        help='The unique id of your job name')
-    parser.add_argument('--output',
-                        help='Path to the file you wish to output to. If not \
+    parser.add_argument('--id', dest='job_id', required=True, help='The unique id of your AZTK job')
+    parser.add_argument('--name', dest='app_name', required=True, help='The unique id of your job name')
+    parser.add_argument(
+        '--output',
+        help='Path to the file you wish to output to. If not \
                               specified, output is printed to stdout')
 
 

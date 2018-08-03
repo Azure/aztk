@@ -3,7 +3,6 @@ from install import install
 from core import logger
 
 
-
 def run():
     if len(sys.argv) < 2:
         print("Error: Expected at least one argument")

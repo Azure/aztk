@@ -17,7 +17,6 @@ class JobOperations(SparkBaseOperations):
         self._core_job_operations = CoreJobOperations(context)
         # self._spark_base_cluster_operations = SparkBaseOperations()
 
-
     def list(self):
         """List all jobs.
 

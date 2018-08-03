@@ -6,6 +6,7 @@ from aztk import error
 from aztk.utils import constants, helpers
 from aztk.core.models import Model, fields
 
+
 class SparkToolkit(aztk.models.Toolkit):
     def __init__(self, version: str, environment: str = None, environment_version: str = None):
         super().__init__(
@@ -53,6 +54,7 @@ class RemoteLogin(aztk.models.RemoteLogin):
 
 class PortForwardingSpecification(aztk.models.PortForwardingSpecification):
     pass
+
 
 class File(aztk.models.File):
     pass
@@ -105,9 +107,11 @@ class PluginConfiguration(aztk.models.PluginConfiguration):
 
 SchedulingTarget = aztk.models.SchedulingTarget
 
+
 class ClusterConfiguration(aztk.models.ClusterConfiguration):
     spark_configuration = fields.Model(SparkConfiguration, default=None)
     worker_on_master = fields.Boolean(default=True)
+
 
 class SecretsConfiguration(aztk.models.SecretsConfiguration):
     pass
@@ -118,23 +122,22 @@ class VmImage(aztk.models.VmImage):
 
 
 class ApplicationConfiguration:
-    def __init__(
-            self,
-            name=None,
-            application=None,
-            application_args=None,
-            main_class=None,
-            jars=None,
-            py_files=None,
-            files=None,
-            driver_java_options=None,
-            driver_library_path=None,
-            driver_class_path=None,
-            driver_memory=None,
-            executor_memory=None,
-            driver_cores=None,
-            executor_cores=None,
-            max_retry_count=None):
+    def __init__(self,
+                 name=None,
+                 application=None,
+                 application_args=None,
+                 main_class=None,
+                 jars=None,
+                 py_files=None,
+                 files=None,
+                 driver_java_options=None,
+                 driver_library_path=None,
+                 driver_class_path=None,
+                 driver_memory=None,
+                 executor_memory=None,
+                 driver_cores=None,
+                 executor_cores=None,
+                 max_retry_count=None):
         self.name = name
         self.application = application
         self.application_args = application_args
@@ -185,19 +188,18 @@ class Application:
 
 
 class JobConfiguration:
-    def __init__(
-            self,
-            id = None,
-            applications = None,
-            vm_size = None,
-            custom_scripts=None,
-            spark_configuration=None,
-            toolkit=None,
-            max_dedicated_nodes=0,
-            max_low_pri_nodes=0,
-            subnet_id=None,
-            scheduling_target: SchedulingTarget = None,
-            worker_on_master=None):
+    def __init__(self,
+                 id=None,
+                 applications=None,
+                 vm_size=None,
+                 custom_scripts=None,
+                 spark_configuration=None,
+                 toolkit=None,
+                 max_dedicated_nodes=0,
+                 max_low_pri_nodes=0,
+                 subnet_id=None,
+                 scheduling_target: SchedulingTarget = None,
+                 worker_on_master=None):
 
         self.id = id
         self.applications = applications
@@ -240,8 +242,7 @@ class JobConfiguration:
         Raises: Error if invalid
         """
         if self.toolkit is None:
-            raise error.InvalidModelError(
-                "Please supply a toolkit in the cluster configuration")
+            raise error.InvalidModelError("Please supply a toolkit in the cluster configuration")
 
         self.toolkit.validate()
 
@@ -254,9 +255,7 @@ class JobConfiguration:
             )
 
         if self.vm_size is None:
-            raise error.AztkError(
-                "Please supply a vm_size in your configuration."
-            )
+            raise error.AztkError("Please supply a vm_size in your configuration.")
 
         if self.mixed_mode() and not self.subnet_id:
             raise error.AztkError(
@@ -277,7 +276,8 @@ class JobState():
 
 
 class Job():
-    def __init__(self, cloud_job_schedule: batch_models.CloudJobSchedule,
+    def __init__(self,
+                 cloud_job_schedule: batch_models.CloudJobSchedule,
                  cloud_tasks: List[batch_models.CloudTask] = None,
                  pool: batch_models.CloudPool = None,
                  nodes: batch_models.ComputeNodePaged = None):

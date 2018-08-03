@@ -9,12 +9,12 @@ class Validator:
     To write your validator extend this class and implement the validate method.
     To raise an error raise  InvalidModelFieldError
     """
+
     def __call__(self, value):
         self.validate(value)
 
     def validate(self, value):
         raise NotImplementedError()
-
 
 
 class Required(Validator):
@@ -77,7 +77,6 @@ class Boolean(Validator):
             raise InvalidModelFieldError('{0} should be a boolean'.format(value))
 
 
-
 class In(Validator):
     """
     Validate the field value is in the list of allowed choices
@@ -93,6 +92,7 @@ class In(Validator):
         if value not in self.choices:
             raise InvalidModelFieldError('{0} should be in {1}'.format(value, self.choices))
 
+
 class InstanceOf(Validator):
     """
     Check if the field is an instance of the given type
@@ -106,8 +106,7 @@ class InstanceOf(Validator):
             return
 
         if not isinstance(value, self.type):
-            raise InvalidModelFieldError(
-                "should be an instance of '{}'".format(self.type.__name__))
+            raise InvalidModelFieldError("should be an instance of '{}'".format(self.type.__name__))
 
 
 class Model(Validator):
@@ -123,8 +122,7 @@ class Model(Validator):
             return
 
         if not isinstance(value, self.model):
-            raise InvalidModelFieldError(
-                "should be an instance of '{}'".format(self.model.__name__))
+            raise InvalidModelFieldError("should be an instance of '{}'".format(self.model.__name__))
 
         value.validate()
 

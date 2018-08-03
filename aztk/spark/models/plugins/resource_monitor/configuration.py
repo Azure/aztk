@@ -5,6 +5,7 @@ from aztk.utils import constants
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
+
 class ResourceMonitorPlugin(PluginConfiguration):
     def __init__(self):
         super().__init__(
@@ -22,5 +23,4 @@ class ResourceMonitorPlugin(PluginConfiguration):
                 PluginFile("start_monitor.sh", os.path.join(dir_path, "start_monitor.sh")),
                 PluginFile("etc/telegraf.conf", os.path.join(dir_path, "telegraf.conf")),
                 PluginFile("docker-compose.yml", os.path.join(dir_path, "docker-compose.yml")),
-            ]
-        )
+            ])

@@ -42,6 +42,7 @@ class PluginPort(Model):
             return self.public
         return None
 
+
 class PluginConfiguration(Model):
     """
     Plugin manifest that should be returned in the main.py of your plugin

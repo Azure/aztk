@@ -1,6 +1,7 @@
 import yaml
 from aztk.error import AztkError, InvalidModelError
 
+
 class ConfigurationBase:
     """
     Base class for any configuration.
@@ -18,7 +19,6 @@ class ConfigurationBase:
         except (ValueError, TypeError) as e:
             pretty_args = yaml.dump(args, default_flow_style=False)
             raise AztkError("{0} {1}\n{2}".format(cls.__name__, str(e), pretty_args))
-
 
     @classmethod
     def _from_dict(cls, args: dict):

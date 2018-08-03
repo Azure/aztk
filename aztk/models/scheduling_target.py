@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class SchedulingTarget(Enum):
     """
     Target where task will get scheduled.

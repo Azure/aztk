@@ -10,8 +10,10 @@ from core import config
 
 MASTER_NODE_METADATA_KEY = "_spark_master_node"
 
+
 class CannotAllocateMasterError(Exception):
     pass
+
 
 def get_master_node_id(pool: batchmodels.CloudPool):
     """
@@ -26,16 +28,17 @@ def get_master_node_id(pool: batchmodels.CloudPool):
 
     return None
 
+
 def try_assign_self_as_master(client: batch.BatchServiceClient, pool: batchmodels.CloudPool):
     current_metadata = pool.metadata or []
     new_metadata = current_metadata + [{"name": MASTER_NODE_METADATA_KEY, "value": config.node_id}]
 
     try:
-        client.pool.patch(config.pool_id, batchmodels.PoolPatchParameter(
-            metadata=new_metadata
-        ), batchmodels.PoolPatchOptions(
-            if_match=pool.e_tag,
-        ))
+        client.pool.patch(
+            config.pool_id,
+            batchmodels.PoolPatchParameter(metadata=new_metadata),
+            batchmodels.PoolPatchOptions(if_match=pool.e_tag,
+                                         ))
         return True
     except (batcherror.BatchErrorException, ClientRequestError):
         print("Couldn't assign itself as master the pool because the pool was modified since last get.")

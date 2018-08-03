@@ -70,7 +70,7 @@ class NodeData:
             relative_folder = os.path.relpath(base, path)
             for file in files:
                 if self._includeFile(file, exclude):
-                    self.add_file(os.path.join(base, file), os.path.join(dest, relative_folder), binary = False)
+                    self.add_file(os.path.join(base, file), os.path.join(dest, relative_folder), binary=False)
 
     def _add_custom_scripts(self):
         data = []
@@ -90,7 +90,8 @@ class NodeData:
                     raise InvalidCustomScriptError("Custom script '{0}' doesn't exists.".format(custom_script.script))
             elif isinstance(custom_script.script, models.File):
                 new_file_name = str(index) + '_' + custom_script.script.name
-                self.zipf.writestr(os.path.join('custom-scripts', new_file_name), custom_script.script.payload.getvalue())
+                self.zipf.writestr(
+                    os.path.join('custom-scripts', new_file_name), custom_script.script.payload.getvalue())
 
         self.zipf.writestr(
             os.path.join(CUSTOM_SCRIPT_FOLDER, CUSTOM_SCRIPT_METADATA_FILE), yaml.dump(data, default_flow_style=False))
@@ -108,8 +109,8 @@ class NodeData:
             binary=False)
 
         # add ssh keys for passwordless ssh
-        self.zipf.writestr( 'id_rsa.pub', spark_configuration.ssh_key_pair['pub_key'])
-        self.zipf.writestr( 'id_rsa', spark_configuration.ssh_key_pair['priv_key'])
+        self.zipf.writestr('id_rsa.pub', spark_configuration.ssh_key_pair['pub_key'])
+        self.zipf.writestr('id_rsa', spark_configuration.ssh_key_pair['priv_key'])
 
         if spark_configuration.jars:
             for jar in spark_configuration.jars:
@@ -141,14 +142,15 @@ class NodeData:
             for file in plugin.files:
                 zipf = self.zipf.writestr('plugins/{0}/{1}'.format(plugin.name, file.target), file.content())
             if plugin.execute:
-                data.append(dict(
-                    name=plugin.name,
-                    execute='{0}/{1}'.format(plugin.name, plugin.execute),
-                    args=plugin.args,
-                    env=plugin.env,
-                    target=plugin.target.value,
-                    target_role=plugin.target_role.value,
-                ))
+                data.append(
+                    dict(
+                        name=plugin.name,
+                        execute='{0}/{1}'.format(plugin.name, plugin.execute),
+                        args=plugin.args,
+                        env=plugin.env,
+                        target=plugin.target.value,
+                        target_role=plugin.target_role.value,
+                    ))
 
         self.zipf.writestr(os.path.join('plugins', 'plugins-manifest.yaml'), yaml.dump(data))
         return zipf

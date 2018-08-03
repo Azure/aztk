@@ -24,15 +24,11 @@ def main():
 
     setup_common_args(parser)
 
-    subparsers = parser.add_subparsers(
-        title="Available Softwares", dest="software", metavar="<software>")
+    subparsers = parser.add_subparsers(title="Available Softwares", dest="software", metavar="<software>")
     subparsers.required = True
-    spark_parser = subparsers.add_parser(
-        "spark", help="Commands to run spark jobs")
-    plugins_parser = subparsers.add_parser(
-        "plugins", help="Commands to list and view plugins")
-    toolkit_parser = subparsers.add_parser(
-        "toolkit", help="List current toolkit information and browse available ones")
+    spark_parser = subparsers.add_parser("spark", help="Commands to run spark jobs")
+    plugins_parser = subparsers.add_parser("plugins", help="Commands to list and view plugins")
+    toolkit_parser = subparsers.add_parser("toolkit", help="List current toolkit information and browse available ones")
 
     spark.setup_parser(spark_parser)
     plugins.setup_parser(plugins_parser)
@@ -50,10 +46,8 @@ def main():
 
 
 def setup_common_args(parser: argparse.ArgumentParser):
-    parser.add_argument('--version', action='version',
-                        version=aztk.version.__version__)
-    parser.add_argument("--verbose", action='store_true',
-                        help="Enable verbose logging.")
+    parser.add_argument('--version', action='version', version=aztk.version.__version__)
+    parser.add_argument("--verbose", action='store_true', help="Enable verbose logging.")
 
 
 def parse_common_args(args: NamedTuple):

@@ -10,12 +10,7 @@ class SparkUIProxyPlugin(PluginConfiguration):
     def __init__(self):
         super().__init__(
             name="spark_ui_proxy",
-            ports=[
-                PluginPort(
-                    internal=9999,
-                    public=True
-                )
-            ],
+            ports=[PluginPort(internal=9999, public=True)],
             target_role=PluginTargetRole.Master,
             execute="spark_ui_proxy.sh",
             args=["localhost:8080", "9999"],

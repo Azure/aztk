@@ -2,7 +2,14 @@ import aztk.models as models
 from aztk.utils import ssh as ssh_lib
 
 
-def ssh_into_node(base_client, pool_id, node_id, username, ssh_key=None, password=None, port_forward_list=None, internal=False):
+def ssh_into_node(base_client,
+                  pool_id,
+                  node_id,
+                  username,
+                  ssh_key=None,
+                  password=None,
+                  port_forward_list=None,
+                  internal=False):
     if internal:
         result = base_client.batch_client.compute_node.get(pool_id=pool_id, node_id=node_id)
         rls = models.RemoteLogin(ip_address=result.ip_address, port="22")

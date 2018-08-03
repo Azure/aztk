@@ -10,6 +10,7 @@ from aztk.utils import deprecate
 from aztk.models import Toolkit
 from aztk.models.plugins.internal import PluginReference
 
+
 def load_aztk_secrets() -> SecretsConfiguration:
     """
     Loads aztk from .aztk/secrets.yaml files(local and global)
@@ -23,7 +24,7 @@ def load_aztk_secrets() -> SecretsConfiguration:
     if not global_config and not local_config:
         raise aztk.error.AztkError("There is no secrets.yaml in either ./.aztk/secrets.yaml or .aztk/secrets.yaml")
 
-    if global_config:  # Global config is optional
+    if global_config:    # Global config is optional
         _merge_secrets_dict(secrets, global_config)
     if local_config:
         _merge_secrets_dict(secrets, local_config)
@@ -31,6 +32,7 @@ def load_aztk_secrets() -> SecretsConfiguration:
     # Validate and raise error if any
     secrets.validate()
     return secrets
+
 
 def _load_config_file(path: str):
     if not os.path.isfile(path):
@@ -40,26 +42,26 @@ def _load_config_file(path: str):
         try:
             return yaml.load(stream)
         except yaml.YAMLError as err:
-            raise aztk.error.AztkError(
-                "Error in {0}:\n {1}".format(path, err))
+            raise aztk.error.AztkError("Error in {0}:\n {1}".format(path, err))
 
 
 def _merge_secrets_dict(secrets: SecretsConfiguration, secrets_config):
     if 'default' in secrets_config:
-        deprecate("0.9.0", "default key in secrets.yaml is deprecated.", "Place all child parameters directly at the root")
+        deprecate("0.9.0", "default key in secrets.yaml is deprecated.",
+                  "Place all child parameters directly at the root")
         secrets_config = dict(**secrets_config, **secrets_config.pop('default'))
 
     other = SecretsConfiguration.from_dict(secrets_config)
     secrets.merge(other)
 
-def read_cluster_config(
-        path: str = aztk.utils.constants.DEFAULT_CLUSTER_CONFIG_PATH
-) -> ClusterConfiguration:
+
+def read_cluster_config(path: str = aztk.utils.constants.DEFAULT_CLUSTER_CONFIG_PATH) -> ClusterConfiguration:
     """
         Reads the config file in the .aztk/ directory (.aztk/cluster.yaml)
     """
     config_dict = _load_config_file(path)
     return cluster_config_from_dict(config_dict)
+
 
 def cluster_config_from_dict(config: dict):
     wait = False
@@ -92,8 +94,7 @@ class SshConfig:
         self.job_history_ui_port = '18080'
         self.web_ui_port = '8080'
 
-    def _read_config_file(
-            self, path: str = aztk.utils.constants.DEFAULT_SSH_CONFIG_PATH):
+    def _read_config_file(self, path: str = aztk.utils.constants.DEFAULT_SSH_CONFIG_PATH):
         """
             Reads the config file in the .aztk/ directory (.aztk/ssh.yaml)
         """
@@ -104,8 +105,7 @@ class SshConfig:
             try:
                 config = yaml.load(stream)
             except yaml.YAMLError as err:
-                raise aztk.error.AztkError(
-                    "Error in ssh.yaml: {0}".format(err))
+                raise aztk.error.AztkError("Error in ssh.yaml: {0}".format(err))
 
             if config is None:
                 return
@@ -137,14 +137,11 @@ class SshConfig:
         if config.get('internal') is not None:
             self.internal = config['internal']
 
-    def merge(self, cluster_id, username, job_ui_port, job_history_ui_port,
-              web_ui_port, host, connect, internal):
+    def merge(self, cluster_id, username, job_ui_port, job_history_ui_port, web_ui_port, host, connect, internal):
         """
             Merges fields with args object
         """
-        self._read_config_file(
-            os.path.join(aztk.utils.constants.HOME_DIRECTORY_PATH, '.aztk',
-                         'ssh.yaml'))
+        self._read_config_file(os.path.join(aztk.utils.constants.HOME_DIRECTORY_PATH, '.aztk', 'ssh.yaml'))
         self._read_config_file()
         self._merge_dict(
             dict(
@@ -164,8 +161,7 @@ class SshConfig:
 
         if self.username is None:
             raise aztk.error.AztkError(
-                "Please supply a username either in the ssh.yaml configuration file or with a parameter (--username)"
-            )
+                "Please supply a username either in the ssh.yaml configuration file or with a parameter (--username)")
 
 
 class JobConfig():
@@ -206,7 +202,6 @@ class JobConfig():
             if scheduling_target:
                 self.scheduling_target = SchedulingTarget(scheduling_target)
 
-
         applications = config.get('applications')
         if applications:
             self.applications = []
@@ -226,9 +221,7 @@ class JobConfig():
                         driver_memory=application.get('driver_memory'),
                         executor_memory=application.get('executor_memory'),
                         driver_cores=application.get('driver_cores'),
-                        executor_cores=application.get('executor_cores')
-                    )
-                )
+                        executor_cores=application.get('executor_cores')))
 
         spark_configuration = config.get('spark_configuration')
         if spark_configuration:
@@ -241,13 +234,10 @@ class JobConfig():
         if str_path:
             abs_path = os.path.abspath(os.path.expanduser(str_path))
             if not os.path.exists(abs_path):
-                raise aztk.error.AztkError(
-                    "Could not find file: {0}\nCheck your configuration file".
-                    format(str_path))
+                raise aztk.error.AztkError("Could not find file: {0}\nCheck your configuration file".format(str_path))
             return abs_path
 
-    def _read_config_file(
-            self, path: str = aztk.utils.constants.DEFAULT_SPARK_JOB_CONFIG):
+    def _read_config_file(self, path: str = aztk.utils.constants.DEFAULT_SPARK_JOB_CONFIG):
         """
             Reads the Job config file in the .aztk/ directory (.aztk/job.yaml)
         """
@@ -258,8 +248,7 @@ class JobConfig():
             try:
                 config = yaml.load(stream)
             except yaml.YAMLError as err:
-                raise aztk.error.AztkError(
-                    "Error in job.yaml: {0}".format(err))
+                raise aztk.error.AztkError("Error in job.yaml: {0}".format(err))
 
             if config is None:
                 return
@@ -278,15 +267,12 @@ class JobConfig():
                 raise aztk.error.AztkError(
                     "Application specified with no name. Please verify your configuration in job.yaml")
             if entry.application is None:
-                raise aztk.error.AztkError(
-                    "No path to application specified for {} in job.yaml".format(entry.name))
+                raise aztk.error.AztkError("No path to application specified for {} in job.yaml".format(entry.name))
 
 
 def get_file_if_exists(file):
-    local_conf_file = os.path.join(
-        aztk.utils.constants.DEFAULT_SPARK_CONF_SOURCE, file)
-    global_conf_file = os.path.join(aztk.utils.constants.GLOBAL_CONFIG_PATH,
-                                    file)
+    local_conf_file = os.path.join(aztk.utils.constants.DEFAULT_SPARK_CONF_SOURCE, file)
+    global_conf_file = os.path.join(aztk.utils.constants.GLOBAL_CONFIG_PATH, file)
 
     if os.path.exists(local_conf_file):
         return local_conf_file
@@ -309,16 +295,14 @@ def load_jars():
 
     # try load global
     try:
-        jars_src = os.path.join(aztk.utils.constants.GLOBAL_CONFIG_PATH,
-                                'jars')
+        jars_src = os.path.join(aztk.utils.constants.GLOBAL_CONFIG_PATH, 'jars')
         jars = [os.path.join(jars_src, jar) for jar in os.listdir(jars_src)]
     except FileNotFoundError:
         pass
 
     # try load local, overwrite if found
     try:
-        jars_src = os.path.join(aztk.utils.constants.DEFAULT_SPARK_CONF_SOURCE,
-                                'jars')
+        jars_src = os.path.join(aztk.utils.constants.DEFAULT_SPARK_CONF_SOURCE, 'jars')
         jars = [os.path.join(jars_src, jar) for jar in os.listdir(jars_src)]
     except FileNotFoundError:
         pass

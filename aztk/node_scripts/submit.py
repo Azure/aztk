@@ -12,7 +12,6 @@ from core import config
 
 # limit azure.storage logging
 logging.getLogger("azure.storage").setLevel(logging.CRITICAL)
-
 '''
 Submit helper methods
 '''
@@ -46,12 +45,9 @@ def upload_file_to_container(container_name,
     if not node_path:
         node_path = blob_name
 
-    blob_client.create_container(container_name,
-                                 fail_on_exist=False)
+    blob_client.create_container(container_name, fail_on_exist=False)
 
-    blob_client.create_blob_from_path(container_name,
-                                      blob_path,
-                                      file_path)
+    blob_client.create_blob_from_path(container_name, blob_path, file_path)
 
     sas_token = blob_client.generate_blob_shared_access_signature(
         container_name,
@@ -59,32 +55,17 @@ def upload_file_to_container(container_name,
         permission=blob.BlobPermissions.READ,
         expiry=datetime.datetime.utcnow() + datetime.timedelta(days=7))
 
-    sas_url = blob_client.make_blob_url(container_name,
-                                        blob_path,
-                                        sas_token=sas_token)
+    sas_url = blob_client.make_blob_url(container_name, blob_path, sas_token=sas_token)
 
-    return batch_models.ResourceFile(file_path=node_path,
-                                     blob_source=sas_url)
+    return batch_models.ResourceFile(file_path=node_path, blob_source=sas_url)
 
 
-def __app_submit_cmd(
-        name: str,
-        app: str,
-        app_args: List[str],
-        main_class: str,
-        jars: List[str],
-        py_files: List[str],
-        files: List[str],
-        driver_java_options: str,
-        driver_library_path: str,
-        driver_class_path: str,
-        driver_memory: str,
-        executor_memory: str,
-        driver_cores: int,
-        executor_cores: int):
+def __app_submit_cmd(name: str, app: str, app_args: List[str], main_class: str, jars: List[str], py_files: List[str],
+                     files: List[str], driver_java_options: str, driver_library_path: str, driver_class_path: str,
+                     driver_memory: str, executor_memory: str, driver_cores: int, executor_cores: int):
     cluster_id = os.environ['AZ_BATCH_POOL_ID']
     spark_home = os.environ['SPARK_HOME']
-    with open (os.path.join(spark_home, 'conf', 'master')) as f:
+    with open(os.path.join(spark_home, 'conf', 'master')) as f:
         master_ip = f.read().rstrip()
 
     # set file paths to correct path on container
@@ -94,10 +75,8 @@ def __app_submit_cmd(
     files = [os.path.join(files_path, os.path.basename(f)) for f in files]
 
     # 2>&1 redirect stdout and stderr to be in the same file
-    spark_submit_cmd = CommandBuilder(
-        '{0}/bin/spark-submit'.format(spark_home))
-    spark_submit_cmd.add_option(
-        '--master', 'spark://{0}:7077'.format(master_ip))
+    spark_submit_cmd = CommandBuilder('{0}/bin/spark-submit'.format(spark_home))
+    spark_submit_cmd.add_option('--master', 'spark://{0}:7077'.format(master_ip))
     spark_submit_cmd.add_option('--name', name)
     spark_submit_cmd.add_option('--class', main_class)
     spark_submit_cmd.add_option('--jars', jars and ','.join(jars))
@@ -114,8 +93,7 @@ def __app_submit_cmd(
         spark_submit_cmd.add_option('--executor-cores', str(executor_cores))
 
     spark_submit_cmd.add_argument(
-        os.path.expandvars(app) + ' ' +
-        ' '.join(['\'' + str(app_arg) + '\'' for app_arg in (app_args or [])]))
+        os.path.expandvars(app) + ' ' + ' '.join(['\'' + str(app_arg) + '\'' for app_arg in (app_args or [])]))
 
     with open("spark-submit.txt", mode="w", encoding="UTF-8") as stream:
         stream.write(spark_submit_cmd.to_str())
@@ -146,7 +124,6 @@ def upload_log(blob_client, application):
 
 
 def receive_submit_request(application_file_path):
-
     '''
         Handle the request to submit a task
     '''

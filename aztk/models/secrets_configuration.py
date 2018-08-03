@@ -1,6 +1,7 @@
 from aztk.core.models import Model, fields
 from aztk.error import InvalidModelError
 
+
 class ServicePrincipalConfiguration(Model):
     """
     Container class for AAD authentication
@@ -10,6 +11,7 @@ class ServicePrincipalConfiguration(Model):
     credential = fields.String()
     batch_account_resource_id = fields.String()
     storage_account_resource_id = fields.String()
+
 
 class SharedKeyConfiguration(Model):
     """
@@ -46,14 +48,10 @@ class SecretsConfiguration(Model):
 
     def __validate__(self):
         if self.service_principal and self.shared_key:
-            raise InvalidModelError(
-                "Both service_principal and shared_key auth are configured, must use only one"
-            )
+            raise InvalidModelError("Both service_principal and shared_key auth are configured, must use only one")
 
         if not self.service_principal and not self.shared_key:
-            raise InvalidModelError(
-                "Neither service_principal and shared_key auth are configured, must use only one"
-            )
+            raise InvalidModelError("Neither service_principal and shared_key auth are configured, must use only one")
 
     def is_aad(self):
         return self.service_principal is not None

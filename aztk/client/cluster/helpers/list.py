@@ -7,10 +7,8 @@ def list_clusters(cluster_client, software_metadata_key):
         List all the cluster on your account.
     """
     pools = cluster_client.batch_client.pool.list()
-    software_metadata = (
-        constants.AZTK_SOFTWARE_METADATA_KEY, software_metadata_key)
-    cluster_metadata = (
-        constants.AZTK_MODE_METADATA_KEY, constants.AZTK_CLUSTER_MODE_METADATA)
+    software_metadata = (constants.AZTK_SOFTWARE_METADATA_KEY, software_metadata_key)
+    cluster_metadata = (constants.AZTK_MODE_METADATA_KEY, constants.AZTK_CLUSTER_MODE_METADATA)
 
     aztk_clusters = []
     for pool in [pool for pool in pools if pool.metadata]:

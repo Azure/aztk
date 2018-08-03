@@ -7,10 +7,7 @@ from aztk_cli import config, log, utils
 
 
 def setup_parser(parser: argparse.ArgumentParser):
-    parser.add_argument('--id',
-                        dest='job_id',
-                        required=True,
-                        help='The unique id of your AZTK job')
+    parser.add_argument('--id', dest='job_id', required=True, help='The unique id of your AZTK job')
 
 
 def execute(args: typing.NamedTuple):

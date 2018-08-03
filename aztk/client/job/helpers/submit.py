@@ -4,15 +4,8 @@ import azure.batch.models as batch_models
 from aztk.utils import helpers, constants
 
 
-def submit_job(
-        job_client,
-        job_configuration,
-        start_task,
-        job_manager_task,
-        autoscale_formula,
-        software_metadata_key: str,
-        vm_image_model,
-        application_metadata):
+def submit_job(job_client, job_configuration, start_task, job_manager_task, autoscale_formula,
+               software_metadata_key: str, vm_image_model, application_metadata):
     """
             Job Submission
             :param job_configuration -> aztk_sdk.spark.models.JobConfiguration
@@ -54,7 +47,8 @@ def submit_job(
             max_tasks_per_node=4,
             metadata=[
                 batch_models.MetadataItem(name=constants.AZTK_SOFTWARE_METADATA_KEY, value=software_metadata_key),
-                batch_models.MetadataItem(name=constants.AZTK_MODE_METADATA_KEY, value=constants.AZTK_JOB_MODE_METADATA)
+                batch_models.MetadataItem(
+                    name=constants.AZTK_MODE_METADATA_KEY, value=constants.AZTK_JOB_MODE_METADATA)
             ]))
 
     # define job specification
@@ -66,7 +60,8 @@ def submit_job(
         metadata=[batch_models.MetadataItem(name='applications', value=application_metadata)])
 
     # define schedule
-    schedule = batch_models.Schedule(do_not_run_until=None, do_not_run_after=None, start_window=None, recurrence_interval=None)
+    schedule = batch_models.Schedule(
+        do_not_run_until=None, do_not_run_after=None, start_window=None, recurrence_interval=None)
 
     # create job schedule and add task
     setup = batch_models.JobScheduleAddParameter(id=job_configuration.id, schedule=schedule, job_specification=job_spec)

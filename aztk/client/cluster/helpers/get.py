@@ -1,5 +1,3 @@
-
-
 #TODO: return Cluster instead of (pool, nodes)
 from aztk import models
 

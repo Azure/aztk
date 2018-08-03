@@ -28,30 +28,19 @@ class ClusterAction:
 
 
 def setup_parser(parser: argparse.ArgumentParser):
-    subparsers = parser.add_subparsers(
-        title="Actions", dest="cluster_action", metavar="<action>")
+    subparsers = parser.add_subparsers(title="Actions", dest="cluster_action", metavar="<action>")
     subparsers.required = True
 
-    create_parser = subparsers.add_parser(
-        ClusterAction.create, help="Create a new cluster")
-    add_user_parser = subparsers.add_parser(
-        ClusterAction.add_user, help="Add a user to the given cluster")
-    delete_parser = subparsers.add_parser(
-        ClusterAction.delete, help="Delete a cluster")
-    get_parser = subparsers.add_parser(
-        ClusterAction.get, help="Get information about a cluster")
-    list_parser = subparsers.add_parser(
-        ClusterAction.list, help="List clusters in your account")
-    app_logs_parser = subparsers.add_parser(
-        "app-logs", help="Get the logs from a submitted app")
-    ssh_parser = subparsers.add_parser(
-        ClusterAction.ssh, help="SSH into the master node of a cluster")
-    submit_parser = subparsers.add_parser(
-        "submit", help="Submit a new spark job to a cluster")
-    run_parser = subparsers.add_parser(
-        ClusterAction.run, help="Run a command on all nodes in your spark cluster")
-    copy_parser = subparsers.add_parser(
-        ClusterAction.copy, help="Copy files to all nodes in your spark cluster")
+    create_parser = subparsers.add_parser(ClusterAction.create, help="Create a new cluster")
+    add_user_parser = subparsers.add_parser(ClusterAction.add_user, help="Add a user to the given cluster")
+    delete_parser = subparsers.add_parser(ClusterAction.delete, help="Delete a cluster")
+    get_parser = subparsers.add_parser(ClusterAction.get, help="Get information about a cluster")
+    list_parser = subparsers.add_parser(ClusterAction.list, help="List clusters in your account")
+    app_logs_parser = subparsers.add_parser("app-logs", help="Get the logs from a submitted app")
+    ssh_parser = subparsers.add_parser(ClusterAction.ssh, help="SSH into the master node of a cluster")
+    submit_parser = subparsers.add_parser("submit", help="Submit a new spark job to a cluster")
+    run_parser = subparsers.add_parser(ClusterAction.run, help="Run a command on all nodes in your spark cluster")
+    copy_parser = subparsers.add_parser(ClusterAction.copy, help="Copy files to all nodes in your spark cluster")
     debug_parser = subparsers.add_parser(
         ClusterAction.debug, help="Debugging tool that aggregates logs and output from the cluster.")
 

@@ -1,7 +1,8 @@
 class CommandOption():
-    def __init__(self, name:str, value: str):
+    def __init__(self, name: str, value: str):
         self.name = name
         self.value = value
+
 
 class CommandBuilder:
     """
@@ -16,7 +17,7 @@ class CommandBuilder:
         self.options = []
         self.arguments = []
 
-    def add_option(self, name: str, value: str = None, enable: bool=None):
+    def add_option(self, name: str, value: str = None, enable: bool = None):
         """
             Add an option to the command line.
 

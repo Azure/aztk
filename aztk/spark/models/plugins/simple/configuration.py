@@ -5,6 +5,7 @@ from aztk.utils import constants
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
+
 class SimplePlugin(PluginConfiguration):
     def __init__(self):
         super().__init__(
