@@ -26,6 +26,7 @@ class CoreClient:
     should be used.**
 
     """
+
     def _get_context(self, secrets_configuration: models.SecretsConfiguration):
         self.secrets_configuration = secrets_configuration
 
@@ -86,7 +87,8 @@ class CoreClient:
         return job_exists or pool_exists
 
     @deprecated("0.10.0")
-    def __create_pool_and_job(self, cluster_conf: models.ClusterConfiguration, software_metadata_key: str, start_task, VmImageModel):
+    def __create_pool_and_job(self, cluster_conf: models.ClusterConfiguration, software_metadata_key: str, start_task,
+                              VmImageModel):
         """
             Create a pool and job
             :param cluster_conf: the configuration object used to create the cluster
@@ -108,8 +110,7 @@ class CoreClient:
 
         network_conf = None
         if cluster_conf.subnet_id is not None:
-            network_conf = batch_models.NetworkConfiguration(
-                subnet_id=cluster_conf.subnet_id)
+            network_conf = batch_models.NetworkConfiguration(subnet_id=cluster_conf.subnet_id)
         auto_scale_formula = "$TargetDedicatedNodes={0}; $TargetLowPriorityNodes={1}".format(
             cluster_conf.size, cluster_conf.size_low_priority)
 
@@ -117,8 +118,7 @@ class CoreClient:
         pool = batch_models.PoolAddParameter(
             id=pool_id,
             virtual_machine_configuration=batch_models.VirtualMachineConfiguration(
-                image_reference=image_ref_to_use,
-                node_agent_sku_id=sku_to_use),
+                image_reference=image_ref_to_use, node_agent_sku_id=sku_to_use),
             vm_size=cluster_conf.vm_size,
             enable_auto_scale=True,
             auto_scale_formula=auto_scale_formula,
@@ -128,8 +128,7 @@ class CoreClient:
             max_tasks_per_node=4,
             network_configuration=network_conf,
             metadata=[
-                batch_models.MetadataItem(
-                    name=constants.AZTK_SOFTWARE_METADATA_KEY, value=software_metadata_key),
+                batch_models.MetadataItem(name=constants.AZTK_SOFTWARE_METADATA_KEY, value=software_metadata_key),
                 batch_models.MetadataItem(
                     name=constants.AZTK_MODE_METADATA_KEY, value=constants.AZTK_CLUSTER_MODE_METADATA)
             ])
@@ -138,9 +137,7 @@ class CoreClient:
         helpers.create_pool_if_not_exist(pool, self.batch_client)
 
         # Create job
-        job = batch_models.JobAddParameter(
-            id=job_id,
-            pool_info=batch_models.PoolInformation(pool_id=pool_id))
+        job = batch_models.JobAddParameter(id=job_id, pool_info=batch_models.PoolInformation(pool_id=pool_id))
 
         # Add job to batch
         self.batch_client.job.add(job)
@@ -164,10 +161,8 @@ class CoreClient:
             List all the cluster on your account.
         """
         pools = self.batch_client.pool.list()
-        software_metadata = (
-            constants.AZTK_SOFTWARE_METADATA_KEY, software_metadata_key)
-        cluster_metadata = (
-            constants.AZTK_MODE_METADATA_KEY, constants.AZTK_CLUSTER_MODE_METADATA)
+        software_metadata = (constants.AZTK_SOFTWARE_METADATA_KEY, software_metadata_key)
+        cluster_metadata = (constants.AZTK_MODE_METADATA_KEY, constants.AZTK_CLUSTER_MODE_METADATA)
 
         aztk_pools = []
         for pool in [pool for pool in pools if pool.metadata]:
@@ -177,7 +172,8 @@ class CoreClient:
         return aztk_pools
 
     @deprecated("0.10.0")
-    def __create_user(self, pool_id: str, node_id: str, username: str, password: str = None, ssh_key: str = None) -> str:
+    def __create_user(self, pool_id: str, node_id: str, username: str, password: str = None,
+                      ssh_key: str = None) -> str:
         """
             Create a pool user
             :param pool: the pool to add the user to
@@ -188,14 +184,12 @@ class CoreClient:
         """
         # Create new ssh user for the given node
         self.batch_client.compute_node.add_user(
-            pool_id,
-            node_id,
+            pool_id, node_id,
             batch_models.ComputeNodeUser(
                 name=username,
                 is_admin=True,
                 password=password,
-                ssh_public_key=get_ssh_key.get_user_public_key(
-                    ssh_key, self.secrets_configuration),
+                ssh_public_key=get_ssh_key.get_user_public_key(ssh_key, self.secrets_configuration),
                 expiry_time=datetime.now(timezone.utc) + timedelta(days=365)))
 
     @deprecated("0.10.0")
@@ -217,8 +211,7 @@ class CoreClient:
         :param node_id
         :returns aztk.models.RemoteLogin
         """
-        result = self.batch_client.compute_node.get_remote_login_settings(
-            pool_id, node_id)
+        result = self.batch_client.compute_node.get_remote_login_settings(pool_id, node_id)
         return models.RemoteLogin(ip_address=result.remote_login_ip_address, port=str(result.remote_login_port))
 
     @deprecated("0.10.0")
@@ -246,11 +239,10 @@ class CoreClient:
         ssh_key = RSA.generate(2048)
         ssh_pub_key = ssh_key.publickey().exportKey('OpenSSH').decode('utf-8')
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            futures = {executor.submit(self.__create_user_on_node,
-                                       generated_username,
-                                       pool_id,
-                                       node.id,
-                                       ssh_pub_key): node for node in nodes}
+            futures = {
+                executor.submit(self.__create_user_on_node, generated_username, pool_id, node.id, ssh_pub_key): node
+                for node in nodes
+            }
             concurrent.futures.wait(futures)
 
         return generated_username, ssh_key
@@ -258,12 +250,10 @@ class CoreClient:
     @deprecated("0.10.0")
     def __create_user_on_pool(self, username, pool_id, nodes, ssh_pub_key=None, password=None):
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            futures = {executor.submit(self.__create_user_on_node,
-                                       username,
-                                       pool_id,
-                                       node.id,
-                                       ssh_pub_key,
-                                       password): node for node in nodes}
+            futures = {
+                executor.submit(self.__create_user_on_node, username, pool_id, node.id, ssh_pub_key, password): node
+                for node in nodes
+            }
             concurrent.futures.wait(futures)
 
     @deprecated("0.10.0")
@@ -295,8 +285,7 @@ class CoreClient:
                 node_rls.port,
                 ssh_key=ssh_key.exportKey().decode('utf-8'),
                 container_name=container_name,
-                timeout=timeout
-            )
+                timeout=timeout)
             return output
         finally:
             self.__delete_user(cluster_id, node.id, generated_username)
@@ -319,9 +308,7 @@ class CoreClient:
                     cluster_nodes,
                     ssh_key=ssh_key.exportKey().decode('utf-8'),
                     container_name=container_name,
-                    timeout=timeout
-                )
-            )
+                    timeout=timeout))
             return output
         except OSError as exc:
             raise exc
@@ -329,7 +316,14 @@ class CoreClient:
             self.__delete_user_on_pool(generated_username, pool.id, nodes)
 
     @deprecated("0.10.0")
-    def __cluster_copy(self, cluster_id, source_path, destination_path=None, container_name=None, internal=False, get=False, timeout=None):
+    def __cluster_copy(self,
+                       cluster_id,
+                       source_path,
+                       destination_path=None,
+                       container_name=None,
+                       internal=False,
+                       get=False,
+                       timeout=None):
         pool, nodes = self.__get_pool_details(cluster_id)
         nodes = list(nodes)
         if internal:
@@ -348,9 +342,7 @@ class CoreClient:
                     destination_path=destination_path,
                     ssh_key=ssh_key.exportKey().decode('utf-8'),
                     get=get,
-                    timeout=timeout
-                )
-            )
+                    timeout=timeout))
             return output
         except (OSError, batch_error.BatchErrorException) as exc:
             raise exc
@@ -358,7 +350,14 @@ class CoreClient:
             self.__delete_user_on_pool(generated_username, pool.id, nodes)
 
     @deprecated("0.10.0")
-    def __ssh_into_node(self, pool_id, node_id, username, ssh_key=None, password=None, port_forward_list=None, internal=False):
+    def __ssh_into_node(self,
+                        pool_id,
+                        node_id,
+                        username,
+                        ssh_key=None,
+                        password=None,
+                        port_forward_list=None,
+                        internal=False):
         if internal:
             result = self.batch_client.compute_node.get(pool_id=pool_id, node_id=node_id)
             rls = models.RemoteLogin(ip_address=result.ip_address, port="22")
@@ -376,14 +375,8 @@ class CoreClient:
         )
 
     @deprecated("0.10.0")
-    def __submit_job(self,
-                     job_configuration,
-                     start_task,
-                     job_manager_task,
-                     autoscale_formula,
-                     software_metadata_key: str,
-                     vm_image_model,
-                     application_metadata):
+    def __submit_job(self, job_configuration, start_task, job_manager_task, autoscale_formula,
+                     software_metadata_key: str, vm_image_model, application_metadata):
         """
             Job Submission
             :param job_configuration -> aztk_sdk.spark.models.JobConfiguration
@@ -404,8 +397,7 @@ class CoreClient:
         # set up subnet if necessary
         network_conf = None
         if job_configuration.subnet_id:
-            network_conf = batch_models.NetworkConfiguration(
-                subnet_id=job_configuration.subnet_id)
+            network_conf = batch_models.NetworkConfiguration(subnet_id=job_configuration.subnet_id)
 
         # set up a schedule for a recurring job
         auto_pool_specification = batch_models.AutoPoolSpecification(
@@ -415,8 +407,7 @@ class CoreClient:
             pool=batch_models.PoolSpecification(
                 display_name=job_configuration.id,
                 virtual_machine_configuration=batch_models.VirtualMachineConfiguration(
-                    image_reference=image_ref_to_use,
-                    node_agent_sku_id=sku_to_use),
+                    image_reference=image_ref_to_use, node_agent_sku_id=sku_to_use),
                 vm_size=job_configuration.vm_size,
                 enable_auto_scale=True,
                 auto_scale_formula=autoscale_formula,
@@ -426,13 +417,10 @@ class CoreClient:
                 network_configuration=network_conf,
                 max_tasks_per_node=4,
                 metadata=[
-                    batch_models.MetadataItem(
-                        name=constants.AZTK_SOFTWARE_METADATA_KEY, value=software_metadata_key),
+                    batch_models.MetadataItem(name=constants.AZTK_SOFTWARE_METADATA_KEY, value=software_metadata_key),
                     batch_models.MetadataItem(
                         name=constants.AZTK_MODE_METADATA_KEY, value=constants.AZTK_JOB_MODE_METADATA)
-                ]
-            )
-        )
+                ]))
 
         # define job specification
         job_spec = batch_models.JobSpecification(
@@ -440,25 +428,15 @@ class CoreClient:
             display_name=job_configuration.id,
             on_all_tasks_complete=batch_models.OnAllTasksComplete.terminate_job,
             job_manager_task=job_manager_task,
-            metadata=[
-                batch_models.MetadataItem(
-                    name='applications', value=application_metadata)
-            ]
-        )
+            metadata=[batch_models.MetadataItem(name='applications', value=application_metadata)])
 
         # define schedule
         schedule = batch_models.Schedule(
-            do_not_run_until=None,
-            do_not_run_after=None,
-            start_window=None,
-            recurrence_interval=None
-        )
+            do_not_run_until=None, do_not_run_after=None, start_window=None, recurrence_interval=None)
 
         # create job schedule and add task
         setup = batch_models.JobScheduleAddParameter(
-            id=job_configuration.id,
-            schedule=schedule,
-            job_specification=job_spec)
+            id=job_configuration.id, schedule=schedule, job_specification=job_spec)
 
         self.batch_client.job_schedule.add(setup)
 

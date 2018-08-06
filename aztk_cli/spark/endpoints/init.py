@@ -7,8 +7,11 @@ import aztk.utils.constants as constants
 
 
 def setup_parser(parser: argparse.ArgumentParser):
-    parser.add_argument('--global', dest='global_flag', action='store_true',
-                        help="Create a .aztk/ folder in your home directory for global configurations.")
+    parser.add_argument(
+        '--global',
+        dest='global_flag',
+        action='store_true',
+        help="Create a .aztk/ folder in your home directory for global configurations.")
     software_parser = parser.add_mutually_exclusive_group()
     software_parser.add_argument('--miniconda', action="store_true", required=False)
     software_parser.add_argument('--anaconda', action="store_true", required=False)

@@ -56,12 +56,11 @@ def create_resource_group(credentials, subscription_id, **kwargs):
                 resource_group_name=kwargs.get("resource_group", DefaultSettings.resource_group),
                 parameters={
                     'location': kwargs.get("region", DefaultSettings.region),
-                }
-            )
+                })
         except CloudError as e:
             if i == 2:
-                raise AccountSetupError(
-                    "Unable to create resource group in region {}".format(kwargs.get("region", DefaultSettings.region)))
+                raise AccountSetupError("Unable to create resource group in region {}".format(
+                    kwargs.get("region", DefaultSettings.region)))
             print(e.message)
             print("Please try again.")
             kwargs["resource_group"] = prompt_with_default("Azure Region", DefaultSettings.region)
@@ -82,13 +81,8 @@ def create_storage_account(credentials, subscription_id, **kwargs):
         resource_group_name=kwargs.get("resource_group", DefaultSettings.resource_group),
         account_name=kwargs.get("storage_account", DefaultSettings.storage_account),
         parameters=StorageAccountCreateParameters(
-            sku=Sku(SkuName.standard_lrs),
-            kind=Kind.storage,
-            location=kwargs.get('region', DefaultSettings.region)
-        )
-    )
+            sku=Sku(SkuName.standard_lrs), kind=Kind.storage, location=kwargs.get('region', DefaultSettings.region)))
     return storage_account.result().id
-
 
 
 def create_batch_account(credentials, subscription_id, **kwargs):
@@ -108,10 +102,7 @@ def create_batch_account(credentials, subscription_id, **kwargs):
         parameters=BatchAccountCreateParameters(
             location=kwargs.get('region', DefaultSettings.region),
             auto_storage=AutoStorageBaseProperties(
-                storage_account_id=kwargs.get('storage_account_id', DefaultSettings.region)
-            )
-        )
-    )
+                storage_account_id=kwargs.get('storage_account_id', DefaultSettings.region))))
     return batch_account.result().id
 
 
@@ -151,19 +142,13 @@ def create_vnet(credentials, subscription_id, **kwargs):
         resource_group_name=resource_group_name,
         virtual_network_name=kwargs.get("virtual_network_name", DefaultSettings.virtual_network_name),
         parameters=VirtualNetwork(
-            location=kwargs.get("region", DefaultSettings.region),
-            address_space=AddressSpace(["10.0.0.0/24"])
-        )
-    )
+            location=kwargs.get("region", DefaultSettings.region), address_space=AddressSpace(["10.0.0.0/24"])))
     virtual_network = virtual_network.result()
     subnet = network_client.subnets.create_or_update(
         resource_group_name=resource_group_name,
         virtual_network_name=virtual_network_name,
         subnet_name=subnet_name,
-        subnet_parameters=Subnet(
-            address_prefix='10.0.0.0/24'
-        )
-    )
+        subnet_parameters=Subnet(address_prefix='10.0.0.0/24'))
     return subnet.result().id
 
 
@@ -175,10 +160,7 @@ def create_aad_user(credentials, tenant_id, **kwargs):
         :param **application_name: str
     """
     graph_rbac_client = GraphRbacManagementClient(
-        credentials,
-        tenant_id,
-        base_url=AZURE_PUBLIC_CLOUD.endpoints.active_directory_graph_resource_id
-    )
+        credentials, tenant_id, base_url=AZURE_PUBLIC_CLOUD.endpoints.active_directory_graph_resource_id)
     application_credential = uuid.uuid4()
     try:
         display_name = kwargs.get("application_name", DefaultSettings.application_name)
@@ -192,42 +174,32 @@ def create_aad_user(credentials, tenant_id, **kwargs):
                         start_date=datetime(2000, 1, 1, 0, 0, 0, 0, tzinfo=timezone.utc),
                         end_date=datetime(2299, 12, 31, 0, 0, 0, 0, tzinfo=timezone.utc),
                         value=application_credential,
-                        key_id=uuid.uuid4()
-                    )
-                ]
-            )
-        )
+                        key_id=uuid.uuid4())
+                ]))
         service_principal = graph_rbac_client.service_principals.create(
-            ServicePrincipalCreateParameters(
-                app_id=application.app_id,
-                account_enabled=True
-            )
-        )
+            ServicePrincipalCreateParameters(app_id=application.app_id, account_enabled=True))
     except GraphErrorException as e:
         if e.inner_exception.code == "Request_BadRequest":
-            application = next(graph_rbac_client.applications.list(
-                filter="identifierUris/any(c:c eq 'http://{}.com')".format(display_name)))
+            application = next(
+                graph_rbac_client.applications.list(
+                    filter="identifierUris/any(c:c eq 'http://{}.com')".format(display_name)))
 
             confirmation_prompt = "Previously created application with name {} found. "\
                                   "Would you like to use it? (y/n): ".format(application.display_name)
             prompt_for_confirmation(confirmation_prompt, e, ValueError("Response not recognized. Please try again."))
-            password_credentials = list(graph_rbac_client.applications.list_password_credentials(application_object_id=application.object_id))
+            password_credentials = list(
+                graph_rbac_client.applications.list_password_credentials(application_object_id=application.object_id))
             password_credentials.append(
                 PasswordCredential(
                     start_date=datetime(2000, 1, 1, 0, 0, 0, 0, tzinfo=timezone.utc),
                     end_date=datetime(2299, 12, 31, 0, 0, 0, 0, tzinfo=timezone.utc),
                     value=application_credential,
-                    key_id=uuid.uuid4()
-                )
-            )
+                    key_id=uuid.uuid4()))
             graph_rbac_client.applications.patch(
                 application_object_id=application.object_id,
-                parameters=ApplicationUpdateParameters(
-                    password_credentials=password_credentials
-                )
-            )
-            service_principal = next(graph_rbac_client.service_principals.list(
-                filter="appId eq '{}'".format(application.app_id)))
+                parameters=ApplicationUpdateParameters(password_credentials=password_credentials))
+            service_principal = next(
+                graph_rbac_client.service_principals.list(filter="appId eq '{}'".format(application.app_id)))
         else:
             raise e
 
@@ -244,21 +216,15 @@ def create_role_assignment(credentials, subscription_id, scope, principal_id):
     """
     authorization_client = AuthorizationManagementClient(credentials, subscription_id)
     role_name = 'Contributor'
-    roles = list(authorization_client.role_definitions.list(
-        scope,
-        filter="roleName eq '{}'".format(role_name)
-    ))
+    roles = list(authorization_client.role_definitions.list(scope, filter="roleName eq '{}'".format(role_name)))
     contributor_role = roles[0]
     for i in range(10):
         try:
-            authorization_client.role_assignments.create(
-                scope,
-                uuid.uuid4(),
-                {
-                    'role_definition_id': contributor_role.id,
-                    'principal_id': principal_id
-                }
-            )
+            authorization_client.role_assignments.create(scope, uuid.uuid4(),
+                                                         {
+                                                             'role_definition_id': contributor_role.id,
+                                                             'principal_id': principal_id
+                                                         })
             break
         except CloudError as e:
             # ignore error if service principal has not yet been created
@@ -321,7 +287,6 @@ def prompt_tenant_selection(tenant_ids):
     raise AccountSetupError("Tenant selection not recognized after 3 attempts.")
 
 
-
 class Spinner:
     busy = False
     delay = 0.1
@@ -329,7 +294,8 @@ class Spinner:
     @staticmethod
     def spinning_cursor():
         while 1:
-            for cursor in '|/-\\': yield cursor
+            for cursor in '|/-\\':
+                yield cursor
 
     def __init__(self, delay=None):
         self.spinner_generator = self.spinning_cursor()
@@ -358,7 +324,6 @@ class Spinner:
         time.sleep(self.delay)
 
 
-
 if __name__ == "__main__":
     print("\nGetting credentials.")
     # get credentials and tenant_id
@@ -374,15 +339,22 @@ if __name__ == "__main__":
           "Default values are provided in the brackets. "\
           "Hit enter to use default.")
     kwargs = {
-        "region": prompt_with_default("Azure Region", DefaultSettings.region),
-        "resource_group": prompt_with_default("Resource Group Name", DefaultSettings.resource_group),
-        "storage_account": prompt_with_default("Storage Account Name", DefaultSettings.storage_account),
-        "batch_account": prompt_with_default("Batch Account Name", DefaultSettings.batch_account),
-        # "virtual_network_name": prompt_with_default("Virtual Network Name", DefaultSettings.virtual_network_name),
-        # "subnet_name": prompt_with_default("Subnet Name", DefaultSettings.subnet_name),
-        "application_name": prompt_with_default("Active Directory Application Name", DefaultSettings.application_name),
-        "application_credential_name": prompt_with_default("Active Directory Application Credential Name", DefaultSettings.resource_group),
-        "service_principal": prompt_with_default("Service Principal Name", DefaultSettings.service_principal)
+        "region":
+        prompt_with_default("Azure Region", DefaultSettings.region),
+        "resource_group":
+        prompt_with_default("Resource Group Name", DefaultSettings.resource_group),
+        "storage_account":
+        prompt_with_default("Storage Account Name", DefaultSettings.storage_account),
+        "batch_account":
+        prompt_with_default("Batch Account Name", DefaultSettings.batch_account),
+    # "virtual_network_name": prompt_with_default("Virtual Network Name", DefaultSettings.virtual_network_name),
+    # "subnet_name": prompt_with_default("Subnet Name", DefaultSettings.subnet_name),
+        "application_name":
+        prompt_with_default("Active Directory Application Name", DefaultSettings.application_name),
+        "application_credential_name":
+        prompt_with_default("Active Directory Application Credential Name", DefaultSettings.resource_group),
+        "service_principal":
+        prompt_with_default("Service Principal Name", DefaultSettings.service_principal)
     }
     print("Creating the Azure resources.")
 
@@ -410,9 +382,9 @@ if __name__ == "__main__":
     with Spinner():
         profile = credentials.get_cli_profile()
         aad_cred, subscription_id, tenant_id = profile.get_login_credentials(
-            resource=AZURE_PUBLIC_CLOUD.endpoints.active_directory_graph_resource_id
-        )
-        application_id, service_principal_object_id, application_credential = create_aad_user(aad_cred, tenant_id, **kwargs)
+            resource=AZURE_PUBLIC_CLOUD.endpoints.active_directory_graph_resource_id)
+        application_id, service_principal_object_id, application_credential = create_aad_user(
+            aad_cred, tenant_id, **kwargs)
 
     print("Created Azure Active Directory service principal.")
 
@@ -425,10 +397,9 @@ if __name__ == "__main__":
             "tenant_id": tenant_id,
             "client_id": application_id,
             "credential": application_credential,
-            # "subnet_id": subnet_id,
+    # "subnet_id": subnet_id,
             "batch_account_resource_id": batch_account_id,
             "storage_account_resource_id": storage_account_id
-        }
-    )
+        })
 
     print("\n# Copy the following into your .aztk/secrets.yaml file\n{}".format(secrets))

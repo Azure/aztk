@@ -1,9 +1,8 @@
 import azure.batch.models as batch_models
 
+
 class Cluster:
-    def __init__(self,
-                 pool: batch_models.CloudPool,
-                 nodes: batch_models.ComputeNodePaged = None):
+    def __init__(self, pool: batch_models.CloudPool, nodes: batch_models.ComputeNodePaged = None):
         self.id = pool.id
         self.pool = pool
         self.nodes = nodes
@@ -20,4 +19,3 @@ class Cluster:
         self.current_low_pri_nodes = pool.current_low_priority_nodes
         self.target_dedicated_nodes = pool.target_dedicated_nodes
         self.target_low_pri_nodes = pool.target_low_priority_nodes
-

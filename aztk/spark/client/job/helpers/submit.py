@@ -64,7 +64,10 @@ def _apply_default_for_job_config(job_conf: models.JobConfiguration):
     return job_conf
 
 
-def submit_job(core_job_operations, spark_job_operations, job_configuration: models.JobConfiguration, wait: bool = False):
+def submit_job(core_job_operations,
+               spark_job_operations,
+               job_configuration: models.JobConfiguration,
+               wait: bool = False):
     try:
         job_configuration = _apply_default_for_job_config(job_configuration)
         job_configuration.validate()
@@ -84,8 +87,8 @@ def submit_job(core_job_operations, spark_job_operations, job_configuration: mod
         application_tasks = []
         for application in job_configuration.applications:
             application_tasks.append((application,
-                                      spark_job_operations._generate_application_task(core_job_operations, job_configuration.id,
-                                                                                     application)))
+                                      spark_job_operations._generate_application_task(
+                                          core_job_operations, job_configuration.id, application)))
 
         job_manager_task = generate_job_manager_task(core_job_operations, job_configuration, application_tasks)
 
@@ -106,7 +109,7 @@ def submit_job(core_job_operations, spark_job_operations, job_configuration: mod
             software_metadata_key=software_metadata_key,
             vm_image_model=vm_image,
             application_metadata='\n'.join(application.name for application in (job_configuration.applications or [])))
-        
+
         if wait:
             spark_job_operations.wait(id=job_configuration.id)
 

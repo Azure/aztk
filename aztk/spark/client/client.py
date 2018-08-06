@@ -26,18 +26,20 @@ class Client(CoreClient):
             cluster (:obj:`aztk.spark.client.cluster.ClusterOperations`): Cluster
             job (:obj:`aztk.spark.client.job.JobOperations`): Job
     """
+
     def __init__(self, secrets_configuration: models.SecretsConfiguration = None, **kwargs):
         self.secrets_configuration = None
         context = None
         if kwargs.get("secrets_config"):
-            deprecate(version="0.10.0", message="secrets_config key is deprecated in secrets.yaml",
-                      advice="Please use secrets_configuration key instead.")
+            deprecate(
+                version="0.10.0",
+                message="secrets_config key is deprecated in secrets.yaml",
+                advice="Please use secrets_configuration key instead.")
             context = self._get_context(kwargs.get("secrets_config"))
         else:
             context = self._get_context(secrets_configuration)
         self.cluster = ClusterOperations(context)
         self.job = JobOperations(context)
-
 
     # ALL THE FOLLOWING METHODS ARE DEPRECATED AND WILL BE REMOVED IN 0.10.0
 
@@ -171,7 +173,8 @@ class Client(CoreClient):
                                 password=None,
                                 port_forward_list=None,
                                 internal=False):
-        return self.cluster._core_cluster_operations.ssh_into_node(cluster_id, node_id, username, ssh_key, password, port_forward_list, internal)
+        return self.cluster._core_cluster_operations.ssh_into_node(cluster_id, node_id, username, ssh_key, password,
+                                                                   port_forward_list, internal)
 
     '''
         job submission

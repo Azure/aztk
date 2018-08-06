@@ -47,9 +47,10 @@ def _run_script(script_path: str = None):
     os.chmod(script_path, file_stat.st_mode | 0o777)
     print("Running custom script:", script_path)
     try:
-        subprocess.call([script_path], shell = True)
+        subprocess.call([script_path], shell=True)
     except Exception as e:
         print(e)
+
 
 def _run_scripts_dir(root: str = None):
     try:

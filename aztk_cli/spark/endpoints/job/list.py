@@ -10,6 +10,7 @@ def setup_parser(_: argparse.ArgumentParser):
     # No arguments for list yet
     pass
 
+
 def execute(args: typing.NamedTuple):
     spark_client = aztk.spark.Client(config.load_aztk_secrets())
 

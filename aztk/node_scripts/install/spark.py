@@ -29,6 +29,7 @@ def setup_as_worker():
     setup_connection()
     start_spark_worker()
 
+
 def get_pool() -> batchmodels.CloudPool:
     return batch_client.pool.get(config.pool_id)
 
@@ -50,15 +51,13 @@ def setup_connection():
     """
         This setup spark config with which nodes are slaves and which are master
     """
-    master_node_id = pick_master.get_master_node_id(
-        batch_client.pool.get(config.pool_id))
+    master_node_id = pick_master.get_master_node_id(batch_client.pool.get(config.pool_id))
     master_node = get_node(master_node_id)
 
     master_config_file = os.path.join(spark_conf_folder, "master")
     master_file = open(master_config_file, 'w', encoding='UTF-8')
 
-    print("Adding master node ip {0} to config file '{1}'".format(
-        master_node.ip_address, master_config_file))
+    print("Adding master node ip {0} to config file '{1}'".format(master_node.ip_address, master_config_file))
     master_file.write("{0}\n".format(master_node.ip_address))
 
     master_file.close()
@@ -66,8 +65,7 @@ def setup_connection():
 
 def wait_for_master():
     print("Waiting for master to be ready.")
-    master_node_id = pick_master.get_master_node_id(
-        batch_client.pool.get(config.pool_id))
+    master_node_id = pick_master.get_master_node_id(batch_client.pool.get(config.pool_id))
 
     if master_node_id == config.node_id:
         return
@@ -85,8 +83,7 @@ def wait_for_master():
 def start_spark_master():
     master_ip = get_node(config.node_id).ip_address
     exe = os.path.join(spark_home, "sbin", "start-master.sh")
-    cmd = [exe, "-h", master_ip, "--webui-port",
-           str(config.spark_web_ui_port)]
+    cmd = [exe, "-h", master_ip, "--webui-port", str(config.spark_web_ui_port)]
     print("Starting master with '{0}'".format(" ".join(cmd)))
     call(cmd)
     try:
@@ -99,12 +96,10 @@ def start_spark_master():
 def start_spark_worker():
     wait_for_master()
     exe = os.path.join(spark_home, "sbin", "start-slave.sh")
-    master_node_id = pick_master.get_master_node_id(
-        batch_client.pool.get(config.pool_id))
+    master_node_id = pick_master.get_master_node_id(batch_client.pool.get(config.pool_id))
     master_node = get_node(master_node_id)
 
-    cmd = [exe, "spark://{0}:7077".format(master_node.ip_address),
-           "--webui-port", str(config.spark_worker_ui_port)]
+    cmd = [exe, "spark://{0}:7077".format(master_node.ip_address), "--webui-port", str(config.spark_worker_ui_port)]
     print("Connecting to master with '{0}'".format(" ".join(cmd)))
     call(cmd)
 

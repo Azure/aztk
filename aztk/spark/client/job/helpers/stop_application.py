@@ -5,6 +5,7 @@ from aztk.spark import models
 from aztk.utils import helpers
 from .get_recent_job import get_recent_job
 
+
 def stop_app(core_job_operations, job_id, application_name):
     recent_run_job = get_recent_job(core_job_operations, job_id)
 

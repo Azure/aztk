@@ -6,7 +6,6 @@ from setuptools import find_packages, setup
 from aztk import version
 from aztk_cli import constants
 
-
 data_files = []
 
 
@@ -16,6 +15,7 @@ def _includeFile(filename: str, exclude: [str]) -> bool:
             return False
 
     return True
+
 
 def find_package_files(root, directory, dest=""):
     paths = []

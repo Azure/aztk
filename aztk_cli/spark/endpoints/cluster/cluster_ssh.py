@@ -19,10 +19,15 @@ def setup_parser(parser: argparse.ArgumentParser):
     parser.add_argument('-u', '--username', help='Username to spark cluster')
     parser.add_argument('--password', help='Password for the specified ssh user')
     parser.add_argument('--host', dest="host", action='store_true', help='Connect to the host of the Spark container')
-    parser.add_argument('--no-connect', dest="connect", action='store_false',
-                        help='Do not create the ssh session. Only print out the command to run.')
-    parser.add_argument('--internal', action='store_true',
-                        help='Connect using the local IP of the master node. Only use if using a VPN.')
+    parser.add_argument(
+        '--no-connect',
+        dest="connect",
+        action='store_false',
+        help='Do not create the ssh session. Only print out the command to run.')
+    parser.add_argument(
+        '--internal',
+        action='store_true',
+        help='Connect using the local IP of the master node. Only use if using a VPN.')
     parser.set_defaults(connect=True, internal=False)
 
 
@@ -97,9 +102,10 @@ def native_python_ssh_into_master(spark_client, cluster, ssh_conf, password):
     plugin_ports = []
     if configuration and configuration.plugins:
         ports = [
-            PortForwardingSpecification(
-                port.internal,
-                port.public_port) for plugin in configuration.plugins for port in plugin.ports if port.expose_publicly
+            PortForwardingSpecification(port.internal, port.public_port)
+            for plugin in configuration.plugins
+            for port in plugin.ports
+            if port.expose_publicly
         ]
         plugin_ports.extend(ports)
 
@@ -111,12 +117,11 @@ def native_python_ssh_into_master(spark_client, cluster, ssh_conf, password):
         ssh_key=None,
         password=password,
         port_forward_list=[
-            PortForwardingSpecification(remote_port=8080, local_port=8080),      # web ui
-            PortForwardingSpecification(remote_port=4040, local_port=4040),      # job ui
+            PortForwardingSpecification(remote_port=8080, local_port=8080),    # web ui
+            PortForwardingSpecification(remote_port=4040, local_port=4040),    # job ui
             PortForwardingSpecification(remote_port=18080, local_port=18080),    # job history ui
         ] + plugin_ports,
-        internal=ssh_conf.internal
-    )
+        internal=ssh_conf.internal)
 
 
 def shell_out_ssh(spark_client, ssh_conf):

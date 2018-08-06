@@ -9,7 +9,7 @@ VERBOSE_FORMAT = '[%(asctime)s] [%(filename)s:%(module)s:%(funcName)s:%(lineno)d
 
 
 def add_coloring_to_emit_windows(fn):
-        # add methods we need to the class
+    # add methods we need to the class
 
     def _set_color(self, code):
         import ctypes
@@ -21,10 +21,10 @@ def add_coloring_to_emit_windows(fn):
     setattr(logging.StreamHandler, '_set_color', _set_color)
 
     def new(*args):
-        FOREGROUND_BLUE = 0x0001  # text color contains blue.
-        FOREGROUND_GREEN = 0x0002  # text color contains green.
-        FOREGROUND_RED = 0x0004  # text color contains red.
-        FOREGROUND_INTENSITY = 0x0008  # text color is intensified.
+        FOREGROUND_BLUE = 0x0001    # text color contains blue.
+        FOREGROUND_GREEN = 0x0002    # text color contains green.
+        FOREGROUND_RED = 0x0004    # text color contains red.
+        FOREGROUND_INTENSITY = 0x0008    # text color is intensified.
         FOREGROUND_WHITE = FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED
 
         # winbase.h
@@ -41,7 +41,7 @@ def add_coloring_to_emit_windows(fn):
         FOREGROUND_MAGENTA = 0x0005
         FOREGROUND_YELLOW = 0x0006
         FOREGROUND_GREY = 0x0007
-        FOREGROUND_INTENSITY = 0x0008  # foreground color is intensified.
+        FOREGROUND_INTENSITY = 0x0008    # foreground color is intensified.
 
         BACKGROUND_BLACK = 0x0000
         BACKGROUND_BLUE = 0x0010
@@ -51,7 +51,7 @@ def add_coloring_to_emit_windows(fn):
         BACKGROUND_MAGENTA = 0x0050
         BACKGROUND_YELLOW = 0x0060
         BACKGROUND_GREY = 0x0070
-        BACKGROUND_INTENSITY = 0x0080  # background color is intensified.
+        BACKGROUND_INTENSITY = 0x0080    # background color is intensified.
 
         levelno = args[1].levelno
         if levelno >= 50:
@@ -74,6 +74,7 @@ def add_coloring_to_emit_windows(fn):
         args[0]._set_color(FOREGROUND_WHITE)
         # print "after"
         return ret
+
     return new
 
 
@@ -82,22 +83,23 @@ def add_coloring_to_emit_ansi(fn):
     def new(*args):
         levelno = args[1].levelno
         if levelno >= 50:
-            color = '\x1b[31m'  # red
+            color = '\x1b[31m'    # red
         elif levelno >= 40:
-            color = '\x1b[31m'  # red
+            color = '\x1b[31m'    # red
         elif levelno >= 30:
-            color = '\x1b[33m'  # yellow
+            color = '\x1b[33m'    # yellow
         elif levelno >= 20:
-            color = '\x1b[32m'  # green
+            color = '\x1b[32m'    # green
         elif levelno >= 19:
-            color = '\x1b[0m'   # normal
+            color = '\x1b[0m'    # normal
         elif levelno >= 10:
-            color = '\x1b[35m'  # pink
+            color = '\x1b[35m'    # pink
         else:
-            color = '\x1b[0m'  # normal
-        args[1].msg = color + args[1].msg + '\x1b[0m'  # normal
+            color = '\x1b[0m'    # normal
+        args[1].msg = color + args[1].msg + '\x1b[0m'    # normal
         # print "after"
         return fn(*args)
+
     return new
 
 
@@ -108,9 +110,9 @@ else:
     # all non-Windows platforms are supporting ANSI escapes so we use them
     logging.StreamHandler.emit = add_coloring_to_emit_ansi(logging.StreamHandler.emit)
 
-
 logging.PRINT = 19
 logging.addLevelName(logging.PRINT, "PRINT")
+
 
 def print_level(self, message, *args, **kwargs):
     self._log(logging.PRINT, message, args, **kwargs)

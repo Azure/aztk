@@ -6,14 +6,8 @@ from aztk_cli import config, log, utils
 
 
 def setup_parser(parser: argparse.ArgumentParser):
-    parser.add_argument('--id',
-                        dest='cluster_id',
-                        required=True,
-                        help='The unique id of your spark cluster')
-    parser.add_argument('--show-config',
-                        dest='show_config',
-                        action='store_true',
-                        help='Show the cluster configuration')
+    parser.add_argument('--id', dest='cluster_id', required=True, help='The unique id of your spark cluster')
+    parser.add_argument('--show-config', dest='show_config', action='store_true', help='Show the cluster configuration')
     parser.add_argument('--internal', action='store_true',
                         help="Show the local IP of the nodes. "\
                              "Only use if using connecting with a VPN.")

@@ -10,7 +10,8 @@ from .get_recent_job import get_recent_job
 def _get_job(core_job_operations, job_id):
     job = core_job_operations.batch_client.job_schedule.get(job_id)
     job_apps = [
-        app for app in core_job_operations.batch_client.task.list(job_id=job.execution_info.recent_job.id) if app.id != job_id
+        app for app in core_job_operations.batch_client.task.list(job_id=job.execution_info.recent_job.id)
+        if app.id != job_id
     ]
     recent_run_job = get_recent_job(core_job_operations, job_id)
     pool_prefix = recent_run_job.pool_info.auto_pool_specification.auto_pool_id_prefix

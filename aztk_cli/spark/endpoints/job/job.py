@@ -24,29 +24,18 @@ class ClusterAction:
 
 
 def setup_parser(parser: argparse.ArgumentParser):
-    subparsers = parser.add_subparsers(
-        title="Actions", dest="job_action", metavar="<action>")
+    subparsers = parser.add_subparsers(title="Actions", dest="job_action", metavar="<action>")
     subparsers.required = True
 
-    get_app_logs_parser = subparsers.add_parser(
-        ClusterAction.get_app_logs, help="Get a Job's application logs")
-    get_app_parser = subparsers.add_parser(
-        ClusterAction.get_app, help="Get information about a Job's application")
-    delete_parser = subparsers.add_parser(
-        ClusterAction.delete, help="Delete a Job")
-    get_parser = subparsers.add_parser(
-        ClusterAction.get, help="Get information about a Job")
-    list_parser = subparsers.add_parser(
-        ClusterAction.list, help="List Jobs in your account")
-    list_apps_parser = subparsers.add_parser(
-        ClusterAction.list_apps, help="List all applications on an AZTK Job")
-    stop_app_parser = subparsers.add_parser(
-        ClusterAction.stop_app, help="Stop a Job's application")
-    stop_parser = subparsers.add_parser(
-        ClusterAction.stop, help="Stop a Job from running")
-    submit_parser = subparsers.add_parser(
-        ClusterAction.submit, help="Submit a new spark Job")
-
+    get_app_logs_parser = subparsers.add_parser(ClusterAction.get_app_logs, help="Get a Job's application logs")
+    get_app_parser = subparsers.add_parser(ClusterAction.get_app, help="Get information about a Job's application")
+    delete_parser = subparsers.add_parser(ClusterAction.delete, help="Delete a Job")
+    get_parser = subparsers.add_parser(ClusterAction.get, help="Get information about a Job")
+    list_parser = subparsers.add_parser(ClusterAction.list, help="List Jobs in your account")
+    list_apps_parser = subparsers.add_parser(ClusterAction.list_apps, help="List all applications on an AZTK Job")
+    stop_app_parser = subparsers.add_parser(ClusterAction.stop_app, help="Stop a Job's application")
+    stop_parser = subparsers.add_parser(ClusterAction.stop, help="Stop a Job from running")
+    submit_parser = subparsers.add_parser(ClusterAction.submit, help="Submit a new spark Job")
 
     get_app_logs.setup_parser(get_app_logs_parser)
     get_app.setup_parser(get_app_parser)

@@ -1,5 +1,6 @@
 import os
 
+
 def get_user_public_key(key_or_path: str = None, secrets_config=None):
     """
         Return the ssh key.
@@ -7,10 +8,10 @@ def get_user_public_key(key_or_path: str = None, secrets_config=None):
         otherwise will check the configuration file.
     """
     if not key_or_path:
-       if not secrets_config.ssh_pub_key:
-           return None
+        if not secrets_config.ssh_pub_key:
+            return None
 
-       key_or_path = secrets_config.ssh_pub_key
+        key_or_path = secrets_config.ssh_pub_key
 
     if not key_or_path:
         return None

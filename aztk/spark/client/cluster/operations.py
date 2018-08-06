@@ -163,7 +163,8 @@ class ClusterOperations(SparkBaseOperations):
         Returns:
             :obj:`List[aztk.spark.models.NodeOutput]`: A list of NodeOutput objects representing the output of the copy command.
         """
-        return copy.cluster_copy(self._core_cluster_operations, id, source_path, destination_path, host, internal, timeout)
+        return copy.cluster_copy(self._core_cluster_operations, id, source_path, destination_path, host, internal,
+                                 timeout)
 
     def download(self,
                  id: str,
@@ -190,8 +191,8 @@ class ClusterOperations(SparkBaseOperations):
         Returns:
             :obj:`List[aztk.spark.models.NodeOutput]`: A list of NodeOutput objects representing the output of the copy command.
         """
-        return download.cluster_download(self._core_cluster_operations, id, source_path, destination_path, host, internal,
-                                         timeout)
+        return download.cluster_download(self._core_cluster_operations, id, source_path, destination_path, host,
+                                         internal, timeout)
 
     def diagnostics(self, id, output_directory=None):
         """Download a file from every node in a cluster.
@@ -221,7 +222,8 @@ class ClusterOperations(SparkBaseOperations):
         Returns:
             :obj:`aztk.spark.models.ApplicationLog`: a model representing the output of the application.
         """
-        return get_application_log.get_application_log(self._core_cluster_operations, id, application_name, tail, current_bytes)
+        return get_application_log.get_application_log(self._core_cluster_operations, id, application_name, tail,
+                                                       current_bytes)
 
     def get_remote_login_settings(self, id: str, node_id: str):
         """Get the remote login information for a node in a cluster

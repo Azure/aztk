@@ -12,13 +12,14 @@ from aztk.utils import constants, helpers
 output_file = constants.TASK_WORKING_DIR + \
     "/" + constants.SPARK_SUBMIT_LOGS_FILE
 
+
 def __check_task_node_exist(batch_client, cluster_id: str, task: batch_models.CloudTask) -> bool:
     try:
-        batch_client.compute_node.get(
-            cluster_id, task.node_info.node_id)
+        batch_client.compute_node.get(cluster_id, task.node_info.node_id)
         return True
     except batch_error.BatchErrorException:
         return False
+
 
 def __wait_for_app_to_be_running(batch_client, cluster_id: str, application_name: str) -> batch_models.CloudTask:
     """
@@ -33,11 +34,11 @@ def __wait_for_app_to_be_running(batch_client, cluster_id: str, application_name
         else:
             return task
 
+
 def __get_output_file_properties(batch_client, cluster_id: str, application_name: str):
     while True:
         try:
-            file = helpers.get_file_properties(
-                cluster_id, application_name, output_file, batch_client)
+            file = helpers.get_file_properties(cluster_id, application_name, output_file, batch_client)
             return file
         except batch_error.BatchErrorException as e:
             if e.response.status_code == 404:
@@ -79,8 +80,7 @@ def get_log(batch_client, blob_client, cluster_id: str, application_name: str, t
         ocp_range = None
 
         if tail:
-            ocp_range = "bytes={0}-{1}".format(
-                current_bytes, target_bytes - 1)
+            ocp_range = "bytes={0}-{1}".format(current_bytes, target_bytes - 1)
 
         stream = batch_client.file.get_from_task(
             job_id, task_id, output_file, batch_models.FileGetFromTaskOptions(ocp_range=ocp_range))

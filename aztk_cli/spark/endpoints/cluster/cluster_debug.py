@@ -8,11 +8,9 @@ from aztk_cli import config, utils
 
 
 def setup_parser(parser: argparse.ArgumentParser):
-    parser.add_argument('--id', dest='cluster_id', required=True,
-                        help='The unique id of your spark cluster')
+    parser.add_argument('--id', dest='cluster_id', required=True, help='The unique id of your spark cluster')
 
-    parser.add_argument('--output', '-o', required=False,
-                        help='the directory for the output folder')
+    parser.add_argument('--output', '-o', required=False, help='the directory for the output folder')
 
 
 def execute(args: typing.NamedTuple):

@@ -3,11 +3,8 @@ import subprocess
 from aztk.internal import DockerCmd
 from aztk.utils import constants
 
-def start_spark_container(
-        docker_repo: str=None,
-        gpu_enabled: bool=False,
-        file_mounts=None,
-        plugins=None):
+
+def start_spark_container(docker_repo: str = None, gpu_enabled: bool = False, file_mounts=None, plugins=None):
 
     cmd = DockerCmd(
         name=constants.DOCKER_SPARK_CONTAINER_NAME,
@@ -50,22 +47,22 @@ def start_spark_container(
     cmd.pass_env('SPARK_SUBMIT_LOGS_FILE')
     cmd.pass_env('SPARK_JOB_UI_PORT')
 
-    cmd.open_port(8080)       # Spark Master UI
-    cmd.open_port(7077)       # Spark Master
-    cmd.open_port(7337)       # Spark Shuffle Service
-    cmd.open_port(4040)       # Job UI
-    cmd.open_port(18080)      # Spark History Server UI
-    cmd.open_port(3022)       # Docker SSH
+    cmd.open_port(8080)    # Spark Master UI
+    cmd.open_port(7077)    # Spark Master
+    cmd.open_port(7337)    # Spark Shuffle Service
+    cmd.open_port(4040)    # Job UI
+    cmd.open_port(18080)    # Spark History Server UI
+    cmd.open_port(3022)    # Docker SSH
 
     if plugins:
         for plugin in plugins:
             for port in plugin.ports:
                 cmd.open_port(port.internal)
 
-    print("="*60)
+    print("=" * 60)
     print("                 Starting docker container")
-    print("-"*60)
+    print("-" * 60)
     print(cmd.to_str())
-    print("="*60)
+    print("=" * 60)
     subprocess.call(['/bin/bash', '-c', 'echo Is master?: $AZTK_IS_MASTER _ $AZTK_IS_WORKER'])
     subprocess.call(['/bin/bash', '-c', cmd.to_str()])

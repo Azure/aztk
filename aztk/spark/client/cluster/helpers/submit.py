@@ -15,12 +15,18 @@ def affinitize_task_to_master(core_cluster_operations, spark_cluster_operations,
     cluster = spark_cluster_operations.get(cluster_id)
     if cluster.master_node_id is None:
         raise AztkError("Master has not yet been selected. Please wait until the cluster is finished provisioning.")
-    master_node = core_cluster_operations.batch_client.compute_node.get(pool_id=cluster_id, node_id=cluster.master_node_id)
+    master_node = core_cluster_operations.batch_client.compute_node.get(
+        pool_id=cluster_id, node_id=cluster.master_node_id)
     task.affinity_info = batch_models.AffinityInformation(affinity_id=master_node.affinity_id)
     return task
 
 
-def submit_application(core_cluster_operations, spark_cluster_operations, cluster_id, application, remote: bool = False, wait: bool = False):
+def submit_application(core_cluster_operations,
+                       spark_cluster_operations,
+                       cluster_id,
+                       application,
+                       remote: bool = False,
+                       wait: bool = False):
     """
     Submit a spark app
     """
@@ -32,7 +38,8 @@ def submit_application(core_cluster_operations, spark_cluster_operations, cluste
     core_cluster_operations.batch_client.task.add(job_id=job_id, task=task)
 
     if wait:
-        helpers.wait_for_task_to_complete(job_id=job_id, task_id=task.id, batch_client=core_cluster_operations.batch_client)
+        helpers.wait_for_task_to_complete(
+            job_id=job_id, task_id=task.id, batch_client=core_cluster_operations.batch_client)
 
 
 def submit(core_cluster_operations,

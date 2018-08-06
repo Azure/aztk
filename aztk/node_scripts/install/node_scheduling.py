@@ -2,6 +2,7 @@ from azure import batch
 from aztk.models import ClusterConfiguration, SchedulingTarget
 from core import config, log
 
+
 def disable_scheduling(batch_client: batch.BatchServiceClient):
     """
     Disable scheduling for the current node
@@ -15,6 +16,7 @@ def disable_scheduling(batch_client: batch.BatchServiceClient):
         log.info("Disabled task scheduling for this node")
     else:
         log.info("Task scheduling is already disabled for this node")
+
 
 def enable_scheduling(batch_client: batch.BatchServiceClient):
     """
@@ -31,10 +33,8 @@ def enable_scheduling(batch_client: batch.BatchServiceClient):
         log.info("Task scheduling is already enabled for this node")
 
 
-def setup_node_scheduling(
-        batch_client: batch.BatchServiceClient,
-        cluster_config: ClusterConfiguration,
-        is_master: bool):
+def setup_node_scheduling(batch_client: batch.BatchServiceClient, cluster_config: ClusterConfiguration,
+                          is_master: bool):
 
     is_dedicated = config.is_dedicated
     enable = False

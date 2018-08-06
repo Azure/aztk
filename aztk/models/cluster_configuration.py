@@ -1,6 +1,6 @@
 import aztk.error as error
 from aztk.core.models import Model, fields
-from aztk.utils import deprecated,deprecate, helpers
+from aztk.utils import deprecated, deprecate, helpers
 
 from .custom_script import CustomScript
 from .file_share import FileShare
@@ -8,6 +8,7 @@ from .plugins import PluginConfiguration
 from .toolkit import Toolkit
 from .user_configuration import UserConfiguration
 from .scheduling_target import SchedulingTarget
+
 
 class ClusterConfiguration(Model):
     """
@@ -45,7 +46,8 @@ class ClusterConfiguration(Model):
             kwargs['size'] = kwargs.pop('vm_count')
 
         if 'vm_low_pri_count' in kwargs:
-            deprecate("vm_low_pri_count is deprecated for ClusterConfiguration.", "Please use size_low_priority instead.")
+            deprecate("vm_low_pri_count is deprecated for ClusterConfiguration.",
+                      "Please use size_low_priority instead.")
             kwargs['size_low_priority'] = kwargs.pop('vm_low_pri_count')
 
         super().__init__(*args, **kwargs)
@@ -77,7 +79,6 @@ class ClusterConfiguration(Model):
         """
         return self.size > 0 and self.size_low_priority > 0
 
-
     def gpu_enabled(self):
         return helpers.is_gpu_enabled(self.vm_size)
 
@@ -92,8 +93,7 @@ class ClusterConfiguration(Model):
 
         if self.vm_size is None:
             raise error.InvalidModelError(
-                "Please supply a vm_size in either the cluster.yaml configuration file or with a parameter (--vm-size)"
-            )
+                "Please supply a vm_size in either the cluster.yaml configuration file or with a parameter (--vm-size)")
 
         if self.mixed_mode() and not self.subnet_id:
             raise error.InvalidModelError(
@@ -101,7 +101,8 @@ class ClusterConfiguration(Model):
             )
 
         if self.custom_scripts:
-            deprecate("0.9.0", "Custom scripts are DEPRECATED.", "Use plugins instead. See https://aztk.readthedocs.io/en/v0.7.0/15-plugins.html.")
+            deprecate("0.9.0", "Custom scripts are DEPRECATED.",
+                      "Use plugins instead. See https://aztk.readthedocs.io/en/v0.7.0/15-plugins.html.")
 
         if self.scheduling_target == SchedulingTarget.Dedicated and self.size == 0:
             raise error.InvalidModelError("Scheduling target cannot be Dedicated if dedicated vm size is 0")

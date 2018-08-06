@@ -2,6 +2,7 @@ import warnings
 import functools
 import inspect
 
+
 def deprecated(version: str, advice: str = None):
     """
     This is a decorator which can be used to mark functions
@@ -23,6 +24,7 @@ def deprecated(version: str, advice: str = None):
         def new_func(*args, **kwargs):
             deprecate(version=version, message=msg.format(name=func.__name__, advice=advice), advice=advice)
             return func(*args, **kwargs)
+
         return new_func
 
     return decorator
@@ -37,8 +39,9 @@ def deprecate(version: str, message: str, advice: str = ""):
         advice (str): Sentence explaining alternatives to the deprecated functionality.
     """
 
-    warnings.simplefilter('always', DeprecationWarning)  # turn off filter
-    warnings.warn("{0} It will be removed in Aztk version {1}. {2}".format(message, version, advice),
-                  category=DeprecationWarning,
-                  stacklevel=2)
-    warnings.simplefilter('default', DeprecationWarning)  # reset filter
+    warnings.simplefilter('always', DeprecationWarning)    # turn off filter
+    warnings.warn(
+        "{0} It will be removed in Aztk version {1}. {2}".format(message, version, advice),
+        category=DeprecationWarning,
+        stacklevel=2)
+    warnings.simplefilter('default', DeprecationWarning)    # reset filter

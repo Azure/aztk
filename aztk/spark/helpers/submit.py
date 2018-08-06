@@ -6,8 +6,6 @@ import azure.batch.models as batch_models
 from aztk.error import AztkError
 from aztk.utils import constants, helpers
 from aztk.utils.command_builder import CommandBuilder
-
-
 '''
 Submit helper methods
 '''
@@ -22,11 +20,12 @@ def generate_task(spark_client, container_id, application, remote=False):
 
     # The application provided is not hosted remotely and therefore must be uploaded
     if not remote:
-        app_resource_file = helpers.upload_file_to_container(container_name=container_id,
-                                                            application_name=application.name,
-                                                            file_path=application.application,
-                                                            blob_client=spark_client.blob_client,
-                                                            use_full_path=False)
+        app_resource_file = helpers.upload_file_to_container(
+            container_name=container_id,
+            application_name=application.name,
+            file_path=application.application,
+            blob_client=spark_client.blob_client,
+            use_full_path=False)
 
         # Upload application file
         resource_files.append(app_resource_file)
@@ -36,34 +35,36 @@ def generate_task(spark_client, container_id, application, remote=False):
     # Upload dependent JARS
     jar_resource_file_paths = []
     for jar in application.jars:
-        current_jar_resource_file_path = helpers.upload_file_to_container(container_name=container_id,
-                                                                          application_name=application.name,
-                                                                          file_path=jar,
-                                                                          blob_client=spark_client.blob_client,
-                                                                          use_full_path=False)
+        current_jar_resource_file_path = helpers.upload_file_to_container(
+            container_name=container_id,
+            application_name=application.name,
+            file_path=jar,
+            blob_client=spark_client.blob_client,
+            use_full_path=False)
         jar_resource_file_paths.append(current_jar_resource_file_path)
         resource_files.append(current_jar_resource_file_path)
 
     # Upload dependent python files
     py_files_resource_file_paths = []
     for py_file in application.py_files:
-        current_py_files_resource_file_path = helpers.upload_file_to_container(container_name=container_id,
-                                                                               application_name=application.name,
-                                                                               file_path=py_file,
-                                                                               blob_client=spark_client.blob_client,
-                                                                               use_full_path=False)
-        py_files_resource_file_paths.append(
-            current_py_files_resource_file_path)
+        current_py_files_resource_file_path = helpers.upload_file_to_container(
+            container_name=container_id,
+            application_name=application.name,
+            file_path=py_file,
+            blob_client=spark_client.blob_client,
+            use_full_path=False)
+        py_files_resource_file_paths.append(current_py_files_resource_file_path)
         resource_files.append(current_py_files_resource_file_path)
 
     # Upload other dependent files
     files_resource_file_paths = []
     for file in application.files:
-        files_resource_file_path = helpers.upload_file_to_container(container_name=container_id,
-                                                                    application_name=application.name,
-                                                                    file_path=file,
-                                                                    blob_client=spark_client.blob_client,
-                                                                    use_full_path=False)
+        files_resource_file_path = helpers.upload_file_to_container(
+            container_name=container_id,
+            application_name=application.name,
+            file_path=file,
+            blob_client=spark_client.blob_client,
+            use_full_path=False)
         files_resource_file_paths.append(files_resource_file_path)
         resource_files.append(files_resource_file_path)
 
@@ -95,13 +96,10 @@ def generate_task(spark_client, container_id, application, remote=False):
         id=application.name,
         command_line=helpers.wrap_commands_in_shell([task_cmd.to_str()]),
         resource_files=resource_files,
-        constraints=batch_models.TaskConstraints(
-            max_task_retry_count=application.max_retry_count),
+        constraints=batch_models.TaskConstraints(max_task_retry_count=application.max_retry_count),
         user_identity=batch_models.UserIdentity(
             auto_user=batch_models.AutoUserSpecification(
-                scope=batch_models.AutoUserScope.task,
-                elevation_level=batch_models.ElevationLevel.admin))
-    )
+                scope=batch_models.AutoUserScope.task, elevation_level=batch_models.ElevationLevel.admin)))
 
     return task
 
@@ -121,7 +119,6 @@ def submit_application(spark_client, cluster_id, application, remote: bool = Fal
     """
     task = generate_task(spark_client, cluster_id, application, remote)
     task = affinitize_task_to_master(spark_client, cluster_id, task)
-
 
     # Add task to batch job (which has the same name as cluster_id)
     job_id = cluster_id

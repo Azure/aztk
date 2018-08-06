@@ -11,14 +11,18 @@ class AztkError(Exception):
 class AztkAttributeError(AztkError):
     pass
 
+
 class ClusterNotReadyError(AztkError):
     pass
+
 
 class AzureApiInitError(AztkError):
     pass
 
+
 class InvalidPluginConfigurationError(AztkError):
     pass
+
 
 class InvalidModelError(AztkError):
     def __init__(self, message: str, model=None):
@@ -34,11 +38,14 @@ class InvalidModelError(AztkError):
 class MissingRequiredAttributeError(InvalidModelError):
     pass
 
+
 class InvalidCustomScriptError(InvalidModelError):
     pass
 
+
 class InvalidPluginReferenceError(InvalidModelError):
     pass
+
 
 class InvalidModelFieldError(InvalidModelError):
     def __init__(self, message: str, model=None, field=None):

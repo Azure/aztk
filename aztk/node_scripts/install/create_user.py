@@ -9,6 +9,7 @@ import yaml
     Creates a user if the user configuration file at $AZTK_WORKING_DIR/user.yaml exists
 '''
 
+
 def create_user(batch_client):
     path = os.path.join(os.environ['AZTK_WORKING_DIR'], "user.yaml")
 
@@ -30,11 +31,10 @@ def create_user(batch_client):
                 is_admin=True,
                 password=password,
                 ssh_public_key=str(user_conf['ssh-key']),
-                expiry_time=datetime.now(timezone.utc) + timedelta(days=365)
-            )
-        )
+                expiry_time=datetime.now(timezone.utc) + timedelta(days=365)))
     except batch_error.BatchErrorException as e:
         print(e)
+
 
 def decrypt_password(user_conf):
     cipher_text = user_conf['password']

@@ -4,6 +4,7 @@ from aztk.models.plugins.plugin_file import PluginFile
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
+
 def JupyterPlugin():
     return PluginConfiguration(
         name="jupyter",

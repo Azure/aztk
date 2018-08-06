@@ -6,9 +6,6 @@ from aztk.utils import constants
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
+
 def CondaPlugin(packages=None):
-    return InstallPlugin(
-        name="conda",
-        command="conda install -y",
-        packages=packages
-    )
+    return InstallPlugin(name="conda", command="conda install -y", packages=packages)

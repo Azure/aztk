@@ -2,7 +2,9 @@ import collections
 import enum
 
 from aztk.error import InvalidModelFieldError
+
 from . import validators as aztk_validators
+
 
 class ModelMergeStrategy(enum.Enum):
     Override = 1
@@ -14,6 +16,7 @@ class ModelMergeStrategy(enum.Enum):
     Try to merge value nested
     """
 
+
 class ListMergeStrategy(enum.Enum):
     Replace = 1
     """
@@ -24,11 +27,13 @@ class ListMergeStrategy(enum.Enum):
     Append all the values of the new list
     """
 
+
 # pylint: disable=W0212
 class Field:
     """
     Base class for all model fields
     """
+
     def __init__(self, *validators, **kwargs):
         self.default = kwargs.get('default')
         self.required = 'default' not in kwargs
@@ -99,6 +104,7 @@ class Integer(Field):
     """
     Model Integer field
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(aztk_validators.Integer(), *args, **kwargs)
 
@@ -132,8 +138,7 @@ class List(Field):
         self.merge_strategy = kwargs.get('merge_strategy', ListMergeStrategy.Append)
         self.skip_none = kwargs.get('skip_none', True)
 
-        super().__init__(
-            aztk_validators.List(*kwargs.get('inner_validators', [])), **kwargs)
+        super().__init__(aztk_validators.List(*kwargs.get('inner_validators', [])), **kwargs)
 
     def __set__(self, instance, value):
         if isinstance(value, collections.MutableSequence):
@@ -145,7 +150,7 @@ class List(Field):
     def _resolve(self, value):
         result = []
         for item in value:
-            if item is None and self.skip_none: # Skip none values
+            if item is None and self.skip_none:    # Skip none values
                 continue
 
             if self.model and isinstance(item, collections.MutableMapping):
@@ -175,6 +180,7 @@ class List(Field):
                 else:
                     output.append(item)
         return output
+
 
 class Model(Field):
     """
@@ -214,10 +220,12 @@ class Model(Field):
         else:
             return None
 
+
 class Enum(Field):
     """
     Field that should be an enum
     """
+
     def __init__(self, model, *args, **kwargs):
         super().__init__(aztk_validators.InstanceOf(model), *args, **kwargs)
 
@@ -231,7 +239,6 @@ class Enum(Field):
                 available = [e.value for e in self.model]
                 raise InvalidModelFieldError("{0} is not a valid option. Use one of {1}".format(value, available))
         super().__set__(instance, value)
-
 
     def serialize(self, instance):
         val = super().serialize(instance)
