@@ -15,6 +15,11 @@ steps:
   displayName: install aztk
 
 - script: |
+    yapf -dr aztk/ aztk_cli/
+  condition: and(succeeded(), eq(variables['agent.os'], 'linux'))
+  displayName: yapf
+
+- script: |
     pytest -n 50
   condition: and(succeeded(), in(variables['agent.os'], 'linux'))
   displayName: pytest
