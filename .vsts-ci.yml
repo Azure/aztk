@@ -5,25 +5,25 @@ queue: Hosted Linux Preview
 
 phases:
 - phase: Test
-    steps:
-    - task: UsePythonVersion@0
-      inputs:
-        versionSpec: '>= 3.5' 
-        addToPath: true 
-        architecture: 'x64'
+  steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '>= 3.5' 
+      addToPath: true 
+      architecture: 'x64'
 
-    - script: |
-        pip install -r requirements.txt
-        pip install -e .
-      condition: succeeded()
-      displayName: install aztk
+  - script: |
+      pip install -r requirements.txt
+      pip install -e .
+    condition: succeeded()
+    displayName: install aztk
 
-    - script: |
-        yapf -dr aztk/ aztk_cli/
-      condition: succeeded()
-      displayName: yapf
+  - script: |
+      yapf -dr aztk/ aztk_cli/
+    condition: succeeded()
+    displayName: yapf
 
-    - script: |
-        pytest -n 50
-      condition: succeeded()
-      displayName: pytest
+  - script: |
+      pytest -n 50
+    condition: succeeded()
+    displayName: pytest
