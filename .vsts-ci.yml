@@ -4,7 +4,7 @@ trigger:
 queue: Hosted Linux Preview
 
 phases:
-  phase: Test
+- phase: Test
     steps:
     - task: UsePythonVersion@0
       inputs:
