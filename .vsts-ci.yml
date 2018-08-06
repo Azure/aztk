@@ -4,7 +4,7 @@ trigger:
 
 phases:
 - phase: Test
-  queue: Hosted Ubuntu 1604
+  queue: Hosted Linux Preview
   steps:
   - task: UsePythonVersion@0
     inputs:
