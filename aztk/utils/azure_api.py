@@ -1,14 +1,16 @@
 import re
-import azure.batch.batch_service_client as batch
+from typing import Optional
+
 import azure.batch.batch_auth as batch_auth
+import azure.batch.batch_service_client as batch
 import azure.storage.blob as blob
-from aztk import error
-from aztk.version import __version__
 from azure.common.credentials import ServicePrincipalCredentials
 from azure.mgmt.batch import BatchManagementClient
 from azure.mgmt.storage import StorageManagementClient
 from azure.storage.common import CloudStorageAccount
-from typing import Optional
+
+from aztk import error
+from aztk.version import __version__
 
 RESOURCE_ID_PATTERN = re.compile('^/subscriptions/(?P<subscription>[^/]+)'
                                  '/resourceGroups/(?P<resourcegroup>[^/]+)'
@@ -93,9 +95,25 @@ def make_blob_client(secrets):
         subscription = m.group('subscription')
         resourcegroup = m.group('resourcegroup')
         mgmt_client = StorageManagementClient(arm_credentials, subscription)
-        key = mgmt_client.storage_accounts.list_keys(
-            resource_group_name=resourcegroup, account_name=accountname).keys[0].value
+        key = retry_function(
+            mgmt_client.storage_accounts.list_keys,
+            10,
+            1,
+            Exception,
+            resource_group_name=resourcegroup,
+            account_name=accountname).keys[0].value
         storage_client = CloudStorageAccount(accountname, key)
         blob_client = storage_client.create_block_blob_service()
 
     return blob_client
+
+
+def retry_function(function, retry_attempts: int, retry_interval: int, exception: Exception, *args, **kwargs):
+    import time
+    for i in range(retry_attempts):
+        try:
+            return function(*args, **kwargs)
+        except exception as e:
+            if i == retry_attempts - 1:
+                raise e
+            time.sleep(retry_interval)
