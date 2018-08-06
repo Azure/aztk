@@ -25,6 +25,6 @@ phases:
       displayName: yapf
 
     - script: |
-        pytest -n 50
+        pytest -n 102
       condition: succeeded()
       displayName: pytest
