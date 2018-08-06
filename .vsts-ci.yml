@@ -1,6 +1,5 @@
 trigger:
   - master
-  - internal/yapf-on-save
 
 
 phases:
