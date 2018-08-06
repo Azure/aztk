@@ -331,8 +331,8 @@ def print_applications(applications):
         else:
             application = applications[name]
             log.info(
-                print_format.format(application.name, application.state, utc_to_local(
-                    application.state_transition_time), application.exit_code
+                print_format.format(application.name, application.state,
+                                    utc_to_local(application.state_transition_time), application.exit_code
                                     if application.exit_code is not None else "-"))
     if warn_scheduling:
         log.warning("\nNo Spark applications will be scheduled until the master is selected.")

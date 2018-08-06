@@ -224,10 +224,10 @@ async def clus_copy(username,
                     get=False,
                     timeout=None):
     return await asyncio.gather(*[
-        asyncio.get_event_loop().run_in_executor(ThreadPoolExecutor(), copy_from_node if get else node_copy, node.id,
-                                                 source_path, destination_path, username, node_rls.ip_address,
-                                                 node_rls.port, ssh_key, password, container_name, timeout)
-        for node, node_rls in nodes
+        asyncio.get_event_loop()
+        .run_in_executor(ThreadPoolExecutor(), copy_from_node
+                         if get else node_copy, node.id, source_path, destination_path, username, node_rls.ip_address,
+                         node_rls.port, ssh_key, password, container_name, timeout) for node, node_rls in nodes
     ])
 
 

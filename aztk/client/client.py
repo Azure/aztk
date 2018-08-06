@@ -183,14 +183,14 @@ class CoreClient:
             :param ssh_key: ssh_key of the user to add
         """
         # Create new ssh user for the given node
-        self.batch_client.compute_node.add_user(pool_id, node_id,
-                                                batch_models.ComputeNodeUser(
-                                                    name=username,
-                                                    is_admin=True,
-                                                    password=password,
-                                                    ssh_public_key=get_ssh_key.get_user_public_key(
-                                                        ssh_key, self.secrets_configuration),
-                                                    expiry_time=datetime.now(timezone.utc) + timedelta(days=365)))
+        self.batch_client.compute_node.add_user(
+            pool_id, node_id,
+            batch_models.ComputeNodeUser(
+                name=username,
+                is_admin=True,
+                password=password,
+                ssh_public_key=get_ssh_key.get_user_public_key(ssh_key, self.secrets_configuration),
+                expiry_time=datetime.now(timezone.utc) + timedelta(days=365)))
 
     @deprecated("0.10.0")
     def __delete_user(self, pool_id: str, node_id: str, username: str) -> str:
