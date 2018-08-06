@@ -1,29 +1,30 @@
 trigger:
   - master
+  - internal/yapf-on-save
 
 
 phases:
-- phase: Test
-  queue: Hosted Linux Preview
-  steps:
-  - task: UsePythonVersion@0
-    inputs:
-      versionSpec: '>= 3.5' 
-      addToPath: true 
-      architecture: 'x64'
+  - phase: Test
+    queue: Hosted Linux Preview
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '>= 3.5' 
+        addToPath: true 
+        architecture: 'x64'
 
-  - script: |
-      pip install -r requirements.txt
-      pip install -e .
-    condition: succeeded()
-    displayName: install aztk
+    - script: |
+        pip install -r requirements.txt
+        pip install -e .
+      condition: succeeded()
+      displayName: install aztk
 
-  - script: |
-      yapf -dr aztk/ aztk_cli/
-    condition: succeeded()
-    displayName: yapf
+    - script: |
+        yapf -dr aztk/ aztk_cli/
+      condition: succeeded()
+      displayName: yapf
 
-  - script: |
-      pytest -n 50
-    condition: succeeded()
-    displayName: pytest
+    - script: |
+        pytest -n 50
+      condition: succeeded()
+      displayName: pytest
