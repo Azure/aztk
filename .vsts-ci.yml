@@ -1,6 +1,5 @@
 trigger:
   - master
-  - internal/update-and-fix-builds
 
 
 phases:
