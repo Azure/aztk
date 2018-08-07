@@ -8,6 +8,7 @@ install:
   - pip install -e .
 
 script:
+  - yapf --verison
   - yapf --style .style.yapf -dpr aztk/ aztk_cli/ 
   - pylint -E aztk
   - pytest --ignore=tests/integration_tests
