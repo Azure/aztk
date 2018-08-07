@@ -28,8 +28,13 @@ phases:
         pylint -E aztk
       condition: succeeded()
       displayName: pylint
+    
+    - script: |
+        pytest -n 20 --ignore=tests/integration_tests
+      condition: succeeded()
+      displayName: unit tests
 
     - script: |
-        pytest -n 102
+        pytest -n 50
       condition: succeeded()
-      displayName: pytest
+      displayName: integration tests
