@@ -34,6 +34,6 @@ phases:
       displayName: unit tests
 
     - script: |
-        pytest -n 50
+        pytest -n 75
       condition: succeeded()
       displayName: integration tests
