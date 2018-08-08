@@ -8,7 +8,7 @@ phases:
     steps:
     - task: UsePythonVersion@0
       inputs:
-        versionSpec: '>= 3.5' 
+        versionSpec: '3.6 >= 3.5' 
         addToPath: true 
         architecture: 'x64'
 
@@ -19,11 +19,21 @@ phases:
       displayName: install aztk
 
     - script: |
-        yapf -dpr aztk/ aztk_cli/
+        yapf --style .style.yapf -dpr aztk/ aztk_cli/
       condition: succeeded()
       displayName: yapf
 
     - script: |
-        pytest -n 102
+        pylint -E aztk
       condition: succeeded()
-      displayName: pytest
+      displayName: pylint
+    
+    - script: |
+        pytest -n 20 --ignore=tests/integration_tests
+      condition: succeeded()
+      displayName: unit tests
+
+    - script: |
+        pytest -n 75
+      condition: succeeded()
+      displayName: integration tests
