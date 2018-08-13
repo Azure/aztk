@@ -2,7 +2,7 @@
 
 # Entry point for the start task. It will install all dependencies and start docker.
 # Usage:
-# setup_host.sh [container_name] [docker_repo_name]
+# setup_host.sh [container_name] [docker_repo_name] [docker_run_options]
 set -e
 
 export AZTK_WORKING_DIR=/mnt/batch/tasks/startup/wd
@@ -10,6 +10,7 @@ export PYTHONUNBUFFERED=TRUE
 
 container_name=$1
 docker_repo_name=$2
+docker_run_options=$3
 
 install_prerequisites () {
     echo "Installing pre-reqs"
@@ -79,7 +80,7 @@ run_docker_container () {
         echo "Creating docker container."
 
         echo "Running setup python script"
-        $AZTK_WORKING_DIR/.aztk-env/.venv/bin/python $(dirname $0)/main.py setup-node $docker_repo_name
+        $AZTK_WORKING_DIR/.aztk-env/.venv/bin/python $(dirname $0)/main.py setup-node $docker_repo_name "$docker_run_options"
 
         # wait until container is running
         until [ "`/usr/bin/docker inspect -f {{.State.Running}} $container_name`"=="true" ]; do

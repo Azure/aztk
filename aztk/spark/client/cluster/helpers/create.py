@@ -53,8 +53,8 @@ def create_cluster(core_cluster_operations,
 
         start_task = spark_cluster_operations._generate_cluster_start_task(
             core_cluster_operations, zip_resource_files, cluster_conf.cluster_id, cluster_conf.gpu_enabled(),
-            cluster_conf.get_docker_repo(), cluster_conf.file_shares, cluster_conf.plugins, cluster_conf.mixed_mode(),
-            cluster_conf.worker_on_master)
+            cluster_conf.get_docker_repo(), cluster_conf.get_docker_run_options(), cluster_conf.file_shares,
+            cluster_conf.plugins, cluster_conf.mixed_mode(), cluster_conf.worker_on_master)
 
         software_metadata_key = base_models.Software.spark
 

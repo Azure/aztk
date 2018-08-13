@@ -63,6 +63,7 @@ def __get_secrets_env(core_base_operations):
 def __cluster_install_cmd(zip_resource_file: batch_models.ResourceFile,
                           gpu_enabled: bool,
                           docker_repo: str = None,
+                          docker_run_options: str = None,
                           plugins=None,
                           worker_on_master: bool = True,
                           file_mounts=None,
@@ -93,9 +94,10 @@ def __cluster_install_cmd(zip_resource_file: batch_models.ResourceFile,
             'unzip -o $AZ_BATCH_TASK_WORKING_DIR/{0};'\
             'chmod 777 $AZ_BATCH_TASK_WORKING_DIR/aztk/node_scripts/setup_host.sh;'\
         ') 2>&1'.format(zip_resource_file.file_path),
-        '/bin/bash $AZ_BATCH_TASK_WORKING_DIR/aztk/node_scripts/setup_host.sh {0} {1}'.format(
+        '/bin/bash $AZ_BATCH_TASK_WORKING_DIR/aztk/node_scripts/setup_host.sh {0} {1} "{2}"'.format(
             constants.DOCKER_SPARK_CONTAINER_NAME,
             docker_repo,
+            "" if docker_run_options is None else docker_run_options.replace('"', '\\\"')
         )
     ]
 
@@ -108,6 +110,7 @@ def generate_cluster_start_task(core_base_operations,
                                 cluster_id: str,
                                 gpu_enabled: bool,
                                 docker_repo: str = None,
+                                docker_run_options: str = None,
                                 file_shares: List[models.FileShare] = None,
                                 plugins: List[models.PluginConfiguration] = None,
                                 mixed_mode: bool = False,
@@ -137,8 +140,8 @@ def generate_cluster_start_task(core_base_operations,
     ] + __get_docker_credentials(core_base_operations) + _get_aztk_environment(cluster_id, worker_on_master, mixed_mode)
 
     # start task command
-    command = __cluster_install_cmd(zip_resource_file, gpu_enabled, docker_repo, plugins, worker_on_master, file_shares,
-                                    mixed_mode)
+    command = __cluster_install_cmd(zip_resource_file, gpu_enabled, docker_repo, docker_run_options, plugins,
+                                    worker_on_master, file_shares, mixed_mode)
 
     return batch_models.StartTask(
         command_line=helpers.wrap_commands_in_shell(command),

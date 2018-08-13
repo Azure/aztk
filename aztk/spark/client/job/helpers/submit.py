@@ -81,6 +81,7 @@ def submit_job(core_job_operations,
             job_configuration.id,
             job_configuration.gpu_enabled,
             job_configuration.get_docker_repo(),
+            job_configuration.get_docker_run_options(),
             mixed_mode=job_configuration.mixed_mode(),
             worker_on_master=job_configuration.worker_on_master)
 

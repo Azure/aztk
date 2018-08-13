@@ -11,7 +11,7 @@ def run():
     action = sys.argv[1]
 
     if action == "setup-node":
-        install.setup_host(sys.argv[2])
+        install.setup_host(sys.argv[2], sys.argv[3])
     elif action == "setup-spark-container":
         install.setup_spark_container()
     else:

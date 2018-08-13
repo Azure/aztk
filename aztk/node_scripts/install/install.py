@@ -1,9 +1,11 @@
 import os
-from core import config
-from install import pick_master, spark, scripts, create_user, plugins, spark_container
+
 import wait_until_master_selected
-from aztk.models.plugins import PluginTarget
 from aztk.internal import cluster_data
+from aztk.models.plugins import PluginTarget
+from core import config
+from install import (create_user, pick_master, plugins, scripts, spark, spark_container)
+
 from .node_scheduling import setup_node_scheduling
 
 
@@ -14,9 +16,11 @@ def read_cluster_config():
     return cluster_config
 
 
-def setup_host(docker_repo: str):
+def setup_host(docker_repo: str, docker_run_options: str):
     """
-    Code to be run on the node(NOT in a container)
+    Code to be run on the node (NOT in a container)
+    :param docker_repo: location of the Docker image to use
+    :param docker_run_options: additional command-line options to pass to docker run
     """
     client = config.batch_client
 
@@ -49,6 +53,7 @@ def setup_host(docker_repo: str):
     #TODO pass azure file shares
     spark_container.start_spark_container(
         docker_repo=docker_repo,
+        docker_run_options=docker_run_options,
         gpu_enabled=os.environ.get("AZTK_GPU_ENABLED") == "true",
         plugins=cluster_conf.plugins,
     )

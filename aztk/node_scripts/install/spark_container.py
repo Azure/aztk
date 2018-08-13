@@ -4,11 +4,16 @@ from aztk.internal import DockerCmd
 from aztk.utils import constants
 
 
-def start_spark_container(docker_repo: str = None, gpu_enabled: bool = False, file_mounts=None, plugins=None):
+def start_spark_container(docker_repo: str = None,
+                          docker_run_options: str = None,
+                          gpu_enabled: bool = False,
+                          file_mounts=None,
+                          plugins=None):
 
     cmd = DockerCmd(
         name=constants.DOCKER_SPARK_CONTAINER_NAME,
         docker_repo=docker_repo,
+        docker_run_options=docker_run_options,
         cmd="/bin/bash /mnt/batch/tasks/startup/wd/aztk/node_scripts/docker_main.sh",
         gpu_enabled=gpu_enabled)
 

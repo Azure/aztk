@@ -5,7 +5,7 @@ import azure.batch.models as batch_models
 from aztk.client.base import BaseOperations as CoreBaseOperations
 from aztk.spark import models
 
-from .helpers import generate_cluster_start_task, generate_application_task
+from .helpers import generate_application_task, generate_cluster_start_task
 
 
 class SparkBaseOperations:
@@ -19,6 +19,7 @@ class SparkBaseOperations:
                                      id: str,
                                      gpu_enabled: bool,
                                      docker_repo: str = None,
+                                     docker_run_options: str = None,
                                      file_shares: List[models.FileShare] = None,
                                      plugins: List[models.PluginConfiguration] = None,
                                      mixed_mode: bool = False,
@@ -44,9 +45,9 @@ class SparkBaseOperations:
         Returns:
             :obj:`azure.batch.models.StartTask`: the StartTask definition to provision the cluster.
         """
-        return generate_cluster_start_task.generate_cluster_start_task(core_base_operations, zip_resource_file, id,
-                                                                       gpu_enabled, docker_repo, file_shares, plugins,
-                                                                       mixed_mode, worker_on_master)
+        return generate_cluster_start_task.generate_cluster_start_task(
+            core_base_operations, zip_resource_file, id, gpu_enabled, docker_repo, docker_run_options, file_shares,
+            plugins, mixed_mode, worker_on_master)
 
     #TODO: make this private or otherwise not public
     def _generate_application_task(self, core_base_operations, container_id, application, remote=False):

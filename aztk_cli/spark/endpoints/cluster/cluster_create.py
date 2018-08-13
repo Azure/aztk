@@ -20,12 +20,10 @@ def setup_parser(parser: argparse.ArgumentParser):
     parser.add_argument('--username', help='Username to access your cluster (required: --wait flag)')
     parser.add_argument(
         '--password',
-        help="The password to access your spark cluster's head \
-                             node. If not provided will use ssh public key.")
+        help="The password to access your spark cluster's head node. If not provided will use ssh public key.")
     parser.add_argument(
-        '--docker-repo',
-        help='The location of the public docker image you want to use \
-                             (<my-username>/<my-repo>:<tag>)')
+        '--docker-repo', help='The location of the public docker image you want to use (<my-username>/<my-repo>:<tag>)')
+    parser.add_argument('--docker-run-options', help='command line options to pass to `docker run`')
     parser.add_argument('--subnet-id', help='The subnet in which to create the cluster.')
 
     parser.add_argument('--no-wait', dest='wait', action='store_false')
@@ -57,8 +55,11 @@ def execute(args: typing.NamedTuple):
                 password=args.password,
             )))
 
-    if args.docker_repo and cluster_conf.toolkit:
-        cluster_conf.toolkit.docker_repo = args.docker_repo
+    if cluster_conf.toolkit:
+        if args.docker_repo:
+            cluster_conf.toolkit.docker_repo = args.docker_repo
+        if args.docker_run_options:
+            cluster_conf.toolkit.docker_run_options = args.docker_run_options
 
     wait = wait if args.wait is None else args.wait
 

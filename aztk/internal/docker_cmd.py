@@ -7,7 +7,7 @@ class DockerCmd:
     Class helping to write a docker command
     """
 
-    def __init__(self, name: str, docker_repo: str, cmd: str, gpu_enabled=False):
+    def __init__(self, name: str, docker_repo: str, docker_run_options: str, cmd: str, gpu_enabled=False):
         if gpu_enabled:
             self.cmd = CommandBuilder('nvidia-docker run')
         else:
@@ -15,6 +15,7 @@ class DockerCmd:
         self.cmd.add_option('--net', 'host')
         self.cmd.add_option('--name', name)
         self.cmd.add_argument('-d')
+        self.cmd.add_argument(docker_run_options)
         self.cmd.add_argument(docker_repo)
         self.cmd.add_argument(cmd)
 

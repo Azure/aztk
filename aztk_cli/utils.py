@@ -405,6 +405,8 @@ def print_cluster_conf(cluster_conf: ClusterConfiguration, wait: bool):
              len(cluster_conf.file_shares) if cluster_conf.file_shares is not None else 0)
     log.info("gpu enabled:             %s", str(cluster_conf.gpu_enabled()))
     log.info("docker repo name:        %s", cluster_conf.get_docker_repo())
+    if cluster_conf.get_docker_run_options():
+        log.info("docker run options:      %s", cluster_conf.get_docker_run_options())
     log.info("wait for cluster:        %s", wait)
     if user_configuration:
         log.info("username:                %s", user_configuration.username)

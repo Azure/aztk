@@ -22,6 +22,8 @@ toolkit:
   # Optional docker repository(To bring your custom docker image. Just specify the Toolkit software, version and environment if using default images)
   # docker_repo: <name of docker image repo (for more information, see https://github.com/Azure/aztk/blob/master/docs/12-docker-image.md)>
 
+  # Optional command line options to pass to `docker run`
+  # docker_run_options: <additional command line options to pass to `docker run` (for more information, see https://github.com/Azure/aztk/blob/master/docs/12-docker-image.md)>
 
 # vm_size: <vm-size, see available options here: https://azure.microsoft.com/pricing/details/batch//>
 vm_size: standard_a2

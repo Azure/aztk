@@ -236,6 +236,9 @@ class JobConfiguration:
     def get_docker_repo(self) -> str:
         return self.toolkit.get_docker_repo(self.gpu_enabled)
 
+    def get_docker_run_options(self) -> str:
+        return self.toolkit.get_docker_run_options()
+
     def validate(self) -> bool:
         """
         Validate the config at its current state.

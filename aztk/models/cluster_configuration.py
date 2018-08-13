@@ -1,13 +1,13 @@
 import aztk.error as error
 from aztk.core.models import Model, fields
-from aztk.utils import deprecated, deprecate, helpers
+from aztk.utils import deprecate, deprecated, helpers
 
 from .custom_script import CustomScript
 from .file_share import FileShare
 from .plugins import PluginConfiguration
+from .scheduling_target import SchedulingTarget
 from .toolkit import Toolkit
 from .user_configuration import UserConfiguration
-from .scheduling_target import SchedulingTarget
 
 
 class ClusterConfiguration(Model):
@@ -85,10 +85,13 @@ class ClusterConfiguration(Model):
     def get_docker_repo(self):
         return self.toolkit.get_docker_repo(self.gpu_enabled())
 
+    def get_docker_run_options(self) -> str:
+        return self.toolkit.get_docker_run_options()
+
     def __validate__(self) -> bool:
         if self.size == 0 and self.size_low_priority == 0:
             raise error.InvalidModelError(
-                "Please supply a valid (greater than 0) size or size_low_priority value either in the cluster.yaml configuration file or with a parameter (--size or --size-low-pri)"
+                "Please supply a valid (greater than 0) size or size_low_priority value either in the cluster.yaml configuration file or with a parameter (--size or --size-low-priority)"
             )
 
         if self.vm_size is None:
@@ -97,7 +100,7 @@ class ClusterConfiguration(Model):
 
         if self.mixed_mode() and not self.subnet_id:
             raise error.InvalidModelError(
-                "You must configure a VNET to use AZTK in mixed mode (dedicated and low priority nodes). Set the VNET's subnet_id in your cluster.yaml."
+                "You must configure a VNET to use AZTK in mixed mode (dedicated and low priority nodes). Set the VNET's subnet_id in your cluster.yaml or with a parameter (--subnet-id)."
             )
 
         if self.custom_scripts:
