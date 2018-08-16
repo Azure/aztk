@@ -1,16 +1,14 @@
 import os
 import subprocess
 from datetime import datetime
+
 import pytest
-
-
 from azure.batch.models import BatchErrorException
 
 import aztk.spark
 from aztk.error import AztkError
 from aztk_cli import config
-from tests.integration_tests.spark.sdk.get_client import get_spark_client, get_test_suffix
-
+from tests.integration_tests.spark.sdk.get_client import (get_spark_client, get_test_suffix)
 
 base_job_id = get_test_suffix("job")
 spark_client = get_spark_client()
@@ -21,22 +19,21 @@ def test_submit_job():
     app1 = aztk.spark.models.ApplicationConfiguration(
         name="pipy100",
         application="./examples/src/main/python/pi.py",
-        application_args=[100]
+        application_args=[10],
     )
     app2 = aztk.spark.models.ApplicationConfiguration(
         name="pipy101",
         application="./examples/src/main/python/pi.py",
-        application_args=[100]
+        application_args=[10],
     )
     job_configuration = aztk.spark.models.JobConfiguration(
-        id=test_id+base_job_id,
+        id=test_id + base_job_id,
         applications=[app1, app2],
         vm_size="standard_f1",
         spark_configuration=None,
         toolkit=aztk.spark.models.SparkToolkit(version="2.3.0"),
         max_dedicated_nodes=2,
-        max_low_pri_nodes=0
-    )
+        max_low_pri_nodes=0)
     try:
         with pytest.warns(DeprecationWarning):
             job = spark_client.submit_job(job_configuration=job_configuration)
@@ -58,15 +55,15 @@ def test_list_jobs():
     app1 = aztk.spark.models.ApplicationConfiguration(
         name="pipy100",
         application="./examples/src/main/python/pi.py",
-        application_args=[100]
+        application_args=[10],
     )
     app2 = aztk.spark.models.ApplicationConfiguration(
         name="pipy101",
         application="./examples/src/main/python/pi.py",
-        application_args=[100]
+        application_args=[10],
     )
     job_configuration = aztk.spark.models.JobConfiguration(
-        id=test_id+base_job_id,
+        id=test_id + base_job_id,
         applications=[app1, app2],
         vm_size="standard_f1",
         custom_scripts=None,
@@ -74,8 +71,7 @@ def test_list_jobs():
         toolkit=aztk.spark.models.SparkToolkit(version="2.3.0"),
         max_dedicated_nodes=1,
         max_low_pri_nodes=0,
-        worker_on_master=True
-    )
+        worker_on_master=True)
     try:
         with pytest.warns(DeprecationWarning):
             spark_client.submit_job(job_configuration=job_configuration)
@@ -99,23 +95,22 @@ def test_list_applications():
     app1 = aztk.spark.models.ApplicationConfiguration(
         name="pipy100",
         application="./examples/src/main/python/pi.py",
-        application_args=[100]
+        application_args=[10],
     )
     app2 = aztk.spark.models.ApplicationConfiguration(
         name="pipy101",
         application="./examples/src/main/python/pi.py",
-        application_args=[100]
+        application_args=[10],
     )
     job_configuration = aztk.spark.models.JobConfiguration(
-        id=test_id+base_job_id,
+        id=test_id + base_job_id,
         applications=[app1, app2],
         vm_size="standard_f1",
         custom_scripts=None,
         spark_configuration=None,
         toolkit=aztk.spark.models.SparkToolkit(version="2.3.0"),
         max_dedicated_nodes=2,
-        max_low_pri_nodes=0
-    )
+        max_low_pri_nodes=0)
     try:
         with pytest.warns(DeprecationWarning):
             spark_client.submit_job(job_configuration=job_configuration)
@@ -141,15 +136,15 @@ def test_get_job():
     app1 = aztk.spark.models.ApplicationConfiguration(
         name="pipy100",
         application="./examples/src/main/python/pi.py",
-        application_args=[100]
+        application_args=[10],
     )
     app2 = aztk.spark.models.ApplicationConfiguration(
         name="pipy101",
         application="./examples/src/main/python/pi.py",
-        application_args=[100]
+        application_args=[10],
     )
     job_configuration = aztk.spark.models.JobConfiguration(
-        id=test_id+base_job_id,
+        id=test_id + base_job_id,
         applications=[app1, app2],
         vm_size="standard_f1",
         custom_scripts=None,
@@ -157,8 +152,7 @@ def test_get_job():
         toolkit=aztk.spark.models.SparkToolkit(version="2.3.0"),
         max_dedicated_nodes=1,
         max_low_pri_nodes=0,
-        worker_on_master=True
-    )
+        worker_on_master=True)
     try:
         with pytest.warns(DeprecationWarning):
             spark_client.submit_job(job_configuration=job_configuration)
@@ -183,18 +177,17 @@ def test_get_application():
     app1 = aztk.spark.models.ApplicationConfiguration(
         name="pipy100",
         application="./examples/src/main/python/pi.py",
-        application_args=[100]
+        application_args=[10],
     )
     job_configuration = aztk.spark.models.JobConfiguration(
-        id=test_id+base_job_id,
+        id=test_id + base_job_id,
         applications=[app1],
         vm_size="standard_f1",
         custom_scripts=None,
         spark_configuration=None,
         toolkit=aztk.spark.models.SparkToolkit(version="2.3.0"),
         max_dedicated_nodes=2,
-        max_low_pri_nodes=0
-    )
+        max_low_pri_nodes=0)
     try:
         with pytest.warns(DeprecationWarning):
             spark_client.submit_job(job_configuration=job_configuration)
@@ -218,18 +211,17 @@ def test_get_application_log():
     app1 = aztk.spark.models.ApplicationConfiguration(
         name="pipy100",
         application="./examples/src/main/python/pi.py",
-        application_args=[100]
+        application_args=[10],
     )
     job_configuration = aztk.spark.models.JobConfiguration(
-        id=test_id+base_job_id,
+        id=test_id + base_job_id,
         applications=[app1],
         vm_size="standard_f1",
         custom_scripts=None,
         spark_configuration=None,
         toolkit=aztk.spark.models.SparkToolkit(version="2.3.0"),
         max_dedicated_nodes=2,
-        max_low_pri_nodes=0
-    )
+        max_low_pri_nodes=0)
     try:
         with pytest.warns(DeprecationWarning):
             spark_client.submit_job(job_configuration=job_configuration)
@@ -237,7 +229,8 @@ def test_get_application_log():
             spark_client.wait_until_job_finished(job_configuration.id)
 
         with pytest.warns(DeprecationWarning):
-            application_log = spark_client.get_job_application_log(job_id=job_configuration.id, application_name=app1.name)
+            application_log = spark_client.get_job_application_log(
+                job_id=job_configuration.id, application_name=app1.name)
 
         assert isinstance(application_log, aztk.spark.models.ApplicationLog)
         assert application_log.log is not None
@@ -257,10 +250,10 @@ def test_delete_job():
     app1 = aztk.spark.models.ApplicationConfiguration(
         name="pipy100",
         application="./examples/src/main/python/pi.py",
-        application_args=[100]
+        application_args=[10],
     )
     job_configuration = aztk.spark.models.JobConfiguration(
-        id=test_id+base_job_id,
+        id=test_id + base_job_id,
         applications=[app1],
         vm_size="standard_f1",
         custom_scripts=None,
@@ -268,8 +261,7 @@ def test_delete_job():
         toolkit=aztk.spark.models.SparkToolkit(version="2.3.0"),
         max_dedicated_nodes=1,
         max_low_pri_nodes=0,
-        worker_on_master=True
-    )
+        worker_on_master=True)
     try:
 
         with pytest.warns(DeprecationWarning):

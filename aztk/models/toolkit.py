@@ -2,7 +2,7 @@ import re
 
 from aztk.core.models import Model, fields
 from aztk.error import InvalidModelError
-from aztk.utils import constants, deprecate
+from aztk.utils import constants
 
 
 class ToolkitDefinition:
@@ -60,8 +60,6 @@ class Toolkit(Model):
         if self.version not in toolkit_def.versions:
             raise InvalidModelError("Toolkit '{0}' with version '{1}' is not available. Use one of: {2}".format(
                 self.software, self.version, toolkit_def.versions))
-        if self.version == "1.6":
-            deprecate("0.9.0", "Spark version 1.6 is being deprecated for Aztk.", "Please use 2.1 and above.")
 
         if self.environment:
             if self.environment not in toolkit_def.environments:

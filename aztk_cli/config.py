@@ -1,14 +1,11 @@
 import os
+
 import yaml
+
 import aztk.spark
-from aztk.spark.models import (
-    SecretsConfiguration,
-    ClusterConfiguration,
-    SchedulingTarget,
-)
-from aztk.utils import deprecate
 from aztk.models import Toolkit
 from aztk.models.plugins.internal import PluginReference
+from aztk.spark.models import (ClusterConfiguration, SchedulingTarget, SecretsConfiguration)
 
 
 def load_aztk_secrets() -> SecretsConfiguration:
@@ -46,11 +43,6 @@ def _load_config_file(path: str):
 
 
 def _merge_secrets_dict(secrets: SecretsConfiguration, secrets_config):
-    if 'default' in secrets_config:
-        deprecate("0.9.0", "default key in secrets.yaml is deprecated.",
-                  "Place all child parameters directly at the root")
-        secrets_config = dict(**secrets_config, **secrets_config.pop('default'))
-
     other = SecretsConfiguration.from_dict(secrets_config)
     secrets.merge(other)
 

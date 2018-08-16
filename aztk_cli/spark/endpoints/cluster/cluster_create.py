@@ -3,7 +3,6 @@ import typing
 
 import aztk.spark
 from aztk.spark.models import ClusterConfiguration, UserConfiguration
-from aztk.utils import deprecate
 from aztk_cli import config, log, utils
 from aztk_cli.config import load_aztk_spark_config
 
@@ -39,9 +38,6 @@ def execute(args: typing.NamedTuple):
     # read cluster.yaml configuration file, overwrite values with args
     file_config, wait = config.read_cluster_config()
     cluster_conf.merge(file_config)
-    if args.size_low_pri is not None:
-        deprecate("0.9.0", "--size-low-pri has been deprecated.", "Please use --size-low-priority.")
-        args.size_low_priority = args.size_low_pri
 
     cluster_conf.merge(
         ClusterConfiguration(

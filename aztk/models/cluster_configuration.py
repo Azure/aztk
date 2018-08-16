@@ -1,6 +1,6 @@
 import aztk.error as error
 from aztk.core.models import Model, fields
-from aztk.utils import deprecate, deprecated, helpers
+from aztk.utils import helpers
 
 from .custom_script import CustomScript
 from .file_share import FileShare
@@ -41,36 +41,7 @@ class ClusterConfiguration(Model):
     scheduling_target = fields.Enum(SchedulingTarget, default=None)
 
     def __init__(self, *args, **kwargs):
-        if 'vm_count' in kwargs:
-            deprecate("0.9.0", "vm_count is deprecated for ClusterConfiguration.", "Please use size instead.")
-            kwargs['size'] = kwargs.pop('vm_count')
-
-        if 'vm_low_pri_count' in kwargs:
-            deprecate("vm_low_pri_count is deprecated for ClusterConfiguration.",
-                      "Please use size_low_priority instead.")
-            kwargs['size_low_priority'] = kwargs.pop('vm_low_pri_count')
-
         super().__init__(*args, **kwargs)
-
-    @property
-    @deprecated("0.9.0")
-    def vm_count(self):
-        return self.size
-
-    @vm_count.setter
-    @deprecated("0.9.0")
-    def vm_count(self, value):
-        self.size = value
-
-    @property
-    @deprecated("0.9.0")
-    def vm_low_pri_count(self):
-        return self.size_low_priority
-
-    @vm_low_pri_count.setter
-    @deprecated("0.9.0")
-    def vm_low_pri_count(self, value):
-        self.size_low_priority = value
 
     def mixed_mode(self) -> bool:
         """
@@ -102,10 +73,6 @@ class ClusterConfiguration(Model):
             raise error.InvalidModelError(
                 "You must configure a VNET to use AZTK in mixed mode (dedicated and low priority nodes). Set the VNET's subnet_id in your cluster.yaml or with a parameter (--subnet-id)."
             )
-
-        if self.custom_scripts:
-            deprecate("0.9.0", "Custom scripts are DEPRECATED.",
-                      "Use plugins instead. See https://aztk.readthedocs.io/en/v0.7.0/15-plugins.html.")
 
         if self.scheduling_target == SchedulingTarget.Dedicated and self.size == 0:
             raise error.InvalidModelError("Scheduling target cannot be Dedicated if dedicated vm size is 0")

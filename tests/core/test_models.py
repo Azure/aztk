@@ -77,7 +77,8 @@ def test_enum_invalid_type_raise_error():
 
     with pytest.raises(
             InvalidModelFieldError,
-            match="SimpleStateModel state unknown is not a valid option. Use one of \\['creating', 'ready', 'deleting'\\]"):
+            match=
+            "SimpleStateModel state unknown is not a valid option. Use one of \\['creating', 'ready', 'deleting'\\]"):
 
         obj = SimpleStateModel(state="unknown")
         obj.validate()
@@ -234,7 +235,7 @@ def test_list_field_is_never_required():
     obj = UserList()
     obj.validate()
 
-    assert isinstance(obj.infos, (list, ))
+    assert isinstance(obj.infos, (list,))
     assert len(obj.infos) == 0
 
     infos = obj.infos
@@ -242,7 +243,7 @@ def test_list_field_is_never_required():
     assert len(obj.infos) == 1
 
     obj2 = UserList(infos=None)
-    assert isinstance(obj2.infos, (list, ))
+    assert isinstance(obj2.infos, (list,))
     assert len(obj2.infos) == 0
 
 
@@ -253,7 +254,7 @@ def test_list_field_ignore_none_entries():
     obj = UserList(infos=[None, None])
     obj.validate()
 
-    assert isinstance(obj.infos, (list, ))
+    assert isinstance(obj.infos, (list,))
     assert len(obj.infos) == 0
 
 

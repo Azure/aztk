@@ -10,6 +10,7 @@ def test_spark_configuration_defaults():
     assert spark_configuration.spark_defaults_conf is None
     assert spark_configuration.spark_defaults_conf is None
 
+
 def test_spark_configuration_fields():
     spark_configuration = SparkConfiguration(
         spark_defaults_conf="spark-defaults.conf",

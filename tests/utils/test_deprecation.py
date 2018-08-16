@@ -29,7 +29,8 @@ def test_deprecated_field():
 
         def __init__(self, *args, **kwargs):
             if 'deprecated_field' in kwargs:
-                deprecate("0.9.0", "deprecated_field is deprecated for DummyClass.", "Please use non_deprecated_field instead.")
+                deprecate("0.0.0", "deprecated_field is deprecated for DummyClass.",
+                          "Please use non_deprecated_field instead.")
                 kwargs['non_deprecated_field'] = kwargs.pop('deprecated_field')
 
             super().__init__(*args, **kwargs)
