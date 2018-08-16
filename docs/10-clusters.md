@@ -182,6 +182,15 @@ The debug utility will pull logs from all nodes in the cluster. The utility will
 
 __Please be careful sharing the output of the `debug` command as secrets and application code are present in the output.__
 
+Pass the `--brief` flag to only download the most essential logs from each node:
+```sh
+aztk spark cluster debug --id <cluster-id> --output </path/to/output/directory/> --brief
+```
+This command will retrieve:
+- stdout file from the node's startup
+- stderr file from the node's startup
+- the docker log for the spark container
+
 
 ### Interact with your Spark cluster
 By default, the `aztk spark cluster ssh` command port forwards the Spark Web UI to *localhost:8080*, Spark Jobs UI to *localhost:4040*, and Spark History Server to your *localhost:18080*. This can be [configured in *.aztk/ssh.yaml*](../docs/13-configuration.html#sshyaml).

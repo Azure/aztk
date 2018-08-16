@@ -194,7 +194,7 @@ class ClusterOperations(SparkBaseOperations):
         return download.cluster_download(self._core_cluster_operations, id, source_path, destination_path, host,
                                          internal, timeout)
 
-    def diagnostics(self, id, output_directory=None):
+    def diagnostics(self, id, output_directory: str = None, brief: bool = False):
         """Download a file from every node in a cluster.
 
         Args:
@@ -206,7 +206,7 @@ class ClusterOperations(SparkBaseOperations):
         Returns:
             :obj:`List[aztk.spark.models.NodeOutput]`: A list of NodeOutput objects representing the output of the copy command.
         """
-        return diagnostics.run_cluster_diagnostics(self, id, output_directory)
+        return diagnostics.run_cluster_diagnostics(self, id, output_directory, brief)
 
     def get_application_log(self, id: str, application_name: str, tail=False, current_bytes: int = 0):
         """Get the log for a running or completed application
