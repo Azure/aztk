@@ -27,6 +27,11 @@ class CoreClient:
 
     """
 
+    def __init__(self):
+        self.secrets_configuration = None
+        self.batch_client = None
+        self.blob_client = None
+
     def _get_context(self, secrets_configuration: models.SecretsConfiguration):
         self.secrets_configuration = secrets_configuration
 

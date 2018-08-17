@@ -172,6 +172,7 @@ class JobConfig():
         self.subnet_id = None
         self.worker_on_master = None
         self.scheduling_target = None
+        self.jars = []
 
     def _merge_dict(self, config):
         config = config.get('job')

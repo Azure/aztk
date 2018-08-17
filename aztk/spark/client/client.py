@@ -16,7 +16,7 @@ from aztk.spark.helpers import get_log as get_log_helper
 from aztk.spark.helpers import job_submission as job_submit_helper
 from aztk.spark.helpers import submit as cluster_submit_helper
 from aztk.spark.utils import util
-from aztk.utils import azure_api, deprecated, deprecate, helpers
+from aztk.utils import azure_api, deprecate, deprecated, helpers
 
 
 class Client(CoreClient):
@@ -28,7 +28,7 @@ class Client(CoreClient):
     """
 
     def __init__(self, secrets_configuration: models.SecretsConfiguration = None, **kwargs):
-        self.secrets_configuration = None
+        super().__init__()
         context = None
         if kwargs.get("secrets_config"):
             deprecate(
