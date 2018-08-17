@@ -1,7 +1,4 @@
-import datetime
-import os
 import time
-from typing import List
 
 import azure.batch.models as batch_models
 import yaml
@@ -9,6 +6,8 @@ import yaml
 import aztk.error as error
 from aztk.utils import constants, helpers
 from aztk.utils.command_builder import CommandBuilder
+
+
 '''
     Job Submission helper methods
 '''

@@ -1,14 +1,15 @@
 import os
 import re
-import logging
+
+import azure.batch.batch_auth as batchauth
 import azure.batch.batch_service_client as batch
 import azure.storage.blob as blob
-import azure.batch.batch_auth as batchauth
-from core import log
 from azure.common.credentials import ServicePrincipalCredentials
 from azure.mgmt.batch import BatchManagementClient
 from azure.mgmt.storage import StorageManagementClient
 from azure.storage.common import CloudStorageAccount
+
+from core import log
 
 RESOURCE_ID_PATTERN = re.compile('^/subscriptions/(?P<subscription>[^/]+)'
                                  '/resourceGroups/(?P<resourcegroup>[^/]+)'

@@ -1,5 +1,4 @@
 import re
-from typing import Optional
 
 import azure.batch.batch_auth as batch_auth
 import azure.batch.batch_service_client as batch

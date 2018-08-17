@@ -2,13 +2,14 @@
     Code that handle spark configuration
 """
 import datetime
-import time
 import os
-import json
 import shutil
-from subprocess import call, Popen, check_output
+import time
+from subprocess import call
 from typing import List
+
 import azure.batch.models as batchmodels
+
 from core import config
 from install import pick_master
 

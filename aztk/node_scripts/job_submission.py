@@ -1,11 +1,9 @@
-import datetime
 import os
-import subprocess
-import sys
-from typing import List
+
 import azure.batch.models as batch_models
 import azure.storage.blob as blob
 import yaml
+
 from aztk.utils.command_builder import CommandBuilder
 from core import config
 from install.pick_master import get_master_node_id
@@ -24,7 +22,6 @@ def schedule_tasks(tasks_path):
         Handle the request to submit a task
     '''
     batch_client = config.batch_client
-    blob_client = config.blob_client
 
     for task_definition in tasks_path:
         with open(task_definition, 'r', encoding='UTF-8') as stream:

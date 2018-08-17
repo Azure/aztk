@@ -1,12 +1,14 @@
-import sys
-import os
-import logging
-import yaml
-import subprocess
 import datetime
+import logging
+import os
+import subprocess
+import sys
 from typing import List
-import azure.storage.blob as blob
+
 import azure.batch.models as batch_models
+import azure.storage.blob as blob
+import yaml
+
 from aztk.utils.command_builder import CommandBuilder
 from core import config
 
@@ -63,7 +65,6 @@ def upload_file_to_container(container_name,
 def __app_submit_cmd(name: str, app: str, app_args: List[str], main_class: str, jars: List[str], py_files: List[str],
                      files: List[str], driver_java_options: str, driver_library_path: str, driver_class_path: str,
                      driver_memory: str, executor_memory: str, driver_cores: int, executor_cores: int):
-    cluster_id = os.environ['AZ_BATCH_POOL_ID']
     spark_home = os.environ['SPARK_HOME']
     with open(os.path.join(spark_home, 'conf', 'master')) as f:
         master_ip = f.read().rstrip()
@@ -127,7 +128,6 @@ def receive_submit_request(application_file_path):
     '''
         Handle the request to submit a task
     '''
-    batch_client = config.batch_client
     blob_client = config.blob_client
     application = load_application(application_file_path)
 

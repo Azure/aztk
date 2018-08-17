@@ -1,4 +1,3 @@
-import os
 from aztk.utils.command_builder import CommandBuilder
 
 

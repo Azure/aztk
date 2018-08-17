@@ -1,6 +1,4 @@
-import os
 import inspect
-import importlib.util
 from aztk.utils import constants
 from aztk.error import InvalidPluginReferenceError
 from aztk.spark.models import plugins

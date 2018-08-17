@@ -1,8 +1,9 @@
-import os
 import json
-import yaml
+import os
 import subprocess
-from pathlib import Path
+
+import yaml
+
 from aztk.models.plugins import PluginTarget, PluginTargetRole
 
 log_folder = os.path.join(os.environ['AZTK_WORKING_DIR'], 'logs', 'plugins')
