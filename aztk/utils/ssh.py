@@ -39,12 +39,12 @@ class Handler(SocketServer.BaseRequestHandler):
             r, w, x = select.select([self.request, channel], [], [])
             if self.request in r:
                 data = self.request.recv(1024)
-                if len(data) == 0:
+                if not data:
                     break
                 channel.send(data)
             if channel in r:
                 data = channel.recv(1024)
-                if len(data) == 0:
+                if not data:
                     break
                 self.request.send(data)
 

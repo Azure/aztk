@@ -3,8 +3,8 @@ from aztk.spark import models
 from aztk.spark.client.base import SparkBaseOperations
 
 from .helpers import (copy, create, create_user, delete, diagnostics, download, get, get_application_log,
-                      get_application_status, get_configuration, get_remote_login_settings, list, node_run, run, submit,
-                      wait)
+                      get_application_status, get_configuration, get_remote_login_settings, list, node_run, run,
+                      ssh_into_master, submit, wait)
 
 
 class ClusterOperations(SparkBaseOperations):
@@ -260,3 +260,21 @@ class ClusterOperations(SparkBaseOperations):
             :obj:`aztk.spark.models.ClusterConfiguration`
         """
         return get_configuration.get_configuration(self._core_cluster_operations, id)
+
+    def ssh_into_master(self, id, username, ssh_key=None, password=None, port_forward_list=None, internal=False):
+        """Open an SSH tunnel to the Spark master node and forward the specified ports
+
+        Args:
+            id (:obj:`str`): the id of the cluster
+            username (:obj:`str`): the name of the user to open the ssh session with
+            ssh_key (:obj:`str`, optional): the ssh_key to authenticate the ssh user with.
+                Must specify either `ssh_key` or `password`.
+            password (:obj:`str`, optional): the password to authenticate the ssh user with.
+                Must specify either `password` or `ssh_key`.
+            port_forward_list (:obj:`aztk.spark.models.PortForwardingSpecification`, optional):
+                List of the ports to forward.
+            internal (:obj:`str`, optional): if True, this will connect to the node using its internal IP.
+                Only use this if running within the same VNET as the cluster. Defaults to False.
+        """
+        return ssh_into_master.ssh_into_master(self, self._core_cluster_operations, id, username, ssh_key, password,
+                                               port_forward_list, internal)
