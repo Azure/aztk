@@ -1,10 +1,12 @@
 from typing import List
-from Cryptodome.PublicKey import RSA
+
 import azure.batch.models as batch_models
+from Cryptodome.PublicKey import RSA
+
 import aztk.models
 from aztk import error
-from aztk.utils import constants, helpers
 from aztk.core.models import Model, fields
+from aztk.utils import constants, helpers
 
 
 class SparkToolkit(aztk.models.Toolkit):
@@ -158,11 +160,11 @@ class Application:
         self.name = cloud_task.id
         self.last_modified = cloud_task.last_modified
         self.creation_time = cloud_task.creation_time
-        self.state = cloud_task.state._value_
+        self.state = cloud_task.state.name
         self.state_transition_time = cloud_task.state_transition_time
         self.exit_code = cloud_task.execution_info.exit_code
         if cloud_task.previous_state:
-            self.previous_state = cloud_task.previous_state._value_
+            self.previous_state = cloud_task.previous_state.name
             self.previous_state_transition_time = cloud_task.previous_state_transition_time
 
         self._execution_info = cloud_task.execution_info
@@ -288,7 +290,7 @@ class Job:
     ):
         self.id = cloud_job_schedule.id
         self.last_modified = cloud_job_schedule.last_modified
-        self.state = cloud_job_schedule.state._value_
+        self.state = cloud_job_schedule.state.name
         self.state_transition_time = cloud_job_schedule.state_transition_time
         self.creation_time = cloud_job_schedule.creation_time
         self.applications = [Application(task) for task in (cloud_tasks or [])]

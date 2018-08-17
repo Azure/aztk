@@ -172,7 +172,6 @@ def ssh_in_master(
     master_node_port = remote_login_settings.port
 
     spark_web_ui_port = utils.constants.DOCKER_SPARK_WEB_UI_PORT
-    spark_worker_ui_port = utils.constants.DOCKER_SPARK_WORKER_UI_PORT
     spark_job_ui_port = utils.constants.DOCKER_SPARK_JOB_UI_PORT
     spark_job_history_ui_port = utils.constants.DOCKER_SPARK_JOB_UI_HISTORY_PORT
 
@@ -229,11 +228,6 @@ def print_batch_exception(batch_exception):
             for mesg in batch_exception.error.values:
                 log.error("%s:\t%s", mesg.key, mesg.value)
     log.error("-------------------------------------------")
-
-
-"""
-    Job submission
-"""
 
 
 def print_jobs(jobs: List[models.Job]):
@@ -293,7 +287,7 @@ def print_cluster_summary(cluster: models.Cluster):
     if state_count:
         log.info("| Node States:")
         for state in state_count:
-            log.info("| \t%s: %d", state._value_, state_count[state])
+            log.info("| \t%s: %d", state.name, state_count[state])
     log.info("Master:            %s", cluster.master_node_id or "Pending")
     log.info("")
 
