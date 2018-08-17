@@ -3,7 +3,8 @@ from aztk.spark import models
 from aztk.spark.client.base import SparkBaseOperations
 
 from .helpers import (copy, create, create_user, delete, diagnostics, download, get, get_application_log,
-                      get_application_status, get_remote_login_settings, list, node_run, run, submit, wait)
+                      get_application_status, get_configuration, get_remote_login_settings, list, node_run, run, submit,
+                      wait)
 
 
 class ClusterOperations(SparkBaseOperations):
@@ -248,3 +249,14 @@ class ClusterOperations(SparkBaseOperations):
             :obj:`None`
         """
         return wait.wait_for_application_to_complete(self._core_cluster_operations, id, application_name)
+
+    def get_configuration(self, id: str):
+        """Get the initial configuration of the cluster
+
+        Args:
+            id (:obj:`str`): the id of the cluster
+
+        Returns:
+            :obj:`aztk.spark.models.ClusterConfiguration`
+        """
+        return get_configuration.get_configuration(self._core_cluster_operations, id)
