@@ -8,11 +8,6 @@ from aztk.utils import constants, helpers
 from aztk.utils.command_builder import CommandBuilder
 
 
-'''
-Submit helper methods
-'''
-
-
 def __get_node(spark_client, node_id: str, cluster_id: str) -> batch_models.ComputeNode:
     return spark_client.batch_client.compute_node.get(cluster_id, node_id)
 

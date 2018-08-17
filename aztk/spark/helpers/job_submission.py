@@ -8,11 +8,6 @@ from aztk.utils import constants, helpers
 from aztk.utils.command_builder import CommandBuilder
 
 
-'''
-    Job Submission helper methods
-'''
-
-
 def __app_cmd():
     docker_exec = CommandBuilder("sudo docker exec")
     docker_exec.add_argument("-i")
