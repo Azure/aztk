@@ -11,6 +11,5 @@ def NvBLASPlugin():
         ports=[],
         target_role=PluginTargetRole.All,
         execute="nvblas.sh",
-        files=[
-            PluginFile("nvblas.sh", os.path.join(dir_path, "nvblas.sh")),
-        ])
+        files=[PluginFile("nvblas.sh", os.path.join(dir_path, "nvblas.sh"))],
+    )

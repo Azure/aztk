@@ -4,7 +4,6 @@ import logging
 import azure.common
 import yaml
 
-
 from .blob_data import BlobData
 from .node_data import NodeData
 
@@ -13,6 +12,7 @@ class ClusterData:
     """
     Class handling the management of data for a cluster
     """
+
     # ALl data related to cluster(config, metadata, etc.) should be under this folder
     CLUSTER_DIR = "cluster"
     APPLICATIONS_DIR = "applications"

@@ -29,7 +29,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 
 BIND_ADDR = os.environ.get("BIND_ADDR", "0.0.0.0")
 SERVER_PORT = int(os.environ.get("SERVER_PORT", "80"))
-URL_PREFIX = os.environ.get("URL_PREFIX", "").rstrip('/') + '/'
+URL_PREFIX = os.environ.get("URL_PREFIX", "").rstrip("/") + "/"
 SPARK_MASTER_HOST = ""
 
 
@@ -44,7 +44,7 @@ class ProxyHandler(BaseHTTPRequestHandler):
         self.proxyRequest(None)
 
     def do_POST(self):
-        length = int(self.headers.getheader('content-length'))
+        length = int(self.headers.getheader("content-length"))
         postData = self.rfile.read(length)
         self.proxyRequest(postData)
 
@@ -84,17 +84,19 @@ class ProxyHandler(BaseHTTPRequestHandler):
     def rewriteLinks(self, page, targetHost):
         target = "{0}proxy:{1}/".format(URL_PREFIX, targetHost).encode()
         page = page.replace(b'href="/', b'href="' + target)
-        page = page.replace(b"'<div><a href=' + logUrl + '>'",
-                            b"'<div><a href=' + location.origin + logUrl.replace('http://', '/proxy:') + '>'")
-        page = page.replace(b'href="log', b'href="' + target + b'log')
-        page = page.replace(b'href="http://', b'href="' + URL_PREFIX.encode() + b'proxy:')
+        page = page.replace(
+            b"'<div><a href=' + logUrl + '>'",
+            b"'<div><a href=' + location.origin + logUrl.replace('http://', '/proxy:') + '>'",
+        )
+        page = page.replace(b'href="log', b'href="' + target + b"log")
+        page = page.replace(b'href="http://', b'href="' + URL_PREFIX.encode() + b"proxy:")
         page = page.replace(b'src="/', b'src="' + target)
         page = page.replace(b'action="', b'action="' + target)
-        page = page.replace(b'"/api/v1/', b'"' + target + b'api/v1/')
+        page = page.replace(b'"/api/v1/', b'"' + target + b"api/v1/")
         return page
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: <proxied host:port> [<proxy port>]")
         sys.exit(1)

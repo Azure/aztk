@@ -25,7 +25,8 @@ class PluginManager:
         nvblas=plugins.NvBLASPlugin,
         apt_get=plugins.AptGetPlugin,
         pip_install=plugins.PipPlugin,
-        conda_install=plugins.CondaPlugin)
+        conda_install=plugins.CondaPlugin,
+    )
 
     def __init__(self):
         self.loaded = False

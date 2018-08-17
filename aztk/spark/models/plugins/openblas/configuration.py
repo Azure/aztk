@@ -11,7 +11,5 @@ def OpenBLASPlugin():
         ports=[],
         target_role=PluginTargetRole.All,
         execute="openblas.sh",
-        files=[
-            PluginFile("openblas.sh", os.path.join(dir_path, "openblas.sh")),
-        ],
+        files=[PluginFile("openblas.sh", os.path.join(dir_path, "openblas.sh"))],
     )

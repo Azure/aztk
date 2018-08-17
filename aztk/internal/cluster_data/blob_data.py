@@ -1,6 +1,7 @@
-import azure.batch.models as batch_models
 import datetime
-from azure.storage.blob import BlockBlobService, BlobPermissions
+
+import azure.batch.models as batch_models
+from azure.storage.blob import BlobPermissions, BlockBlobService
 
 
 class BlobData:
@@ -19,7 +20,8 @@ class BlobData:
             self.container,
             self.blob,
             permission=BlobPermissions.READ,
-            expiry=datetime.datetime.utcnow() + datetime.timedelta(days=365))
+            expiry=datetime.datetime.utcnow() + datetime.timedelta(days=365),
+        )
 
         sas_url = self.blob_client.make_blob_url(self.container, self.blob, sas_token=sas_token)
 

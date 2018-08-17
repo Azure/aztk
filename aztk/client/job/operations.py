@@ -4,8 +4,16 @@ from .helpers import submit
 
 
 class CoreJobOperations(BaseOperations):
-    def submit(self, job_configuration, start_task, job_manager_task, autoscale_formula, software_metadata_key: str,
-               vm_image_model, application_metadata):
+    def submit(
+            self,
+            job_configuration,
+            start_task,
+            job_manager_task,
+            autoscale_formula,
+            software_metadata_key: str,
+            vm_image_model,
+            application_metadata,
+    ):
         """Submit a job
 
         Jobs are a cluster definition and one or many application definitions which run on the cluster. The job's
@@ -26,5 +34,13 @@ class CoreJobOperations(BaseOperations):
         Returns:
             :obj:`azure.batch.models.CloudJobSchedule`: Model representing the Azure Batch JobSchedule state.
         """
-        return submit.submit_job(self, job_configuration, start_task, job_manager_task, autoscale_formula,
-                                 software_metadata_key, vm_image_model, application_metadata)
+        return submit.submit_job(
+            self,
+            job_configuration,
+            start_task,
+            job_manager_task,
+            autoscale_formula,
+            software_metadata_key,
+            vm_image_model,
+            application_metadata,
+        )

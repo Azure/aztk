@@ -7,16 +7,17 @@ from aztk_cli import config, utils, log
 
 
 def setup_parser(parser: argparse.ArgumentParser):
-    parser.add_argument('--id', dest='cluster_id', required=True, help='The unique id of your spark cluster')
-    parser.add_argument('--name', dest='app_name', required=True, help='The unique id of your job name')
+    parser.add_argument("--id", dest="cluster_id", required=True, help="The unique id of your spark cluster")
+    parser.add_argument("--name", dest="app_name", required=True, help="The unique id of your job name")
 
     output_group = parser.add_mutually_exclusive_group()
 
     output_group.add_argument(
-        '--output',
-        help='Path to the file you wish to output to. If not \
-                                    specified, output is printed to stdout')
-    output_group.add_argument('--tail', dest='tail', action='store_true')
+        "--output",
+        help="Path to the file you wish to output to. If not \
+                                    specified, output is printed to stdout",
+    )
+    output_group.add_argument("--tail", dest="tail", action="store_true")
 
 
 def execute(args: typing.NamedTuple):

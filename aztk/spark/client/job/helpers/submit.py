@@ -15,11 +15,12 @@ def __app_cmd():
     docker_exec.add_argument("-i")
     docker_exec.add_option("-e", "AZ_BATCH_TASK_WORKING_DIR=$AZ_BATCH_TASK_WORKING_DIR")
     docker_exec.add_option("-e", "AZ_BATCH_JOB_ID=$AZ_BATCH_JOB_ID")
-    docker_exec.add_argument("spark /bin/bash >> output.log 2>&1 -c \"" \
-                             "source ~/.bashrc; " \
-                             "export PYTHONPATH=$PYTHONPATH:\$AZTK_WORKING_DIR; " \
-                             "cd \$AZ_BATCH_TASK_WORKING_DIR; " \
-                             "\$AZTK_WORKING_DIR/.aztk-env/.venv/bin/python \$AZTK_WORKING_DIR/aztk/node_scripts/job_submission.py\"")
+    docker_exec.add_argument(
+        r'spark /bin/bash >> output.log 2>&1 -c "'
+        r"source ~/.bashrc; "
+        r"export PYTHONPATH=$PYTHONPATH:\$AZTK_WORKING_DIR; "
+        r"cd \$AZ_BATCH_TASK_WORKING_DIR; "
+        r'\$AZTK_WORKING_DIR/.aztk-env/.venv/bin/python \$AZTK_WORKING_DIR/aztk/node_scripts/job_submission.py"')
     return docker_exec.to_str()
 
 
@@ -28,10 +29,11 @@ def generate_job_manager_task(core_job_operations, job, application_tasks):
     for application, task in application_tasks:
         task_definition_resource_file = helpers.upload_text_to_container(
             container_name=job.id,
-            application_name=application.name + '.yaml',
-            file_path=application.name + '.yaml',
+            application_name=application.name + ".yaml",
+            file_path=application.name + ".yaml",
             content=yaml.dump(task),
-            blob_client=core_job_operations.blob_client)
+            blob_client=core_job_operations.blob_client,
+        )
         resource_files.append(task_definition_resource_file)
 
     task_cmd = __app_cmd()
@@ -45,7 +47,8 @@ def generate_job_manager_task(core_job_operations, job, application_tasks):
         allow_low_priority_node=True,
         user_identity=batch_models.UserIdentity(
             auto_user=batch_models.AutoUserSpecification(
-                scope=batch_models.AutoUserScope.task, elevation_level=batch_models.ElevationLevel.admin)))
+                scope=batch_models.AutoUserScope.task, elevation_level=batch_models.ElevationLevel.admin)),
+    )
 
     return task
 
@@ -83,24 +86,24 @@ def submit_job(core_job_operations,
             job_configuration.get_docker_repo(),
             job_configuration.get_docker_run_options(),
             mixed_mode=job_configuration.mixed_mode(),
-            worker_on_master=job_configuration.worker_on_master)
+            worker_on_master=job_configuration.worker_on_master,
+        )
 
         application_tasks = []
         for application in job_configuration.applications:
-            application_tasks.append((application,
-                                      spark_job_operations._generate_application_task(
-                                          core_job_operations, job_configuration.id, application)))
+            application_tasks.append((
+                application,
+                spark_job_operations._generate_application_task(core_job_operations, job_configuration.id, application),
+            ))
 
         job_manager_task = generate_job_manager_task(core_job_operations, job_configuration, application_tasks)
 
         software_metadata_key = base_models.Software.spark
 
-        vm_image = models.VmImage(publisher='Canonical', offer='UbuntuServer', sku='16.04')
+        vm_image = models.VmImage(publisher="Canonical", offer="UbuntuServer", sku="16.04")
 
-        autoscale_formula = "$TargetDedicatedNodes = {0}; " \
-                            "$TargetLowPriorityNodes = {1}".format(
-                                job_configuration.max_dedicated_nodes,
-                                job_configuration.max_low_pri_nodes)
+        autoscale_formula = "$TargetDedicatedNodes = {0}; " "$TargetLowPriorityNodes = {1}".format(
+            job_configuration.max_dedicated_nodes, job_configuration.max_low_pri_nodes)
 
         job = core_job_operations.submit(
             job_configuration=job_configuration,
@@ -109,7 +112,8 @@ def submit_job(core_job_operations,
             autoscale_formula=autoscale_formula,
             software_metadata_key=software_metadata_key,
             vm_image_model=vm_image,
-            application_metadata='\n'.join(application.name for application in (job_configuration.applications or [])))
+            application_metadata="\n".join(application.name for application in (job_configuration.applications or [])),
+        )
 
         if wait:
             spark_job_operations.wait(id=job_configuration.id)

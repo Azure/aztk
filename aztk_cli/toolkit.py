@@ -6,10 +6,10 @@ from aztk_cli import log
 
 
 def setup_parser(parser: argparse.ArgumentParser):
-    parser.add_argument('toolkit_software', nargs='?')
-    parser.add_argument('version', nargs='?')
-    parser.add_argument('environment', nargs='?')
-    parser.add_argument('--gpu', action='store_true')
+    parser.add_argument("toolkit_software", nargs="?")
+    parser.add_argument("version", nargs="?")
+    parser.add_argument("environment", nargs="?")
+    parser.add_argument("--gpu", action="store_true")
 
 
 def execute(args: typing.NamedTuple):
@@ -24,14 +24,10 @@ def execute(args: typing.NamedTuple):
     if not args.environment:
         print_available_environments(args.toolkit_software)
 
-    toolkit = Toolkit(
-        software=args.toolkit_software,
-        version=args.version,
-        environment=args.environment,
-    )
+    toolkit = Toolkit(software=args.toolkit_software, version=args.version, environment=args.environment)
 
     toolkit.validate()
-    log.info('Docker image picked for this toolkit: %s', toolkit.get_docker_repo(args.gpu))
+    log.info("Docker image picked for this toolkit: %s", toolkit.get_docker_repo(args.gpu))
     return None
 
 

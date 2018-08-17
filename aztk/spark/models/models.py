@@ -10,11 +10,7 @@ from aztk.core.models import Model, fields
 class SparkToolkit(aztk.models.Toolkit):
     def __init__(self, version: str, environment: str = None, environment_version: str = None):
         super().__init__(
-            software="spark",
-            version=version,
-            environment=environment,
-            environment_version=environment_version,
-        )
+            software="spark", version=version, environment=environment, environment_version=environment_version)
 
 
 class Cluster(aztk.models.Cluster):
@@ -72,9 +68,9 @@ class SparkConfiguration(Model):
 
     def __generate_ssh_key_pair(self):
         key = RSA.generate(2048)
-        priv_key = key.exportKey('PEM')
-        pub_key = key.publickey().exportKey('OpenSSH')
-        return {'pub_key': pub_key, 'priv_key': priv_key}
+        priv_key = key.exportKey("PEM")
+        pub_key = key.publickey().exportKey("OpenSSH")
+        return {"pub_key": pub_key, "priv_key": priv_key}
 
 
 class CustomScript(aztk.models.CustomScript):
@@ -122,22 +118,24 @@ class VmImage(aztk.models.VmImage):
 
 
 class ApplicationConfiguration:
-    def __init__(self,
-                 name=None,
-                 application=None,
-                 application_args=None,
-                 main_class=None,
-                 jars=None,
-                 py_files=None,
-                 files=None,
-                 driver_java_options=None,
-                 driver_library_path=None,
-                 driver_class_path=None,
-                 driver_memory=None,
-                 executor_memory=None,
-                 driver_cores=None,
-                 executor_cores=None,
-                 max_retry_count=None):
+    def __init__(
+            self,
+            name=None,
+            application=None,
+            application_args=None,
+            main_class=None,
+            jars=None,
+            py_files=None,
+            files=None,
+            driver_java_options=None,
+            driver_library_path=None,
+            driver_class_path=None,
+            driver_memory=None,
+            executor_memory=None,
+            driver_cores=None,
+            executor_cores=None,
+            max_retry_count=None,
+    ):
         self.name = name
         self.application = application
         self.application_args = application_args
@@ -188,18 +186,20 @@ class Application:
 
 
 class JobConfiguration:
-    def __init__(self,
-                 id=None,
-                 applications=None,
-                 vm_size=None,
-                 custom_scripts=None,
-                 spark_configuration=None,
-                 toolkit=None,
-                 max_dedicated_nodes=0,
-                 max_low_pri_nodes=0,
-                 subnet_id=None,
-                 scheduling_target: SchedulingTarget = None,
-                 worker_on_master=None):
+    def __init__(
+            self,
+            id=None,
+            applications=None,
+            vm_size=None,
+            custom_scripts=None,
+            spark_configuration=None,
+            toolkit=None,
+            max_dedicated_nodes=0,
+            max_low_pri_nodes=0,
+            subnet_id=None,
+            scheduling_target: SchedulingTarget = None,
+            worker_on_master=None,
+    ):
 
         self.id = id
         self.applications = applications
@@ -269,8 +269,8 @@ class JobConfiguration:
             raise error.InvalidModelError("Scheduling target cannot be Dedicated if dedicated vm size is 0")
 
 
-class JobState():
-    complete = 'completed'
+class JobState:
+    complete = "completed"
     active = "active"
     completed = "completed"
     disabled = "disabled"
@@ -278,12 +278,14 @@ class JobState():
     deleting = "deleting"
 
 
-class Job():
-    def __init__(self,
-                 cloud_job_schedule: batch_models.CloudJobSchedule,
-                 cloud_tasks: List[batch_models.CloudTask] = None,
-                 pool: batch_models.CloudPool = None,
-                 nodes: batch_models.ComputeNodePaged = None):
+class Job:
+    def __init__(
+            self,
+            cloud_job_schedule: batch_models.CloudJobSchedule,
+            cloud_tasks: List[batch_models.CloudTask] = None,
+            pool: batch_models.CloudPool = None,
+            nodes: batch_models.ComputeNodePaged = None,
+    ):
         self.id = cloud_job_schedule.id
         self.last_modified = cloud_job_schedule.last_modified
         self.state = cloud_job_schedule.state._value_

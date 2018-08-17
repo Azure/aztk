@@ -7,21 +7,23 @@ from aztk_cli import config, log
 
 def setup_parser(parser: argparse.ArgumentParser):
     parser.add_argument(
-        '--id', dest='cluster_ids', nargs='*', required=True, help='The unique id of your spark cluster')
+        "--id", dest="cluster_ids", nargs="*", required=True, help="The unique id of your spark cluster")
     parser.add_argument(
-        '--force',
-        '-f',
-        dest='force',
+        "--force",
+        "-f",
+        dest="force",
         required=False,
-        action='store_true',
-        help='Do not prompt for confirmation, force deletion of cluster.')
+        action="store_true",
+        help="Do not prompt for confirmation, force deletion of cluster.",
+    )
     parser.add_argument(
-        '--keep-logs',
-        '-k',
-        dest='keep_logs',
-        action='store_true',
+        "--keep-logs",
+        "-k",
+        dest="keep_logs",
+        action="store_true",
         required=False,
-        help='Prevent logs in storage from being deleted.')
+        help="Prevent logs in storage from being deleted.",
+    )
     parser.set_defaults(force=False, keep_logs=False)
 
 

@@ -28,7 +28,8 @@ class Client(CoreClient):
             deprecate(
                 version="0.10.0",
                 message="secrets_config key is deprecated in secrets.yaml",
-                advice="Please use secrets_configuration key instead.")
+                advice="Please use secrets_configuration key instead.",
+            )
             context = self._get_context(kwargs.get("secrets_config"))
         else:
             context = self._get_context(secrets_configuration)
@@ -127,36 +128,42 @@ class Client(CoreClient):
             id=cluster_id, node_id=node_id, command=command, host=host, internal=internal, timeout=timeout)
 
     @deprecated("0.10.0")
-    def cluster_copy(self,
-                     cluster_id: str,
-                     source_path: str,
-                     destination_path: str,
-                     host: bool = False,
-                     internal: bool = False,
-                     timeout: int = None):
+    def cluster_copy(
+            self,
+            cluster_id: str,
+            source_path: str,
+            destination_path: str,
+            host: bool = False,
+            internal: bool = False,
+            timeout: int = None,
+    ):
         return self.cluster.copy(
             id=cluster_id,
             source_path=source_path,
             destination_path=destination_path,
             host=host,
             internal=internal,
-            timeout=timeout)
+            timeout=timeout,
+        )
 
     @deprecated("0.10.0")
-    def cluster_download(self,
-                         cluster_id: str,
-                         source_path: str,
-                         destination_path: str = None,
-                         host: bool = False,
-                         internal: bool = False,
-                         timeout: int = None):
+    def cluster_download(
+            self,
+            cluster_id: str,
+            source_path: str,
+            destination_path: str = None,
+            host: bool = False,
+            internal: bool = False,
+            timeout: int = None,
+    ):
         return self.cluster.download(
             id=cluster_id,
             source_path=source_path,
             destination_path=destination_path,
             host=host,
             internal=internal,
-            timeout=timeout)
+            timeout=timeout,
+        )
 
     @deprecated("0.10.0")
     def cluster_ssh_into_master(self,
@@ -170,9 +177,9 @@ class Client(CoreClient):
         return self.cluster._core_cluster_operations.ssh_into_node(cluster_id, node_id, username, ssh_key, password,
                                                                    port_forward_list, internal)
 
-    '''
+    """
         job submission
-    '''
+    """
 
     @deprecated("0.10.0")
     def submit_job(self, job_configuration: models.JobConfiguration):

@@ -12,7 +12,5 @@ class SimplePlugin(PluginConfiguration):
             target_role=PluginTargetRole.All,
             target=PluginTarget.Host,
             execute="simple.sh",
-            files=[
-                PluginFile("simple.sh", os.path.join(dir_path, "simple.sh")),
-            ],
+            files=[PluginFile("simple.sh", os.path.join(dir_path, "simple.sh"))],
         )

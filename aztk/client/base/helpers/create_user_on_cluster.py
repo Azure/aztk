@@ -1,7 +1,7 @@
 import concurrent.futures
 
 
-#TODO: remove nodes param
+# TODO: remove nodes param
 def create_user_on_cluster(base_operations, id, nodes, username, ssh_pub_key=None, password=None):
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = {

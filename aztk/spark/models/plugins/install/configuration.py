@@ -12,4 +12,5 @@ def InstallPlugin(name, command, packages=None):
         execute="install.sh",
         files=[PluginFile("install.sh", os.path.join(dir_path, "install.sh"))],
         args=packages,
-        env=dict(COMMAND=command))
+        env=dict(COMMAND=command),
+    )

@@ -46,8 +46,8 @@ def main():
 
 
 def setup_common_args(parser: argparse.ArgumentParser):
-    parser.add_argument('--version', action='version', version=aztk.version.__version__)
-    parser.add_argument("--verbose", action='store_true', help="Enable verbose logging.")
+    parser.add_argument("--version", action="version", version=aztk.version.__version__)
+    parser.add_argument("--verbose", action="store_true", help="Enable verbose logging.")
 
 
 def parse_common_args(args: NamedTuple):
@@ -69,5 +69,5 @@ def run_software(args: NamedTuple):
     func(args)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

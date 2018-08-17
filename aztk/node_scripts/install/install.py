@@ -4,7 +4,7 @@ import wait_until_master_selected
 from aztk.internal import cluster_data
 from aztk.models.plugins import PluginTarget
 from core import config
-from install import (create_user, pick_master, plugins, scripts, spark, spark_container)
+from install import create_user, pick_master, plugins, scripts, spark, spark_container
 
 from .node_scheduling import setup_node_scheduling
 
@@ -25,7 +25,7 @@ def setup_host(docker_repo: str, docker_run_options: str):
     client = config.batch_client
 
     create_user.create_user(batch_client=client)
-    if os.environ['AZ_BATCH_NODE_IS_DEDICATED'] == "true" or os.environ['AZTK_MIXED_MODE'] == "false":
+    if os.environ["AZ_BATCH_NODE_IS_DEDICATED"] == "true" or os.environ["AZTK_MIXED_MODE"] == "false":
         is_master = pick_master.find_master(client)
     else:
         is_master = False
@@ -50,7 +50,7 @@ def setup_host(docker_repo: str, docker_run_options: str):
 
     setup_node_scheduling(client, cluster_conf, is_master)
 
-    #TODO pass azure file shares
+    # TODO pass azure file shares
     spark_container.start_spark_container(
         docker_repo=docker_repo,
         docker_run_options=docker_run_options,
@@ -83,4 +83,4 @@ def setup_spark_container():
     plugins.setup_plugins(target=PluginTarget.SparkContainer, is_master=is_master, is_worker=is_worker)
     scripts.run_custom_scripts(is_master=is_master, is_worker=is_worker)
 
-    open("/tmp/setup_complete", 'a').close()
+    open("/tmp/setup_complete", "a").close()

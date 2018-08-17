@@ -19,8 +19,8 @@ def _run(spark_cluster_operations, cluster_id, output_directory=None, brief=Fals
         result = spark_cluster_operations.download(cluster_id, remote_path, local_path, host=True)
 
         # write run output to debug/ directory
-        with open(os.path.join(output_directory, "debug-output.txt"), 'w', encoding="UTF-8") as f:
-            [f.write(node_output.output + '\n') for node_output in run_output]
+        with open(os.path.join(output_directory, "debug-output.txt"), "w", encoding="UTF-8") as f:
+            [f.write(node_output.output + "\n") for node_output in run_output]
     else:
         result = spark_cluster_operations.download(cluster_id, remote_path, host=True)
 
@@ -28,11 +28,11 @@ def _run(spark_cluster_operations, cluster_id, output_directory=None, brief=Fals
 
 
 def _build_diagnostic_ssh_command(brief):
-    return "sudo rm -rf /tmp/debug.zip; "\
-           "sudo apt-get install -y python3-pip; "\
-           "sudo -H pip3 install --upgrade pip; "\
-           "sudo -H pip3 install docker; "\
-           "sudo python3 /tmp/debug.py {}".format(brief)
+    return ("sudo rm -rf /tmp/debug.zip; "
+            "sudo apt-get install -y python3-pip; "
+            "sudo -H pip3 install --upgrade pip; "
+            "sudo -H pip3 install docker; "
+            "sudo python3 /tmp/debug.py {}".format(brief))
 
 
 def run_cluster_diagnostics(spark_cluster_operations, cluster_id, output_directory=None, brief=False):

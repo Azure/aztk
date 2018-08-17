@@ -25,8 +25,8 @@ TOOLKIT_MAP = dict(
             r=ToolkitEnvironmentDefinition(),
             miniconda=ToolkitEnvironmentDefinition(),
             anaconda=ToolkitEnvironmentDefinition(),
-        )),
-)
+        ),
+    ))
 
 
 class Toolkit(Model):
@@ -74,12 +74,12 @@ class Toolkit(Model):
                         self.environment, self.environment_version, self.software, env_def.versions))
 
         if self.docker_run_options:
-            invalid_character = re.search('[^A-Za-z0-9 _./:=\-\"]', self.docker_run_options)
+            invalid_character = re.search(r'[^A-Za-z0-9 _./:=\-"]', self.docker_run_options)
             if invalid_character:
                 raise InvalidModelError(
                     "Docker run options contains invalid character '{0}'. Only A-Z, a-z, 0-9, space, hyphen (-), "
                     "underscore (_), period (.), forward slash (/), colon (:), equals(=), comma (,), and "
-                    "double quote (\") are allowed.".format(invalid_character.group(0)))
+                    'double quote (") are allowed.'.format(invalid_character.group(0)))
 
     def get_docker_repo(self, gpu: bool):
         if self.docker_repo:
@@ -87,10 +87,7 @@ class Toolkit(Model):
 
         repo = "aztk/{0}".format(self.software)
 
-        return "{repo}:{tag}".format(
-            repo=repo,
-            tag=self._get_docker_tag(gpu),
-        )
+        return "{repo}:{tag}".format(repo=repo, tag=self._get_docker_tag(gpu))
 
     def get_docker_run_options(self):
         return self.docker_run_options
@@ -109,7 +106,7 @@ class Toolkit(Model):
 
         array.append("gpu" if gpu else "base")
 
-        return '-'.join(array)
+        return "-".join(array)
 
     def _get_environment_definition(self) -> ToolkitEnvironmentDefinition:
         toolkit = TOOLKIT_MAP.get(self.software)

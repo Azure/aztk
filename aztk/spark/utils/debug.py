@@ -50,9 +50,7 @@ def cmd_check_output(cmd):
     try:
         output = check_output(cmd, shell=True, stderr=STDOUT)
     except CalledProcessError as e:
-        return "CMD: {0}\n"\
-               "returncode: {1}"\
-               "output: {2}".format(e.cmd, e.returncode, e.output)
+        return "CMD: {0}\n" "returncode: {1}" "output: {2}".format(e.cmd, e.returncode, e.output)
     else:
         return output
 
@@ -62,9 +60,9 @@ def get_disk_free():
 
 
 def get_docker_diagnostics(docker_client):
-    '''
+    """
         returns list of tuples (filename, data) to be written in the zip
-    '''
+    """
     output = []
     output.append(get_docker_images(docker_client))
     logs = get_docker_containers(docker_client)
@@ -95,7 +93,7 @@ def get_docker_containers(docker_client):
             # get docker container logs
             logs.append((container.name + "/docker.log", container.logs()))
             logs.append(get_docker_process_status(container))
-            if container.name == "spark":    #TODO: find a more robust way to get specific info off specific containers
+            if container.name == "spark":    # TODO: find a more robust way to get specific info off specific containers
                 logs.extend(get_container_aztk_script(container))
                 logs.extend(get_spark_logs(container))
                 logs.extend(get_spark_app_logs(container))
@@ -158,13 +156,13 @@ def filter_members(members):
 
 
 def extract_tar_in_memory(container, data):
-    data = io.BytesIO(b''.join([item for item in data]))
+    data = io.BytesIO(b"".join([item for item in data]))
     tarf = tarfile.open(fileobj=data)
     logs = []
     for member in filter_members(tarf):
         file_bytes = tarf.extractfile(member)
         if file_bytes is not None:
-            logs.append((container.name + "/" + member.name, b''.join(file_bytes.readlines())))
+            logs.append((container.name + "/" + member.name, b"".join(file_bytes.readlines())))
     return logs
 
 
@@ -174,7 +172,7 @@ def get_brief_diagnostics():
     logs = []
     for file_name in files:
         try:
-            logs.append((file_name, open(batch_dir + file_name, 'rb').read()))
+            logs.append((file_name, open(batch_dir + file_name, "rb").read()))
             # print("LOG:", (file_name, open(batch_dir+file_name, 'rb').read()))
         except FileNotFoundError as e:
             print("file not found", e)

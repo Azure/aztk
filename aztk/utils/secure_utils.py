@@ -23,4 +23,4 @@ def encrypt_password(ssh_pub_key, password):
 
 
 def generate_random_string(charset=string.ascii_uppercase + string.ascii_lowercase, length=16):
-    return ''.join(random.SystemRandom().choice(charset) for _ in range(length))
+    return "".join(random.SystemRandom().choice(charset) for _ in range(length))

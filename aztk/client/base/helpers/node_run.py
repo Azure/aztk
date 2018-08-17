@@ -22,9 +22,10 @@ def node_run(base_client, cluster_id, node_id, command, internal, container_name
             generated_username,
             node_rls.ip_address,
             node_rls.port,
-            ssh_key=ssh_key.exportKey().decode('utf-8'),
+            ssh_key=ssh_key.exportKey().decode("utf-8"),
             container_name=container_name,
-            timeout=timeout)
+            timeout=timeout,
+        )
         return output
     finally:
         base_client.delete_user_on_node(cluster_id, node.id, generated_username)

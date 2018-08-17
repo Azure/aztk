@@ -9,12 +9,7 @@ class ResourceMonitorPlugin(PluginConfiguration):
     def __init__(self):
         super().__init__(
             name="resource_monitor",
-            ports=[
-                PluginPort(
-                    internal=8890,
-                    public=True,
-                ),
-            ],
+            ports=[PluginPort(internal=8890, public=True)],
             target=PluginTarget.Host,
             target_role=PluginTargetRole.All,
             execute="start_monitor.sh",
@@ -22,4 +17,5 @@ class ResourceMonitorPlugin(PluginConfiguration):
                 PluginFile("start_monitor.sh", os.path.join(dir_path, "start_monitor.sh")),
                 PluginFile("etc/telegraf.conf", os.path.join(dir_path, "telegraf.conf")),
                 PluginFile("docker-compose.yml", os.path.join(dir_path, "docker-compose.yml")),
-            ])
+            ],
+        )

@@ -5,8 +5,13 @@ from aztk import models
 from aztk.utils import helpers, constants
 
 
-def create_pool_and_job(core_cluster_operations, cluster_conf: models.ClusterConfiguration, software_metadata_key: str,
-                        start_task, VmImageModel):
+def create_pool_and_job(
+        core_cluster_operations,
+        cluster_conf: models.ClusterConfiguration,
+        software_metadata_key: str,
+        start_task,
+        VmImageModel,
+):
     """
         Create a pool and job
         :param cluster_conf: the configuration object used to create the cluster
@@ -22,9 +27,8 @@ def create_pool_and_job(core_cluster_operations, cluster_conf: models.ClusterCon
     job_id = cluster_conf.cluster_id
 
     # Get a verified node agent sku
-    sku_to_use, image_ref_to_use = \
-        helpers.select_latest_verified_vm_image_with_node_agent_sku(
-            VmImageModel.publisher, VmImageModel.offer, VmImageModel.sku, core_cluster_operations.batch_client)
+    sku_to_use, image_ref_to_use = helpers.select_latest_verified_vm_image_with_node_agent_sku(
+        VmImageModel.publisher, VmImageModel.offer, VmImageModel.sku, core_cluster_operations.batch_client)
 
     network_conf = None
     if cluster_conf.subnet_id is not None:
@@ -48,8 +52,9 @@ def create_pool_and_job(core_cluster_operations, cluster_conf: models.ClusterCon
         metadata=[
             batch_models.MetadataItem(name=constants.AZTK_SOFTWARE_METADATA_KEY, value=software_metadata_key),
             batch_models.MetadataItem(
-                name=constants.AZTK_MODE_METADATA_KEY, value=constants.AZTK_CLUSTER_MODE_METADATA)
-        ])
+                name=constants.AZTK_MODE_METADATA_KEY, value=constants.AZTK_CLUSTER_MODE_METADATA),
+        ],
+    )
 
     # Create the pool + create user for the pool
     helpers.create_pool_if_not_exist(pool, core_cluster_operations.batch_client)
