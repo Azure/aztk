@@ -24,7 +24,7 @@ class BaseOperations:
         self.blob_client = context['blob_client']
         self.secrets_configuration = context['secrets_configuration']
 
-    def get_cluster_config(self, id: str) -> models.ClusterConfiguration:
+    def get_cluster_configuration(self, id: str) -> models.ClusterConfiguration:
         """Open an ssh tunnel to a node
 
         Args:

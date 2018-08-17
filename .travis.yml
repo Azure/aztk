@@ -9,7 +9,7 @@ install:
 
 script:
   - yapf --style .style.yapf -dpr aztk/ aztk_cli/
-  - pylint -E aztk
+  - pylint -j 2 -E aztk aztk_cli
   - pytest --ignore=tests/integration_tests
 
 branches:
