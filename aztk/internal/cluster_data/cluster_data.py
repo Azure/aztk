@@ -4,7 +4,6 @@ import logging
 import azure.common
 import yaml
 
-from aztk.models import ClusterConfiguration
 
 from .blob_data import BlobData
 from .node_data import NodeData

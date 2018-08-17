@@ -5,12 +5,8 @@ import os
 import time
 import re
 import azure.common
-import azure.batch.batch_service_client as batch
-import azure.batch.batch_auth as batch_auth
 import azure.batch.models as batch_models
 import azure.storage.blob as blob
-from aztk.version import __version__
-from aztk.utils import constants
 from aztk import error
 import aztk.models
 import yaml

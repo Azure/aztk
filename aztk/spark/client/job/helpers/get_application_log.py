@@ -5,7 +5,6 @@ from aztk import error
 from aztk.spark import models
 from aztk.utils import helpers
 
-from .list_applications import list_applications
 from .get_recent_job import get_recent_job
 
 

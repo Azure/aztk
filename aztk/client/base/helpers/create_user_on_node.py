@@ -3,7 +3,6 @@ from datetime import datetime, timedelta, timezone
 import azure.batch.models as batch_models
 import azure.batch.models.batch_error as batch_error
 
-from aztk import models
 from aztk.utils import get_ssh_key
 
 

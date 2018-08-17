@@ -12,7 +12,7 @@ import azure.batch.models as batch_models
 from aztk import error, utils
 from aztk.models import ClusterConfiguration
 from aztk.spark import models
-from aztk.utils import get_ssh_key, helpers
+from aztk.utils import get_ssh_key
 
 from . import log
 

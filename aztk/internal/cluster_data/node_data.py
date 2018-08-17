@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import List
 import yaml
 from aztk import models
-from aztk.utils import constants, file_utils, secure_utils
+from aztk.utils import constants, secure_utils
 from aztk.error import InvalidCustomScriptError
 
 ROOT_PATH = constants.ROOT_PATH

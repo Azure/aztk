@@ -1,9 +1,7 @@
 from typing import List
-from aztk.utils.command_builder import CommandBuilder
 from aztk.utils import helpers
 from aztk.utils import constants
 from aztk import models as aztk_models
-from aztk.spark.models import ClusterConfiguration
 import azure.batch.models as batch_models
 
 POOL_ADMIN_USER_IDENTITY = batch_models.UserIdentity(

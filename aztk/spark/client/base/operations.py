@@ -2,7 +2,6 @@ from typing import List
 
 import azure.batch.models as batch_models
 
-from aztk.client.base import BaseOperations as CoreBaseOperations
 from aztk.spark import models
 
 from .helpers import generate_application_task, generate_cluster_start_task

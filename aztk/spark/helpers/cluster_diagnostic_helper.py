@@ -1,8 +1,4 @@
 import os
-from aztk.utils import ssh
-from aztk.utils.command_builder import CommandBuilder
-from aztk import models as aztk_models
-import azure.batch.models as batch_models
 
 
 def run(spark_client, cluster_id, output_directory=None):

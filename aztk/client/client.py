@@ -13,8 +13,6 @@ import aztk.utils.constants as constants
 import aztk.utils.get_ssh_key as get_ssh_key
 import aztk.utils.helpers as helpers
 import aztk.utils.ssh as ssh_lib
-from aztk.client.cluster import CoreClusterOperations
-from aztk.client.job import CoreJobOperations
 from aztk.internal import cluster_data
 from aztk.utils import deprecated, secure_utils
 

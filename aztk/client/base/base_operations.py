@@ -1,6 +1,5 @@
 from aztk import models
 from aztk.internal import cluster_data
-from aztk.utils import ssh as ssh_lib
 
 from .helpers import (create_user_on_cluster, create_user_on_node, delete_user_on_cluster, delete_user_on_node,
                       generate_user_on_cluster, generate_user_on_node, get_application_log, get_remote_login_settings,

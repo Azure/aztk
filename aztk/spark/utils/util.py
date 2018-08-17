@@ -3,15 +3,9 @@ from __future__ import print_function
 import datetime
 import time
 
-import azure.batch.batch_auth as batch_auth
-import azure.batch.batch_service_client as batch
 import azure.batch.models as batch_models
-import azure.storage.blob as blob
 
-import aztk.models
-from aztk import error
 from aztk.utils import constants
-from aztk.version import __version__
 
 
 class MasterInvalidStateError(Exception):

@@ -2,21 +2,15 @@ from typing import List
 
 import azure.batch.models.batch_error as batch_error
 
-import aztk
 from aztk import error
 from aztk import models as base_models
 from aztk.client import CoreClient
-from aztk.internal.cluster_data import NodeData
 from aztk.spark import models
 from aztk.spark.client.cluster import ClusterOperations
 from aztk.spark.client.job import JobOperations
-from aztk.spark.helpers import cluster_diagnostic_helper
-from aztk.spark.helpers import create_cluster as create_cluster_helper
-from aztk.spark.helpers import get_log as get_log_helper
 from aztk.spark.helpers import job_submission as job_submit_helper
-from aztk.spark.helpers import submit as cluster_submit_helper
 from aztk.spark.utils import util
-from aztk.utils import azure_api, deprecate, deprecated, helpers
+from aztk.utils import deprecate, deprecated, helpers
 
 
 class Client(CoreClient):
