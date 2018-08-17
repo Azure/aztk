@@ -36,7 +36,7 @@ class Handler(SocketServer.BaseRequestHandler):
         logging.debug('Connected!  Tunnel open %r -> %r -> %r', self.request.getpeername(), channel.getpeername(),
                       (self.chain_host, self.chain_port))
         while True:
-            r, w, x = select.select([self.request, channel], [], [])
+            r, _, _ = select.select([self.request, channel], [], [])
             if self.request in r:
                 data = self.request.recv(1024)
                 if not data:
@@ -116,7 +116,7 @@ def node_exec_command(node_id,
             container_name, command)
     else:
         cmd = '/bin/bash 2>&1 -c \'set -e; set -o pipefail; {0}; wait\''.format(command)
-    stdin, stdout, stderr = client.exec_command(cmd, get_pty=True)
+    _, stdout, _ = client.exec_command(cmd, get_pty=True)
     output = stdout.read().decode("utf-8")
     client.close()
     return NodeOutput(node_id, output, None)
@@ -235,7 +235,7 @@ def node_ssh(username, hostname, port, ssh_key=None, password=None, port_forward
     try:
         client = connect(
             hostname=hostname, port=port, username=username, password=password, pkey=ssh_key, timeout=timeout)
-        threads = forward_ports(client=client, port_forward_list=port_forward_list)
+        forward_ports(client=client, port_forward_list=port_forward_list)
     except AztkError as e:
         raise e
 
