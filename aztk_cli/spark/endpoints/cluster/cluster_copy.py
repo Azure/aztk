@@ -30,5 +30,6 @@ def execute(args: typing.NamedTuple):
     with utils.Spinner():
         copy_output = spark_client.cluster.copy(
             id=args.cluster_id, source_path=args.source_path, destination_path=args.dest_path, internal=args.internal)
-    [utils.log_node_copy_output(node_output) for node_output in copy_output]
+    for node_output in copy_output:
+        utils.log_node_copy_output(node_output)
     sys.exit(0 if not any([node_output.error for node_output in copy_output]) else 1)

@@ -33,5 +33,5 @@ def execute(args: typing.NamedTuple):
             ]
         else:
             results = spark_client.cluster.run(args.cluster_id, args.command, args.host, args.internal)
-
-    [utils.log_node_run_output(node_output) for node_output in results]
+    for node_output in results:
+        utils.log_node_run_output(node_output)

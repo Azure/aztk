@@ -5,7 +5,7 @@ import yaml
 import aztk.spark
 from aztk.models import Toolkit
 from aztk.models.plugins.internal import PluginReference
-from aztk.spark.models import ClusterConfiguration, SchedulingTarget, SecretsConfiguration
+from aztk.spark.models import (ClusterConfiguration, SchedulingTarget, SecretsConfiguration)
 
 
 def load_aztk_secrets() -> SecretsConfiguration:
@@ -148,13 +148,21 @@ class SshConfig:
             ))
 
         if self.cluster_id is None:
-            raise aztk.error.AztkError(
-                "Please supply an id for the cluster either in the ssh.yaml configuration file or with a parameter (--id)"
-            )
+            raise aztk.error.AztkError("Please supply an id for the cluster either in the ssh.yaml configuration file "
+                                       "or with a parameter (--id)")
 
         if self.username is None:
             raise aztk.error.AztkError(
                 "Please supply a username either in the ssh.yaml configuration file or with a parameter (--username)")
+
+
+def __convert_to_path(path: str):
+    if path:
+        abs_path = os.path.abspath(os.path.expanduser(path))
+        if not os.path.exists(abs_path):
+            raise aztk.error.AztkError("Could not find file: {0}\nCheck your configuration file".format(path))
+        return abs_path
+    return None
 
 
 class JobConfig:
@@ -220,17 +228,10 @@ class JobConfig:
 
         spark_configuration = config.get("spark_configuration")
         if spark_configuration:
-            self.spark_defaults_conf = self.__convert_to_path(spark_configuration.get("spark_defaults_conf"))
-            self.spark_env_sh = self.__convert_to_path(spark_configuration.get("spark_env_sh"))
-            self.core_site_xml = self.__convert_to_path(spark_configuration.get("core_site_xml"))
-            self.jars = [self.__convert_to_path(jar) for jar in spark_configuration.get("jars") or []]
-
-    def __convert_to_path(self, str_path):
-        if str_path:
-            abs_path = os.path.abspath(os.path.expanduser(str_path))
-            if not os.path.exists(abs_path):
-                raise aztk.error.AztkError("Could not find file: {0}\nCheck your configuration file".format(str_path))
-            return abs_path
+            self.spark_defaults_conf = __convert_to_path(spark_configuration.get("spark_defaults_conf"))
+            self.spark_env_sh = __convert_to_path(spark_configuration.get("spark_env_sh"))
+            self.core_site_xml = __convert_to_path(spark_configuration.get("core_site_xml"))
+            self.jars = [__convert_to_path(jar) for jar in spark_configuration.get("jars") or []]
 
     def _read_config_file(self, path: str = aztk.utils.constants.DEFAULT_SPARK_JOB_CONFIG):
         """
