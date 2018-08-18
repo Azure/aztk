@@ -4,7 +4,7 @@ import wait_until_master_selected
 from aztk.internal import cluster_data
 from aztk.models.plugins import PluginTarget
 from core import config
-from install import (create_user, pick_master, plugins, scripts, spark, spark_container)
+from install import create_user, pick_master, plugins, spark, spark_container
 
 from .node_scheduling import setup_node_scheduling
 
