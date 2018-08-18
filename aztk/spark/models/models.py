@@ -255,17 +255,16 @@ class JobConfiguration:
             raise error.AztkError("Please supply an ID for the Job in your configuration.")
 
         if self.max_dedicated_nodes == 0 and self.max_low_pri_nodes == 0:
-            raise error.AztkError(
-                "Please supply a valid (greater than 0) value for either max_dedicated_nodes or max_low_pri_nodes in your configuration."
-            )
+            raise error.AztkError("Please supply a valid (greater than 0) value for either max_dedicated_nodes "
+                                  "or max_low_pri_nodes in your configuration.")
 
         if self.vm_size is None:
             raise error.AztkError("Please supply a vm_size in your configuration.")
 
         if self.mixed_mode() and not self.subnet_id:
             raise error.AztkError(
-                "You must configure a VNET to use AZTK in mixed mode (dedicated and low priority nodes) and pass the subnet_id in your configuration.."
-            )
+                "You must configure a VNET to use AZTK in mixed mode (dedicated and low priority nodes) "
+                "and pass the subnet_id in your configuration..")
 
         if self.scheduling_target == SchedulingTarget.Dedicated and self.max_dedicated_nodes == 0:
             raise error.InvalidModelError("Scheduling target cannot be Dedicated if dedicated vm size is 0")
@@ -302,9 +301,11 @@ class Job:
 
 class ApplicationLog(aztk.models.ApplicationLog):
     def __init__(self, application_log: aztk.models.ApplicationLog):
-        self.name = application_log.name
-        self.cluster_id = application_log.cluster_id    # TODO: change to something cluster/job agnostic
-        self.log = application_log.log
-        self.total_bytes = application_log.total_bytes
-        self.application_state = application_log.application_state
-        self.exit_code = application_log.exit_code
+        super().__init__(
+            name=application_log.name,
+            cluster_id=application_log.cluster_id,    # TODO: change to something cluster/job agnostic
+            log=application_log.log,
+            total_bytes=application_log.total_bytes,
+            application_state=application_log.application_state,
+            exit_code=application_log.exit_code,
+        )

@@ -35,9 +35,9 @@ class ClusterData:
             result = self.blob_client.get_blob_to_text(self.cluster_id, blob_path)
             return yaml.load(result.content)
         except azure.common.AzureMissingResourceHttpError:
-            logging.warn("Cluster %s doesn't have cluster configuration in storage", self.cluster_id)
+            logging.warning("Cluster %s doesn't have cluster configuration in storage", self.cluster_id)
         except yaml.YAMLError:
-            logging.warn("Cluster %s contains invalid cluster configuration in blob", self.cluster_id)
+            logging.warning("Cluster %s contains invalid cluster configuration in blob", self.cluster_id)
 
     def upload_file(self, blob_path: str, local_path: str) -> BlobData:
         self.blob_client.create_blob_from_path(self.cluster_id, blob_path, local_path)

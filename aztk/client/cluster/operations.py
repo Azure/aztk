@@ -67,7 +67,7 @@ class CoreClusterOperations(BaseOperations):
                 Defaults to False.
 
         Returns:
-            :obj:`List[aztk.models.NodeOutput]`: 
+            :obj:`List[aztk.models.NodeOutput]`:
                 A list of NodeOutput objects representing the output of the copy command.
         """
         return delete.delete_pool_and_job(self, id, keep_logs)

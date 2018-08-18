@@ -11,7 +11,7 @@ VERBOSE_FORMAT = "[%(asctime)s] [%(filename)s:%(module)s:%(funcName)s:%(lineno)d
 def add_coloring_to_emit_windows(fn):
     # add methods we need to the class
 
-    def _set_color(self, code):
+    def set_color(self, code):
         import ctypes
 
         # Constants from the Windows API
@@ -19,7 +19,7 @@ def add_coloring_to_emit_windows(fn):
         hdl = ctypes.windll.kernel32.GetStdHandle(self.STD_OUTPUT_HANDLE)
         ctypes.windll.kernel32.SetConsoleTextAttribute(hdl, code)
 
-    setattr(logging.StreamHandler, "_set_color", _set_color)
+    setattr(logging.StreamHandler, "set_color", set_color)
 
     def new(*args):
         FOREGROUND_BLUE = 0x0001    # text color contains blue.
@@ -54,10 +54,10 @@ def add_coloring_to_emit_windows(fn):
             color = FOREGROUND_MAGENTA
         else:
             color = FOREGROUND_WHITE
-        args[0]._set_color(color)
+        args[0].set_color(color)
 
         ret = fn(*args)
-        args[0]._set_color(FOREGROUND_WHITE)
+        args[0].set_color(FOREGROUND_WHITE)
         # print "after"
         return ret
 
@@ -99,7 +99,7 @@ else:
 logging.PRINT = 19
 logging.addLevelName(logging.PRINT, "PRINT")
 
-
+# pylint: disable=protected-access
 def print_level(self, message, *args, **kwargs):
     self._log(logging.PRINT, message, args, **kwargs)
 

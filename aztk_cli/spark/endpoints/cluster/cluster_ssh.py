@@ -5,10 +5,9 @@ import azure.batch.models.batch_error as batch_error
 
 import aztk
 from aztk.models import ClusterConfiguration
+from aztk.spark.models import PortForwardingSpecification
 from aztk_cli import config, log, utils
 from aztk_cli.config import SshConfig
-
-from aztk.spark.models import PortForwardingSpecification
 
 
 def setup_parser(parser: argparse.ArgumentParser):
@@ -101,12 +100,11 @@ def native_python_ssh_into_master(spark_client, cluster, cluster_configuration, 
         log.warning("No ssh client found, using pure python connection.")
         return
 
-    configuration = spark_client.cluster.get_configuration(cluster.id)
     plugin_ports = []
-    if configuration and configuration.plugins:
+    if cluster_configuration and cluster_configuration.plugins:
         ports = [
             PortForwardingSpecification(port.internal, port.public_port)
-            for plugin in configuration.plugins
+            for plugin in cluster_configuration.plugins
             for port in plugin.ports
             if port.expose_publicly
         ]

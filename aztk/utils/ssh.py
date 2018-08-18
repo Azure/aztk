@@ -81,7 +81,7 @@ def connect(hostname, port=22, username=None, password=None, pkey=None, timeout=
         ssh_key = None
 
     timeout = timeout or 20
-    logging.debug("Connecting to {}@{}:{}, timeout={}".format(username, hostname, port, timeout))
+    logging.debug("Connecting to %s@%s:%d, timeout=%d", username, hostname, port, timeout)
     try:
         client.connect(hostname, port=port, username=username, password=password, pkey=ssh_key, timeout=timeout)
     except socket.timeout:

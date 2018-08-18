@@ -6,18 +6,13 @@ from aztk import error
 from aztk.utils import helpers
 
 
-def _write_error(stream, node_output):
-    stream.write(node_output.error)
-
-
-def _write_output(stream, node_output):
-    stream.write(node_output.output)
-
-
 def _run(spark_cluster_operations, cluster_id, output_directory=None, brief=False):
     # copy debug program to each node
-    output = spark_cluster_operations.copy(
+    copy_output = spark_cluster_operations.copy(
         cluster_id, os.path.abspath("./aztk/spark/utils/debug.py"), "/tmp/debug.py", host=True)
+    for node_output in copy_output:
+        if node_output.error:
+            raise error.AztkError("Failed to copy diagnostic script to cluster.")
     ssh_cmd = _build_diagnostic_ssh_command(brief)
     run_output = spark_cluster_operations.run(cluster_id, ssh_cmd, host=True)
     remote_path = "/tmp/debug.zip"
@@ -29,7 +24,7 @@ def _run(spark_cluster_operations, cluster_id, output_directory=None, brief=Fals
         # write run output or error to debug/ directory
         with open(os.path.join(output_directory, "debug-output.txt"), "w", encoding="UTF-8") as stream:
             for node_output in run_output:
-                _write_error(stream, node_output) if node_output.error else _write_output(stream, node_output)
+                stream.write(node_output.error) if node_output.error else stream.write(node_output.output)
     else:
         result = spark_cluster_operations.download(cluster_id, remote_path, host=True)
 

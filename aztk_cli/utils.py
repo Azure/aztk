@@ -276,8 +276,6 @@ def node_state_count(cluster: models.Cluster):
 
 
 def print_cluster_summary(cluster: models.Cluster):
-    print_format = "{:<4} {:<23} {:<15}"
-
     log.info("Cluster           %s", cluster.id)
     log.info("-" * 42)
     log.info("Nodes             %s", __pretty_node_count(cluster))
