@@ -1,8 +1,6 @@
 # Plugins
 
-Plugins are a successor to [custom scripts](11-custom-scripts.html) and are the recommended way of running custom code on the cluster.
-
-Plugins can either be one of the Aztk [supported plugins](#supported-plugins) or the path to a [local file](#custom-script-plugin).
+Plugins can either be one of the `aztk` [supported plugins](#supported-plugins) or the path to a [local file](#custom-script-plugin).
 
 ## Supported Plugins
 AZTK ships with a library of default plugins that enable auxiliary services to use with your Spark cluster.

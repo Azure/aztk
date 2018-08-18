@@ -46,13 +46,6 @@ Jobs also require a definition of the cluster on which the Applications will run
       software: spark
       version: 2.2
     subnet_id: <resource ID of a subnet to use (optional)>
-    custom_scripts:
-      - List
-      - of
-      - paths
-      - to
-      - custom
-      - scripts
 ```
 _Please Note: For more information about Azure VM sizes, see [Azure Batch Pricing](https://azure.microsoft.com/en-us/pricing/details/batch/). And for more information about Docker repositories see [Docker](./12-docker-image.html)._
 

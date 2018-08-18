@@ -39,7 +39,6 @@ def execute(args: typing.NamedTuple):
     job_configuration = aztk.spark.models.JobConfiguration(
         id=job_conf.id,
         applications=job_conf.applications,
-        custom_scripts=job_conf.custom_scripts,
         spark_configuration=spark_configuration,
         vm_size=job_conf.vm_size,
         toolkit=job_conf.toolkit,

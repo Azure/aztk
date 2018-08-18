@@ -35,7 +35,6 @@ class ClusterConfiguration(Model):
 
     subnet_id = fields.String(default=None)
     plugins = fields.List(PluginConfiguration)
-    custom_scripts = fields.List(CustomScript)
     file_shares = fields.List(FileShare)
     user_configuration = fields.Model(UserConfiguration, default=None)
     scheduling_target = fields.Enum(SchedulingTarget, default=None)

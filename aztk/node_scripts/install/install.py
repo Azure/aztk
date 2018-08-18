@@ -81,6 +81,5 @@ def setup_spark_container():
         spark.start_spark_worker()
 
     plugins.setup_plugins(target=PluginTarget.SparkContainer, is_master=is_master, is_worker=is_worker)
-    scripts.run_custom_scripts(is_master=is_master, is_worker=is_worker)
 
     open("/tmp/setup_complete", 'a').close()

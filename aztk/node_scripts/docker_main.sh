@@ -6,15 +6,10 @@ set -e
 source ~/.bashrc
 echo "Initializing spark container"
 
-# --------------------
-# Setup custom scripts
-# --------------------
-custom_script_dir=$AZTK_WORKING_DIR/custom-scripts
 aztk_dir=$AZTK_WORKING_DIR/aztk
 
 # -----------------------
 # Preload jupyter samples
-# TODO: remove when we support uploading random (non-executable) files as part custom-scripts
 # -----------------------
 mkdir -p /mnt/samples
 
