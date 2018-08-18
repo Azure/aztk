@@ -99,6 +99,7 @@ else:
 logging.PRINT = 19
 logging.addLevelName(logging.PRINT, "PRINT")
 
+
 # pylint: disable=protected-access
 def print_level(self, message, *args, **kwargs):
     self._log(logging.PRINT, message, args, **kwargs)
