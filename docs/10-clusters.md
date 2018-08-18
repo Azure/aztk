@@ -197,5 +197,5 @@ By default, the `aztk spark cluster ssh` command port forwards the Spark Web UI 
 
 ## Next Steps
 - [Run a Spark job](20-spark-submit.html)
-- [Configure the Spark cluster using custom commands](11-custom-scripts.html)
+- [Configure the Spark cluster using custom plugins](51-define-plugin.html)
 - [Bring your own Docker image or choose between a variety of our supported base images to manage your Spark and Python versions](12-docker-image.html)

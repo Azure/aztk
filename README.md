@@ -115,9 +115,7 @@ By default, we port forward the Spark Web UI to *localhost:8080*, Spark Jobs UI 
 
 You can configure these settings in the *.aztk/ssh.yaml* file.
 
-NOTE: When working interactively, you may want to use tools like Jupyter or RStudio-Server depending on whether or not you are a python or R user. To do so, you need to setup your cluster with the appropriate docker image and custom scripts:
- - [how to setup Jupyter with Pyspark](https://github.com/Azure/aztk/wiki/PySpark-on-Azure-with-AZTK)
- - [how to setup RStudio-Server with Sparklyr](https://github.com/Azure/aztk/wiki/SparklyR-on-Azure-with-AZTK)
+NOTE: When working interactively, you may want to use tools like Jupyter or RStudio-Server. To do so, you need to setup your cluster with the appropriate docker image and plugin. See [Plugins](./docs/15-plugins.md) for more information.
 
 ### 5. Manage and Monitor your Spark Cluster
 

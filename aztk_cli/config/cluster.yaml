@@ -29,13 +29,6 @@ size: 2
 # username: <username for the linux user to be created> (optional)
 username: spark
 
-# **DEPRECATED** Use plugins instead
-# custom_scripts:
-#   - script: </path/to/script.sh or /path/to/script/directory/>
-#     runOn: <master/worker/all-nodes>
-#   - script: <./relative/path/to/other/script.sh or ./relative/path/to/other/script/directory/>
-#     runOn: <master/worker/all-nodes>
-
 # To add your cluster to a virtual network provide the full arm resource id below
 # subnet_id: /subscriptions/********-****-****-****-************/resourceGroups/********/providers/Microsoft.Network/virtualNetworks/*******/subnets/******
 

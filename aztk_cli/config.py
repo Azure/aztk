@@ -169,7 +169,6 @@ class JobConfig:
     def __init__(self):
         self.id = None
         self.applications = []
-        self.custom_scripts = None
         self.spark_configuration = None
         self.vm_size = None
         self.toolkit = None
@@ -197,7 +196,6 @@ class JobConfig:
                 self.max_dedicated_nodes = cluster_configuration.get("size")
             if cluster_configuration.get("size_low_priority") is not None:
                 self.max_low_pri_nodes = cluster_configuration.get("size_low_priority")
-            self.custom_scripts = cluster_configuration.get("custom_scripts")
             self.subnet_id = cluster_configuration.get("subnet_id")
             self.worker_on_master = cluster_configuration.get("worker_on_master")
             scheduling_target = cluster_configuration.get("scheduling_target")
