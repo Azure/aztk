@@ -300,7 +300,7 @@ class ApplicationLog(aztk.models.ApplicationLog):
     def __init__(self, application_log: aztk.models.ApplicationLog):
         super().__init__(
             name=application_log.name,
-            cluster_id=application_log.cluster_id,    # TODO: change to something cluster/job agnostic
+            cluster_id=application_log.cluster_id,  # TODO: change to something cluster/job agnostic
             log=application_log.log,
             total_bytes=application_log.total_bytes,
             application_state=application_log.application_state,
