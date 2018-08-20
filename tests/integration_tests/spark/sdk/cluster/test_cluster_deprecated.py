@@ -12,7 +12,8 @@ import aztk.spark
 from aztk.error import AztkError
 from aztk.utils import constants
 from aztk_cli import config
-from tests.integration_tests.spark.sdk.get_client import (get_spark_client, get_test_suffix)
+from tests.integration_tests.spark.sdk.get_client import (get_spark_client,
+                                                          get_test_suffix)
 
 base_cluster_id = get_test_suffix("cluster")
 spark_client = get_spark_client()
@@ -20,10 +21,17 @@ spark_client = get_spark_client()
 
 def clean_up_cluster(cluster_id):
     try:
-        spark_client.delete_cluster(cluster_id=cluster_id)
-    except (BatchErrorException, AztkError):
-        # pass in the event that the cluster does not exist
-        pass
+        cluster = spark_client.get_cluster(cluster_id)
+        failed_nodes = [
+            node for node in cluster.nodes
+            if node.state in [batch_models.ComputeNodeState.unusable, batch_models.ComputeNodeState.start_task_failed]
+        ]
+        if failed_nodes:
+            pass
+        else:
+            spark_client.delete_cluster(cluster_id=cluster_id)
+    except (BatchErrorException, AztkError) as e:
+        raise e
 
 
 def ensure_spark_master(cluster_id):

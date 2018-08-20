@@ -20,7 +20,15 @@ spark_client = get_spark_client()
 
 def clean_up_cluster(cluster_id):
     try:
-        spark_client.cluster.delete(id=cluster_id)
+        cluster = spark_client.cluster.get(cluster_id)
+        failed_nodes = [
+            node for node in cluster.nodes
+            if node.state in [batch_models.ComputeNodeState.unusable, batch_models.ComputeNodeState.start_task_failed]
+        ]
+        if failed_nodes:
+            pass
+        else:
+            spark_client.cluster.delete(id=cluster_id)
     except (BatchErrorException, AztkError):
         # pass in the event that the cluster does not exist
         pass

@@ -1,4 +1,7 @@
 import azure.batch.models as batch_models
+from msrest.exceptions import ClientRequestError
+
+from aztk.utils import BackOffPolicy, retry
 
 
 def delete_pool_and_job(core_cluster_operations, pool_id: str, keep_logs: bool = False):
@@ -19,13 +22,18 @@ def delete_pool_and_job(core_cluster_operations, pool_id: str, keep_logs: bool =
     pool_exists = core_cluster_operations.batch_client.pool.exists(pool_id)
 
     if job_exists:
-        core_cluster_operations.batch_client.job.delete(job_id)
+        delete_batch_object(core_cluster_operations.batch_client.job.delete, job_id)
 
     if pool_exists:
-        core_cluster_operations.batch_client.pool.delete(pool_id)
+        delete_batch_object(core_cluster_operations.batch_client.pool.delete, pool_id)
 
     if not keep_logs:
         cluster_data = core_cluster_operations.get_cluster_data(pool_id)
         cluster_data.delete_container(pool_id)
 
     return job_exists or pool_exists
+
+
+@retry(retry_count=4, retry_interval=1, backoff_policy=BackOffPolicy.exponential, exceptions=(ClientRequestError))
+def delete_batch_object(function, *args, **kwargs):
+    return function(*args, **kwargs)
