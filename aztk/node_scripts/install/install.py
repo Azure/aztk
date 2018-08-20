@@ -4,7 +4,7 @@ import wait_until_master_selected
 from aztk.internal import cluster_data
 from aztk.models.plugins import PluginTarget
 from core import config
-from install import (create_user, pick_master, plugins, scripts, spark, spark_container)
+from install import create_user, pick_master, plugins, spark, spark_container
 
 from .node_scheduling import setup_node_scheduling
 
@@ -81,6 +81,5 @@ def setup_spark_container():
         spark.start_spark_worker()
 
     plugins.setup_plugins(target=PluginTarget.SparkContainer, is_master=is_master, is_worker=is_worker)
-    scripts.run_custom_scripts(is_master=is_master, is_worker=is_worker)
 
     open("/tmp/setup_complete", 'a').close()

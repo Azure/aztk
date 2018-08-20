@@ -4,17 +4,17 @@ import os
 import zipfile
 from pathlib import Path
 from typing import List
+
 import yaml
+
 from aztk import models
-from aztk.utils import constants, file_utils, secure_utils
 from aztk.error import InvalidCustomScriptError
+from aztk.utils import constants, file_utils, secure_utils
 
 ROOT_PATH = constants.ROOT_PATH
 
 # Constants for node data
 NODE_SCRIPT_FOLDER = "aztk"
-CUSTOM_SCRIPT_FOLDER = "custom-scripts"
-CUSTOM_SCRIPT_METADATA_FILE = "custom-scripts.yaml"
 PLUGIN_FOLDER = "plugins"
 
 
@@ -30,7 +30,6 @@ class NodeData:
 
     def add_core(self):
         self._add_node_scripts()
-        self._add_custom_scripts()
         self._add_plugins()
         self._add_spark_configuration()
         self._add_user_conf()
@@ -71,30 +70,6 @@ class NodeData:
             for file in files:
                 if self._includeFile(file, exclude):
                     self.add_file(os.path.join(base, file), os.path.join(dest, relative_folder), binary=False)
-
-    def _add_custom_scripts(self):
-        data = []
-        if not self.cluster_config.custom_scripts:
-            return
-
-        for index, custom_script in enumerate(self.cluster_config.custom_scripts):
-            if isinstance(custom_script.script, (str, bytes)):
-                new_file_name = str(index) + '_' + os.path.basename(custom_script.script)
-                data.append(dict(script=new_file_name, runOn=str(custom_script.run_on)))
-                try:
-                    with io.open(custom_script.script, 'r', encoding='UTF-8') as f:
-                        self.zipf.writestr(
-                            os.path.join(CUSTOM_SCRIPT_FOLDER, new_file_name),
-                            f.read().replace('\r\n', '\n'))
-                except FileNotFoundError:
-                    raise InvalidCustomScriptError("Custom script '{0}' doesn't exists.".format(custom_script.script))
-            elif isinstance(custom_script.script, models.File):
-                new_file_name = str(index) + '_' + custom_script.script.name
-                self.zipf.writestr(
-                    os.path.join('custom-scripts', new_file_name), custom_script.script.payload.getvalue())
-
-        self.zipf.writestr(
-            os.path.join(CUSTOM_SCRIPT_FOLDER, CUSTOM_SCRIPT_METADATA_FILE), yaml.dump(data, default_flow_style=False))
 
     def _add_spark_configuration(self):
         spark_configuration = self.cluster_config.spark_configuration

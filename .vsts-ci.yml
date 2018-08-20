@@ -24,7 +24,7 @@ phases:
       displayName: yapf
 
     - script: |
-        pylint -E aztk
+        pylint -j 2 -E aztk aztk_cli
       condition: succeeded()
       displayName: pylint
     

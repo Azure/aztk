@@ -6,6 +6,14 @@ from aztk import error
 from aztk.utils import helpers
 
 
+def _write_error(stream, node_output):
+    stream.write(node_output.error)
+
+
+def _write_output(stream, node_output):
+    stream.write(node_output.output)
+
+
 def _run(spark_cluster_operations, cluster_id, output_directory=None, brief=False):
     # copy debug program to each node
     output = spark_cluster_operations.copy(
@@ -18,9 +26,10 @@ def _run(spark_cluster_operations, cluster_id, output_directory=None, brief=Fals
         local_path = os.path.join(os.path.abspath(output_directory), "debug.zip")
         result = spark_cluster_operations.download(cluster_id, remote_path, local_path, host=True)
 
-        # write run output to debug/ directory
-        with open(os.path.join(output_directory, "debug-output.txt"), 'w', encoding="UTF-8") as f:
-            [f.write(node_output.output + '\n') for node_output in run_output]
+        # write run output or error to debug/ directory
+        with open(os.path.join(output_directory, "debug-output.txt"), 'w', encoding="UTF-8") as stream:
+            for node_output in run_output:
+                _write_error(stream, node_output) if node_output.error else _write_output(stream, node_output)
     else:
         result = spark_cluster_operations.download(cluster_id, remote_path, host=True)
 

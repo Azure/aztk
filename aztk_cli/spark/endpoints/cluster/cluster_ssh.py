@@ -37,7 +37,7 @@ http_prefix = 'http://localhost:'
 def execute(args: typing.NamedTuple):
     spark_client = aztk.spark.Client(config.load_aztk_secrets())
     cluster = spark_client.cluster.get(args.cluster_id)
-    cluster_config = spark_client.cluster.get_cluster_config(args.cluster_id)
+    cluster_configuration = spark_client.cluster.get_configuration(args.cluster_id)
     ssh_conf = SshConfig()
 
     ssh_conf.merge(
@@ -55,21 +55,21 @@ def execute(args: typing.NamedTuple):
     utils.log_property("open webui", "{0}{1}".format(http_prefix, ssh_conf.web_ui_port))
     utils.log_property("open jobui", "{0}{1}".format(http_prefix, ssh_conf.job_ui_port))
     utils.log_property("open jobhistoryui", "{0}{1}".format(http_prefix, ssh_conf.job_history_ui_port))
-    print_plugin_ports(cluster_config)
+    print_plugin_ports(cluster_configuration)
     utils.log_property("ssh username", ssh_conf.username)
     utils.log_property("connect", ssh_conf.connect)
     log.info("-------------------------------------------")
 
     try:
-        shell_out_ssh(spark_client, ssh_conf)
+        shell_out_ssh(spark_client, cluster_configuration, ssh_conf)
     except OSError:
         # no ssh client is found, falling back to pure python
-        native_python_ssh_into_master(spark_client, cluster, ssh_conf, args.password)
+        native_python_ssh_into_master(spark_client, cluster, cluster_configuration, ssh_conf, args.password)
 
 
-def print_plugin_ports(cluster_config: ClusterConfiguration):
-    if cluster_config and cluster_config.plugins:
-        plugins = cluster_config.plugins
+def print_plugin_ports(cluster_configuration: ClusterConfiguration):
+    if cluster_configuration and cluster_configuration.plugins:
+        plugins = cluster_configuration.plugins
         has_ports = False
         plugin_ports = {}
         for plugin in plugins:
@@ -93,12 +93,12 @@ def print_plugin_ports(cluster_config: ClusterConfiguration):
                     utils.log_property(label, url)
 
 
-def native_python_ssh_into_master(spark_client, cluster, ssh_conf, password):
+def native_python_ssh_into_master(spark_client, cluster, cluster_configuration, ssh_conf, password):
     if not ssh_conf.connect:
         log.warning("No ssh client found, using pure python connection.")
         return
 
-    configuration = spark_client.cluster.get_cluster_config(cluster.id)
+    configuration = spark_client.cluster.get_configuration(cluster.id)
     plugin_ports = []
     if configuration and configuration.plugins:
         ports = [
@@ -124,11 +124,12 @@ def native_python_ssh_into_master(spark_client, cluster, ssh_conf, password):
         internal=ssh_conf.internal)
 
 
-def shell_out_ssh(spark_client, ssh_conf):
+def shell_out_ssh(spark_client, cluster_configuration, ssh_conf):
     try:
         ssh_cmd = utils.ssh_in_master(
             client=spark_client,
             cluster_id=ssh_conf.cluster_id,
+            cluster_configuration=cluster_configuration,
             webui=ssh_conf.web_ui_port,
             jobui=ssh_conf.job_ui_port,
             jobhistoryui=ssh_conf.job_history_ui_port,

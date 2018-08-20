@@ -130,6 +130,7 @@ def stream_logs(client, cluster_id, application_name):
 
 def ssh_in_master(client,
                   cluster_id: str,
+                  cluster_configuration: models.ClusterConfiguration,
                   username: str = None,
                   webui: str = None,
                   jobui: str = None,
@@ -152,7 +153,6 @@ def ssh_in_master(client,
 
     # Get master node id from task (job and task are both named pool_id)
     cluster = client.cluster.get(cluster_id)
-    configuration = client.cluster.get_cluster_config(cluster_id)
 
     master_node_id = cluster.master_node_id
 
@@ -186,8 +186,8 @@ def ssh_in_master(client,
     if ports is not None:
         for port in ports:
             ssh_command.add_option("-L", "{0}:localhost:{1}".format(port[0], port[1]))
-    if configuration and configuration.plugins:
-        for plugin in configuration.plugins:
+    if cluster_configuration and cluster_configuration.plugins:
+        for plugin in cluster_configuration.plugins:
             for port in plugin.ports:
                 if port.expose_publicly:
                     ssh_command.add_option("-L", "{0}:localhost:{1}".format(port.public_port, port.internal))
@@ -399,7 +399,6 @@ def print_cluster_conf(cluster_conf: ClusterConfiguration, wait: bool):
     log.info(">        dedicated:      %s", cluster_conf.size)
     log.info(">     low priority:      %s", cluster_conf.size_low_priority)
     log.info("cluster vm size:         %s", cluster_conf.vm_size)
-    log.info("custom scripts:          %s", len(cluster_conf.custom_scripts) if cluster_conf.custom_scripts else 0)
     log.info("subnet ID:               %s", cluster_conf.subnet_id)
     log.info("file shares:             %s",
              len(cluster_conf.file_shares) if cluster_conf.file_shares is not None else 0)

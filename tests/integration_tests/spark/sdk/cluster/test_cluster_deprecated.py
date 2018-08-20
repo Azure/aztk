@@ -82,7 +82,6 @@ def test_create_cluster():
         size_low_priority=0,
         vm_size="standard_f2",
         subnet_id=None,
-        custom_scripts=None,
         file_shares=None,
         toolkit=aztk.spark.models.SparkToolkit(version="2.3.0"),
         spark_configuration=None)
@@ -114,7 +113,6 @@ def test_get_cluster():
         size_low_priority=0,
         vm_size="standard_f2",
         subnet_id=None,
-        custom_scripts=None,
         file_shares=None,
         toolkit=aztk.spark.models.SparkToolkit(version="2.3.0"),
         spark_configuration=None)
@@ -148,7 +146,6 @@ def test_list_clusters():
         size_low_priority=0,
         vm_size="standard_f2",
         subnet_id=None,
-        custom_scripts=None,
         file_shares=None,
         toolkit=aztk.spark.models.SparkToolkit(version="2.3.0"),
         spark_configuration=None)
@@ -175,7 +172,6 @@ def test_get_remote_login_settings():
         size_low_priority=0,
         vm_size="standard_f2",
         subnet_id=None,
-        custom_scripts=None,
         file_shares=None,
         toolkit=aztk.spark.models.SparkToolkit(version="2.3.0"),
         spark_configuration=None)
@@ -206,7 +202,6 @@ def test_submit():
         size_low_priority=0,
         vm_size="standard_f2",
         subnet_id=None,
-        custom_scripts=None,
         file_shares=None,
         toolkit=aztk.spark.models.SparkToolkit(version="2.3.0"),
         spark_configuration=None)
@@ -250,7 +245,6 @@ def test_get_application_log():
         size_low_priority=0,
         vm_size="standard_f2",
         subnet_id=None,
-        custom_scripts=None,
         file_shares=None,
         toolkit=aztk.spark.models.SparkToolkit(version="2.3.0"),
         spark_configuration=None)
@@ -314,7 +308,6 @@ def test_get_application_status_complete():
         size_low_priority=0,
         vm_size="standard_f2",
         subnet_id=None,
-        custom_scripts=None,
         file_shares=None,
         toolkit=aztk.spark.models.SparkToolkit(version="2.3.0"),
         spark_configuration=None)
@@ -360,7 +353,6 @@ def test_delete_cluster():
         size_low_priority=0,
         vm_size="standard_f2",
         subnet_id=None,
-        custom_scripts=None,
         file_shares=None,
         toolkit=aztk.spark.models.SparkToolkit(version="2.3.0"),
         spark_configuration=None)
@@ -387,7 +379,6 @@ def test_spark_processes_up():
         size_low_priority=0,
         vm_size="standard_f2",
         subnet_id=None,
-        custom_scripts=None,
         file_shares=None,
         toolkit=aztk.spark.models.SparkToolkit(version="2.3.0"),
         spark_configuration=None)
@@ -417,7 +408,6 @@ def test_debug_tool():
         size_low_priority=0,
         vm_size="standard_f2",
         subnet_id=None,
-        custom_scripts=None,
         file_shares=None,
         toolkit=aztk.spark.models.SparkToolkit(version="2.3.0"),
         spark_configuration=None)

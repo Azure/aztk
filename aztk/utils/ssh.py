@@ -77,6 +77,7 @@ def connect(hostname, port=22, username=None, password=None, pkey=None, timeout=
         ssh_key = None
 
     timeout = timeout or 20
+    logging.debug("Connecting to {}@{}:{}, timeout={}".format(username, hostname, port, timeout))
     try:
         client.connect(hostname, port=port, username=username, password=password, pkey=ssh_key, timeout=timeout)
     except socket.timeout:
@@ -206,7 +207,6 @@ def node_copy(node_id,
             output = sftp_client.put(source_path, destination_path).__str__()
             return NodeOutput(node_id, output, None)
     except (IOError, PermissionError) as e:
-        raise e
         return NodeOutput(node_id, None, e)
     finally:
         sftp_client.close()
