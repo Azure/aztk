@@ -18,9 +18,9 @@ base_cluster_id = get_test_suffix("cluster")
 spark_client = get_spark_client()
 
 
-def clean_up_cluster(cluster_id):
+def clean_up_cluster(id):
     try:
-        cluster = spark_client.cluster.get(cluster_id)
+        cluster = spark_client.cluster.get(id)
         failed_nodes = [
             node for node in cluster.nodes
             if node.state in [batch_models.ComputeNodeState.unusable, batch_models.ComputeNodeState.start_task_failed]
@@ -28,49 +28,65 @@ def clean_up_cluster(cluster_id):
         if failed_nodes:
             pass
         else:
-            spark_client.cluster.delete(id=cluster_id)
-    except (BatchErrorException, AztkError):
+            spark_client.cluster.delete(id=id)
+    except (BatchErrorException, AztkError) as e:
         # pass in the event that the cluster does not exist
-        pass
-
-
-def ensure_spark_master(cluster_id):
-    results = spark_client.cluster.run(cluster_id,
-                "if $AZTK_IS_MASTER ; then $SPARK_HOME/sbin/spark-daemon.sh status org.apache.spark.deploy.master.Master 1 ;" \
-                " else echo AZTK_IS_MASTER is false ; fi")
-    for _, result in results:
-        if isinstance(result, Exception):
-            raise result
-        print(result[0])
-        assert result[0] in ["org.apache.spark.deploy.master.Master is running.", "AZTK_IS_MASTER is false"]
-
-
-def ensure_spark_worker(cluster_id):
-    results = spark_client.cluster.run(cluster_id,
-                "if $AZTK_IS_WORKER ; then $SPARK_HOME/sbin/spark-daemon.sh status org.apache.spark.deploy.worker.Worker 1 ;" \
-                " else echo AZTK_IS_WORKER is false ; fi")
-    for _, result in results:
-        if isinstance(result, Exception):
-            raise result
-        assert result[0] in ["org.apache.spark.deploy.worker.Worker is running.", "AZTK_IS_WORKER is false"]
-
-
-def ensure_spark_processes(cluster_id):
-    ensure_spark_master(cluster_id)
-    ensure_spark_worker(cluster_id)
-
-
-def wait_for_all_nodes(cluster_id, nodes):
-    while True:
-        for node in nodes:
-            if node.state in [batch_models.ComputeNodeState.unusable, batch_models.ComputeNodeState.start_task_failed]:
-                raise AztkError("Node {} in failed state.".format(node.id))
-            if node.state not in [batch_models.ComputeNodeState.idle, batch_models.ComputeNodeState.running]:
-                break
+        print(str(e))
+        acceptable_failures = [
+            "The specified job has been marked for deletion and is being garbage collected.",
+            "The specified pool has been marked for deletion and is being reclaimed."
+        ]
+        if any(item in str(e) for item in acceptable_failures):
+            pass
         else:
-            nodes = spark_client.cluster.get(cluster_id).nodes
-            continue
-        break
+            raise e
+
+
+def ensure_spark_master(id):
+    cluster = spark_client.cluster.get(id)
+    results = spark_client.cluster.run(
+        id,
+        "if $AZTK_IS_MASTER ; then $SPARK_HOME/sbin/spark-daemon.sh status org.apache.spark.deploy.master.Master 1 ;"
+        " else echo AZTK_IS_MASTER is false ; fi")
+    for result in results:
+        if result.error:
+            raise result.error
+        assert result.output.rstrip() in [
+            "org.apache.spark.deploy.master.Master is running.", "AZTK_IS_MASTER is false"
+        ]
+
+
+def ensure_spark_worker(id):
+    results = spark_client.cluster.run(
+        id,
+        "if $AZTK_IS_WORKER ; then $SPARK_HOME/sbin/spark-daemon.sh status org.apache.spark.deploy.worker.Worker 1 ;"
+        " else echo AZTK_IS_WORKER is false ; fi")
+    for result in results:
+        if result.error:
+            raise result
+        assert result.output.rstrip() in [
+            "org.apache.spark.deploy.worker.Worker is running.", "AZTK_IS_WORKER is false"
+        ]
+
+
+def ensure_spark_processes(id):
+    ensure_spark_master(id)
+    ensure_spark_worker(id)
+
+
+def wait_for_all_nodes(id, nodes):
+    start_time = time.time()
+    while (time.time() - start_time) < 300:
+        print("{} : running wait for all nodes check node states".format(time.time() - start_time))
+        if any(node in [batch_models.ComputeNodeState.unusable, batch_models.ComputeNodeState.start_task_failed]
+               for node in nodes):
+            raise AztkError("A node is unusable or had its start task fail.")
+        if not all(
+                node in [batch_models.ComputeNodeState.idle, batch_models.ComputeNodeState.running] for node in nodes):
+            nodes = spark_client.cluster.get(id).nodes
+            print("Not all nodes idle or running.")
+        else:
+            break
 
 
 def test_create_cluster():
@@ -97,9 +113,6 @@ def test_create_cluster():
         assert cluster.master_node_id is not None
         assert cluster.current_low_pri_nodes == 0
 
-    except (AztkError, BatchErrorException) as e:
-        assert False
-
     finally:
         clean_up_cluster(cluster_configuration.cluster_id)
 
@@ -120,9 +133,6 @@ def test_list_clusters():
         clusters = spark_client.cluster.list()
 
         assert cluster_configuration.cluster_id in [cluster.id for cluster in clusters]
-
-    except (AztkError, BatchErrorException):
-        assert False
 
     finally:
         clean_up_cluster(cluster_configuration.cluster_id)
@@ -146,11 +156,6 @@ def test_get_remote_login_settings():
 
         assert rls.ip_address is not None
         assert rls.port is not None
-
-    except (AztkError, BatchErrorException) as e:
-        raise e
-        assert False
-
     finally:
         clean_up_cluster(cluster_configuration.cluster_id)
 
@@ -187,9 +192,6 @@ def test_submit():
         spark_client.cluster.submit(
             id=cluster_configuration.cluster_id, application=application_configuration, wait=True)
         assert True
-
-    except (AztkError, BatchErrorException):
-        assert False
 
     finally:
         clean_up_cluster(cluster_configuration.cluster_id)
@@ -237,9 +239,6 @@ def test_get_application_log():
         assert application_log.application_state == "completed"
         assert application_log.log is not None
         assert application_log.total_bytes is not None
-
-    except (AztkError, BatchErrorException):
-        assert False
 
     finally:
         clean_up_cluster(cluster_configuration.cluster_id)
@@ -291,9 +290,6 @@ def test_get_application_status_complete():
 
         assert status == "completed"
 
-    except (AztkError, BatchErrorException):
-        assert False
-
     finally:
         clean_up_cluster(cluster_configuration.cluster_id)
 
@@ -316,9 +312,6 @@ def test_delete_cluster():
 
         assert success is True
 
-    except (AztkError, BatchErrorException):
-        assert False
-
     finally:
         clean_up_cluster(cluster_configuration.cluster_id)
 
@@ -334,23 +327,16 @@ def test_spark_processes_up():
         file_shares=None,
         toolkit=aztk.spark.models.SparkToolkit(version="2.3.0"),
         spark_configuration=None)
-
     try:
         cluster = spark_client.cluster.create(cluster_configuration, wait=True)
         wait_for_all_nodes(cluster.id, cluster.nodes)
-        success = spark_client.cluster.delete(id=cluster_configuration.cluster_id)
-
-        assert success is True
-
-    except (AztkError, BatchErrorException):
-        assert False
-
+        ensure_spark_processes(id=cluster_configuration.cluster_id)
     finally:
         clean_up_cluster(cluster_configuration.cluster_id)
 
 
 def test_debug_tool():
-    test_id = "debug-tool-"
+    test_id = "test-debug-tool-"
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
         cluster_id=test_id + base_cluster_id,
         size=2,
@@ -375,8 +361,5 @@ def test_debug_tool():
             assert node_output.id in [node.id for node in nodes]
             assert node_output.error is None
             assert any(member in name for name in debug_zip.namelist() for member in expected_members)
-    except (AztkError, BatchErrorException):
-        assert False
-
     finally:
         clean_up_cluster(cluster_configuration.cluster_id)

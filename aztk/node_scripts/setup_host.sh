@@ -66,9 +66,9 @@ pull_docker_container () {
 install_python_dependencies () {
     echo "Installing python dependencies"
     pipenv install --python /usr/bin/python3.5m
-    pipenv run pip install --upgrade setuptools wheel #TODO: add pip when pipenv is compatible with pip10
+    pipenv run pip install --upgrade pip setuptools wheel
+    pip --version
     echo "Finished installing python dependencies"
-
 }
 
 run_docker_container () {
