@@ -78,11 +78,11 @@ def wait_for_all_nodes(id, nodes):
     start_time = time.time()
     while (time.time() - start_time) < 300:
         print("{} : running wait for all nodes check node states".format(time.time() - start_time))
-        if any(node in [batch_models.ComputeNodeState.unusable, batch_models.ComputeNodeState.start_task_failed]
+        if any(node.state in [batch_models.ComputeNodeState.unusable, batch_models.ComputeNodeState.start_task_failed]
                for node in nodes):
             raise AztkError("A node is unusable or had its start task fail.")
-        if not all(
-                node in [batch_models.ComputeNodeState.idle, batch_models.ComputeNodeState.running] for node in nodes):
+        if not all(node.state in [batch_models.ComputeNodeState.idle, batch_models.ComputeNodeState.running]
+                   for node in nodes):
             nodes = spark_client.cluster.get(id).nodes
             print("Not all nodes idle or running.")
         else:
@@ -191,8 +191,6 @@ def test_submit():
 
         spark_client.cluster.submit(
             id=cluster_configuration.cluster_id, application=application_configuration, wait=True)
-        assert True
-
     finally:
         clean_up_cluster(cluster_configuration.cluster_id)
 

@@ -12,8 +12,7 @@ import aztk.spark
 from aztk.error import AztkError
 from aztk.utils import constants
 from aztk_cli import config
-from tests.integration_tests.spark.sdk.get_client import (get_spark_client,
-                                                          get_test_suffix)
+from tests.integration_tests.spark.sdk.get_client import (get_spark_client, get_test_suffix)
 
 base_cluster_id = get_test_suffix("cluster")
 spark_client = get_spark_client()
@@ -78,11 +77,11 @@ def wait_for_all_nodes(id, nodes):
     start_time = time.time()
     while (time.time() - start_time) < 300:
         print("{} : running wait for all nodes check node states".format(time.time() - start_time))
-        if any(node in [batch_models.ComputeNodeState.unusable, batch_models.ComputeNodeState.start_task_failed]
+        if any(node.state in [batch_models.ComputeNodeState.unusable, batch_models.ComputeNodeState.start_task_failed]
                for node in nodes):
             raise AztkError("A node is unusable or had its start task fail.")
-        if not all(
-                node in [batch_models.ComputeNodeState.idle, batch_models.ComputeNodeState.running] for node in nodes):
+        if not all(node.state in [batch_models.ComputeNodeState.idle, batch_models.ComputeNodeState.running]
+                   for node in nodes):
             nodes = spark_client.cluster.get(id).nodes
             print("Not all nodes idle or running.")
         else:
@@ -193,8 +192,6 @@ def test_get_remote_login_settings():
         assert rls.ip_address is not None
         assert rls.port is not None
 
-        assert False
-
     finally:
         clean_up_cluster(cluster_configuration.cluster_id)
 
@@ -232,8 +229,6 @@ def test_submit():
         with pytest.warns(DeprecationWarning):
             spark_client.submit(
                 cluster_id=cluster_configuration.cluster_id, application=application_configuration, wait=True)
-
-        assert True
 
     finally:
         clean_up_cluster(cluster_configuration.cluster_id)
