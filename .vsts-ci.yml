@@ -33,11 +33,6 @@ phases:
       condition: succeeded()
       displayName: unit tests
 
-    # - script: |
-    #     pytest -n 75
-    #   condition: succeeded()
-    #   displayName: integration tests
-    
     - script: |
       pylint  -j 2 aztk aztk_cli
       condition: succeededOrFailed()
