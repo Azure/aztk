@@ -42,7 +42,9 @@ install_prerequisites () {
 
 install_docker_compose () {
     echo "Installing Docker-Compose"
-    sudo curl -L https://github.com/docker/compose/releases/download/1.19.0/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+    for i in {1..5}; do 
+        sudo curl -L https://github.com/docker/compose/releases/download/1.19.0/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose && break || sleep 2; 
+    done
     sudo chmod +x /usr/local/bin/docker-compose
     echo "Finished installing Docker-Compose"
 }
@@ -64,9 +66,9 @@ pull_docker_container () {
 install_python_dependencies () {
     echo "Installing python dependencies"
     pipenv install --python /usr/bin/python3.5m
-    pipenv run pip install --upgrade setuptools wheel #TODO: add pip when pipenv is compatible with pip10
+    pipenv run pip install --upgrade pip setuptools wheel
+    pip --version
     echo "Finished installing python dependencies"
-
 }
 
 run_docker_container () {
