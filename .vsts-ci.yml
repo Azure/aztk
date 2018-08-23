@@ -1,6 +1,6 @@
 trigger:
   - master
-
+  - internal/fix-pylint-warnings
 
 phases:
   - phase: Test
@@ -26,14 +26,19 @@ phases:
     - script: |
         pylint -j 2 -E aztk aztk_cli
       condition: succeeded()
-      displayName: pylint
+      displayName: pylint error check
     
     - script: |
         pytest -n 20 --ignore=tests/integration_tests
       condition: succeeded()
       displayName: unit tests
 
+    # - script: |
+    #     pytest -n 75
+    #   condition: succeeded()
+    #   displayName: integration tests
+    
     - script: |
-        pytest -n 75
-      condition: succeeded()
-      displayName: integration tests
+      pylint  -j 2 aztk aztk_cli
+      condition: succeededOrFailed()
+      displayName: pylint report
