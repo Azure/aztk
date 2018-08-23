@@ -4,12 +4,6 @@ from aztk.error import AztkError
 
 
 def ensure_spark_master(spark_client, id):
-    cluster = spark_client.cluster.get(id)
-    if any([
-            node.state not in [batch_models.ComputeNodeState.idle, batch_models.ComputeNodeState.running]
-            for node in cluster.nodes
-    ]):
-        raise AztkError("Not all nodes are up.")
     results = spark_client.cluster.run(
         id,
         "if $AZTK_IS_MASTER ; then $SPARK_HOME/sbin/spark-daemon.sh status org.apache.spark.deploy.master.Master 1 ;"
@@ -23,12 +17,6 @@ def ensure_spark_master(spark_client, id):
 
 
 def ensure_spark_worker(spark_client, id):
-    cluster = spark_client.cluster.get(id)
-    if any([
-            node.state not in [batch_models.ComputeNodeState.idle, batch_models.ComputeNodeState.running]
-            for node in cluster.nodes
-    ]):
-        raise AztkError("Not all nodes are up.")
     results = spark_client.cluster.run(
         id,
         "if $AZTK_IS_WORKER ; then $SPARK_HOME/sbin/spark-daemon.sh status org.apache.spark.deploy.worker.Worker 1 ;"
