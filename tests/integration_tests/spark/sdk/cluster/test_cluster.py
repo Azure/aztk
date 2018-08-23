@@ -21,13 +21,10 @@ spark_client = get_spark_client()
 def clean_up_cluster(id):
     try:
         cluster = spark_client.cluster.get(id)
-        failed_nodes = [
-            node for node in cluster.nodes
-            if node.state in [batch_models.ComputeNodeState.unusable, batch_models.ComputeNodeState.start_task_failed]
-        ]
-        if failed_nodes:
-            pass
-        else:
+        if not any([
+                node.state in [batch_models.ComputeNodeState.unusable, batch_models.ComputeNodeState.start_task_failed]
+                for node in cluster.nodes
+        ]):
             spark_client.cluster.delete(id=id)
     except (BatchErrorException, AztkError) as e:
         # pass in the event that the cluster does not exist
@@ -44,6 +41,11 @@ def clean_up_cluster(id):
 
 def ensure_spark_master(id):
     cluster = spark_client.cluster.get(id)
+    if any([
+            node.state not in [batch_models.ComputeNodeState.idle, batch_models.ComputeNodeState.running]
+            for node in cluster.nodes
+    ]):
+        raise AztkError("Not all nodes are up.")
     results = spark_client.cluster.run(
         id,
         "if $AZTK_IS_MASTER ; then $SPARK_HOME/sbin/spark-daemon.sh status org.apache.spark.deploy.master.Master 1 ;"
@@ -57,6 +59,12 @@ def ensure_spark_master(id):
 
 
 def ensure_spark_worker(id):
+    cluster = spark_client.cluster.get(id)
+    if any([
+            node.state not in [batch_models.ComputeNodeState.idle, batch_models.ComputeNodeState.running]
+            for node in cluster.nodes
+    ]):
+        raise AztkError("Not all nodes are up.")
     results = spark_client.cluster.run(
         id,
         "if $AZTK_IS_WORKER ; then $SPARK_HOME/sbin/spark-daemon.sh status org.apache.spark.deploy.worker.Worker 1 ;"
