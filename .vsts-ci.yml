@@ -34,6 +34,6 @@ phases:
       displayName: unit tests
 
     - script: |
-      pylint  -j 2 aztk aztk_cli
+        pylint  -j 2 aztk aztk_cli
       condition: succeededOrFailed()
       displayName: pylint report
