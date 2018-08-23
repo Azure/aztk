@@ -111,7 +111,7 @@ def node_exec_command(node_id,
         client = connect(
             hostname=hostname, port=port, username=username, password=password, pkey=ssh_key, timeout=timeout)
     except AztkError as e:
-        return NodeOutput(node_id, e)
+        return NodeOutput(node_id, None, e)
     if container_name:
         cmd = 'sudo docker exec 2>&1 -t {0} /bin/bash -c \'set -e; set -o pipefail; {1}; wait\''.format(
             container_name, command)
@@ -161,15 +161,15 @@ def copy_from_node(node_id,
             os.makedirs(os.path.dirname(destination_path), exist_ok=True)
             with open(destination_path, 'wb') as f:
                 sftp_client.getfo(source_path, f)
+                return NodeOutput(node_id, f, None)
         else:
             import tempfile
             # create 2mb temporary file
             f = tempfile.SpooledTemporaryFile(2 * 1024**3)
             sftp_client.getfo(source_path, f)
-
-        return NodeOutput(node_id, f, None)
+            return NodeOutput(node_id, f, None)
     except OSError as e:
-        return (node_id, None, e)
+        return NodeOutput(node_id, None, e)
     finally:
         sftp_client.close()
         client.close()
