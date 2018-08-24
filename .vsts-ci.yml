@@ -35,5 +35,6 @@ phases:
 
     - script: |
         pylint  -j 2 aztk aztk_cli
-      condition: succeededOrFailed()
+      continueOnError: true
+      condition: succeeded()
       displayName: pylint report
