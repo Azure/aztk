@@ -50,7 +50,5 @@ class PluginReference(Model):
             execute=script_filename,
             target=self.target,
             target_role=self.target_role or PluginConfiguration,
-            files=[
-                PluginFile(script_filename, self.script),
-            ],
+            files=[PluginFile(script_filename, self.script)],
         )

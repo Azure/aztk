@@ -8,14 +8,16 @@ from aztk.utils import ssh as ssh_lib
 from aztk.utils import helpers
 
 
-def cluster_copy(cluster_operations,
-                 cluster_id,
-                 source_path,
-                 destination_path=None,
-                 container_name=None,
-                 internal=False,
-                 get=False,
-                 timeout=None):
+def cluster_copy(
+        cluster_operations,
+        cluster_id,
+        source_path,
+        destination_path=None,
+        container_name=None,
+        internal=False,
+        get=False,
+        timeout=None,
+):
     cluster = cluster_operations.get(cluster_id)
     pool, nodes = cluster.pool, list(cluster.nodes)
     if internal:
@@ -36,9 +38,10 @@ def cluster_copy(cluster_operations,
                 nodes=cluster_nodes,
                 source_path=source_path,
                 destination_path=destination_path,
-                ssh_key=ssh_key.exportKey().decode('utf-8'),
+                ssh_key=ssh_key.exportKey().decode("utf-8"),
                 get=get,
-                timeout=timeout))
+                timeout=timeout,
+            ))
         return output
     except (OSError, batch_error.BatchErrorException) as exc:
         raise exc

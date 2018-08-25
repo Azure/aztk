@@ -1,5 +1,4 @@
 import re
-from typing import Optional
 
 import azure.batch.batch_auth as batch_auth
 import azure.batch.batch_service_client as batch
@@ -12,10 +11,10 @@ from azure.storage.common import CloudStorageAccount
 from aztk import error
 from aztk.version import __version__
 
-RESOURCE_ID_PATTERN = re.compile('^/subscriptions/(?P<subscription>[^/]+)'
-                                 '/resourceGroups/(?P<resourcegroup>[^/]+)'
-                                 '/providers/[^/]+'
-                                 '/[^/]+Accounts/(?P<account>[^/]+)$')
+RESOURCE_ID_PATTERN = re.compile("^/subscriptions/(?P<subscription>[^/]+)"
+                                 "/resourceGroups/(?P<resourcegroup>[^/]+)"
+                                 "/providers/[^/]+"
+                                 "/[^/]+Accounts/(?P<account>[^/]+)$")
 
 
 def validate_secrets(secrets):
@@ -48,23 +47,25 @@ def make_batch_client(secrets):
             client_id=secrets.service_principal.client_id,
             secret=secrets.service_principal.credential,
             tenant=secrets.service_principal.tenant_id,
-            resource='https://management.core.windows.net/')
+            resource="https://management.core.windows.net/",
+        )
         m = RESOURCE_ID_PATTERN.match(secrets.service_principal.batch_account_resource_id)
-        arm_batch_client = BatchManagementClient(arm_credentials, m.group('subscription'))
-        account = arm_batch_client.batch_account.get(m.group('resourcegroup'), m.group('account'))
-        base_url = 'https://{0}/'.format(account.account_endpoint)
+        arm_batch_client = BatchManagementClient(arm_credentials, m.group("subscription"))
+        account = arm_batch_client.batch_account.get(m.group("resourcegroup"), m.group("account"))
+        base_url = "https://{0}/".format(account.account_endpoint)
         credentials = ServicePrincipalCredentials(
             client_id=secrets.service_principal.client_id,
             secret=secrets.service_principal.credential,
             tenant=secrets.service_principal.tenant_id,
-            resource='https://batch.core.windows.net/')
+            resource="https://batch.core.windows.net/",
+        )
 
     # Set up Batch Client
     batch_client = batch.BatchServiceClient(credentials, base_url=base_url)
 
     # Set retry policy
     batch_client.config.retry_policy.retries = 5
-    batch_client.config.add_user_agent('aztk/{}'.format(__version__))
+    batch_client.config.add_user_agent("aztk/{}".format(__version__))
 
     return batch_client
 
@@ -82,26 +83,29 @@ def make_blob_client(secrets):
         blob_client = blob.BlockBlobService(
             account_name=secrets.shared_key.storage_account_name,
             account_key=secrets.shared_key.storage_account_key,
-            endpoint_suffix=secrets.shared_key.storage_account_suffix)
+            endpoint_suffix=secrets.shared_key.storage_account_suffix,
+        )
     else:
         # Set up ServicePrincipalCredentials
         arm_credentials = ServicePrincipalCredentials(
             client_id=secrets.service_principal.client_id,
             secret=secrets.service_principal.credential,
             tenant=secrets.service_principal.tenant_id,
-            resource='https://management.core.windows.net/')
+            resource="https://management.core.windows.net/",
+        )
         m = RESOURCE_ID_PATTERN.match(secrets.service_principal.storage_account_resource_id)
-        accountname = m.group('account')
-        subscription = m.group('subscription')
-        resourcegroup = m.group('resourcegroup')
+        accountname = m.group("account")
+        subscription = m.group("subscription")
+        resourcegroup = m.group("resourcegroup")
         mgmt_client = StorageManagementClient(arm_credentials, subscription)
-        key = retry_function(
+        key = (retry_function(
             mgmt_client.storage_accounts.list_keys,
             10,
             1,
             Exception,
             resource_group_name=resourcegroup,
-            account_name=accountname).keys[0].value
+            account_name=accountname,
+        ).keys[0].value)
         storage_client = CloudStorageAccount(accountname, key)
         blob_client = storage_client.create_block_blob_service()
 
@@ -110,6 +114,7 @@ def make_blob_client(secrets):
 
 def retry_function(function, retry_attempts: int, retry_interval: int, exception: Exception, *args, **kwargs):
     import time
+
     for i in range(retry_attempts):
         try:
             return function(*args, **kwargs)

@@ -4,12 +4,14 @@ from aztk import error
 from aztk.utils import helpers
 
 
-def create_user(core_cluster_operations,
-                spark_cluster_operations,
-                cluster_id: str,
-                username: str,
-                password: str = None,
-                ssh_key: str = None) -> str:
+def create_user(
+        core_cluster_operations,
+        spark_cluster_operations,
+        cluster_id: str,
+        username: str,
+        password: str = None,
+        ssh_key: str = None,
+) -> str:
     try:
         cluster = spark_cluster_operations.get(cluster_id)
         master_node_id = cluster.master_node_id

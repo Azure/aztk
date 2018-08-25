@@ -7,10 +7,13 @@
 import argparse
 import warnings
 from typing import NamedTuple
-import azure.batch.models.batch_error as batch_error
+
+from azure.batch.models import batch_error
+
 import aztk
-from aztk_cli import logger, log, utils, constants
+from aztk_cli import constants, log, logger, utils
 from aztk_cli.spark.endpoints import spark
+
 from . import plugins, toolkit
 
 
@@ -46,8 +49,8 @@ def main():
 
 
 def setup_common_args(parser: argparse.ArgumentParser):
-    parser.add_argument('--version', action='version', version=aztk.version.__version__)
-    parser.add_argument("--verbose", action='store_true', help="Enable verbose logging.")
+    parser.add_argument("--version", action="version", version=aztk.version.__version__)
+    parser.add_argument("--verbose", action="store_true", help="Enable verbose logging.")
 
 
 def parse_common_args(args: NamedTuple):
@@ -69,5 +72,5 @@ def run_software(args: NamedTuple):
     func(args)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

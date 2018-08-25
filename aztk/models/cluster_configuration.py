@@ -61,8 +61,8 @@ class ClusterConfiguration(Model):
     def __validate__(self) -> bool:
         if self.size == 0 and self.size_low_priority == 0:
             raise error.InvalidModelError(
-                "Please supply a valid (greater than 0) size or size_low_priority value either in the cluster.yaml configuration file or with a parameter (--size or --size-low-priority)"
-            )
+                "Please supply a valid (greater than 0) size or size_low_priority value either "
+                "in the cluster.yaml configuration file or with a parameter (--size or --size-low-priority)")
 
         if self.vm_size is None:
             raise error.InvalidModelError(
@@ -70,8 +70,8 @@ class ClusterConfiguration(Model):
 
         if self.mixed_mode() and not self.subnet_id:
             raise error.InvalidModelError(
-                "You must configure a VNET to use AZTK in mixed mode (dedicated and low priority nodes). Set the VNET's subnet_id in your cluster.yaml or with a parameter (--subnet-id)."
-            )
+                "You must configure a VNET to use AZTK in mixed mode (dedicated and low priority nodes). "
+                "Set the VNET's subnet_id in your cluster.yaml or with a parameter (--subnet-id).")
 
         if self.scheduling_target == SchedulingTarget.Dedicated and self.size == 0:
             raise error.InvalidModelError("Scheduling target cannot be Dedicated if dedicated vm size is 0")

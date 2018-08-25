@@ -2,9 +2,25 @@ from aztk.client.cluster import CoreClusterOperations
 from aztk.spark import models
 from aztk.spark.client.base import SparkBaseOperations
 
-from .helpers import (copy, create, create_user, delete, diagnostics, download, get, get_application_log,
-                      get_application_status, get_configuration, get_remote_login_settings, list, node_run, run, submit,
-                      wait)
+from .helpers import (
+    copy,
+    create,
+    create_user,
+    delete,
+    diagnostics,
+    download,
+    get,
+    get_application_log,
+    get_application_status,
+    get_configuration,
+    get_remote_login_settings,
+    list,
+    node_run,
+    run,
+    ssh_into_master,
+    submit,
+    wait,
+)
 
 
 class ClusterOperations(SparkBaseOperations):
@@ -58,7 +74,8 @@ class ClusterOperations(SparkBaseOperations):
         """List all clusters.
 
         Returns:
-            :obj:`List[aztk.spark.models.Cluster]`: List of Cluster objects each representing the state and configuration of the cluster.
+            :obj:`List[aztk.spark.models.Cluster]`: List of Cluster objects each representing the state
+                and configuration of the cluster.
         """
         return list.list_clusters(self._core_cluster_operations)
 
@@ -71,7 +88,8 @@ class ClusterOperations(SparkBaseOperations):
             remote (:obj:`bool`): If True, the application file will not be uploaded, it is assumed to be reachable
                 by the cluster already. This is useful when your application is stored in a mounted Azure File Share
                 and not the client. Defaults to False.
-            wait (:obj:`bool`, optional): If True, this function blocks until the application has completed. Defaults to False.
+            wait (:obj:`bool`, optional): If True, this function blocks until the application has completed.
+                Defaults to False.
 
         Returns:
             :obj:`None`
@@ -84,7 +102,8 @@ class ClusterOperations(SparkBaseOperations):
         Args:
             username (:obj:`str`): name of the user to create.
             pool_id (:obj:`str`): id of the cluster to create the user on.
-            ssh_key (:obj:`str`, optional): ssh public key to create the user with, must use ssh_key or password. Defaults to None.
+            ssh_key (:obj:`str`, optional): ssh public key to create the user with, must use ssh_key or password.
+                Defaults to None.
             password (:obj:`str`, optional): password for the user, must use ssh_key or password. Defaults to None.
 
         Returns:
@@ -118,7 +137,8 @@ class ClusterOperations(SparkBaseOperations):
                 Defaults to None.
 
         Returns:
-            :obj:`List[aztk.spark.models.NodeOutput]`: list of NodeOutput objects containing the output of the run command
+            :obj:`List[aztk.spark.models.NodeOutput]`:
+                list of NodeOutput objects containing the output of the run command
         """
         return run.cluster_run(self._core_cluster_operations, id, command, host, internal, timeout)
 
@@ -141,13 +161,15 @@ class ClusterOperations(SparkBaseOperations):
         """
         return node_run.node_run(self._core_cluster_operations, id, node_id, command, host, internal, timeout)
 
-    def copy(self,
-             id: str,
-             source_path: str,
-             destination_path: str,
-             host: bool = False,
-             internal: bool = False,
-             timeout: int = None):
+    def copy(
+            self,
+            id: str,
+            source_path: str,
+            destination_path: str,
+            host: bool = False,
+            internal: bool = False,
+            timeout: int = None,
+    ):
         """Copy a file to every node in a cluster.
 
         Args:
@@ -162,18 +184,21 @@ class ClusterOperations(SparkBaseOperations):
                 Defaults to None.
 
         Returns:
-            :obj:`List[aztk.spark.models.NodeOutput]`: A list of NodeOutput objects representing the output of the copy command.
+            :obj:`List[aztk.spark.models.NodeOutput]`:
+                A list of NodeOutput objects representing the output of the copy command.
         """
         return copy.cluster_copy(self._core_cluster_operations, id, source_path, destination_path, host, internal,
                                  timeout)
 
-    def download(self,
-                 id: str,
-                 source_path: str,
-                 destination_path: str = None,
-                 host: bool = False,
-                 internal: bool = False,
-                 timeout: int = None):
+    def download(
+            self,
+            id: str,
+            source_path: str,
+            destination_path: str = None,
+            host: bool = False,
+            internal: bool = False,
+            timeout: int = None,
+    ):
         """Download a file from every node in a cluster.
 
         Args:
@@ -190,7 +215,8 @@ class ClusterOperations(SparkBaseOperations):
                 Defaults to None.
 
         Returns:
-            :obj:`List[aztk.spark.models.NodeOutput]`: A list of NodeOutput objects representing the output of the copy command.
+            :obj:`List[aztk.spark.models.NodeOutput]`:
+                A list of NodeOutput objects representing the output of the copy command.
         """
         return download.cluster_download(self._core_cluster_operations, id, source_path, destination_path, host,
                                          internal, timeout)
@@ -205,7 +231,8 @@ class ClusterOperations(SparkBaseOperations):
                 written to this path. Defaults to None.
 
         Returns:
-            :obj:`List[aztk.spark.models.NodeOutput]`: A list of NodeOutput objects representing the output of the copy command.
+            :obj:`List[aztk.spark.models.NodeOutput]`:
+                A list of NodeOutput objects representing the output of the copy command.
         """
         return diagnostics.run_cluster_diagnostics(self, id, output_directory, brief)
 
@@ -215,10 +242,11 @@ class ClusterOperations(SparkBaseOperations):
         Args:
             id (:obj:`str`): the id of the cluster to run the command on.
             application_name (:obj:`str`): str
-            tail (:obj:`bool`, optional): If True, get the remaining bytes after current_bytes. Otherwise, the whole log will be retrieved.
-                Only use this if streaming the log as it is being written. Defaults to False.
-            current_bytes (:obj:`int`): Specifies the last seen byte, so only the bytes after current_bytes are retrieved.
-                Only useful is streaming the log as it is being written. Only used if tail is True.
+            tail (:obj:`bool`, optional): If True, get the remaining bytes after current_bytes.
+                Otherwise, the whole log will be retrieved. Only use this if streaming the log as it is being written.
+                Defaults to False.
+            current_bytes (:obj:`int`): Specifies the last seen byte, so only the bytes after current_bytes are
+                retrieved. Only useful is streaming the log as it is being written. Only used if tail is True.
 
         Returns:
             :obj:`aztk.spark.models.ApplicationLog`: a model representing the output of the application.
@@ -234,7 +262,8 @@ class ClusterOperations(SparkBaseOperations):
             node_id (:obj:`str`): the id of the node in the cluster
 
         Returns:
-            :obj:`aztk.spark.models.RemoteLogin`: Object that contains the ip address and port combination to login to a node
+            :obj:`aztk.spark.models.RemoteLogin`:
+                Object that contains the ip address and port combination to login to a node
         """
         return get_remote_login_settings.get_remote_login_settings(self._core_cluster_operations, id, node_id)
 
@@ -260,3 +289,21 @@ class ClusterOperations(SparkBaseOperations):
             :obj:`aztk.spark.models.ClusterConfiguration`
         """
         return get_configuration.get_configuration(self._core_cluster_operations, id)
+
+    def ssh_into_master(self, id, username, ssh_key=None, password=None, port_forward_list=None, internal=False):
+        """Open an SSH tunnel to the Spark master node and forward the specified ports
+
+        Args:
+            id (:obj:`str`): the id of the cluster
+            username (:obj:`str`): the name of the user to open the ssh session with
+            ssh_key (:obj:`str`, optional): the ssh_key to authenticate the ssh user with.
+                Must specify either `ssh_key` or `password`.
+            password (:obj:`str`, optional): the password to authenticate the ssh user with.
+                Must specify either `password` or `ssh_key`.
+            port_forward_list (:obj:`aztk.spark.models.PortForwardingSpecification`, optional):
+                List of the ports to forward.
+            internal (:obj:`str`, optional): if True, this will connect to the node using its internal IP.
+                Only use this if running within the same VNET as the cluster. Defaults to False.
+        """
+        return ssh_into_master.ssh_into_master(self, self._core_cluster_operations, id, username, ssh_key, password,
+                                               port_forward_list, internal)

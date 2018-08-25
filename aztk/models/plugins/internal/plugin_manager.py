@@ -1,7 +1,4 @@
-import os
 import inspect
-import importlib.util
-from aztk.utils import constants
 from aztk.error import InvalidPluginReferenceError
 from aztk.spark.models import plugins
 
@@ -28,7 +25,8 @@ class PluginManager:
         nvblas=plugins.NvBLASPlugin,
         apt_get=plugins.AptGetPlugin,
         pip_install=plugins.PipPlugin,
-        conda_install=plugins.CondaPlugin)
+        conda_install=plugins.CondaPlugin,
+    )
 
     def __init__(self):
         self.loaded = False

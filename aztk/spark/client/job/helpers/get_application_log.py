@@ -5,7 +5,6 @@ from aztk import error
 from aztk.spark import models
 from aztk.utils import helpers
 
-from .list_applications import list_applications
 from .get_recent_job import get_recent_job
 
 
@@ -25,8 +24,11 @@ def _get_application_log(core_job_operations, spark_job_operations, job_id, appl
                 raise error.AztkError("The application {0} has not yet been created.".format(application))
         raise error.AztkError("The application {0} does not exist".format(application_name))
     else:
-        if task.state in (batch_models.TaskState.active, batch_models.TaskState.running,
-                          batch_models.TaskState.preparing):
+        if task.state in (
+                batch_models.TaskState.active,
+                batch_models.TaskState.running,
+                batch_models.TaskState.preparing,
+        ):
             raise error.AztkError("The application {0} has not yet finished executing.".format(application_name))
 
         return core_job_operations.get_application_log(job_id, application_name)

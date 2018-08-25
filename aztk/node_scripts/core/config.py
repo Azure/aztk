@@ -1,19 +1,20 @@
 import os
 import re
-import logging
+
+import azure.batch.batch_auth as batchauth
 import azure.batch.batch_service_client as batch
 import azure.storage.blob as blob
-import azure.batch.batch_auth as batchauth
-from core import log
 from azure.common.credentials import ServicePrincipalCredentials
 from azure.mgmt.batch import BatchManagementClient
 from azure.mgmt.storage import StorageManagementClient
 from azure.storage.common import CloudStorageAccount
 
-RESOURCE_ID_PATTERN = re.compile('^/subscriptions/(?P<subscription>[^/]+)'
-                                 '/resourceGroups/(?P<resourcegroup>[^/]+)'
-                                 '/providers/[^/]+'
-                                 '/[^/]+Accounts/(?P<account>[^/]+)$')
+from core import log
+
+RESOURCE_ID_PATTERN = re.compile("^/subscriptions/(?P<subscription>[^/]+)"
+                                 "/resourceGroups/(?P<resourcegroup>[^/]+)"
+                                 "/providers/[^/]+"
+                                 "/[^/]+Accounts/(?P<account>[^/]+)$")
 
 batch_account_name = os.environ.get("AZ_BATCH_ACCOUNT_NAME")
 batch_account_key = os.environ.get("BATCH_ACCOUNT_KEY")
@@ -44,14 +45,14 @@ def get_blob_client() -> blob.BlockBlobService:
             account_name=storage_account_name, account_key=storage_account_key, endpoint_suffix=storage_account_suffix)
     else:
         credentials = ServicePrincipalCredentials(
-            client_id=client_id, secret=credential, tenant=tenant_id, resource='https://management.core.windows.net/')
+            client_id=client_id, secret=credential, tenant=tenant_id, resource="https://management.core.windows.net/")
         m = RESOURCE_ID_PATTERN.match(storage_resource_id)
-        accountname = m.group('account')
-        subscription = m.group('subscription')
-        resourcegroup = m.group('resourcegroup')
+        accountname = m.group("account")
+        subscription = m.group("subscription")
+        resourcegroup = m.group("resourcegroup")
         mgmt_client = StorageManagementClient(credentials, subscription)
-        key = mgmt_client.storage_accounts.list_keys(
-            resource_group_name=resourcegroup, account_name=accountname).keys[0].value
+        key = (mgmt_client.storage_accounts.list_keys(resource_group_name=resourcegroup, account_name=accountname)
+               .keys[0].value)
         storage_client = CloudStorageAccount(accountname, key)
         return storage_client.create_block_blob_service()
 
@@ -62,13 +63,13 @@ def get_batch_client() -> batch.BatchServiceClient:
         credentials = batchauth.SharedKeyCredentials(batch_account_name, batch_account_key)
     else:
         credentials = ServicePrincipalCredentials(
-            client_id=client_id, secret=credential, tenant=tenant_id, resource='https://management.core.windows.net/')
+            client_id=client_id, secret=credential, tenant=tenant_id, resource="https://management.core.windows.net/")
         m = RESOURCE_ID_PATTERN.match(batch_resource_id)
-        batch_client = BatchManagementClient(credentials, m.group('subscription'))
-        account = batch_client.batch_account.get(m.group('resourcegroup'), m.group('account'))
-        base_url = 'https://%s/' % account.account_endpoint
+        batch_client = BatchManagementClient(credentials, m.group("subscription"))
+        account = batch_client.batch_account.get(m.group("resourcegroup"), m.group("account"))
+        base_url = "https://%s/" % account.account_endpoint
         credentials = ServicePrincipalCredentials(
-            client_id=client_id, secret=credential, tenant=tenant_id, resource='https://batch.core.windows.net/')
+            client_id=client_id, secret=credential, tenant=tenant_id, resource="https://batch.core.windows.net/")
 
     return batch.BatchServiceClient(credentials, base_url=base_url)
 

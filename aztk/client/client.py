@@ -13,8 +13,6 @@ import aztk.utils.constants as constants
 import aztk.utils.get_ssh_key as get_ssh_key
 import aztk.utils.helpers as helpers
 import aztk.utils.ssh as ssh_lib
-from aztk.client.cluster import CoreClusterOperations
-from aztk.client.job import CoreJobOperations
 from aztk.internal import cluster_data
 from aztk.utils import deprecated, secure_utils
 
@@ -27,6 +25,11 @@ class CoreClient:
 
     """
 
+    def __init__(self):
+        self.secrets_configuration = None
+        self.batch_client = None
+        self.blob_client = None
+
     def _get_context(self, secrets_configuration: models.SecretsConfiguration):
         self.secrets_configuration = secrets_configuration
 
@@ -34,9 +37,9 @@ class CoreClient:
         self.batch_client = azure_api.make_batch_client(secrets_configuration)
         self.blob_client = azure_api.make_blob_client(secrets_configuration)
         context = {
-            'batch_client': self.batch_client,
-            'blob_client': self.blob_client,
-            'secrets_configuration': self.secrets_configuration,
+            "batch_client": self.batch_client,
+            "blob_client": self.blob_client,
+            "secrets_configuration": self.secrets_configuration,
         }
         return context
 
@@ -52,9 +55,9 @@ class CoreClient:
         """
         return cluster_data.ClusterData(self.blob_client, cluster_id)
 
-    '''
+    """
     General Batch Operations
-    '''
+    """
 
     @deprecated("0.10.0")
     def __delete_pool_and_job(self, pool_id: str, keep_logs: bool = False):
@@ -104,9 +107,8 @@ class CoreClient:
         job_id = cluster_conf.cluster_id
 
         # Get a verified node agent sku
-        sku_to_use, image_ref_to_use = \
-            helpers.select_latest_verified_vm_image_with_node_agent_sku(
-                VmImageModel.publisher, VmImageModel.offer, VmImageModel.sku, self.batch_client)
+        sku_to_use, image_ref_to_use = helpers.select_latest_verified_vm_image_with_node_agent_sku(
+            VmImageModel.publisher, VmImageModel.offer, VmImageModel.sku, self.batch_client)
 
         network_conf = None
         if cluster_conf.subnet_id is not None:
@@ -130,8 +132,9 @@ class CoreClient:
             metadata=[
                 batch_models.MetadataItem(name=constants.AZTK_SOFTWARE_METADATA_KEY, value=software_metadata_key),
                 batch_models.MetadataItem(
-                    name=constants.AZTK_MODE_METADATA_KEY, value=constants.AZTK_CLUSTER_MODE_METADATA)
-            ])
+                    name=constants.AZTK_MODE_METADATA_KEY, value=constants.AZTK_CLUSTER_MODE_METADATA),
+            ],
+        )
 
         # Create the pool + create user for the pool
         helpers.create_pool_if_not_exist(pool, self.batch_client)
@@ -184,13 +187,16 @@ class CoreClient:
         """
         # Create new ssh user for the given node
         self.batch_client.compute_node.add_user(
-            pool_id, node_id,
+            pool_id,
+            node_id,
             batch_models.ComputeNodeUser(
                 name=username,
                 is_admin=True,
                 password=password,
                 ssh_public_key=get_ssh_key.get_user_public_key(ssh_key, self.secrets_configuration),
-                expiry_time=datetime.now(timezone.utc) + timedelta(days=365)))
+                expiry_time=datetime.now(timezone.utc) + timedelta(days=365),
+            ),
+        )
 
     @deprecated("0.10.0")
     def __delete_user(self, pool_id: str, node_id: str, username: str) -> str:
@@ -229,7 +235,7 @@ class CoreClient:
     def __generate_user_on_node(self, pool_id, node_id):
         generated_username = secure_utils.generate_random_string()
         ssh_key = RSA.generate(2048)
-        ssh_pub_key = ssh_key.publickey().exportKey('OpenSSH').decode('utf-8')
+        ssh_pub_key = ssh_key.publickey().exportKey("OpenSSH").decode("utf-8")
         self.__create_user_on_node(generated_username, pool_id, node_id, ssh_pub_key)
         return generated_username, ssh_key
 
@@ -237,7 +243,7 @@ class CoreClient:
     def __generate_user_on_pool(self, pool_id, nodes):
         generated_username = secure_utils.generate_random_string()
         ssh_key = RSA.generate(2048)
-        ssh_pub_key = ssh_key.publickey().exportKey('OpenSSH').decode('utf-8')
+        ssh_pub_key = ssh_key.publickey().exportKey("OpenSSH").decode("utf-8")
         with concurrent.futures.ThreadPoolExecutor() as executor:
             futures = {
                 executor.submit(self.__create_user_on_node, generated_username, pool_id, node.id, ssh_pub_key): node
@@ -283,9 +289,10 @@ class CoreClient:
                 generated_username,
                 node_rls.ip_address,
                 node_rls.port,
-                ssh_key=ssh_key.exportKey().decode('utf-8'),
+                ssh_key=ssh_key.exportKey().decode("utf-8"),
                 container_name=container_name,
-                timeout=timeout)
+                timeout=timeout,
+            )
             return output
         finally:
             self.__delete_user(cluster_id, node.id, generated_username)
@@ -306,9 +313,10 @@ class CoreClient:
                     command,
                     generated_username,
                     cluster_nodes,
-                    ssh_key=ssh_key.exportKey().decode('utf-8'),
+                    ssh_key=ssh_key.exportKey().decode("utf-8"),
                     container_name=container_name,
-                    timeout=timeout))
+                    timeout=timeout,
+                ))
             return output
         except OSError as exc:
             raise exc
@@ -316,14 +324,16 @@ class CoreClient:
             self.__delete_user_on_pool(generated_username, pool.id, nodes)
 
     @deprecated("0.10.0")
-    def __cluster_copy(self,
-                       cluster_id,
-                       source_path,
-                       destination_path=None,
-                       container_name=None,
-                       internal=False,
-                       get=False,
-                       timeout=None):
+    def __cluster_copy(
+            self,
+            cluster_id,
+            source_path,
+            destination_path=None,
+            container_name=None,
+            internal=False,
+            get=False,
+            timeout=None,
+    ):
         pool, nodes = self.__get_pool_details(cluster_id)
         nodes = list(nodes)
         if internal:
@@ -340,9 +350,10 @@ class CoreClient:
                     nodes=cluster_nodes,
                     source_path=source_path,
                     destination_path=destination_path,
-                    ssh_key=ssh_key.exportKey().decode('utf-8'),
+                    ssh_key=ssh_key.exportKey().decode("utf-8"),
                     get=get,
-                    timeout=timeout))
+                    timeout=timeout,
+                ))
             return output
         except (OSError, batch_error.BatchErrorException) as exc:
             raise exc
@@ -375,8 +386,16 @@ class CoreClient:
         )
 
     @deprecated("0.10.0")
-    def __submit_job(self, job_configuration, start_task, job_manager_task, autoscale_formula,
-                     software_metadata_key: str, vm_image_model, application_metadata):
+    def __submit_job(
+            self,
+            job_configuration,
+            start_task,
+            job_manager_task,
+            autoscale_formula,
+            software_metadata_key: str,
+            vm_image_model,
+            application_metadata,
+    ):
         """
             Job Submission
             :param job_configuration -> aztk_sdk.spark.models.JobConfiguration
@@ -390,9 +409,8 @@ class CoreClient:
         self._get_cluster_data(job_configuration.id).save_cluster_config(job_configuration.to_cluster_config())
 
         # get a verified node agent sku
-        sku_to_use, image_ref_to_use = \
-            helpers.select_latest_verified_vm_image_with_node_agent_sku(
-                vm_image_model.publisher, vm_image_model.offer, vm_image_model.sku, self.batch_client)
+        sku_to_use, image_ref_to_use = helpers.select_latest_verified_vm_image_with_node_agent_sku(
+            vm_image_model.publisher, vm_image_model.offer, vm_image_model.sku, self.batch_client)
 
         # set up subnet if necessary
         network_conf = None
@@ -419,8 +437,10 @@ class CoreClient:
                 metadata=[
                     batch_models.MetadataItem(name=constants.AZTK_SOFTWARE_METADATA_KEY, value=software_metadata_key),
                     batch_models.MetadataItem(
-                        name=constants.AZTK_MODE_METADATA_KEY, value=constants.AZTK_JOB_MODE_METADATA)
-                ]))
+                        name=constants.AZTK_MODE_METADATA_KEY, value=constants.AZTK_JOB_MODE_METADATA),
+                ],
+            ),
+        )
 
         # define job specification
         job_spec = batch_models.JobSpecification(
@@ -428,7 +448,8 @@ class CoreClient:
             display_name=job_configuration.id,
             on_all_tasks_complete=batch_models.OnAllTasksComplete.terminate_job,
             job_manager_task=job_manager_task,
-            metadata=[batch_models.MetadataItem(name='applications', value=application_metadata)])
+            metadata=[batch_models.MetadataItem(name="applications", value=application_metadata)],
+        )
 
         # define schedule
         schedule = batch_models.Schedule(

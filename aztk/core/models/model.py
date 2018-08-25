@@ -11,19 +11,19 @@ class ModelMeta(type):
     """
 
     def __new__(mcs, name, bases, attrs):
-        attrs['_fields'] = {}
+        attrs["_fields"] = {}
 
         for base in bases:
-            if hasattr(base, '_fields'):
+            if hasattr(base, "_fields"):
                 for k, v in base._fields.items():
-                    attrs['_fields'][k] = v
+                    attrs["_fields"][k] = v
             for k, v in base.__dict__.items():
                 if isinstance(v, fields.Field):
-                    attrs['_fields'][k] = v
+                    attrs["_fields"][k] = v
 
         for k, v in attrs.items():
             if isinstance(v, fields.Field):
-                attrs['_fields'][k] = v
+                attrs["_fields"][k] = v
 
         return super().__new__(mcs, name, bases, attrs)
 
@@ -84,7 +84,7 @@ class Model(metaclass=ModelMeta):
                 e.model = self
                 raise e
 
-        if hasattr(self, '__validate__'):
+        if hasattr(self, "__validate__"):
             self.__validate__()
 
     def merge(self, other):

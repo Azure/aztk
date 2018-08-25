@@ -1,17 +1,11 @@
-import datetime
-import os
 import time
-from typing import List
 
 import azure.batch.models as batch_models
 import yaml
 
 import aztk.error as error
-from aztk.utils import constants, helpers
+from aztk.utils import helpers
 from aztk.utils.command_builder import CommandBuilder
-'''
-    Job Submission helper methods
-'''
 
 
 def __app_cmd():
@@ -19,11 +13,12 @@ def __app_cmd():
     docker_exec.add_argument("-i")
     docker_exec.add_option("-e", "AZ_BATCH_TASK_WORKING_DIR=$AZ_BATCH_TASK_WORKING_DIR")
     docker_exec.add_option("-e", "AZ_BATCH_JOB_ID=$AZ_BATCH_JOB_ID")
-    docker_exec.add_argument("spark /bin/bash >> output.log 2>&1 -c \"" \
-                             "source ~/.bashrc; " \
-                             "export PYTHONPATH=$PYTHONPATH:\$AZTK_WORKING_DIR; " \
-                             "cd \$AZ_BATCH_TASK_WORKING_DIR; " \
-                             "\$AZTK_WORKING_DIR/.aztk-env/.venv/bin/python \$AZTK_WORKING_DIR/aztk/node_scripts/job_submission.py\"")
+    docker_exec.add_argument(
+        r'spark /bin/bash >> output.log 2>&1 -c "'
+        r"source ~/.bashrc; "
+        r"export PYTHONPATH=$PYTHONPATH:\$AZTK_WORKING_DIR; "
+        r"cd \$AZ_BATCH_TASK_WORKING_DIR; "
+        r'\$AZTK_WORKING_DIR/.aztk-env/.venv/bin/python \$AZTK_WORKING_DIR/aztk/node_scripts/job_submission.py"')
     return docker_exec.to_str()
 
 
@@ -32,10 +27,11 @@ def generate_task(spark_client, job, application_tasks):
     for application, task in application_tasks:
         task_definition_resource_file = helpers.upload_text_to_container(
             container_name=job.id,
-            application_name=application.name + '.yaml',
-            file_path=application.name + '.yaml',
+            application_name=application.name + ".yaml",
+            file_path=application.name + ".yaml",
             content=yaml.dump(task),
-            blob_client=spark_client.blob_client)
+            blob_client=spark_client.blob_client,
+        )
         resource_files.append(task_definition_resource_file)
 
     task_cmd = __app_cmd()
@@ -49,7 +45,8 @@ def generate_task(spark_client, job, application_tasks):
         allow_low_priority_node=True,
         user_identity=batch_models.UserIdentity(
             auto_user=batch_models.AutoUserSpecification(
-                scope=batch_models.AutoUserScope.task, elevation_level=batch_models.ElevationLevel.admin)))
+                scope=batch_models.AutoUserScope.task, elevation_level=batch_models.ElevationLevel.admin)),
+    )
 
     return task
 
@@ -69,7 +66,7 @@ def list_applications(spark_client, job_id):
     applications = {}
     for metadata_item in recent_run_job.metadata:
         if metadata_item.name == "applications":
-            for app_name in metadata_item.value.split('\n'):
+            for app_name in metadata_item.value.split("\n"):
                 applications[app_name] = None
 
     # get tasks from Batch job
@@ -177,8 +174,11 @@ def get_application_log(spark_client, job_id, application_name):
                 raise error.AztkError("The application {0} has not yet been created.".format(application))
         raise error.AztkError("The application {0} does not exist".format(application_name))
     else:
-        if task.state in (batch_models.TaskState.active, batch_models.TaskState.running,
-                          batch_models.TaskState.preparing):
+        if task.state in (
+                batch_models.TaskState.active,
+                batch_models.TaskState.running,
+                batch_models.TaskState.preparing,
+        ):
             raise error.AztkError("The application {0} has not yet finished executing.".format(application_name))
 
         return spark_client.get_application_log(job_id, application_name)

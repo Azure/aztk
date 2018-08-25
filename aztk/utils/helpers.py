@@ -1,27 +1,26 @@
 from __future__ import print_function
+
 import datetime
 import io
-import os
-import time
-import re
-import azure.common
-import azure.batch.batch_service_client as batch
-import azure.batch.batch_auth as batch_auth
-import azure.batch.models as batch_models
-import azure.storage.blob as blob
-from aztk.version import __version__
-from aztk.utils import constants
-from aztk import error
-import aztk.models
-import yaml
 import logging
+import os
+import re
+import time
 
-_STANDARD_OUT_FILE_NAME = 'stdout.txt'
-_STANDARD_ERROR_FILE_NAME = 'stderr.txt'
+import azure.batch.models as batch_models
+import azure.common
+import azure.storage.blob as blob
+import yaml
+
+import aztk.models
+from aztk import error
+
+_STANDARD_OUT_FILE_NAME = "stdout.txt"
+_STANDARD_ERROR_FILE_NAME = "stderr.txt"
 
 
 def is_gpu_enabled(vm_size: str):
-    return bool(re.search('nv|nc', vm_size, flags=re.IGNORECASE))
+    return bool(re.search("nv|nc", vm_size, flags=re.IGNORECASE))
 
 
 def get_cluster(cluster_id, batch_client):
@@ -66,7 +65,7 @@ def wait_for_task_to_complete(job_id: str, task_id: str, batch_client):
 def upload_text_to_container(container_name: str, application_name: str, content: str, file_path: str,
                              blob_client=None) -> batch_models.ResourceFile:
     blob_name = file_path
-    blob_path = application_name + '/' + blob_name    # + '/' + time_stamp + '/' + blob_name
+    blob_path = application_name + "/" + blob_name    # + '/' + time_stamp + '/' + blob_name
     blob_client.create_container(container_name, fail_on_exist=False)
     blob_client.create_blob_from_text(container_name, blob_path, content)
 
@@ -74,7 +73,8 @@ def upload_text_to_container(container_name: str, application_name: str, content
         container_name,
         blob_path,
         permission=blob.BlobPermissions.READ,
-        expiry=datetime.datetime.utcnow() + datetime.timedelta(days=365))
+        expiry=datetime.datetime.utcnow() + datetime.timedelta(days=365),
+    )
 
     sas_url = blob_client.make_blob_url(container_name, blob_path, sas_token=sas_token)
 
@@ -104,7 +104,7 @@ def upload_file_to_container(container_name,
         blob_name = file_path.strip("/")
     else:
         blob_name = os.path.basename(file_path)
-        blob_path = application_name + '/' + blob_name
+        blob_path = application_name + "/" + blob_name
 
     if not node_path:
         node_path = blob_name
@@ -117,7 +117,8 @@ def upload_file_to_container(container_name,
         container_name,
         blob_path,
         permission=blob.BlobPermissions.READ,
-        expiry=datetime.datetime.utcnow() + datetime.timedelta(days=7))
+        expiry=datetime.datetime.utcnow() + datetime.timedelta(days=7),
+    )
 
     sas_url = blob_client.make_blob_url(container_name, blob_path, sas_token=sas_token)
 
@@ -158,11 +159,11 @@ def wait_for_all_nodes_state(pool, node_state, batch_client):
         # refresh pool to ensure that there is no resize error
         pool = batch_client.pool.get(pool.id)
         if pool.resize_errors is not None:
-            raise RuntimeError('resize error encountered for pool {}: {!r}'.format(pool.id, pool.resize_errors))
+            raise RuntimeError("resize error encountered for pool {}: {!r}".format(pool.id, pool.resize_errors))
         nodes = list(batch_client.compute_node.list(pool.id))
 
         totalNodes = pool.target_dedicated_nodes + pool.target_low_priority_nodes
-        if (len(nodes) >= totalNodes and all(node.state in node_state for node in nodes)):
+        if len(nodes) >= totalNodes and all(node.state in node_state for node in nodes):
             return nodes
         time.sleep(1)
 
@@ -241,7 +242,8 @@ def upload_blob_and_create_sas(container_name, blob_name, file_name, expiry, blo
         permission=blob.BlobPermissions.READ,
         blob_client=None,
         expiry=expiry,
-        timeout=timeout)
+        timeout=timeout,
+    )
 
     sas_url = blob_client.make_blob_url(container_name, blob_name, sas_token=sas_token)
 
@@ -256,7 +258,7 @@ def wrap_commands_in_shell(commands):
     :rtype: str
     :return: a shell wrapping commands
     """
-    return '/bin/bash -c \'set -e; set -o pipefail; {}; wait\''.format(';'.join(commands))
+    return "/bin/bash -c 'set -e; set -o pipefail; {}; wait'".format(";".join(commands))
 
 
 def get_connection_info(pool_id, node_id, batch_client):
@@ -290,11 +292,11 @@ def get_cluster_total_current_nodes(pool):
 def normalize_path(path: str) -> str:
     """
     Convert a path in a path that will work well with blob storage and unix
-    It will replace \ with / and remove relative .
+    It will replace backslashes with forwardslashes and return absolute paths.
     """
     path = os.path.abspath(os.path.expanduser(path))
-    path = path.replace('\\', '/')
-    if path.startswith('./'):
+    path = path.replace("\\", "/")
+    if path.startswith("./"):
         return path[2:]
     else:
         return path
@@ -326,7 +328,7 @@ def read_stream_as_string(stream, encoding="utf-8"):
         return output.getvalue().decode(encoding)
     finally:
         output.close()
-    raise RuntimeError('could not write data to stream or decode bytes')
+    raise RuntimeError("could not write data to stream or decode bytes")
 
 
 def format_batch_exception(batch_exception):
@@ -336,17 +338,15 @@ def format_batch_exception(batch_exception):
     """
     l = []
     l.append("-------------------------------------------")
-    if batch_exception.error and \
-            batch_exception.error.message and \
-            batch_exception.error.message.value:
+    if batch_exception.error and batch_exception.error.message and batch_exception.error.message.value:
         l.append(batch_exception.error.message.value)
         if batch_exception.error.values:
-            l.append('')
+            l.append("")
             for mesg in batch_exception.error.values:
                 l.append("{0}:\t{1}".format(mesg.key, mesg.value))
     l.append("-------------------------------------------")
 
-    return '\n'.join(l)
+    return "\n".join(l)
 
 
 def save_cluster_config(cluster_config, blob_client):
@@ -363,9 +363,9 @@ def read_cluster_config(cluster_id: str, blob_client: blob.BlockBlobService):
         result = blob_client.get_blob_to_text(cluster_id, blob_path)
         return yaml.load(result.content)
     except azure.common.AzureMissingResourceHttpError:
-        logging.warn("Cluster %s doesn't have cluster configuration in storage", cluster_id)
+        logging.warning("Cluster %s doesn't have cluster configuration in storage", cluster_id)
     except yaml.YAMLError:
-        logging.warn("Cluster %s contains invalid cluster configuration in blob", cluster_id)
+        logging.warning("Cluster %s contains invalid cluster configuration in blob", cluster_id)
 
 
 def bool_env(value: bool):

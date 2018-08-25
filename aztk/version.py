@@ -25,11 +25,6 @@ major = 0
 minor = 8
 patch = 1
 
-suffix = ''
+suffix = ""
 
-__version__ = "{major}.{minor}.{patch}{suffix}".format(
-    major=major,
-    minor=minor,
-    patch=patch,
-    suffix=suffix,
-)
+__version__ = "{major}.{minor}.{patch}{suffix}".format(major=major, minor=minor, patch=patch, suffix=suffix)

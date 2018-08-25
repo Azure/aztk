@@ -4,7 +4,6 @@ import subprocess
 import sys
 import threading
 import time
-from subprocess import call
 from typing import List
 
 import azure.batch.models as batch_models
@@ -12,7 +11,7 @@ import azure.batch.models as batch_models
 from aztk import error, utils
 from aztk.models import ClusterConfiguration
 from aztk.spark import models
-from aztk.utils import get_ssh_key, helpers
+from aztk.utils import get_ssh_key
 
 from . import log
 
@@ -35,8 +34,10 @@ def get_ssh_key_or_prompt(ssh_key, username, password, secrets_configuration):
                 break
         else:
             raise error.AztkError(
-                "Failed to get valid password, cannot add user to cluster. It is recommended that you provide a ssh public key in .aztk/secrets.yaml. Or provide an ssh-key or password with command line parameters (--ssh-key or --password). You may also run the 'aztk spark cluster add-user' command to add a user to this cluster."
-            )
+                "Failed to get valid password, cannot add user to cluster. "
+                "It is recommended that you provide a ssh public key in .aztk/secrets.yaml. "
+                "Or provide an ssh-key or password with command line parameters (--ssh-key or --password). "
+                "You may also run the 'aztk spark cluster add-user' command to add a user to this cluster.")
     return ssh_key, password
 
 
@@ -53,13 +54,13 @@ def print_cluster(client, cluster: models.Cluster, internal: bool = False):
     log.info("| Low priority: %s", __pretty_low_pri_node_count(cluster))
     log.info("")
 
-    print_format = '|{:^36}| {:^19} | {:^21}| {:^10} | {:^8} |'
-    print_format_underline = '|{:-^36}|{:-^21}|{:-^22}|{:-^12}|{:-^10}|'
+    print_format = "|{:^36}| {:^19} | {:^21}| {:^10} | {:^8} |"
+    print_format_underline = "|{:-^36}|{:-^21}|{:-^22}|{:-^12}|{:-^10}|"
     if internal:
         log.info(print_format.format("Nodes", "State", "IP", "Dedicated", "Master"))
     else:
         log.info(print_format.format("Nodes", "State", "IP:Port", "Dedicated", "Master"))
-    log.info(print_format_underline.format('', '', '', '', ''))
+    log.info(print_format_underline.format("", "", "", "", ""))
 
     if not cluster.nodes:
         return
@@ -68,44 +69,47 @@ def print_cluster(client, cluster: models.Cluster, internal: bool = False):
         if internal:
             ip = node.ip_address
         else:
-            ip = '{}:{}'.format(remote_login_settings.ip_address, remote_login_settings.port)
+            ip = "{}:{}".format(remote_login_settings.ip_address, remote_login_settings.port)
         log.info(
-            print_format.format(node.id, node.state.value, ip, "*" if node.is_dedicated else '', '*'
-                                if node.id == cluster.master_node_id else ''))
-    log.info('')
+            print_format.format(
+                node.id,
+                node.state.value,
+                ip,
+                "*" if node.is_dedicated else "",
+                "*" if node.id == cluster.master_node_id else "",
+            ))
+    log.info("")
 
 
 def __pretty_node_count(cluster: models.Cluster) -> str:
     if cluster.pool.allocation_state is batch_models.AllocationState.resizing:
-        return '{} -> {}'.format(cluster.total_current_nodes, cluster.total_target_nodes)
+        return "{} -> {}".format(cluster.total_current_nodes, cluster.total_target_nodes)
     else:
-        return '{}'.format(cluster.total_current_nodes)
+        return "{}".format(cluster.total_current_nodes)
 
 
 def __pretty_dedicated_node_count(cluster: models.Cluster) -> str:
-    if (cluster.pool.allocation_state is batch_models.AllocationState.resizing
-            or cluster.pool.state is batch_models.PoolState.deleting)\
-            and cluster.current_dedicated_nodes != cluster.target_dedicated_nodes:
-        return '{} -> {}'.format(cluster.current_dedicated_nodes, cluster.target_dedicated_nodes)
+    if (cluster.pool.allocation_state is batch_models.AllocationState.resizing or cluster.pool.state is
+            batch_models.PoolState.deleting) and cluster.current_dedicated_nodes != cluster.target_dedicated_nodes:
+        return "{} -> {}".format(cluster.current_dedicated_nodes, cluster.target_dedicated_nodes)
     else:
-        return '{}'.format(cluster.current_dedicated_nodes)
+        return "{}".format(cluster.current_dedicated_nodes)
 
 
 def __pretty_low_pri_node_count(cluster: models.Cluster) -> str:
-    if (cluster.pool.allocation_state is batch_models.AllocationState.resizing
-            or cluster.pool.state is batch_models.PoolState.deleting)\
-            and cluster.current_low_pri_nodes != cluster.target_low_pri_nodes:
-        return '{} -> {}'.format(cluster.current_low_pri_nodes, cluster.target_low_pri_nodes)
+    if (cluster.pool.allocation_state is batch_models.AllocationState.resizing or cluster.pool.state is
+            batch_models.PoolState.deleting) and cluster.current_low_pri_nodes != cluster.target_low_pri_nodes:
+        return "{} -> {}".format(cluster.current_low_pri_nodes, cluster.target_low_pri_nodes)
     else:
-        return '{}'.format(cluster.current_low_pri_nodes)
+        return "{}".format(cluster.current_low_pri_nodes)
 
 
 def print_clusters(clusters: List[models.Cluster]):
-    print_format = '{:<34}| {:<10}| {:<20}| {:<7}'
-    print_format_underline = '{:-<34}|{:-<11}|{:-<21}|{:-<7}'
+    print_format = "{:<34}| {:<10}| {:<20}| {:<7}"
+    print_format_underline = "{:-<34}|{:-<11}|{:-<21}|{:-<7}"
 
-    log.info(print_format.format('Cluster', 'State', 'VM Size', 'Nodes'))
-    log.info(print_format_underline.format('', '', '', ''))
+    log.info(print_format.format("Cluster", "State", "VM Size", "Nodes"))
+    log.info(print_format_underline.format("", "", "", ""))
     for cluster in clusters:
         node_count = __pretty_node_count(cluster)
 
@@ -113,7 +117,7 @@ def print_clusters(clusters: List[models.Cluster]):
 
 
 def print_clusters_quiet(clusters: List[models.Cluster]):
-    log.print('\n'.join([str(cluster.id) for cluster in clusters]))
+    log.print("\n".join([str(cluster.id) for cluster in clusters]))
 
 
 def stream_logs(client, cluster_id, application_name):
@@ -122,23 +126,25 @@ def stream_logs(client, cluster_id, application_name):
         app_logs = client.cluster.get_application_log(
             id=cluster_id, application_name=application_name, tail=True, current_bytes=current_bytes)
         log.print(app_logs.log)
-        if app_logs.application_state == 'completed':
+        if app_logs.application_state == "completed":
             return app_logs.exit_code
         current_bytes = app_logs.total_bytes
         time.sleep(3)
 
 
-def ssh_in_master(client,
-                  cluster_id: str,
-                  cluster_configuration: models.ClusterConfiguration,
-                  username: str = None,
-                  webui: str = None,
-                  jobui: str = None,
-                  jobhistoryui: str = None,
-                  ports=None,
-                  host: bool = False,
-                  connect: bool = True,
-                  internal: bool = False):
+def ssh_in_master(
+        client,
+        cluster_id: str,
+        cluster_configuration: models.ClusterConfiguration,
+        username: str = None,
+        webui: str = None,
+        jobui: str = None,
+        jobhistoryui: str = None,
+        ports=None,
+        host: bool = False,
+        connect: bool = True,
+        internal: bool = False,
+):
     """
         SSH into head node of spark-app
         :param cluster_id: Id of the cluster to ssh in
@@ -166,11 +172,10 @@ def ssh_in_master(client,
     master_node_port = remote_login_settings.port
 
     spark_web_ui_port = utils.constants.DOCKER_SPARK_WEB_UI_PORT
-    spark_worker_ui_port = utils.constants.DOCKER_SPARK_WORKER_UI_PORT
     spark_job_ui_port = utils.constants.DOCKER_SPARK_JOB_UI_PORT
     spark_job_history_ui_port = utils.constants.DOCKER_SPARK_JOB_UI_HISTORY_PORT
 
-    ssh_command = utils.command_builder.CommandBuilder('ssh')
+    ssh_command = utils.command_builder.CommandBuilder("ssh")
 
     # get ssh private key path if specified
     ssh_priv_key = client.secrets_configuration.ssh_priv_key
@@ -192,21 +197,21 @@ def ssh_in_master(client,
                 if port.expose_publicly:
                     ssh_command.add_option("-L", "{0}:localhost:{1}".format(port.public_port, port.internal))
 
-    user = username if username is not None else '<username>'
+    user = username if username is not None else "<username>"
     if internal:
         ssh_command.add_argument("{0}@{1}".format(user, master_internal_node_ip))
     else:
         ssh_command.add_argument("{0}@{1} -p {2}".format(user, master_node_ip, master_node_port))
 
     if host is False:
-        ssh_command.add_argument("\'sudo docker exec -it spark /bin/bash\'")
+        ssh_command.add_argument("'sudo docker exec -it spark /bin/bash'")
 
     command = ssh_command.to_str()
 
     if connect:
-        call(command, shell=True)
+        subprocess.call(command, shell=True)
 
-    return '\n\t{}\n'.format(command)
+    return "\n\t{}\n".format(command)
 
 
 def print_batch_exception(batch_exception):
@@ -216,35 +221,28 @@ def print_batch_exception(batch_exception):
     """
     log.error("-------------------------------------------")
     log.error("Exception encountered:")
-    if batch_exception.error and \
-            batch_exception.error.message and \
-            batch_exception.error.message.value:
+    if batch_exception.error and batch_exception.error.message and batch_exception.error.message.value:
         log.error(batch_exception.error.message.value)
         if batch_exception.error.values:
-            log.error('')
+            log.error("")
             for mesg in batch_exception.error.values:
                 log.error("%s:\t%s", mesg.key, mesg.value)
     log.error("-------------------------------------------")
 
 
-'''
-    Job submission
-'''
-
-
 def print_jobs(jobs: List[models.Job]):
-    print_format = '{:<34}| {:<10}| {:<20}'
-    print_format_underline = '{:-<34}|{:-<11}|{:-<21}'
+    print_format = "{:<34}| {:<10}| {:<20}"
+    print_format_underline = "{:-<34}|{:-<11}|{:-<21}"
 
-    log.info(print_format.format('Job', 'State', 'Creation Time'))
-    log.info(print_format_underline.format('', '', '', ''))
+    log.info(print_format.format("Job", "State", "Creation Time"))
+    log.info(print_format_underline.format("", "", "", ""))
     for job in jobs:
 
         log.info(print_format.format(job.id, job.state, utc_to_local(job.creation_time)))
 
 
 def print_job(client, job: models.Job):
-    print_format = '{:<36}| {:<15}'
+    print_format = "{:<36}| {:<15}"
 
     log.info("")
     log.info("Job               %s", job.id)
@@ -256,7 +254,7 @@ def print_job(client, job: models.Job):
     if job.cluster:
         print_cluster_summary(job.cluster)
     else:
-        if job.state == 'completed':
+        if job.state == "completed":
             log.info("Cluster           %s", "Job completed, cluster deallocated.")
             log.info("")
         else:
@@ -272,23 +270,23 @@ def print_job(client, job: models.Job):
 
 def node_state_count(cluster: models.Cluster):
     states = {}
-    for state in batch_models.ComputeNodeState:
-        states[state] = 0
     for node in cluster.nodes:
-        states[node.state] += 1
+        states[node.state] = states.get(node.state, 0) + 1
     return states
 
 
 def print_cluster_summary(cluster: models.Cluster):
-    print_format = '{:<4} {:<23} {:<15}'
-
     log.info("Cluster           %s", cluster.id)
     log.info("-" * 42)
     log.info("Nodes             %s", __pretty_node_count(cluster))
     log.info("| Dedicated:      %s", __pretty_dedicated_node_count(cluster))
     log.info("| Low priority:   %s", __pretty_low_pri_node_count(cluster))
     state_count = node_state_count(cluster)
-    log.info("Master            %s", cluster.master_node_id or "Pending")
+    if state_count:
+        log.info("| Node States:")
+        for state in state_count:
+            log.info("| \t%s: %d", state.name, state_count[state])
+    log.info("Master:            %s", cluster.master_node_id or "Pending")
     log.info("")
 
 
@@ -300,13 +298,13 @@ def application_summary(applications):
     warn_scheduling = False
 
     for application in applications:
-        if type(application) == str:
+        if isinstance(application, str):
             states["scheduling"] += 1
             warn_scheduling = True
         else:
             states[application.state] += 1
 
-    print_format = '{:<17} {:<14}'
+    print_format = "{:<17} {:<14}"
     log.info("Applications")
     log.info("-" * 42)
     for state in states:
@@ -318,10 +316,10 @@ def application_summary(applications):
 
 
 def print_applications(applications):
-    print_format = '{:<36}| {:<15}| {:<16} | {:^9} |'
-    print_format_underline = '{:-<36}|{:-<16}|{:-<18}|{:-<11}|'
+    print_format = "{:<36}| {:<15}| {:<16} | {:^9} |"
+    print_format_underline = "{:-<36}|{:-<16}|{:-<18}|{:-<11}|"
     log.info(print_format.format("Applications", "State", "Transition Time", "Exit Code"))
-    log.info(print_format_underline.format('', '', '', ''))
+    log.info(print_format_underline.format("", "", "", ""))
 
     warn_scheduling = False
     for name in applications:
@@ -331,15 +329,18 @@ def print_applications(applications):
         else:
             application = applications[name]
             log.info(
-                print_format.format(application.name, application.state,
-                                    utc_to_local(application.state_transition_time), application.exit_code
-                                    if application.exit_code is not None else "-"))
+                print_format.format(
+                    application.name,
+                    application.state,
+                    utc_to_local(application.state_transition_time),
+                    application.exit_code if application.exit_code is not None else "-",
+                ))
     if warn_scheduling:
         log.warning("\nNo Spark applications will be scheduled until the master is selected.")
 
 
 def print_application(application: models.Application):
-    print_format = '{:<30}| {:<15}'
+    print_format = "{:<30}| {:<15}"
 
     log.info("")
     log.info("Application         %s", application.name)
@@ -356,12 +357,13 @@ class Spinner:
     @staticmethod
     def spinning_cursor():
         while 1:
-            for cursor in '|/-\\':
+            for cursor in "|/-\\":
                 yield cursor
 
     def __init__(self, delay=None):
         self.spinner_generator = self.spinning_cursor()
-        if delay and float(delay): self.delay = delay
+        if delay and float(delay):
+            self.delay = delay
 
     def __enter__(self):
         return self.start()
@@ -374,7 +376,7 @@ class Spinner:
             sys.stdout.write(next(self.spinner_generator))
             sys.stdout.flush()
             time.sleep(self.delay)
-            sys.stdout.write('\b')
+            sys.stdout.write("\b")
             sys.stdout.flush()
 
     def start(self):
@@ -410,7 +412,7 @@ def print_cluster_conf(cluster_conf: ClusterConfiguration, wait: bool):
     if user_configuration:
         log.info("username:                %s", user_configuration.username)
         if user_configuration.password:
-            log.info("Password: %s", '*' * len(user_configuration.password))
+            log.info("Password: %s", "*" * len(user_configuration.password))
     log.info("Plugins:")
     if not cluster_conf.plugins:
         log.info("    None Configured")

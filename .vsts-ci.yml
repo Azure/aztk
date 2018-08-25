@@ -1,7 +1,6 @@
 trigger:
   - master
 
-
 phases:
   - phase: Test
     queue: Hosted Linux Preview
@@ -24,16 +23,22 @@ phases:
       displayName: yapf
 
     - script: |
-        pylint -j 2 -E aztk aztk_cli
+        pylint -jobs 2 --errors-only aztk aztk_cli
       condition: succeeded()
-      displayName: pylint
+      displayName: pylint error check
     
     - script: |
-        pytest -n 20 --ignore=tests/integration_tests
+        pytest --ignore=tests/integration_tests
       condition: succeeded()
       displayName: unit tests
 
     - script: |
-        pytest -n 75
+        pytest --numprocesses=75
       condition: succeeded()
       displayName: integration tests
+    
+    - script: |
+        pylint -jobs 2 --disable=fixme aztk aztk_cli
+      continueOnError: true
+      condition: succeeded()
+      displayName: pylint report

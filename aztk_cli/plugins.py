@@ -1,10 +1,11 @@
 import argparse
 import typing
-from aztk_cli import log
+
 from aztk.models.plugins.internal import plugin_manager
+from aztk_cli import log
 
 
-def setup_parser(parser: argparse.ArgumentParser):
+def setup_parser(_: argparse.ArgumentParser):
     pass
 
 

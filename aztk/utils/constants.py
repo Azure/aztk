@@ -18,33 +18,33 @@ DOCKER_SPARK_HOME = "/home/spark-current"
 """
     Root path of this repository
 """
-ROOT_PATH = os.path.normpath(os.path.join(os.path.dirname(__file__), '..', '..'))
+ROOT_PATH = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", ".."))
 """
     User home directory path
 """
-HOME_DIRECTORY_PATH = os.path.expanduser('~')
+HOME_DIRECTORY_PATH = os.path.expanduser("~")
 """
     Path to the secrets file
 """
-DEFAULT_SECRETS_PATH = os.path.join(os.getcwd(), '.aztk/secrets.yaml')
+DEFAULT_SECRETS_PATH = os.path.join(os.getcwd(), ".aztk/secrets.yaml")
 """
     Paths to the cluster configuration files
 """
-GLOBAL_CONFIG_PATH = os.path.join(HOME_DIRECTORY_PATH, '.aztk')
-DEFAULT_SSH_CONFIG_PATH = os.path.join(os.getcwd(), '.aztk/ssh.yaml')
-DEFAULT_CLUSTER_CONFIG_PATH = os.path.join(os.getcwd(), '.aztk/cluster.yaml')
-DEFAULT_SPARK_CONF_SOURCE = os.path.join(os.getcwd(), '.aztk')
-DEFAULT_SPARK_CONF_DEST = os.path.join(ROOT_PATH, 'node_scripts', 'conf')
-DEFAULT_SPARK_JARS_SOURCE = os.path.join(os.getcwd(), '.aztk', 'jars')
-DEFAULT_SPARK_JARS_DEST = os.path.join(ROOT_PATH, 'node_scripts', 'jars')
-DEFAULT_SPARK_JOB_CONFIG = os.path.join(os.getcwd(), '.aztk', 'job.yaml')
-GLOBAL_SPARK_JOB_CONFIG = os.path.join(HOME_DIRECTORY_PATH, '.aztk', 'job.yaml')
+GLOBAL_CONFIG_PATH = os.path.join(HOME_DIRECTORY_PATH, ".aztk")
+DEFAULT_SSH_CONFIG_PATH = os.path.join(os.getcwd(), ".aztk/ssh.yaml")
+DEFAULT_CLUSTER_CONFIG_PATH = os.path.join(os.getcwd(), ".aztk/cluster.yaml")
+DEFAULT_SPARK_CONF_SOURCE = os.path.join(os.getcwd(), ".aztk")
+DEFAULT_SPARK_CONF_DEST = os.path.join(ROOT_PATH, "node_scripts", "conf")
+DEFAULT_SPARK_JARS_SOURCE = os.path.join(os.getcwd(), ".aztk", "jars")
+DEFAULT_SPARK_JARS_DEST = os.path.join(ROOT_PATH, "node_scripts", "jars")
+DEFAULT_SPARK_JOB_CONFIG = os.path.join(os.getcwd(), ".aztk", "job.yaml")
+GLOBAL_SPARK_JOB_CONFIG = os.path.join(HOME_DIRECTORY_PATH, ".aztk", "job.yaml")
 """
     Source and destination paths for spark init
 """
-INIT_DIRECTORY_SOURCE = os.path.join(ROOT_PATH, "aztk_cli", 'config')
-LOCAL_INIT_DIRECTORY_DEST = os.path.join(os.getcwd(), '.aztk')
-GLOBAL_INIT_DIRECTORY_DEST = os.path.join(HOME_DIRECTORY_PATH, '.aztk')
+INIT_DIRECTORY_SOURCE = os.path.join(ROOT_PATH, "aztk_cli", "config")
+LOCAL_INIT_DIRECTORY_DEST = os.path.join(os.getcwd(), ".aztk")
+GLOBAL_INIT_DIRECTORY_DEST = os.path.join(HOME_DIRECTORY_PATH, ".aztk")
 """
     Key of the metadata entry for the pool that is used to store the master node id
 """

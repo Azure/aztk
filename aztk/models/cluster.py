@@ -11,10 +11,8 @@ class Cluster:
             self.visible_state = pool.allocation_state.value
         else:
             self.visible_state = pool.state.value
-        self.total_current_nodes = pool.current_dedicated_nodes + \
-            pool.current_low_priority_nodes
-        self.total_target_nodes = pool.target_dedicated_nodes + \
-            pool.target_low_priority_nodes
+        self.total_current_nodes = pool.current_dedicated_nodes + pool.current_low_priority_nodes
+        self.total_target_nodes = pool.target_dedicated_nodes + pool.target_low_priority_nodes
         self.current_dedicated_nodes = pool.current_dedicated_nodes
         self.current_low_pri_nodes = pool.current_low_priority_nodes
         self.target_dedicated_nodes = pool.target_dedicated_nodes

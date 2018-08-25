@@ -42,12 +42,14 @@ def submit_application(core_cluster_operations,
             job_id=job_id, task_id=task.id, batch_client=core_cluster_operations.batch_client)
 
 
-def submit(core_cluster_operations,
-           spark_cluster_operations,
-           cluster_id: str,
-           application: models.ApplicationConfiguration,
-           remote: bool = False,
-           wait: bool = False):
+def submit(
+        core_cluster_operations,
+        spark_cluster_operations,
+        cluster_id: str,
+        application: models.ApplicationConfiguration,
+        remote: bool = False,
+        wait: bool = False,
+):
     try:
         submit_application(core_cluster_operations, spark_cluster_operations, cluster_id, application, remote, wait)
     except batch_error.BatchErrorException as e:

@@ -26,9 +26,10 @@ def cluster_run(base_operations, cluster_id, command, internal, container_name=N
                 command,
                 generated_username,
                 cluster_nodes,
-                ssh_key=ssh_key.exportKey().decode('utf-8'),
+                ssh_key=ssh_key.exportKey().decode("utf-8"),
                 container_name=container_name,
-                timeout=timeout))
+                timeout=timeout,
+            ))
         return output
     except OSError as exc:
         raise exc

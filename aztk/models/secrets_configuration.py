@@ -6,6 +6,7 @@ class ServicePrincipalConfiguration(Model):
     """
     Container class for AAD authentication
     """
+
     tenant_id = fields.String()
     client_id = fields.String()
     credential = fields.String()
@@ -17,6 +18,7 @@ class SharedKeyConfiguration(Model):
     """
     Container class for shared key authentication
     """
+
     batch_account_name = fields.String()
     batch_account_key = fields.String()
     batch_service_url = fields.String()
@@ -34,6 +36,7 @@ class DockerConfiguration(Model):
         username (str): Docker endpoint username
         password (str): Docker endpoint password
     """
+
     endpoint = fields.String(default=None)
     username = fields.String(default=None)
     password = fields.String(default=None)

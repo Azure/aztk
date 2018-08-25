@@ -39,9 +39,10 @@ def deprecate(version: str, message: str, advice: str = ""):
         advice (str): Sentence explaining alternatives to the deprecated functionality.
     """
 
-    warnings.simplefilter('always', DeprecationWarning)    # turn off filter
+    warnings.simplefilter("always", DeprecationWarning)    # turn off filter
     warnings.warn(
         "{0} It will be removed in Aztk version {1}. {2}".format(message, version, advice),
         category=DeprecationWarning,
-        stacklevel=2)
-    warnings.simplefilter('default', DeprecationWarning)    # reset filter
+        stacklevel=2,
+    )
+    warnings.simplefilter("default", DeprecationWarning)    # reset filter

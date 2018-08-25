@@ -13,7 +13,8 @@ class CoreClusterOperations(BaseOperations):
             cluster_configuration (:obj:`aztk.models.ClusterConfiguration`): Configuration for the cluster to be created
             software_metadata_key (:obj:`str`): the key for the primary software that will be run on the cluster
             start_task (:obj:`azure.batch.models.StartTask`): Batch StartTask defintion to configure the Batch Pool
-            vm_image_model (:obj:`azure.batch.models.VirtualMachineConfiguration`): Configuration of the virtual machine image and settings
+            vm_image_model (:obj:`azure.batch.models.VirtualMachineConfiguration`):
+                Configuration of the virtual machine image and settings
 
         Returns:
             :obj:`aztk.models.Cluster`: A Cluster object representing the state and configuration of the cluster.
@@ -52,7 +53,8 @@ class CoreClusterOperations(BaseOperations):
                 Defaults to None.
 
         Returns:
-            :obj:`List[aztk.models.NodeOutput]`: A list of NodeOutput objects representing the output of the copy command.
+            :obj:`List[aztk.models.NodeOutput]`:
+                A list of NodeOutput objects representing the output of the copy command.
         """
         return copy.cluster_copy(self, id, source_path, destination_path, container_name, internal, get, timeout)
 
@@ -65,7 +67,8 @@ class CoreClusterOperations(BaseOperations):
                 Defaults to False.
 
         Returns:
-            :obj:`List[aztk.models.NodeOutput]`: A list of NodeOutput objects representing the output of the copy command.
+            :obj:`List[aztk.models.NodeOutput]`:
+                A list of NodeOutput objects representing the output of the copy command.
         """
         return delete.delete_pool_and_job(self, id, keep_logs)
 

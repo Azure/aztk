@@ -12,11 +12,7 @@ from aztk.utils import constants, helpers
 class SparkToolkit(aztk.models.Toolkit):
     def __init__(self, version: str, environment: str = None, environment_version: str = None):
         super().__init__(
-            software="spark",
-            version=version,
-            environment=environment,
-            environment_version=environment_version,
-        )
+            software="spark", version=version, environment=environment, environment_version=environment_version)
 
 
 class Cluster(aztk.models.Cluster):
@@ -74,9 +70,9 @@ class SparkConfiguration(Model):
 
     def __generate_ssh_key_pair(self):
         key = RSA.generate(2048)
-        priv_key = key.exportKey('PEM')
-        pub_key = key.publickey().exportKey('OpenSSH')
-        return {'pub_key': pub_key, 'priv_key': priv_key}
+        priv_key = key.exportKey("PEM")
+        pub_key = key.publickey().exportKey("OpenSSH")
+        return {"pub_key": pub_key, "priv_key": priv_key}
 
 
 class CustomScript(aztk.models.CustomScript):
@@ -124,22 +120,24 @@ class VmImage(aztk.models.VmImage):
 
 
 class ApplicationConfiguration:
-    def __init__(self,
-                 name=None,
-                 application=None,
-                 application_args=None,
-                 main_class=None,
-                 jars=None,
-                 py_files=None,
-                 files=None,
-                 driver_java_options=None,
-                 driver_library_path=None,
-                 driver_class_path=None,
-                 driver_memory=None,
-                 executor_memory=None,
-                 driver_cores=None,
-                 executor_cores=None,
-                 max_retry_count=None):
+    def __init__(
+            self,
+            name=None,
+            application=None,
+            application_args=None,
+            main_class=None,
+            jars=None,
+            py_files=None,
+            files=None,
+            driver_java_options=None,
+            driver_library_path=None,
+            driver_class_path=None,
+            driver_memory=None,
+            executor_memory=None,
+            driver_cores=None,
+            executor_cores=None,
+            max_retry_count=None,
+    ):
         self.name = name
         self.application = application
         self.application_args = application_args
@@ -162,11 +160,11 @@ class Application:
         self.name = cloud_task.id
         self.last_modified = cloud_task.last_modified
         self.creation_time = cloud_task.creation_time
-        self.state = cloud_task.state._value_
+        self.state = cloud_task.state.name
         self.state_transition_time = cloud_task.state_transition_time
         self.exit_code = cloud_task.execution_info.exit_code
         if cloud_task.previous_state:
-            self.previous_state = cloud_task.previous_state._value_
+            self.previous_state = cloud_task.previous_state.name
             self.previous_state_transition_time = cloud_task.previous_state_transition_time
 
         self._execution_info = cloud_task.execution_info
@@ -190,17 +188,19 @@ class Application:
 
 
 class JobConfiguration:
-    def __init__(self,
-                 id=None,
-                 applications=None,
-                 vm_size=None,
-                 spark_configuration=None,
-                 toolkit=None,
-                 max_dedicated_nodes=0,
-                 max_low_pri_nodes=0,
-                 subnet_id=None,
-                 scheduling_target: SchedulingTarget = None,
-                 worker_on_master=None):
+    def __init__(
+            self,
+            id=None,
+            applications=None,
+            vm_size=None,
+            spark_configuration=None,
+            toolkit=None,
+            max_dedicated_nodes=0,
+            max_low_pri_nodes=0,
+            subnet_id=None,
+            scheduling_target: SchedulingTarget = None,
+            worker_on_master=None,
+    ):
 
         self.id = id
         self.applications = applications
@@ -252,24 +252,23 @@ class JobConfiguration:
             raise error.AztkError("Please supply an ID for the Job in your configuration.")
 
         if self.max_dedicated_nodes == 0 and self.max_low_pri_nodes == 0:
-            raise error.AztkError(
-                "Please supply a valid (greater than 0) value for either max_dedicated_nodes or max_low_pri_nodes in your configuration."
-            )
+            raise error.AztkError("Please supply a valid (greater than 0) value for either max_dedicated_nodes "
+                                  "or max_low_pri_nodes in your configuration.")
 
         if self.vm_size is None:
             raise error.AztkError("Please supply a vm_size in your configuration.")
 
         if self.mixed_mode() and not self.subnet_id:
             raise error.AztkError(
-                "You must configure a VNET to use AZTK in mixed mode (dedicated and low priority nodes) and pass the subnet_id in your configuration.."
-            )
+                "You must configure a VNET to use AZTK in mixed mode (dedicated and low priority nodes) "
+                "and pass the subnet_id in your configuration..")
 
         if self.scheduling_target == SchedulingTarget.Dedicated and self.max_dedicated_nodes == 0:
             raise error.InvalidModelError("Scheduling target cannot be Dedicated if dedicated vm size is 0")
 
 
-class JobState():
-    complete = 'completed'
+class JobState:
+    complete = "completed"
     active = "active"
     completed = "completed"
     disabled = "disabled"
@@ -277,15 +276,17 @@ class JobState():
     deleting = "deleting"
 
 
-class Job():
-    def __init__(self,
-                 cloud_job_schedule: batch_models.CloudJobSchedule,
-                 cloud_tasks: List[batch_models.CloudTask] = None,
-                 pool: batch_models.CloudPool = None,
-                 nodes: batch_models.ComputeNodePaged = None):
+class Job:
+    def __init__(
+            self,
+            cloud_job_schedule: batch_models.CloudJobSchedule,
+            cloud_tasks: List[batch_models.CloudTask] = None,
+            pool: batch_models.CloudPool = None,
+            nodes: batch_models.ComputeNodePaged = None,
+    ):
         self.id = cloud_job_schedule.id
         self.last_modified = cloud_job_schedule.last_modified
-        self.state = cloud_job_schedule.state._value_
+        self.state = cloud_job_schedule.state.name
         self.state_transition_time = cloud_job_schedule.state_transition_time
         self.creation_time = cloud_job_schedule.creation_time
         self.applications = [Application(task) for task in (cloud_tasks or [])]
@@ -297,9 +298,11 @@ class Job():
 
 class ApplicationLog(aztk.models.ApplicationLog):
     def __init__(self, application_log: aztk.models.ApplicationLog):
-        self.name = application_log.name
-        self.cluster_id = application_log.cluster_id    # TODO: change to something cluster/job agnostic
-        self.log = application_log.log
-        self.total_bytes = application_log.total_bytes
-        self.application_state = application_log.application_state
-        self.exit_code = application_log.exit_code
+        super().__init__(
+            name=application_log.name,
+            cluster_id=application_log.cluster_id,  # TODO: change to something cluster/job agnostic
+            log=application_log.log,
+            total_bytes=application_log.total_bytes,
+            application_state=application_log.application_state,
+            exit_code=application_log.exit_code,
+        )

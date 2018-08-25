@@ -1,14 +1,9 @@
 from typing import List
 
 import azure.batch.models as batch_models
-import azure.batch.models.batch_error as batch_error
 
-from aztk import error
-from aztk.internal.cluster_data import NodeData
 from aztk.spark import models
-from aztk.spark.utils import util
 from aztk.utils import constants, helpers
-from aztk.spark import models
 
 POOL_ADMIN_USER_IDENTITY = batch_models.UserIdentity(
     auto_user=batch_models.AutoUserSpecification(
@@ -60,14 +55,13 @@ def __get_secrets_env(core_base_operations):
         ]
 
 
-def __cluster_install_cmd(zip_resource_file: batch_models.ResourceFile,
-                          gpu_enabled: bool,
-                          docker_repo: str = None,
-                          docker_run_options: str = None,
-                          plugins=None,
-                          worker_on_master: bool = True,
-                          file_mounts=None,
-                          mixed_mode: bool = False):
+def __cluster_install_cmd(
+        zip_resource_file: batch_models.ResourceFile,
+        gpu_enabled: bool,
+        docker_repo: str = None,
+        docker_run_options: str = None,
+        file_mounts=None,
+):
     """
         For Docker on ubuntu 16.04 - return the command line
         to be run on the start task of the pool to setup spark.
@@ -80,41 +74,42 @@ def __cluster_install_cmd(zip_resource_file: batch_models.ResourceFile,
     if file_mounts:
         for mount in file_mounts:
             # Create the directory on the node
-            shares.append('mkdir -p {0}'.format(mount.mount_path))
+            shares.append("mkdir -p {0}".format(mount.mount_path))
 
             # Mount the file share
             shares.append(
-                'mount -t cifs //{0}.file.core.windows.net/{2} {3} -o vers=3.0,username={0},password={1},dir_mode=0777,file_mode=0777,sec=ntlmssp'.
+                "mount -t cifs //{0}.file.core.windows.net/{2} {3} -o vers=3.0,username={0},password={1},dir_mode=0777,file_mode=0777,sec=ntlmssp".
                 format(mount.storage_account_name, mount.storage_account_key, mount.file_share_path, mount.mount_path))
 
     setup = [
-        'time('\
-            'apt-get -y update;'\
-            'apt-get -y --no-install-recommends install unzip;'\
-            'unzip -o $AZ_BATCH_TASK_WORKING_DIR/{0};'\
-            'chmod 777 $AZ_BATCH_TASK_WORKING_DIR/aztk/node_scripts/setup_host.sh;'\
-        ') 2>&1'.format(zip_resource_file.file_path),
+        "time("
+        "apt-get -y update;"
+        "apt-get -y --no-install-recommends install unzip;"
+        "unzip -o $AZ_BATCH_TASK_WORKING_DIR/{0};"
+        "chmod 777 $AZ_BATCH_TASK_WORKING_DIR/aztk/node_scripts/setup_host.sh;"
+        ") 2>&1".format(zip_resource_file.file_path),
         '/bin/bash $AZ_BATCH_TASK_WORKING_DIR/aztk/node_scripts/setup_host.sh {0} {1} "{2}"'.format(
             constants.DOCKER_SPARK_CONTAINER_NAME,
             docker_repo,
-            "" if docker_run_options is None else docker_run_options.replace('"', '\\\"')
-        )
+            "" if docker_run_options is None else docker_run_options.replace('"', '\\"'),
+        ),
     ]
 
     commands = shares + setup
     return commands
 
 
-def generate_cluster_start_task(core_base_operations,
-                                zip_resource_file: batch_models.ResourceFile,
-                                cluster_id: str,
-                                gpu_enabled: bool,
-                                docker_repo: str = None,
-                                docker_run_options: str = None,
-                                file_shares: List[models.FileShare] = None,
-                                plugins: List[models.PluginConfiguration] = None,
-                                mixed_mode: bool = False,
-                                worker_on_master: bool = True):
+def generate_cluster_start_task(
+        core_base_operations,
+        zip_resource_file: batch_models.ResourceFile,
+        cluster_id: str,
+        gpu_enabled: bool,
+        docker_repo: str = None,
+        docker_run_options: str = None,
+        file_shares: List[models.FileShare] = None,
+        mixed_mode: bool = False,
+        worker_on_master: bool = True,
+):
     """
         This will return the start task object for the pool to be created.
         :param cluster_id str: Id of the cluster(Used for uploading the resource files)
@@ -130,22 +125,23 @@ def generate_cluster_start_task(core_base_operations,
     spark_submit_logs_file = constants.SPARK_SUBMIT_LOGS_FILE
 
     # TODO use certificate
-    environment_settings = __get_secrets_env(core_base_operations) + [
+    environment_settings = (__get_secrets_env(core_base_operations) + [
         batch_models.EnvironmentSetting(name="SPARK_WEB_UI_PORT", value=spark_web_ui_port),
         batch_models.EnvironmentSetting(name="SPARK_WORKER_UI_PORT", value=spark_worker_ui_port),
         batch_models.EnvironmentSetting(name="SPARK_JOB_UI_PORT", value=spark_job_ui_port),
         batch_models.EnvironmentSetting(name="SPARK_CONTAINER_NAME", value=spark_container_name),
         batch_models.EnvironmentSetting(name="SPARK_SUBMIT_LOGS_FILE", value=spark_submit_logs_file),
         batch_models.EnvironmentSetting(name="AZTK_GPU_ENABLED", value=helpers.bool_env(gpu_enabled)),
-    ] + __get_docker_credentials(core_base_operations) + _get_aztk_environment(cluster_id, worker_on_master, mixed_mode)
+    ] + __get_docker_credentials(core_base_operations) + _get_aztk_environment(cluster_id, worker_on_master,
+                                                                               mixed_mode))
 
     # start task command
-    command = __cluster_install_cmd(zip_resource_file, gpu_enabled, docker_repo, docker_run_options, plugins,
-                                    worker_on_master, file_shares, mixed_mode)
+    command = __cluster_install_cmd(zip_resource_file, gpu_enabled, docker_repo, docker_run_options, file_shares)
 
     return batch_models.StartTask(
         command_line=helpers.wrap_commands_in_shell(command),
         resource_files=resource_files,
         environment_settings=environment_settings,
         user_identity=POOL_ADMIN_USER_IDENTITY,
-        wait_for_success=True)
+        wait_for_success=True,
+    )

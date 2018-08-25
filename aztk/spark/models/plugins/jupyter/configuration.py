@@ -8,15 +8,8 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 def JupyterPlugin():
     return PluginConfiguration(
         name="jupyter",
-        ports=[
-            PluginPort(
-                internal=8888,
-                public=True,
-            ),
-        ],
+        ports=[PluginPort(internal=8888, public=True)],
         target_role=PluginTargetRole.All,
         execute="jupyter.sh",
-        files=[
-            PluginFile("jupyter.sh", os.path.join(dir_path, "jupyter.sh")),
-        ],
+        files=[PluginFile("jupyter.sh", os.path.join(dir_path, "jupyter.sh"))],
     )

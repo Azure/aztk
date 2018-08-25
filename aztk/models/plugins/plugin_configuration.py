@@ -9,6 +9,7 @@ class PluginTarget(Enum):
     """
     Where this plugin should run
     """
+
     SparkContainer = "spark-container"
     Host = "host"
 
@@ -26,6 +27,7 @@ class PluginPort(Model):
         :param public: [Optional] Port available to the user. If none won't open any port to the user
         :param name: [Optional] name to differentiate ports if you have multiple
     """
+
     internal = fields.Integer()
     public = fields.Field(default=None)
     name = fields.Integer()
@@ -55,6 +57,7 @@ class PluginConfiguration(Model):
         args: List of arguments to pass to the executing script
         env: Dict of environment variables to pass to the script
     """
+
     name = fields.String()
     files = fields.List(PluginFile)
     execute = fields.String()

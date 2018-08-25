@@ -2,13 +2,14 @@
     Code that handle spark configuration
 """
 import datetime
-import time
 import os
-import json
 import shutil
-from subprocess import call, Popen, check_output
+import time
+from subprocess import call
 from typing import List
+
 import azure.batch.models as batchmodels
+
 from core import config
 from install import pick_master
 
@@ -55,7 +56,7 @@ def setup_connection():
     master_node = get_node(master_node_id)
 
     master_config_file = os.path.join(spark_conf_folder, "master")
-    master_file = open(master_config_file, 'w', encoding='UTF-8')
+    master_file = open(master_config_file, "w", encoding="UTF-8")
 
     print("Adding master node ip {0} to config file '{1}'".format(master_node.ip_address, master_config_file))
     master_file.write("{0}\n".format(master_node.ip_address))
@@ -127,9 +128,9 @@ def setup_conf():
 
 
 def setup_ssh_keys():
-    pub_key_path_src = os.path.join(os.environ['AZTK_WORKING_DIR'], 'id_rsa.pub')
-    priv_key_path_src = os.path.join(os.environ['AZTK_WORKING_DIR'], 'id_rsa')
-    ssh_key_dest = '/root/.ssh'
+    pub_key_path_src = os.path.join(os.environ["AZTK_WORKING_DIR"], "id_rsa.pub")
+    priv_key_path_src = os.path.join(os.environ["AZTK_WORKING_DIR"], "id_rsa")
+    ssh_key_dest = "/root/.ssh"
 
     if not os.path.exists(ssh_key_dest):
         os.mkdir(ssh_key_dest)
@@ -139,27 +140,27 @@ def setup_ssh_keys():
 
 
 def copy_spark_env():
-    spark_env_path_src = os.path.join(os.environ['AZTK_WORKING_DIR'], 'conf/spark-env.sh')
-    spark_env_path_dest = os.path.join(spark_home, 'conf/spark-env.sh')
+    spark_env_path_src = os.path.join(os.environ["AZTK_WORKING_DIR"], "conf/spark-env.sh")
+    spark_env_path_dest = os.path.join(spark_home, "conf/spark-env.sh")
     copyfile(spark_env_path_src, spark_env_path_dest)
 
 
 def copy_spark_defaults():
-    spark_default_path_src = os.path.join(os.environ['AZTK_WORKING_DIR'], 'conf/spark-defaults.conf')
-    spark_default_path_dest = os.path.join(spark_home, 'conf/spark-defaults.conf')
+    spark_default_path_src = os.path.join(os.environ["AZTK_WORKING_DIR"], "conf/spark-defaults.conf")
+    spark_default_path_dest = os.path.join(spark_home, "conf/spark-defaults.conf")
     copyfile(spark_default_path_src, spark_default_path_dest)
 
 
 def copy_core_site():
-    spark_core_site_src = os.path.join(os.environ['AZTK_WORKING_DIR'], 'conf/core-site.xml')
-    spark_core_site_dest = os.path.join(spark_home, 'conf/core-site.xml')
+    spark_core_site_src = os.path.join(os.environ["AZTK_WORKING_DIR"], "conf/core-site.xml")
+    spark_core_site_dest = os.path.join(spark_home, "conf/core-site.xml")
     copyfile(spark_core_site_src, spark_core_site_dest)
 
 
 def copy_jars():
     # Copy jars to $SPARK_HOME/jars
-    spark_default_path_src = os.path.join(os.environ['AZTK_WORKING_DIR'], 'jars')
-    spark_default_path_dest = os.path.join(spark_home, 'jars')
+    spark_default_path_src = os.path.join(os.environ["AZTK_WORKING_DIR"], "jars")
+    spark_default_path_dest = os.path.join(spark_home, "jars")
 
     try:
         jar_files = os.listdir(spark_default_path_src)
@@ -175,10 +176,10 @@ def copy_jars():
 
 def parse_configuration_file(path_to_file: str):
     try:
-        file = open(path_to_file, 'r', encoding='UTF-8')
+        file = open(path_to_file, "r", encoding="UTF-8")
         properties = {}
         for line in file:
-            if (not line.startswith('#') and len(line) > 1):
+            if not line.startswith("#") and len(line) > 1:
                 split = line.split()
                 properties[split[0]] = split[1]
         return properties
@@ -189,10 +190,10 @@ def parse_configuration_file(path_to_file: str):
 
 def start_history_server():
     # configure the history server
-    spark_event_log_enabled_key = 'spark.eventLog.enabled'
-    spark_event_log_directory_key = 'spark.eventLog.dir'
-    spark_history_fs_log_directory = 'spark.history.fs.logDirectory'
-    path_to_spark_defaults_conf = os.path.join(spark_home, 'conf/spark-defaults.conf')
+    spark_event_log_enabled_key = "spark.eventLog.enabled"
+    spark_event_log_directory_key = "spark.eventLog.dir"
+    spark_history_fs_log_directory = "spark.history.fs.logDirectory"
+    path_to_spark_defaults_conf = os.path.join(spark_home, "conf/spark-defaults.conf")
     properties = parse_configuration_file(path_to_spark_defaults_conf)
     required_keys = [spark_event_log_enabled_key, spark_event_log_directory_key, spark_history_fs_log_directory]
 
@@ -208,17 +209,17 @@ def start_history_server():
 def configure_history_server_log_path(path_to_log_file):
     # Check if the file path starts with a local file extension
     # If so, create the path on disk otherwise ignore
-    print('Configuring spark history server log directory {}.'.format(path_to_log_file))
-    if path_to_log_file.startswith('file:/'):
+    print("Configuring spark history server log directory {}.".format(path_to_log_file))
+    if path_to_log_file.startswith("file:/"):
         # create the local path on disk
-        directory = path_to_log_file.replace('file:', '')
+        directory = path_to_log_file.replace("file:", "")
         if os.path.exists(directory):
-            print('Skipping. Directory {} already exists.'.format(directory))
+            print("Skipping. Directory {} already exists.".format(directory))
         else:
-            print('Create directory {}.'.format(directory))
+            print("Create directory {}.".format(directory))
             os.makedirs(directory)
 
             # Make sure the directory can be accessed by all users
             os.chmod(directory, mode=0o777)
     else:
-        print('Skipping. The eventLog directory is not local.')
+        print("Skipping. The eventLog directory is not local.")

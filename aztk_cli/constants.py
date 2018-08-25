@@ -1,4 +1,4 @@
 """
     Name of the executable
 """
-CLI_EXE = 'aztk'
+CLI_EXE = "aztk"

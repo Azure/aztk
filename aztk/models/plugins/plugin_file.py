@@ -15,7 +15,7 @@ class PluginFile(Model):
         super().__init__(target=target, local_path=local_path)
 
     def content(self):
-        with open(self.local_path, "r", encoding='UTF-8') as f:
+        with open(self.local_path, "r", encoding="UTF-8") as f:
             return f.read()
 
 

@@ -1,14 +1,11 @@
-import datetime
 import os
-from typing import List
-import yaml
+
 import azure.batch.models as batch_models
+import yaml
+
 from aztk.error import AztkError
-from aztk.utils import constants, helpers
+from aztk.utils import helpers
 from aztk.utils.command_builder import CommandBuilder
-'''
-Submit helper methods
-'''
 
 
 def __get_node(spark_client, node_id: str, cluster_id: str) -> batch_models.ComputeNode:
@@ -25,12 +22,13 @@ def generate_task(spark_client, container_id, application, remote=False):
             application_name=application.name,
             file_path=application.application,
             blob_client=spark_client.blob_client,
-            use_full_path=False)
+            use_full_path=False,
+        )
 
         # Upload application file
         resource_files.append(app_resource_file)
 
-        application.application = '$AZ_BATCH_TASK_WORKING_DIR/' + os.path.basename(application.application)
+        application.application = "$AZ_BATCH_TASK_WORKING_DIR/" + os.path.basename(application.application)
 
     # Upload dependent JARS
     jar_resource_file_paths = []
@@ -40,7 +38,8 @@ def generate_task(spark_client, container_id, application, remote=False):
             application_name=application.name,
             file_path=jar,
             blob_client=spark_client.blob_client,
-            use_full_path=False)
+            use_full_path=False,
+        )
         jar_resource_file_paths.append(current_jar_resource_file_path)
         resource_files.append(current_jar_resource_file_path)
 
@@ -52,7 +51,8 @@ def generate_task(spark_client, container_id, application, remote=False):
             application_name=application.name,
             file_path=py_file,
             blob_client=spark_client.blob_client,
-            use_full_path=False)
+            use_full_path=False,
+        )
         py_files_resource_file_paths.append(current_py_files_resource_file_path)
         resource_files.append(current_py_files_resource_file_path)
 
@@ -64,7 +64,8 @@ def generate_task(spark_client, container_id, application, remote=False):
             application_name=application.name,
             file_path=file,
             blob_client=spark_client.blob_client,
-            use_full_path=False)
+            use_full_path=False,
+        )
         files_resource_file_paths.append(files_resource_file_path)
         resource_files.append(files_resource_file_path)
 
@@ -75,21 +76,23 @@ def generate_task(spark_client, container_id, application, remote=False):
     application_definition_file = helpers.upload_text_to_container(
         container_name=container_id,
         application_name=application.name,
-        file_path='application.yaml',
+        file_path="application.yaml",
         content=yaml.dump(vars(application)),
-        blob_client=spark_client.blob_client)
+        blob_client=spark_client.blob_client,
+    )
     resource_files.append(application_definition_file)
 
     # create command to submit task
-    task_cmd = CommandBuilder('sudo docker exec')
-    task_cmd.add_argument('-i')
-    task_cmd.add_option('-e', 'AZ_BATCH_TASK_WORKING_DIR=$AZ_BATCH_TASK_WORKING_DIR')
-    task_cmd.add_option('-e', 'STORAGE_LOGS_CONTAINER={0}'.format(container_id))
-    task_cmd.add_argument('spark /bin/bash >> output.log 2>&1')
-    task_cmd.add_argument('-c "source ~/.bashrc; ' \
-                          'export PYTHONPATH=$PYTHONPATH:\$AZTK_WORKING_DIR; ' \
-                          'cd \$AZ_BATCH_TASK_WORKING_DIR; ' \
-                          '\$AZTK_WORKING_DIR/.aztk-env/.venv/bin/python \$AZTK_WORKING_DIR/aztk/node_scripts/submit.py"')
+    task_cmd = CommandBuilder("sudo docker exec")
+    task_cmd.add_argument("-i")
+    task_cmd.add_option("-e", "AZ_BATCH_TASK_WORKING_DIR=$AZ_BATCH_TASK_WORKING_DIR")
+    task_cmd.add_option("-e", "STORAGE_LOGS_CONTAINER={0}".format(container_id))
+    task_cmd.add_argument("spark /bin/bash >> output.log 2>&1")
+    task_cmd.add_argument(
+        r'-c "source ~/.bashrc; '
+        r"export PYTHONPATH=$PYTHONPATH:\$AZTK_WORKING_DIR; "
+        r"cd \$AZ_BATCH_TASK_WORKING_DIR; "
+        r'\$AZTK_WORKING_DIR/.aztk-env/.venv/bin/python \$AZTK_WORKING_DIR/aztk/node_scripts/submit.py"')
 
     # Create task
     task = batch_models.TaskAddParameter(
@@ -99,7 +102,8 @@ def generate_task(spark_client, container_id, application, remote=False):
         constraints=batch_models.TaskConstraints(max_task_retry_count=application.max_retry_count),
         user_identity=batch_models.UserIdentity(
             auto_user=batch_models.AutoUserSpecification(
-                scope=batch_models.AutoUserScope.task, elevation_level=batch_models.ElevationLevel.admin)))
+                scope=batch_models.AutoUserScope.task, elevation_level=batch_models.ElevationLevel.admin)),
+    )
 
     return task
 

@@ -4,12 +4,10 @@ import azure
 import azure.batch.models as batch_models
 import azure.batch.models.batch_error as batch_error
 
-from aztk import error
-from aztk import models
+from aztk import error, models
 from aztk.utils import constants, helpers
 
-output_file = constants.TASK_WORKING_DIR + \
-    "/" + constants.SPARK_SUBMIT_LOGS_FILE
+output_file = constants.TASK_WORKING_DIR + "/" + constants.SPARK_SUBMIT_LOGS_FILE
 
 
 def __check_task_node_exist(batch_client, cluster_id: str, task: batch_models.CloudTask) -> bool:
@@ -50,17 +48,18 @@ def __get_output_file_properties(batch_client, cluster_id: str, application_name
 
 def get_log_from_storage(blob_client, container_name, application_name, task):
     try:
-        blob = blob_client.get_blob_to_text(container_name, application_name + '/' + constants.SPARK_SUBMIT_LOGS_FILE)
+        blob = blob_client.get_blob_to_text(container_name, application_name + "/" + constants.SPARK_SUBMIT_LOGS_FILE)
     except azure.common.AzureMissingResourceHttpError:
         raise error.AztkError("Logs not found in your storage account. They were either deleted or never existed.")
 
     return models.ApplicationLog(
         name=application_name,
         cluster_id=container_name,
-        application_state=task.state._value_,
+        application_state=task.state.name,
         log=blob.content,
         total_bytes=blob.properties.content_length,
-        exit_code=task.execution_info.exit_code)
+        exit_code=task.execution_info.exit_code,
+    )
 
 
 def get_log(batch_client, blob_client, cluster_id: str, application_name: str, tail=False, current_bytes: int = 0):
@@ -88,18 +87,20 @@ def get_log(batch_client, blob_client, cluster_id: str, application_name: str, t
         return models.ApplicationLog(
             name=application_name,
             cluster_id=cluster_id,
-            application_state=task.state._value_,
+            application_state=task.state.name,
             log=content,
             total_bytes=target_bytes,
-            exit_code=task.execution_info.exit_code)
+            exit_code=task.execution_info.exit_code,
+        )
     else:
         return models.ApplicationLog(
             name=application_name,
             cluster_id=cluster_id,
-            application_state=task.state._value_,
-            log='',
+            application_state=task.state.name,
+            log="",
             total_bytes=target_bytes,
-            exit_code=task.execution_info.exit_code)
+            exit_code=task.execution_info.exit_code,
+        )
 
 
 def get_application_log(base_operations, cluster_id: str, application_name: str, tail=False, current_bytes: int = 0):

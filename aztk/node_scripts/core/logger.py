@@ -3,7 +3,7 @@ import logging
 
 log = logging.getLogger("aztk.node-agent")
 
-DEFAULT_FORMAT = '%(message)s'
+DEFAULT_FORMAT = "%(message)s"
 
 
 def setup_logging():

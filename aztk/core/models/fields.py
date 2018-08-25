@@ -35,8 +35,8 @@ class Field:
     """
 
     def __init__(self, *validators, **kwargs):
-        self.default = kwargs.get('default')
-        self.required = 'default' not in kwargs
+        self.default = kwargs.get("default")
+        self.required = "default" not in kwargs
         self.validators = []
 
         if self.required:
@@ -44,7 +44,7 @@ class Field:
 
         self.validators.extend(validators)
 
-        choices = kwargs.get('choices')
+        choices = kwargs.get("choices")
         if choices:
             self.validators.append(aztk_validators.In(choices))
 
@@ -134,11 +134,11 @@ class List(Field):
 
     def __init__(self, model=None, **kwargs):
         self.model = model
-        kwargs.setdefault('default', list)
-        self.merge_strategy = kwargs.get('merge_strategy', ListMergeStrategy.Append)
-        self.skip_none = kwargs.get('skip_none', True)
+        kwargs.setdefault("default", list)
+        self.merge_strategy = kwargs.get("merge_strategy", ListMergeStrategy.Append)
+        self.skip_none = kwargs.get("skip_none", True)
 
-        super().__init__(aztk_validators.List(*kwargs.get('inner_validators', [])), **kwargs)
+        super().__init__(aztk_validators.List(*kwargs.get("inner_validators", [])), **kwargs)
 
     def __set__(self, instance, value):
         if isinstance(value, collections.MutableSequence):
@@ -175,7 +175,7 @@ class List(Field):
         output = []
         if items is not None:
             for item in items:
-                if hasattr(item, 'to_dict'):
+                if hasattr(item, "to_dict"):
                     output.append(item.to_dict())
                 else:
                     output.append(item)
@@ -196,7 +196,7 @@ class Model(Field):
         super().__init__(aztk_validators.Model(model), *args, **kwargs)
 
         self.model = model
-        self.merge_strategy = kwargs.get('merge_strategy', ModelMergeStrategy.Merge)
+        self.merge_strategy = kwargs.get("merge_strategy", ModelMergeStrategy.Merge)
 
     def __set__(self, instance, value):
         if isinstance(value, collections.MutableMapping):

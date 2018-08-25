@@ -1,5 +1,4 @@
 import argparse
-import time
 import typing
 
 import aztk.spark
@@ -11,7 +10,7 @@ def setup_parser(_: argparse.ArgumentParser):
     pass
 
 
-def execute(args: typing.NamedTuple):
+def execute(_: typing.NamedTuple):
     spark_client = aztk.spark.Client(config.load_aztk_secrets())
 
     utils.print_jobs(spark_client.job.list())

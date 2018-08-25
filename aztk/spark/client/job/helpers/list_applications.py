@@ -13,7 +13,7 @@ def _list_applications(core_job_operations, job_id):
     applications = {}
     for metadata_item in recent_run_job.metadata:
         if metadata_item.name == "applications":
-            for app_name in metadata_item.value.split('\n'):
+            for app_name in metadata_item.value.split("\n"):
                 applications[app_name] = None
 
     # get tasks from Batch job

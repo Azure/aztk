@@ -1,8 +1,4 @@
 import os
-from aztk.utils import ssh
-from aztk.utils.command_builder import CommandBuilder
-from aztk import models as aztk_models
-import azure.batch.models as batch_models
 
 
 def run(spark_client, cluster_id, output_directory=None):
@@ -17,8 +13,8 @@ def run(spark_client, cluster_id, output_directory=None):
         output = spark_client.cluster_download(cluster_id, remote_path, local_path, host=True)
 
         # write run output to debug/ directory
-        with open(os.path.join(os.path.dirname(local_path), "debug-output.txt"), 'w', encoding="UTF-8") as f:
-            [f.write(line + '\n') for node_output in run_output for line in node_output.output]
+        with open(os.path.join(os.path.dirname(local_path), "debug-output.txt"), "w", encoding="UTF-8") as f:
+            [f.write(line + "\n") for node_output in run_output for line in node_output.output]
     else:
         output = spark_client.cluster_download(cluster_id, remote_path, host=True)
 
@@ -26,8 +22,4 @@ def run(spark_client, cluster_id, output_directory=None):
 
 
 def _build_diagnostic_ssh_command():
-    return "sudo rm -rf /tmp/debug.zip; "\
-           "sudo apt-get install -y python3-pip; "\
-           "sudo -H pip3 install --upgrade pip; "\
-           "sudo -H pip3 install docker; "\
-           "sudo python3 /tmp/debug.py"
+    return "sudo rm -rf /tmp/debug.zip; " "sudo apt-get install -y python3-pip; " "sudo -H pip3 install --upgrade pip; " "sudo -H pip3 install docker; " "sudo python3 /tmp/debug.py"

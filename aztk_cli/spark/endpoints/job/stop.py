@@ -1,13 +1,12 @@
 import argparse
-import time
 import typing
 
 import aztk.spark
-from aztk_cli import config, log, utils
+from aztk_cli import config, log
 
 
 def setup_parser(parser: argparse.ArgumentParser):
-    parser.add_argument('--id', dest='job_id', required=True, help='The unique id of your AZTK job')
+    parser.add_argument("--id", dest="job_id", required=True, help="The unique id of your AZTK job")
 
 
 def execute(args: typing.NamedTuple):

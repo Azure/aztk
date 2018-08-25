@@ -12,6 +12,6 @@ def cluster_run(core_cluster_operations,
                 timeout=None):
     try:
         return core_cluster_operations.run(
-            cluster_id, command, internal, container_name='spark' if not host else None, timeout=timeout)
+            cluster_id, command, internal, container_name="spark" if not host else None, timeout=timeout)
     except batch_error.BatchErrorException as e:
         raise error.AztkError(helpers.format_batch_exception(e))

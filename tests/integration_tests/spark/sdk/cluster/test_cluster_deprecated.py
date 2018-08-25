@@ -12,61 +12,19 @@ import aztk.spark
 from aztk.error import AztkError
 from aztk.utils import constants
 from aztk_cli import config
+from tests.integration_tests.spark.sdk.clean_up_cluster import clean_up_cluster
+from tests.integration_tests.spark.sdk.ensure_spark_processes import \
+    ensure_spark_processes
 from tests.integration_tests.spark.sdk.get_client import (get_spark_client, get_test_suffix)
+from tests.integration_tests.spark.sdk.wait_for_all_nodes import \
+    wait_for_all_nodes
 
 base_cluster_id = get_test_suffix("cluster")
 spark_client = get_spark_client()
 
 
-def clean_up_cluster(cluster_id):
-    try:
-        spark_client.delete_cluster(cluster_id=cluster_id)
-    except (BatchErrorException, AztkError):
-        # pass in the event that the cluster does not exist
-        pass
-
-
-def ensure_spark_master(cluster_id):
-    results = spark_client.cluster_run(cluster_id,
-                "if $AZTK_IS_MASTER ; then $SPARK_HOME/sbin/spark-daemon.sh status org.apache.spark.deploy.master.Master 1 ;" \
-                " else echo AZTK_IS_MASTER is false ; fi")
-    for _, result in results:
-        if isinstance(result, Exception):
-            raise result
-        print(result[0])
-        assert result[0] in ["org.apache.spark.deploy.master.Master is running.", "AZTK_IS_MASTER is false"]
-
-
-def ensure_spark_worker(cluster_id):
-    results = spark_client.cluster_run(cluster_id,
-                "if $AZTK_IS_WORKER ; then $SPARK_HOME/sbin/spark-daemon.sh status org.apache.spark.deploy.worker.Worker 1 ;" \
-                " else echo AZTK_IS_WORKER is false ; fi")
-    for _, result in results:
-        if isinstance(result, Exception):
-            raise result
-        assert result[0] in ["org.apache.spark.deploy.worker.Worker is running.", "AZTK_IS_WORKER is false"]
-
-
-def ensure_spark_processes(cluster_id):
-    ensure_spark_master(cluster_id)
-    ensure_spark_worker(cluster_id)
-
-
-def wait_for_all_nodes(cluster_id, nodes):
-    while True:
-        for node in nodes:
-            if node.state in [batch_models.ComputeNodeState.unusable, batch_models.ComputeNodeState.start_task_failed]:
-                raise AztkError("Node {} in failed state.".format(node.id))
-            if node.state not in [batch_models.ComputeNodeState.idle, batch_models.ComputeNodeState.running]:
-                break
-        else:
-            nodes = spark_client.cluster.get(cluster_id).nodes
-            continue
-        break
-
-
 def test_create_cluster():
-    test_id = "test-create-"
+    test_id = "test-create-deprecated-"
     # TODO: make Cluster Configuration more robust, test each value
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
         cluster_id=test_id + base_cluster_id,
@@ -90,15 +48,12 @@ def test_create_cluster():
         assert cluster.master_node_id is not None
         assert cluster.current_low_pri_nodes == 0
 
-    except (AztkError, BatchErrorException) as e:
-        assert False
-
     finally:
-        clean_up_cluster(cluster_configuration.cluster_id)
+        clean_up_cluster(spark_client, cluster_configuration.cluster_id)
 
 
 def test_get_cluster():
-    test_id = "test-get-"
+    test_id = "test-get-deprecated-"
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
         cluster_id=test_id + base_cluster_id,
         size=2,
@@ -123,15 +78,12 @@ def test_get_cluster():
         assert cluster.master_node_id is not None
         assert cluster.current_low_pri_nodes == 0
 
-    except (AztkError, BatchErrorException) as e:
-        assert False
-
     finally:
-        clean_up_cluster(cluster_configuration.cluster_id)
+        clean_up_cluster(spark_client, cluster_configuration.cluster_id)
 
 
 def test_list_clusters():
-    test_id = "test-list-"
+    test_id = "test-list-deprecated-"
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
         cluster_id=test_id + base_cluster_id,
         size=2,
@@ -149,15 +101,12 @@ def test_list_clusters():
 
         assert cluster_configuration.cluster_id in [cluster.id for cluster in clusters]
 
-    except (AztkError, BatchErrorException):
-        assert False
-
     finally:
-        clean_up_cluster(cluster_configuration.cluster_id)
+        clean_up_cluster(spark_client, cluster_configuration.cluster_id)
 
 
 def test_get_remote_login_settings():
-    test_id = "test-get-remote-login-"
+    test_id = "test-get-remote-login-deprecated-"
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
         cluster_id=test_id + base_cluster_id,
         size=2,
@@ -178,16 +127,12 @@ def test_get_remote_login_settings():
         assert rls.ip_address is not None
         assert rls.port is not None
 
-    except (AztkError, BatchErrorException) as e:
-        raise e
-        assert False
-
     finally:
-        clean_up_cluster(cluster_configuration.cluster_id)
+        clean_up_cluster(spark_client, cluster_configuration.cluster_id)
 
 
 def test_submit():
-    test_id = "test-submit-"
+    test_id = "test-submit-deprecated-"
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
         cluster_id=test_id + base_cluster_id,
         size=2,
@@ -220,17 +165,12 @@ def test_submit():
             spark_client.submit(
                 cluster_id=cluster_configuration.cluster_id, application=application_configuration, wait=True)
 
-        assert True
-
-    except (AztkError, BatchErrorException):
-        assert False
-
     finally:
-        clean_up_cluster(cluster_configuration.cluster_id)
+        clean_up_cluster(spark_client, cluster_configuration.cluster_id)
 
 
 def test_get_application_log():
-    test_id = "test-get-app-log-"
+    test_id = "test-get-app-log-deprecated-"
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
         cluster_id=test_id + base_cluster_id,
         size=2,
@@ -275,11 +215,8 @@ def test_get_application_log():
         assert application_log.log is not None
         assert application_log.total_bytes is not None
 
-    except (AztkError, BatchErrorException):
-        assert False
-
     finally:
-        clean_up_cluster(cluster_configuration.cluster_id)
+        clean_up_cluster(spark_client, cluster_configuration.cluster_id)
 
 
 def test_create_user_password():
@@ -293,7 +230,7 @@ def test_create_user_ssh_key():
 
 
 def test_get_application_status_complete():
-    test_id = "test-app-status-complete-"
+    test_id = "test-app-status-complete-deprecated-"
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
         cluster_id=test_id + base_cluster_id,
         size=2,
@@ -330,15 +267,12 @@ def test_get_application_status_complete():
 
         assert status == "completed"
 
-    except (AztkError, BatchErrorException):
-        assert False
-
     finally:
-        clean_up_cluster(cluster_configuration.cluster_id)
+        clean_up_cluster(spark_client, cluster_configuration.cluster_id)
 
 
 def test_delete_cluster():
-    test_id = "test-delete-"
+    test_id = "test-delete-deprecated-"
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
         cluster_id=test_id + base_cluster_id,
         size=2,
@@ -356,15 +290,12 @@ def test_delete_cluster():
 
         assert success is True
 
-    except (AztkError, BatchErrorException):
-        assert False
-
     finally:
-        clean_up_cluster(cluster_configuration.cluster_id)
+        clean_up_cluster(spark_client, cluster_configuration.cluster_id)
 
 
 def test_spark_processes_up():
-    test_id = "test-spark-processes-up-"
+    test_id = "test-spark-processes-up-deprecated-"
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
         cluster_id=test_id + base_cluster_id,
         size=2,
@@ -378,22 +309,16 @@ def test_spark_processes_up():
     try:
         with pytest.warns(DeprecationWarning):
             cluster = spark_client.create_cluster(cluster_configuration, wait=True)
-            wait_for_all_nodes(cluster.id, cluster.nodes)
+            wait_for_all_nodes(spark_client, cluster.id, cluster.nodes)
 
-        with pytest.warns(DeprecationWarning):
-            success = spark_client.delete_cluster(cluster_id=cluster_configuration.cluster_id)
-
-        assert success is True
-
-    except (AztkError, BatchErrorException):
-        assert False
+        ensure_spark_processes(spark_client=spark_client, id=cluster_configuration.cluster_id)
 
     finally:
-        clean_up_cluster(cluster_configuration.cluster_id)
+        clean_up_cluster(spark_client, cluster_configuration.cluster_id)
 
 
 def test_debug_tool():
-    test_id = "debug-tool-"
+    test_id = "test-debug-tool-"
     cluster_configuration = aztk.spark.models.ClusterConfiguration(
         cluster_id=test_id + base_cluster_id,
         size=2,
@@ -412,7 +337,7 @@ def test_debug_tool():
             cluster = spark_client.create_cluster(cluster_configuration, wait=True)
 
         nodes = [node for node in cluster.nodes]
-        wait_for_all_nodes(cluster.id, nodes)
+        wait_for_all_nodes(spark_client, cluster.id, nodes)
 
         with pytest.warns(DeprecationWarning):
             cluster_output = spark_client.run_cluster_diagnostics(cluster_id=cluster.id)
@@ -423,8 +348,6 @@ def test_debug_tool():
             assert node_output.id in [node.id for node in nodes]
             assert node_output.error is None
             assert any(member in name for name in debug_zip.namelist() for member in expected_members)
-    except (AztkError, BatchErrorException):
-        assert False
 
     finally:
-        clean_up_cluster(cluster_configuration.cluster_id)
+        clean_up_cluster(spark_client, cluster_configuration.cluster_id)

@@ -1,11 +1,20 @@
 from datetime import timedelta
 
 import azure.batch.models as batch_models
-from aztk.utils import helpers, constants
+
+from aztk.utils import constants, helpers
 
 
-def submit_job(job_client, job_configuration, start_task, job_manager_task, autoscale_formula,
-               software_metadata_key: str, vm_image_model, application_metadata):
+def submit_job(
+        job_client,
+        job_configuration,
+        start_task,
+        job_manager_task,
+        autoscale_formula,
+        software_metadata_key: str,
+        vm_image_model,
+        application_metadata,
+):
     """
             Job Submission
             :param job_configuration -> aztk_sdk.spark.models.JobConfiguration
@@ -19,9 +28,8 @@ def submit_job(job_client, job_configuration, start_task, job_manager_task, auto
     job_client.get_cluster_data(job_configuration.id).save_cluster_config(job_configuration.to_cluster_config())
 
     # get a verified node agent sku
-    sku_to_use, image_ref_to_use = \
-        helpers.select_latest_verified_vm_image_with_node_agent_sku(
-            vm_image_model.publisher, vm_image_model.offer, vm_image_model.sku, job_client.batch_client)
+    sku_to_use, image_ref_to_use = helpers.select_latest_verified_vm_image_with_node_agent_sku(
+        vm_image_model.publisher, vm_image_model.offer, vm_image_model.sku, job_client.batch_client)
 
     # set up subnet if necessary
     network_conf = None
@@ -48,8 +56,10 @@ def submit_job(job_client, job_configuration, start_task, job_manager_task, auto
             metadata=[
                 batch_models.MetadataItem(name=constants.AZTK_SOFTWARE_METADATA_KEY, value=software_metadata_key),
                 batch_models.MetadataItem(
-                    name=constants.AZTK_MODE_METADATA_KEY, value=constants.AZTK_JOB_MODE_METADATA)
-            ]))
+                    name=constants.AZTK_MODE_METADATA_KEY, value=constants.AZTK_JOB_MODE_METADATA),
+            ],
+        ),
+    )
 
     # define job specification
     job_spec = batch_models.JobSpecification(
@@ -57,7 +67,8 @@ def submit_job(job_client, job_configuration, start_task, job_manager_task, auto
         display_name=job_configuration.id,
         on_all_tasks_complete=batch_models.OnAllTasksComplete.terminate_job,
         job_manager_task=job_manager_task,
-        metadata=[batch_models.MetadataItem(name='applications', value=application_metadata)])
+        metadata=[batch_models.MetadataItem(name="applications", value=application_metadata)],
+    )
 
     # define schedule
     schedule = batch_models.Schedule(

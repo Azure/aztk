@@ -24,7 +24,7 @@ class Required(Validator):
 
     def validate(self, value):
         if value is None:
-            raise InvalidModelFieldError('is required')
+            raise InvalidModelFieldError("is required")
 
 
 class String(Validator):
@@ -37,7 +37,7 @@ class String(Validator):
             return
 
         if not isinstance(value, str):
-            raise InvalidModelFieldError('{0} should be a string'.format(value))
+            raise InvalidModelFieldError("{0} should be a string".format(value))
 
 
 class Integer(Validator):
@@ -50,7 +50,7 @@ class Integer(Validator):
             return
 
         if not isinstance(value, int):
-            raise InvalidModelFieldError('{0} should be an integer'.format(value))
+            raise InvalidModelFieldError("{0} should be an integer".format(value))
 
 
 class Float(Validator):
@@ -63,7 +63,7 @@ class Float(Validator):
             return
 
         if not isinstance(value, float):
-            raise InvalidModelFieldError('{0} should be a float'.format(value))
+            raise InvalidModelFieldError("{0} should be a float".format(value))
 
 
 class Boolean(Validator):
@@ -74,7 +74,7 @@ class Boolean(Validator):
             return
 
         if not isinstance(value, bool):
-            raise InvalidModelFieldError('{0} should be a boolean'.format(value))
+            raise InvalidModelFieldError("{0} should be a boolean".format(value))
 
 
 class In(Validator):
@@ -90,7 +90,7 @@ class In(Validator):
             return
 
         if value not in self.choices:
-            raise InvalidModelFieldError('{0} should be in {1}'.format(value, self.choices))
+            raise InvalidModelFieldError("{0} should be in {1}".format(value, self.choices))
 
 
 class InstanceOf(Validator):
@@ -140,7 +140,7 @@ class List(Validator):
             return
 
         if not isinstance(value, collections.MutableSequence):
-            raise InvalidModelFieldError('should be a list')
+            raise InvalidModelFieldError("should be a list")
 
         for i in value:
             for validator in self.validators:

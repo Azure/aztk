@@ -2,24 +2,25 @@ import argparse
 import typing
 
 import aztk.spark
-from aztk_cli import config, log, utils
+from aztk_cli import config, utils
 
 
 def setup_parser(parser: argparse.ArgumentParser):
-    parser.add_argument('--id', dest='cluster_id', required=True, help='The unique id of your spark cluster')
+    parser.add_argument("--id", dest="cluster_id", required=True, help="The unique id of your spark cluster")
     parser.add_argument(
-        '--node-id',
-        '-n',
-        dest='node_id',
+        "--node-id",
+        "-n",
+        dest="node_id",
         required=False,
-        help='The unique id of the node in the cluster to run the command on')
-    parser.add_argument('command', help='The command to run on your spark cluster')
+        help="The unique id of the node in the cluster to run the command on",
+    )
+    parser.add_argument("command", help="The command to run on your spark cluster")
     parser.add_argument(
-        '--internal',
-        action='store_true',
-        help='Connect using the local IP of the master node. Only use if using a VPN')
+        "--internal",
+        action="store_true",
+        help="Connect using the local IP of the master node. Only use if using a VPN")
     parser.add_argument(
-        '--host', action='store_true', help='Run the command on the host instead of the Spark Docker container')
+        "--host", action="store_true", help="Run the command on the host instead of the Spark Docker container")
     parser.set_defaults(internal=False, host=False)
 
 
@@ -32,5 +33,5 @@ def execute(args: typing.NamedTuple):
             ]
         else:
             results = spark_client.cluster.run(args.cluster_id, args.command, args.host, args.internal)
-
-    [utils.log_node_run_output(node_output) for node_output in results]
+    for node_output in results:
+        utils.log_node_run_output(node_output)

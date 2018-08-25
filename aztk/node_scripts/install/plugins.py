@@ -1,18 +1,19 @@
-import os
 import json
-import yaml
+import os
 import subprocess
-from pathlib import Path
+
+import yaml
+
 from aztk.models.plugins import PluginTarget, PluginTargetRole
 
-log_folder = os.path.join(os.environ['AZTK_WORKING_DIR'], 'logs', 'plugins')
+log_folder = os.path.join(os.environ["AZTK_WORKING_DIR"], "logs", "plugins")
 
 
 def _read_manifest_file(path=None):
     if not os.path.isfile(path):
         print("Plugins manifest file doesn't exist at {0}".format(path))
     else:
-        with open(path, 'r', encoding='UTF-8') as stream:
+        with open(path, "r", encoding="UTF-8") as stream:
             try:
                 return yaml.load(stream)
             except json.JSONDecodeError as err:
@@ -22,7 +23,7 @@ def _read_manifest_file(path=None):
 def setup_plugins(target: PluginTarget, is_master: bool = False, is_worker: bool = False):
 
     plugins_dir = _plugins_dir()
-    plugins_manifest = _read_manifest_file(os.path.join(plugins_dir, 'plugins-manifest.yaml'))
+    plugins_manifest = _read_manifest_file(os.path.join(plugins_dir, "plugins-manifest.yaml"))
 
     if not os.path.exists(log_folder):
         os.makedirs(log_folder)
@@ -32,28 +33,41 @@ def setup_plugins(target: PluginTarget, is_master: bool = False, is_worker: bool
 
 
 def _plugins_dir():
-    return os.path.join(os.environ['AZTK_WORKING_DIR'], 'plugins')
+    return os.path.join(os.environ["AZTK_WORKING_DIR"], "plugins")
 
 
 def _run_on_this_node(plugin_obj, target: PluginTarget, is_master, is_worker):
 
-    print("Loading plugin {} in {} on {}".format(plugin_obj["execute"], plugin_obj['target'],
-                                                 plugin_obj['target_role']))
+    print("Loading plugin {} in {} on {}".format(plugin_obj["execute"], plugin_obj["target"],
+                                                 plugin_obj["target_role"]))
 
-    if plugin_obj['target'] != target.value:
-        print("Ignoring ", plugin_obj["execute"], "as target is for ", plugin_obj['target'],
-              "but is currently running in ", target.value)
+    if plugin_obj["target"] != target.value:
+        print(
+            "Ignoring ",
+            plugin_obj["execute"],
+            "as target is for ",
+            plugin_obj["target"],
+            "but is currently running in ",
+            target.value,
+        )
         return False
 
-    if plugin_obj['target_role'] == PluginTargetRole.Master.value and is_master is True:
+    if plugin_obj["target_role"] == PluginTargetRole.Master.value and is_master is True:
         return True
-    if plugin_obj['target_role'] == PluginTargetRole.Worker.value and is_worker is True:
+    if plugin_obj["target_role"] == PluginTargetRole.Worker.value and is_worker is True:
         return True
-    if plugin_obj['target_role'] == PluginTargetRole.All.value:
+    if plugin_obj["target_role"] == PluginTargetRole.All.value:
         return True
 
-    print("Ignoring plugin", plugin_obj["execute"], "as target role is ", plugin_obj['target_role'],
-          "and node is master: ", is_master, is_worker)
+    print(
+        "Ignoring plugin",
+        plugin_obj["execute"],
+        "as target role is ",
+        plugin_obj["target_role"],
+        "and node is master: ",
+        is_master,
+        is_worker,
+    )
 
     return False
 
@@ -63,8 +77,8 @@ def _setup_plugins(plugins_manifest, target: PluginTarget, is_master, is_worker)
 
     for plugin in plugins_manifest:
         if _run_on_this_node(plugin, target, is_master, is_worker):
-            path = os.path.join(plugins_dir, plugin['execute'])
-            _run_script(plugin.get("name"), path, plugin.get('args'), plugin.get('env'))
+            path = os.path.join(plugins_dir, plugin["execute"])
+            _run_script(plugin.get("name"), path, plugin.get("args"), plugin.get("env"))
 
 
 def _run_script(name: str, script_path: str = None, args: dict = None, env: dict = None):
@@ -84,7 +98,7 @@ def _run_script(name: str, script_path: str = None, args: dict = None, env: dict
     if args is None:
         args = []
 
-    out_file = open(os.path.join(log_folder, '{0}.txt'.format(name)), 'w', encoding='UTF-8')
+    out_file = open(os.path.join(log_folder, "{0}.txt".format(name)), "w", encoding="UTF-8")
     try:
         subprocess.call([script_path] + args, env=my_env, stdout=out_file, stderr=out_file)
         print("Finished running")
