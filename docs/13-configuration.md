@@ -47,12 +47,14 @@ plugins:
 # Allow master node to also be a worker <true/false> (Default: true)
 # worker_on_master: true
 
-# Where do you want to run the driver <dedicated/master/any> (Default: dedicated if at least one dedicated node or any otherwise)
-# scheduling_target: dedicated
 
 # wait: <true/false>
 wait: true
 ```
+<!--- this goes about wait: true
+# Where do you want to run the driver <dedicated/master/any> (Default: dedicated if at least one dedicated node or any otherwise)
+# scheduling_target: dedicated
+-->
 
 Running `aztk spark cluster create` will create a cluster of 4 **Standard\_A2** nodes called 'spark\_cluster' with a linux user named 'spark'. This is equivalent to running the command
 

@@ -1,7 +1,8 @@
 import pytest
 
 from aztk.error import InvalidModelError
-from aztk.models import (ClusterConfiguration, SchedulingTarget, Toolkit, UserConfiguration)
+from aztk.models import ClusterConfiguration, Toolkit, UserConfiguration
+# from aztk.models import SchedulingTarget
 from aztk.spark.models.plugins import HDFSPlugin, JupyterPlugin
 
 
@@ -60,15 +61,15 @@ def test_cluster_configuration():
     assert config.plugins[1].name == 'hdfs'
 
 
-def test_scheduling_target_dedicated_with_no_dedicated_nodes_raise_error():
-    with pytest.raises(InvalidModelError, match="Scheduling target cannot be Dedicated if dedicated vm size is 0"):
-        conf = ClusterConfiguration(
-            cluster_id="abc",
-            scheduling_target=SchedulingTarget.Dedicated,
-            vm_size="standard_a2",
-            size=0,
-            size_low_priority=2,
-            toolkit=Toolkit(software="spark", version="1.6.3"),
-        )
+# def test_scheduling_target_dedicated_with_no_dedicated_nodes_raise_error():
+#     with pytest.raises(InvalidModelError, match="Scheduling target cannot be Dedicated if dedicated vm size is 0"):
+#         conf = ClusterConfiguration(
+#             cluster_id="abc",
+#             scheduling_target=SchedulingTarget.Dedicated,
+#             vm_size="standard_a2",
+#             size=0,
+#             size_low_priority=2,
+#             toolkit=Toolkit(software="spark", version="1.6.3"),
+#         )
 
-        conf.validate()
+#         conf.validate()

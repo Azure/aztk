@@ -6,7 +6,7 @@ from aztk.models.plugins import PluginTarget
 from core import config
 from install import create_user, pick_master, plugins, spark, spark_container
 
-from .node_scheduling import setup_node_scheduling
+# from .node_scheduling import setup_node_scheduling
 
 
 def read_cluster_config():
@@ -48,7 +48,7 @@ def setup_host(docker_repo: str, docker_run_options: str):
 
     cluster_conf = read_cluster_config()
 
-    setup_node_scheduling(client, cluster_conf, is_master)
+    # setup_node_scheduling(client, cluster_conf, is_master)
 
     # TODO pass azure file shares
     spark_container.start_spark_container(

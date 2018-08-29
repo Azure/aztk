@@ -12,19 +12,18 @@ POOL_ADMIN_USER_IDENTITY = batch_models.UserIdentity(
     auto_user=batch_models.AutoUserSpecification(
         scope=batch_models.AutoUserScope.pool, elevation_level=batch_models.ElevationLevel.admin))
 
-
-def _default_scheduling_target(vm_count: int):
-    if vm_count == 0:
-        return models.SchedulingTarget.Any
-    else:
-        return models.SchedulingTarget.Dedicated
+# def _default_scheduling_target(vm_count: int):
+#     if vm_count == 0:
+#         return models.SchedulingTarget.Any
+#     else:
+#         return models.SchedulingTarget.Dedicated
 
 
 def _apply_default_for_cluster_config(configuration: models.ClusterConfiguration):
     cluster_conf = models.ClusterConfiguration()
     cluster_conf.merge(configuration)
-    if cluster_conf.scheduling_target is None:
-        cluster_conf.scheduling_target = _default_scheduling_target(cluster_conf.size)
+    # if cluster_conf.scheduling_target is None:
+    #     cluster_conf.scheduling_target = _default_scheduling_target(cluster_conf.size)
     return cluster_conf
 
 

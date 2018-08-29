@@ -103,7 +103,7 @@ class PluginConfiguration(aztk.models.PluginConfiguration):
     pass
 
 
-SchedulingTarget = aztk.models.SchedulingTarget
+# SchedulingTarget = aztk.models.SchedulingTarget
 
 
 class ClusterConfiguration(aztk.models.ClusterConfiguration):
@@ -198,7 +198,7 @@ class JobConfiguration:
             max_dedicated_nodes=0,
             max_low_pri_nodes=0,
             subnet_id=None,
-            scheduling_target: SchedulingTarget = None,
+    # scheduling_target: SchedulingTarget = None,
             worker_on_master=None,
     ):
 
@@ -214,7 +214,7 @@ class JobConfiguration:
         self.max_low_pri_nodes = max_low_pri_nodes
         self.subnet_id = subnet_id
         self.worker_on_master = worker_on_master
-        self.scheduling_target = scheduling_target
+        # self.scheduling_target = scheduling_target
 
     def to_cluster_config(self):
         return ClusterConfiguration(
@@ -226,7 +226,7 @@ class JobConfiguration:
             subnet_id=self.subnet_id,
             worker_on_master=self.worker_on_master,
             spark_configuration=self.spark_configuration,
-            scheduling_target=self.scheduling_target,
+        # scheduling_target=self.scheduling_target,
         )
 
     def mixed_mode(self) -> bool:
@@ -263,8 +263,8 @@ class JobConfiguration:
                 "You must configure a VNET to use AZTK in mixed mode (dedicated and low priority nodes) "
                 "and pass the subnet_id in your configuration..")
 
-        if self.scheduling_target == SchedulingTarget.Dedicated and self.max_dedicated_nodes == 0:
-            raise error.InvalidModelError("Scheduling target cannot be Dedicated if dedicated vm size is 0")
+        # if self.scheduling_target == SchedulingTarget.Dedicated and self.max_dedicated_nodes == 0:
+        #     raise error.InvalidModelError("Scheduling target cannot be Dedicated if dedicated vm size is 0")
 
 
 class JobState:

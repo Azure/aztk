@@ -25,8 +25,6 @@ job:
           # Optional command line options to pass to `docker run`
           # docker_run_options: <additional command line options to pass to `docker run` (for more information, see https://github.com/Azure/aztk/blob/master/docs/12-docker-image.md)>
 
-        # Where do you want to run the driver <dedicated/master/any> (Default: dedicated if at least one dedicated node or any otherwise)
-        # scheduling_target: dedicated
 
     spark_configuration:
         spark_defaults_conf: .aztk/spark-defaults.conf

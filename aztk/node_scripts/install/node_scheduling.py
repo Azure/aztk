@@ -1,6 +1,10 @@
 from azure import batch
-from aztk.models import ClusterConfiguration, SchedulingTarget
+
+from aztk.models import ClusterConfiguration
 from core import config, log
+
+# from aztk.models import SchedulingTarget
+SchedulingTarget = "SchedulingTarget"    # this code isn't used anywhere until scheduling_target reenabled
 
 
 def disable_scheduling(batch_client: batch.BatchServiceClient):
