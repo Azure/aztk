@@ -15,6 +15,7 @@ phases:
 
     - script: |
         pip install --upgrade pip==18.0
+        pip --version
       condition: succeeded()
       displayName: upgrade pip
 
