@@ -33,7 +33,7 @@ phases:
       displayName: unit tests
 
     - script: |
-        pytest --numprocesses=75
+        pytest --numprocesses=75 tests/integration_tests
       condition: succeeded()
       displayName: integration tests
     
