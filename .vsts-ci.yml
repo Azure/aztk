@@ -41,3 +41,4 @@ phases:
       continueOnError: true
       condition: succeeded()
       displayName: pylint report
+
