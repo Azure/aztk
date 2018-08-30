@@ -4,6 +4,15 @@
 
 **Breaking Changes**
 * spark roll back scheduling disable (#653) ([93615d9](https://github.com/Azure/aztk/commit/93615d9)), closes [#653](https://github.com/Azure/aztk/issues/653)
+* remove custom scripts (#650) ([442228a](https://github.com/Azure/aztk/commit/442228a)), closes [#650](https://github.com/Azure/aztk/issues/650)
+* 0.9.0 deprecated code removal (#645) ([eef36dc](https://github.com/Azure/aztk/commit/eef36dc)), closes [#645](https://github.com/Azure/aztk/issues/645)
+* SDK refactor (#622) ([b18eb69](https://github.com/Azure/aztk/commit/b18eb69)), closes [#622](https://github.com/Azure/aztk/issues/622)
+
+**Features**
+* Add ability to specify docker run options in toolkit config (#613) ([9d554c3](https://github.com/Azure/aztk/commit/9d554c3)), closes [#613](https://github.com/Azure/aztk/issues/613) [#3](https://github.com/Azure/aztk/issues/3)
+* add brief flag to debug tool (#634) ([b7bdd8c](https://github.com/Azure/aztk/commit/b7bdd8c)), closes [#634](https://github.com/Azure/aztk/issues/634)
+* first run docs update (#644) ([9098533](https://github.com/Azure/aztk/commit/9098533)), closes [#644](https://github.com/Azure/aztk/issues/644)
+* SDK refactor (#622) ([b18eb69](https://github.com/Azure/aztk/commit/b18eb69)), closes [#622](https://github.com/Azure/aztk/issues/622)
 
 **Bug Fixes**
 * diagnostics function write error result bug (#649) ([293f297](https://github.com/Azure/aztk/commit/293f297)), closes [#649](https://github.com/Azure/aztk/issues/649)
