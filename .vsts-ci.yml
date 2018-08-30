@@ -1,4 +1,7 @@
-name: $(Build.SourceBranchName)$(Rev:.r)
+name: $(Build.SourceBranch)$(Rev:.r)
+
+trigger:
+  - master
 
 phases:
   - phase: Test
