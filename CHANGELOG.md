@@ -1,5 +1,23 @@
 # Changelog
 
+##  0.9.0 (2018-08-30)
+
+**Breaking Changes**
+* spark roll back scheduling disable (#653) ([93615d9](https://github.com/Azure/aztk/commit/93615d9)), closes [#653](https://github.com/Azure/aztk/issues/653)
+
+**Bug Fixes**
+* diagnostics function write error result bug (#649) ([293f297](https://github.com/Azure/aztk/commit/293f297)), closes [#649](https://github.com/Azure/aztk/issues/649)
+* expose get cluster configuration API (#648) ([7c14648](https://github.com/Azure/aztk/commit/7c14648)), closes [#648](https://github.com/Azure/aztk/issues/648)
+* remove bad node scripts import (#652) ([0a9ce94](https://github.com/Azure/aztk/commit/0a9ce94)), closes [#652](https://github.com/Azure/aztk/issues/652)
+* typo in vsts build (#654) ([7c37b06](https://github.com/Azure/aztk/commit/7c37b06)), closes [#654](https://github.com/Azure/aztk/issues/654)
+* update incompatible dependencies in setup.py (#639) ([f98d037](https://github.com/Azure/aztk/commit/f98d037)), closes [#639](https://github.com/Azure/aztk/issues/639)
+
+**Internal Changes**
+* fix pylint warnings (#651) ([828162e](https://github.com/Azure/aztk/commit/828162e)), closes [#651](https://github.com/Azure/aztk/issues/651)
+* update vsts build (#635) ([6eda21e](https://github.com/Azure/aztk/commit/6eda21e)), closes [#635](https://github.com/Azure/aztk/issues/635)
+* verify code formatting in build (#633) ([7730c46](https://github.com/Azure/aztk/commit/7730c46)), closes [#633](https://github.com/Azure/aztk/issues/633)
+
+
 ##  0.8.1 (2018-06-20)
 
 **Bug Fixes**
