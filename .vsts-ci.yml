@@ -1,5 +1,4 @@
-trigger:
-  - master
+name: $(SourceBranchName)$(Rev:.r)
 
 phases:
   - phase: Test
@@ -34,7 +33,7 @@ phases:
 
     - script: |
         pytest --numprocesses=75 tests/integration_tests
-      condition: succeeded()
+      condition: and(succeeded(), or(startsWith($(SourceBranchName), 'release/'), eq($(SourceBranchName, 'master')))
       displayName: integration tests
     
     - script: |
