@@ -14,6 +14,7 @@ phases:
         architecture: 'x64'
 
     - script: |
+        pip install --upgrade pip
         pip install -r requirements.txt
         pip install -e .
       condition: succeeded()
