@@ -33,7 +33,7 @@ phases:
 
     - script: |
         pytest --numprocesses=75 tests/integration_tests
-      condition: and(succeeded(), or(startsWith($(SourceBranchName), 'release/'), eq($(SourceBranchName, 'master')))
+      condition: and(succeeded(), or(startsWith($(SourceBranchName), 'release/'), eq($(SourceBranchName), 'master')))
       displayName: integration tests
 
     - script: |
