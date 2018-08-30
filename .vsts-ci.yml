@@ -19,6 +19,7 @@ phases:
       displayName: upgrade pip
 
     - script: |
+        pip --version
         pip install -r requirements.txt
         pip install -e .
       condition: succeeded()
