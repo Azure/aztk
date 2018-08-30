@@ -5,7 +5,7 @@ trigger:
 
 phases:
   - phase: Test
-    queue: Hosted Ubuntu 1604
+    queue: Hosted Linux Preview
     steps:
     - task: UsePythonVersion@0
       inputs:
@@ -14,13 +14,6 @@ phases:
         architecture: 'x64'
 
     - script: |
-        pip install --upgrade pip==18.0
-        pip --version
-      condition: succeeded()
-      displayName: upgrade pip
-
-    - script: |
-        pip --version
         pip install -r requirements.txt
         pip install -e .
       condition: succeeded()
