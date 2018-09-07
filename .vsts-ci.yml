@@ -35,6 +35,12 @@ phases:
       displayName: unit tests
 
     - script: |
+        export BATCH_ACCOUNT_RESOURCE_ID=$(BATCH_ACCOUNT_RESOURCE_ID)
+        export CLIENT_ID=$(CLIENT_ID)
+        export CREDENTIAL=$(CREDENTIAL)
+        export ID_RSA=$(ID_RSA)
+        export STORAGE_ACCOUNT_RESOURCE_ID=$(STORAGE_ACCOUNT_RESOURCE_ID)
+        export TENANT_ID=$(TENANT_ID)
         pytest --numprocesses=75 tests/integration_tests
       condition: and(succeeded(), or(startsWith(variables['Build.SourceBranchName'], 'release'), eq(variables['Build.SourceBranchName'], 'master')))
       displayName: integration tests
