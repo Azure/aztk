@@ -1,3 +1,5 @@
+name: $(Build.SourceBranch)$(Rev:.r)
+
 trigger:
   - master
 
@@ -7,8 +9,8 @@ phases:
     steps:
     - task: UsePythonVersion@0
       inputs:
-        versionSpec: '3.6 >= 3.5' 
-        addToPath: true 
+        versionSpec: '3.6 >= 3.5'
+        addToPath: true
         architecture: 'x64'
 
     - script: |
@@ -26,17 +28,24 @@ phases:
         pylint --jobs 2 --errors-only aztk aztk_cli
       condition: succeeded()
       displayName: pylint error check
-    
+
     - script: |
         pytest --ignore=tests/integration_tests
       condition: succeeded()
       displayName: unit tests
 
     - script: |
-        pytest --numprocesses=75
-      condition: succeeded()
+        export BATCH_ACCOUNT_RESOURCE_ID=$(BATCH_ACCOUNT_RESOURCE_ID)
+        export CLIENT_ID=$(CLIENT_ID)
+        export CREDENTIAL=$(CREDENTIAL)
+        export ID_RSA=`$(ID_RSA)`
+        export ID_RSA_PUB=`$(ID_RSA_PUB)`
+        export STORAGE_ACCOUNT_RESOURCE_ID=$(STORAGE_ACCOUNT_RESOURCE_ID)
+        export TENANT_ID=$(TENANT_ID)
+        pytest --numprocesses=70 tests/integration_tests
+      condition: and(succeeded(), or(startsWith(variables['Build.SourceBranchName'], 'release'), eq(variables['Build.SourceBranchName'], 'master')))
       displayName: integration tests
-    
+
     - script: |
         pylint --jobs 2 --disable=fixme aztk aztk_cli
       continueOnError: true
