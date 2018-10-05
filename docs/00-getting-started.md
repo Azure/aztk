@@ -78,7 +78,7 @@ The script outputs all of the necessary information to use `aztk`, copy the outp
 #### Usage
 Copy and paste the following into an [Azure Cloud Shell](https://shell.azure.com):
 ```sh
-wget -q https://raw.githubusercontent.com/Azure/aztk/v0.8.1/account_setup.sh &&
+wget -q https://raw.githubusercontent.com/Azure/aztk/v0.9.1/account_setup.sh &&
 chmod 755 account_setup.sh &&
 /bin/bash account_setup.sh
 ```

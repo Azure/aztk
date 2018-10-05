@@ -1,5 +1,11 @@
 # Changelog
 
+##  0.9.1 (2018-10-5)
+**Bug Fixes**
+* Fix: pin all node dependencies not in Pipfile (#667) ([0606598](https://github.com/Azure/aztk/commit/0606598)), closes [#667](https://github.com/Azure/aztk/issues/667)
+* Fix: vsts integration tests block (#657) ([4a60c8a](https://github.com/Azure/aztk/commit/4a60c8a)), closes [#657](https://github.com/Azure/aztk/issues/657)
+* Fix: vsts mutliline secrets (#668) ([cb62207](https://github.com/Azure/aztk/commit/cb62207)), closes [#668](https://github.com/Azure/aztk/issues/668)
+
 ##  0.9.0 (2018-08-30)
 
 **Breaking Changes**
