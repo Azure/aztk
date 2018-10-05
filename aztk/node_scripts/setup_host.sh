@@ -65,8 +65,7 @@ pull_docker_container () {
 
 install_python_dependencies () {
     echo "Installing python dependencies"
-    pipenv install --python /usr/bin/python3.5m
-    pipenv run pip install --upgrade pip setuptools wheel
+    pipenv install --python /usr/bin/python3.5m --ignore-pipfile
     pip --version
     echo "Finished installing python dependencies"
 }
@@ -142,7 +141,8 @@ main () {
     # set up aztk python environment
     export LC_ALL=C.UTF-8
     export LANG=C.UTF-8
-    python3 -m pip install pipenv
+    # ensure these packages are  compatibile before upgrading
+    python3 -m pip install pip=="18.0" pipenv=="2018.7.1"
     mkdir -p $AZTK_WORKING_DIR/.aztk-env
     cp $AZTK_WORKING_DIR/aztk/node_scripts/Pipfile $AZTK_WORKING_DIR/.aztk-env
     cp $AZTK_WORKING_DIR/aztk/node_scripts/Pipfile.lock $AZTK_WORKING_DIR/.aztk-env
