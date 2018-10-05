@@ -38,8 +38,8 @@ phases:
         export BATCH_ACCOUNT_RESOURCE_ID=$(BATCH_ACCOUNT_RESOURCE_ID)
         export CLIENT_ID=$(CLIENT_ID)
         export CREDENTIAL=$(CREDENTIAL)
-        export ID_RSA=`$(ID_RSA)`
-        export ID_RSA_PUB=`$(ID_RSA_PUB)`
+        export ID_RSA="$(ID_RSA)"
+        export ID_RSA_PUB="$(ID_RSA_PUB)"
         export STORAGE_ACCOUNT_RESOURCE_ID=$(STORAGE_ACCOUNT_RESOURCE_ID)
         export TENANT_ID=$(TENANT_ID)
         pytest --numprocesses=70 tests/integration_tests
