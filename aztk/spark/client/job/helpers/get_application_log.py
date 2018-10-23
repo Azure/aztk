@@ -1,22 +1,25 @@
 import azure.batch.models as batch_models
-import azure.batch.models.batch_error as batch_error
+from azure.batch.models import BatchErrorException
 
 from aztk import error
 from aztk.spark import models
 from aztk.utils import helpers
 
-from .get_recent_job import get_recent_job
-
 
 def _get_application_log(core_job_operations, spark_job_operations, job_id, application_name):
+    scheduling_target = core_job_operations.get_cluster_configuration(job_id).scheduling_target
+    if scheduling_target is not models.SchedulingTarget.Any:
+        return core_job_operations.get_application_log(job_id, application_name)
+
     # TODO: change where the logs are uploaded so they aren't overwritten on scheduled runs
     #           current: job_id, application_name/output.log
     #           new: job_id, recent_run_job.id/application_name/output.log
-    recent_run_job = get_recent_job(core_job_operations, job_id)
+    recent_run_job = core_job_operations.get_recent_job(job_id)
     try:
-        task = core_job_operations.batch_client.task.get(job_id=recent_run_job.id, task_id=application_name)
-    except batch_models.batch_error.BatchErrorException as e:
-        # see if the application is written to metadata of pool
+        task = core_job_operations.get_batch_task(id=recent_run_job.id, task_id=application_name)
+    except batch_models.BatchErrorException as e:
+        # task may not exist since it may not yet be scheduled
+        # see if the task is written to metadata of pool
         applications = spark_job_operations.list_applications(job_id)
 
         for application in applications:
@@ -38,5 +41,5 @@ def get_job_application_log(core_job_operations, spark_job_operations, job_id, a
     try:
         return models.ApplicationLog(
             _get_application_log(core_job_operations, spark_job_operations, job_id, application_name))
-    except batch_error.BatchErrorException as e:
+    except BatchErrorException as e:
         raise error.AztkError(helpers.format_batch_exception(e))

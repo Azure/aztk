@@ -1,6 +1,7 @@
 import sys
-from install import install
-from core import logger
+
+from aztk.node_scripts.core import logger
+from aztk.node_scripts.install import install
 
 
 def run():

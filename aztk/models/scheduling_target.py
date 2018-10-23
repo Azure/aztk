@@ -12,12 +12,7 @@ class SchedulingTarget(Enum):
     Only master is allowed to run task
     """
 
-    Dedicated = "dedicated"
-    """
-    Any dedicated node is allowed to run task(Default)
-    """
-
     Any = "any"
     """
-    Any node(Not recommended if using low pri)
+    Any node(Not recommended if using low pri) (Default)
     """

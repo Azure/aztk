@@ -1,4 +1,4 @@
-import azure.batch.models.batch_error as batch_error
+from azure.batch.models import BatchErrorException
 
 from aztk import error
 from aztk.utils import helpers
@@ -12,9 +12,16 @@ def node_run(
         host=False,
         internal: bool = False,
         timeout=None,
+        block=False,
 ):
     try:
         return core_cluster_operations.node_run(
-            cluster_id, node_id, command, internal, container_name="spark" if not host else None, timeout=timeout)
-    except batch_error.BatchErrorException as e:
+            cluster_id,
+            node_id,
+            command,
+            internal,
+            container_name="spark" if not host else None,
+            timeout=timeout,
+            block=block)
+    except BatchErrorException as e:
         raise error.AztkError(helpers.format_batch_exception(e))

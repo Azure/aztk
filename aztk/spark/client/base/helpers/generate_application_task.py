@@ -72,7 +72,7 @@ def generate_application_task(core_base_operations, container_id, application, r
         container_name=container_id,
         application_name=application.name,
         file_path="application.yaml",
-        content=yaml.dump(vars(application)),
+        content=yaml.dump(application),
         blob_client=core_base_operations.blob_client,
     )
     resource_files.append(application_definition_file)
@@ -87,7 +87,7 @@ def generate_application_task(core_base_operations, container_id, application, r
         r'-c "source ~/.bashrc; '
         r"export PYTHONPATH=$PYTHONPATH:\$AZTK_WORKING_DIR; "
         r"cd \$AZ_BATCH_TASK_WORKING_DIR; "
-        r'\$AZTK_WORKING_DIR/.aztk-env/.venv/bin/python \$AZTK_WORKING_DIR/aztk/node_scripts/submit.py"')
+        r'\$AZTK_WORKING_DIR/.aztk-env/.venv/bin/python \$AZTK_WORKING_DIR/aztk/node_scripts/scheduling/submit.py"')
 
     # Create task
     task = batch_models.TaskAddParameter(

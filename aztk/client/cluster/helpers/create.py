@@ -1,11 +1,13 @@
+import hashlib
 from datetime import timedelta
+
 import azure.batch.models as batch_models
 
 from aztk import models
-from aztk.utils import helpers, constants
+from aztk.utils import constants, helpers
 
 
-def create_pool_and_job(
+def create_pool_and_job_and_table(
         core_cluster_operations,
         cluster_conf: models.ClusterConfiguration,
         software_metadata_key: str,
@@ -21,7 +23,12 @@ def create_pool_and_job(
         :param VmImageModel: the type of image to provision for the cluster
         :param wait: wait until the cluster is ready
     """
+    # update storage with the necessary values
     core_cluster_operations.get_cluster_data(cluster_conf.cluster_id).save_cluster_config(cluster_conf)
+
+    if cluster_conf.scheduling_target != models.SchedulingTarget.Any:
+        core_cluster_operations.create_task_table(cluster_conf.cluster_id)
+
     # reuse pool_id as job_id
     pool_id = cluster_conf.cluster_id
     job_id = cluster_conf.cluster_id

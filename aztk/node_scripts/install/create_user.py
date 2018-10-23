@@ -1,6 +1,6 @@
 import os
 import azure.batch.models as batch_models
-import azure.batch.models.batch_error as batch_error
+from azure.batch.models import BatchErrorException
 from Cryptodome.PublicKey import RSA
 from Cryptodome.Cipher import AES, PKCS1_OAEP
 from datetime import datetime, timezone, timedelta
@@ -34,7 +34,7 @@ def create_user(batch_client):
                 expiry_time=datetime.now(timezone.utc) + timedelta(days=365),
             ),
         )
-    except batch_error.BatchErrorException as e:
+    except BatchErrorException as e:
         print(e)
 
 

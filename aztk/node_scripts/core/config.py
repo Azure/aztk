@@ -9,7 +9,8 @@ from azure.mgmt.batch import BatchManagementClient
 from azure.mgmt.storage import StorageManagementClient
 from azure.storage.common import CloudStorageAccount
 
-from core import log
+from aztk.node_scripts.core import log
+from aztk.spark import Client, models
 
 RESOURCE_ID_PATTERN = re.compile("^/subscriptions/(?P<subscription>[^/]+)"
                                  "/resourceGroups/(?P<resourcegroup>[^/]+)"
@@ -74,8 +75,41 @@ def get_batch_client() -> batch.BatchServiceClient:
     return batch.BatchServiceClient(credentials, base_url=base_url)
 
 
-batch_client = get_batch_client()
-blob_client = get_blob_client()
+def get_spark_client():
+    if all([batch_resource_id, client_id, credential, storage_resource_id, tenant_id]):
+        serice_principle_configuration = models.ServicePrincipalConfiguration(
+            tenant_id=tenant_id,
+            client_id=client_id,
+            credential=credential,
+            batch_account_resource_id=batch_resource_id,
+            storage_account_resource_id=storage_resource_id,
+        )
+        return Client(
+            secrets_configuration=models.SecretsConfiguration(service_principal=serice_principle_configuration))
+
+    else:
+        # this must be true if service principle configuration keys were not set
+        assert (all([
+            batch_account_name, batch_account_key, batch_service_url, storage_account_name, storage_account_key,
+            storage_account_suffix
+        ]))
+        shared_key_configuration = models.SharedKeyConfiguration(
+            batch_account_name=batch_account_name,
+            batch_account_key=batch_account_key,
+            batch_service_url=batch_service_url,
+            storage_account_name=storage_account_name,
+            storage_account_key=storage_account_key,
+            storage_account_suffix=storage_account_suffix,
+        )
+
+        return Client(secrets_configuration=models.SecretsConfiguration(shared_key=shared_key_configuration))
+
+
+spark_client = get_spark_client()
+# note: the batch_client and blob_client in _core_cluster_operations
+# is the same as in _core_job_operations
+batch_client = spark_client.cluster._core_cluster_operations.batch_client
+blob_client = spark_client.cluster._core_cluster_operations.blob_client
 
 log.info("Pool id is %s", pool_id)
 log.info("Node id is %s", node_id)

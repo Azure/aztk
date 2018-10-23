@@ -18,7 +18,8 @@ def __app_cmd():
         r"source ~/.bashrc; "
         r"export PYTHONPATH=$PYTHONPATH:\$AZTK_WORKING_DIR; "
         r"cd \$AZ_BATCH_TASK_WORKING_DIR; "
-        r'\$AZTK_WORKING_DIR/.aztk-env/.venv/bin/python \$AZTK_WORKING_DIR/aztk/node_scripts/job_submission.py"')
+        r'\$AZTK_WORKING_DIR/.aztk-env/.venv/bin/python \$AZTK_WORKING_DIR/aztk/node_scripts/scheduling/job_submission.py"'
+    )
     return docker_exec.to_str()
 
 
@@ -130,13 +131,13 @@ def delete(spark_client, job_id, keep_logs: bool = False):
     try:
         spark_client.batch_client.job.delete(recent_run_job.id)
         deleted_job_or_job_schedule = True
-    except batch_models.batch_error.BatchErrorException:
+    except batch_models.BatchErrorException:
         pass
     # delete job_schedule
     try:
         spark_client.batch_client.job_schedule.delete(job_id)
         deleted_job_or_job_schedule = True
-    except batch_models.batch_error.BatchErrorException:
+    except batch_models.BatchErrorException:
         pass
 
     # delete storage container
@@ -152,7 +153,7 @@ def get_application(spark_client, job_id, application_name):
     recent_run_job = __get_recent_job(spark_client, job_id)
     try:
         return spark_client.batch_client.task.get(job_id=recent_run_job.id, task_id=application_name)
-    except batch_models.batch_error.BatchErrorException:
+    except batch_models.BatchErrorException:
         raise error.AztkError(
             "The Spark application {0} is still being provisioned or does not exist.".format(application_name))
 
@@ -164,11 +165,9 @@ def get_application_log(spark_client, job_id, application_name):
     recent_run_job = __get_recent_job(spark_client, job_id)
     try:
         task = spark_client.batch_client.task.get(job_id=recent_run_job.id, task_id=application_name)
-    except batch_models.batch_error.BatchErrorException as e:
-        print(e)
+    except batch_models.BatchErrorException as e:
         # see if the application is written to metadata of pool
         applications = list_applications(spark_client, job_id)
-        print(applications)
         for application in applications:
             if applications[application] is None and application == application_name:
                 raise error.AztkError("The application {0} has not yet been created.".format(application))
@@ -191,7 +190,7 @@ def stop_app(spark_client, job_id, application_name):
     try:
         spark_client.batch_client.task.terminate(job_id=recent_run_job.id, task_id=application_name)
         return True
-    except batch_models.batch_error.BatchErrorException:
+    except batch_models.BatchErrorException:
         return False
 
 

@@ -141,8 +141,7 @@ def execute(args: typing.NamedTuple):
             exit_code = utils.stream_logs(client=spark_client, cluster_id=args.cluster_id, application_name=args.name)
         else:
             with utils.Spinner():
-                spark_client.cluster.wait(
-                    id=args.cluster_id, application_name=args.name)    # TODO: replace wait_until_application_done
+                spark_client.cluster.wait(id=args.cluster_id, application_name=args.name)
                 application_log = spark_client.cluster.get_application_log(
                     id=args.cluster_id, application_name=args.name)
                 with open(os.path.abspath(os.path.expanduser(args.output)), "w", encoding="UTF-8") as f:

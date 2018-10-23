@@ -5,9 +5,7 @@ import yaml
 import aztk.spark
 from aztk.models import Toolkit
 from aztk.models.plugins.internal import PluginReference
-from aztk.spark.models import ClusterConfiguration, SecretsConfiguration
-
-# from aztk.spark.models import SchedulingTarget
+from aztk.spark.models import (ClusterConfiguration, SchedulingTarget, SecretsConfiguration)
 
 
 def load_aztk_secrets() -> SecretsConfiguration:
@@ -181,7 +179,7 @@ class JobConfig:
         self.core_site_xml = None
         self.subnet_id = None
         self.worker_on_master = None
-        # self.scheduling_target = None
+        self.scheduling_target = None
         self.jars = []
 
     def _merge_dict(self, config):
@@ -200,9 +198,9 @@ class JobConfig:
                 self.max_low_pri_nodes = cluster_configuration.get("size_low_priority")
             self.subnet_id = cluster_configuration.get("subnet_id")
             self.worker_on_master = cluster_configuration.get("worker_on_master")
-            # scheduling_target = cluster_configuration.get("scheduling_target")
-            # if scheduling_target:
-            #     self.scheduling_target = SchedulingTarget(scheduling_target)
+            scheduling_target = cluster_configuration.get("scheduling_target")
+            if scheduling_target:
+                self.scheduling_target = SchedulingTarget(scheduling_target)
 
         applications = config.get("applications")
         if applications:

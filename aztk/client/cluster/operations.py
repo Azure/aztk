@@ -19,8 +19,8 @@ class CoreClusterOperations(BaseOperations):
         Returns:
             :obj:`aztk.models.Cluster`: A Cluster object representing the state and configuration of the cluster.
         """
-        return create.create_pool_and_job(self, cluster_configuration, software_metadata_key, start_task,
-                                          vm_image_model)
+        return create.create_pool_and_job_and_table(self, cluster_configuration, software_metadata_key, start_task,
+                                                    vm_image_model)
 
     def get(self, id: str):
         """Get the state and configuration of a cluster
@@ -70,7 +70,7 @@ class CoreClusterOperations(BaseOperations):
             :obj:`List[aztk.models.NodeOutput]`:
                 A list of NodeOutput objects representing the output of the copy command.
         """
-        return delete.delete_pool_and_job(self, id, keep_logs)
+        return delete.delete_pool_and_job_and_table(self, id, keep_logs)
 
     def list(self, software_metadata_key):
         """List clusters running the specified software.

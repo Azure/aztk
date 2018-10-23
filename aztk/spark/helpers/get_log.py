@@ -2,7 +2,7 @@ import time
 
 import azure
 import azure.batch.models as batch_models
-import azure.batch.models.batch_error as batch_error
+from azure.batch.models import BatchErrorException
 
 from aztk import error
 from aztk import models as base_models
@@ -16,7 +16,7 @@ def __check_task_node_exist(batch_client, cluster_id: str, task: batch_models.Cl
     try:
         batch_client.compute_node.get(cluster_id, task.node_info.node_id)
         return True
-    except batch_error.BatchErrorException:
+    except BatchErrorException:
         return False
 
 
@@ -39,7 +39,7 @@ def __get_output_file_properties(batch_client, cluster_id: str, application_name
         try:
             file = helpers.get_file_properties(cluster_id, application_name, output_file, batch_client)
             return file
-        except batch_error.BatchErrorException as e:
+        except BatchErrorException as e:
             if e.response.status_code == 404:
                 # TODO: log
                 time.sleep(5)
@@ -56,7 +56,7 @@ def get_log_from_storage(blob_client, container_name, application_name, task):
     base_model = base_models.ApplicationLog(
         name=application_name,
         cluster_id=container_name,
-        application_state=task.state.name,
+        application_state=task.state,
         log=blob.content,
         total_bytes=blob.properties.content_length,
         exit_code=task.execution_info.exit_code,
@@ -88,7 +88,7 @@ def get_log(batch_client, blob_client, cluster_id: str, application_name: str, t
         base_model = base_models.ApplicationLog(
             name=application_name,
             cluster_id=cluster_id,
-            application_state=task.state.name,
+            application_state=task.state,
             log=content,
             total_bytes=target_bytes,
             exit_code=task.execution_info.exit_code,
@@ -98,7 +98,7 @@ def get_log(batch_client, blob_client, cluster_id: str, application_name: str, t
         base_model = base_models.ApplicationLog(
             name=application_name,
             cluster_id=cluster_id,
-            application_state=task.state.name,
+            application_state=task.state,
             log="",
             total_bytes=target_bytes,
             exit_code=task.execution_info.exit_code,

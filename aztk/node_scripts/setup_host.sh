@@ -160,4 +160,6 @@ main () {
     ) 2>&1
 }
 
+apt-mark hold $(uname -r)
 main
+apt-mark unhold $(uname -r)

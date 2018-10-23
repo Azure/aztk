@@ -92,7 +92,7 @@ def generate_task(spark_client, container_id, application, remote=False):
         r'-c "source ~/.bashrc; '
         r"export PYTHONPATH=$PYTHONPATH:\$AZTK_WORKING_DIR; "
         r"cd \$AZ_BATCH_TASK_WORKING_DIR; "
-        r'\$AZTK_WORKING_DIR/.aztk-env/.venv/bin/python \$AZTK_WORKING_DIR/aztk/node_scripts/submit.py"')
+        r'\$AZTK_WORKING_DIR/.aztk-env/.venv/bin/python \$AZTK_WORKING_DIR/aztk/node_scripts/scheduling/submit.py"')
 
     # Create task
     task = batch_models.TaskAddParameter(

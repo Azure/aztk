@@ -1,8 +1,9 @@
 from typing import List
-from aztk.utils import helpers
-from aztk.utils import constants
-from aztk import models as aztk_models
+
 import azure.batch.models as batch_models
+
+from aztk import models as aztk_models
+from aztk.utils import constants, helpers
 
 POOL_ADMIN_USER_IDENTITY = batch_models.UserIdentity(
     auto_user=batch_models.AutoUserSpecification(
@@ -154,4 +155,5 @@ def generate_cluster_start_task(
         environment_settings=environment_settings,
         user_identity=POOL_ADMIN_USER_IDENTITY,
         wait_for_success=True,
+        max_task_retry_count=2,
     )

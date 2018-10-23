@@ -2,18 +2,8 @@ from aztk.client.job import CoreJobOperations
 from aztk.spark import models
 from aztk.spark.client.base import SparkBaseOperations
 
-from .helpers import (
-    delete,
-    get,
-    get_application,
-    get_application_log,
-    list,
-    list_applications,
-    stop,
-    stop_application,
-    submit,
-    wait_until_complete,
-)
+from .helpers import (delete, get, get_application, get_application_log, list, list_applications, stop,
+                      stop_application, submit, wait_until_complete)
 
 
 class JobOperations(SparkBaseOperations):
@@ -68,7 +58,7 @@ class JobOperations(SparkBaseOperations):
         Returns:
             :obj:`aztk.spark.models.Application`: object representing that state and output of an application
         """
-        return get_application.get_application(self, id, application_name)
+        return get_application.get_application(self._core_job_operations, id, application_name)
 
     def get_application_log(self, id, application_name):
         """Get the log for a running or completed application

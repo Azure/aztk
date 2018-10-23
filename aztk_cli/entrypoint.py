@@ -8,7 +8,7 @@ import argparse
 import warnings
 from typing import NamedTuple
 
-from azure.batch.models import batch_error
+from azure.batch.models import BatchErrorException
 
 import aztk
 from aztk_cli import constants, log, logger, utils
@@ -42,7 +42,7 @@ def main():
 
     try:
         run_software(args)
-    except batch_error.BatchErrorException as e:
+    except BatchErrorException as e:
         utils.print_batch_exception(e)
     except aztk.error.AztkError as e:
         log.error(str(e))

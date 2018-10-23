@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, timezone
 
 import azure.batch.models as batch_models
-import azure.batch.models.batch_error as batch_error
+from azure.batch.models import BatchErrorException
 
 from aztk.utils import get_ssh_key
 
@@ -32,9 +32,9 @@ def __create_user(self, id: str, node_id: str, username: str, password: str = No
 def create_user_on_node(base_client, id, node_id, username, ssh_key=None, password=None):
     try:
         __create_user(base_client, id=id, node_id=node_id, username=username, ssh_key=ssh_key, password=password)
-    except batch_error.BatchErrorException as error:
+    except BatchErrorException as error:
         try:
             base_client.delete_user_on_node(id, node_id, username)
             base_client.create_user_on_node(id=id, node_id=node_id, username=username, ssh_key=ssh_key)
-        except batch_error.BatchErrorException as error:
+        except BatchErrorException as error:
             raise error

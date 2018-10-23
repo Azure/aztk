@@ -4,6 +4,7 @@ import azure.batch.batch_auth as batch_auth
 import azure.batch.batch_service_client as batch
 import azure.storage.blob as blob
 from azure.common.credentials import ServicePrincipalCredentials
+from azure.cosmosdb.table.tableservice import TableService
 from azure.mgmt.batch import BatchManagementClient
 from azure.mgmt.storage import StorageManagementClient
 from azure.storage.common import CloudStorageAccount
@@ -93,10 +94,10 @@ def make_blob_client(secrets):
             tenant=secrets.service_principal.tenant_id,
             resource="https://management.core.windows.net/",
         )
-        m = RESOURCE_ID_PATTERN.match(secrets.service_principal.storage_account_resource_id)
-        accountname = m.group("account")
-        subscription = m.group("subscription")
-        resourcegroup = m.group("resourcegroup")
+        match = RESOURCE_ID_PATTERN.match(secrets.service_principal.storage_account_resource_id)
+        accountname = match.group("account")
+        subscription = match.group("subscription")
+        resourcegroup = match.group("resourcegroup")
         mgmt_client = StorageManagementClient(arm_credentials, subscription)
         key = (retry_function(
             mgmt_client.storage_accounts.list_keys,
@@ -110,6 +111,38 @@ def make_blob_client(secrets):
         blob_client = storage_client.create_block_blob_service()
 
     return blob_client
+
+
+def make_table_service(secrets):
+    if secrets.shared_key:
+        table_service = TableService(
+            account_name=secrets.shared_key.storage_account_name,
+            account_key=secrets.shared_key.storage_account_key,
+            endpoint_suffix=secrets.shared_key.storage_account_suffix,
+        )
+    else:
+        arm_credentials = ServicePrincipalCredentials(
+            client_id=secrets.service_principal.client_id,
+            secret=secrets.service_principal.credential,
+            tenant=secrets.service_principal.tenant_id,
+            resource="https://management.core.windows.net/",
+        )
+        match = RESOURCE_ID_PATTERN.match(secrets.service_principal.storage_account_resource_id)
+        accountname = match.group("account")
+        subscription = match.group("subscription")
+        resourcegroup = match.group("resourcegroup")
+        mgmt_client = StorageManagementClient(arm_credentials, subscription)
+        key = (retry_function(
+            mgmt_client.storage_accounts.list_keys,
+            10,
+            1,
+            Exception,
+            resource_group_name=resourcegroup,
+            account_name=accountname,
+        ).keys[0].value)
+        table_service = TableService(account_name=accountname, account_key=key)
+
+    return table_service
 
 
 def retry_function(function, retry_attempts: int, retry_interval: int, exception: Exception, *args, **kwargs):

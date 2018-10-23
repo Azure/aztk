@@ -1,6 +1,6 @@
 import asyncio
 
-import azure.batch.models.batch_error as batch_error
+from azure.batch.models import BatchErrorException
 
 import aztk.models as models
 from aztk import error
@@ -27,7 +27,7 @@ def cluster_copy(
 
     try:
         generated_username, ssh_key = cluster_operations.generate_user_on_cluster(pool.id, nodes)
-    except batch_error.BatchErrorException as e:
+    except BatchErrorException as e:
         raise error.AztkError(helpers.format_batch_exception(e))
 
     try:
@@ -43,7 +43,7 @@ def cluster_copy(
                 timeout=timeout,
             ))
         return output
-    except (OSError, batch_error.BatchErrorException) as exc:
+    except (OSError, BatchErrorException) as exc:
         raise exc
     finally:
         cluster_operations.delete_user_on_cluster(pool.id, nodes, generated_username)

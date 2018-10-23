@@ -19,7 +19,8 @@ def retry(retry_count=1, retry_interval=0, backoff_policy=BackOffPolicy.linear, 
                     if backoff_policy == BackOffPolicy.linear:
                         time.sleep(i * retry_interval)
                     if backoff_policy == BackOffPolicy.exponential:
-                        print("sleeping:", 2**(i * retry_interval))
+                        # TODO: enable logger
+                        # log.debug("{} failed, sleeping for".format(function), 2**(i * retry_interval))
                         time.sleep(2**(i * retry_interval))
             # do not retry on the last iteration
             return function(*args, **kwargs)

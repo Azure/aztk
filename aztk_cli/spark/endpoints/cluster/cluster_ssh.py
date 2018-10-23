@@ -1,7 +1,7 @@
 import argparse
 import typing
 
-from azure.batch.models import batch_error
+from azure.batch.models import BatchErrorException
 
 import aztk
 from aztk.models import ClusterConfiguration
@@ -145,7 +145,7 @@ def shell_out_ssh(spark_client, cluster_configuration, ssh_conf):
             log.info("Use the following command to connect to your spark head node:")
             log.info("\t%s", ssh_cmd)
 
-    except batch_error.BatchErrorException as e:
+    except BatchErrorException as e:
         if e.error.code == "PoolNotFound":
             raise aztk.error.AztkError("The cluster you are trying to connect to does not exist.")
         else:

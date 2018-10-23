@@ -2,25 +2,9 @@ from aztk.client.cluster import CoreClusterOperations
 from aztk.spark import models
 from aztk.spark.client.base import SparkBaseOperations
 
-from .helpers import (
-    copy,
-    create,
-    create_user,
-    delete,
-    diagnostics,
-    download,
-    get,
-    get_application_log,
-    get_application_status,
-    get_configuration,
-    get_remote_login_settings,
-    list,
-    node_run,
-    run,
-    ssh_into_master,
-    submit,
-    wait,
-)
+from .helpers import (copy, create, create_user, delete, diagnostics, download, get, get_application_log,
+                      get_application_state, get_configuration, get_remote_login_settings, list, node_run, run,
+                      ssh_into_master, submit, wait)
 
 
 class ClusterOperations(SparkBaseOperations):
@@ -111,17 +95,17 @@ class ClusterOperations(SparkBaseOperations):
         """
         return create_user.create_user(self._core_cluster_operations, self, id, username, ssh_key, password)
 
-    def get_application_status(self, id: str, application_name: str):
-        """Get the status of a submitted application
+    def get_application_state(self, id: str, application_name: str):
+        """Get the state of a submitted application
 
         Args:
             id (:obj:`str`): the name of the cluster the application was submitted to
             application_name (:obj:`str`): the name of the application to get
 
         Returns:
-            :obj:`str`: the status state of the application
+            :obj:`aztk.spark.models.ApplicationState`: the state of the application
         """
-        return get_application_status.get_application_status(self._core_cluster_operations, id, application_name)
+        return get_application_state.get_application_state(self._core_cluster_operations, id, application_name)
 
     def run(self, id: str, command: str, host=False, internal: bool = False, timeout=None):
         """Run a bash command on every node in the cluster
@@ -142,7 +126,16 @@ class ClusterOperations(SparkBaseOperations):
         """
         return run.cluster_run(self._core_cluster_operations, id, command, host, internal, timeout)
 
-    def node_run(self, id: str, node_id: str, command: str, host=False, internal: bool = False, timeout=None):
+    def node_run(
+            self,
+            id: str,
+            node_id: str,
+            command: str,
+            host=False,
+            internal: bool = False,
+            timeout=None,
+            block=True,
+    ):
         """Run a bash command on the given node
 
         Args:
@@ -155,11 +148,11 @@ class ClusterOperations(SparkBaseOperations):
                 If None, the command will run on the host VM. Defaults to None.
             timeout=None (:obj:`str`, optional): The timeout in seconds for establishing a connection to the node.
                 Defaults to None.
-
+            block=True (:obj:`bool`, optional): If True, the command blocks until execution is complete.
         Returns:
             :obj:`aztk.spark.models.NodeOutput`: object containing the output of the run command
         """
-        return node_run.node_run(self._core_cluster_operations, id, node_id, command, host, internal, timeout)
+        return node_run.node_run(self._core_cluster_operations, id, node_id, command, host, internal, timeout, block)
 
     def copy(
             self,

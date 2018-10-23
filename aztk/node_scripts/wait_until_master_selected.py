@@ -6,8 +6,8 @@ def main():
 
     while master is None:
         try:
-            from core import config
-            from install.pick_master import get_master_node_id
+            from aztk.node_scripts.core import config
+            from aztk.node_scripts.install.pick_master import get_master_node_id
 
             batch_client = config.batch_client
             pool = batch_client.pool.get(config.pool_id)

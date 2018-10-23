@@ -1,6 +1,6 @@
 from typing import List
 
-import azure.batch.models.batch_error as batch_error
+from azure.batch.models import BatchErrorException
 
 from aztk import error
 from aztk import models as base_models
@@ -80,14 +80,14 @@ class Client(CoreClient):
     def wait_until_application_done(self, cluster_id: str, task_id: str):    # NOT IMPLEMENTED
         try:
             helpers.wait_for_task_to_complete(job_id=cluster_id, task_id=task_id, batch_client=self.batch_client)
-        except batch_error.BatchErrorException as e:
+        except BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
     @deprecated("0.10.0")
     def wait_until_applications_done(self, cluster_id: str):    # NOT IMPLEMENTED
         try:
             helpers.wait_for_tasks_to_complete(job_id=cluster_id, batch_client=self.batch_client)
-        except batch_error.BatchErrorException as e:
+        except BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
     @deprecated("0.10.0")
@@ -97,7 +97,7 @@ class Client(CoreClient):
             pool = self.batch_client.pool.get(cluster_id)
             nodes = self.batch_client.compute_node.list(pool_id=cluster_id)
             return models.Cluster(base_models.Cluster(pool, nodes))
-        except batch_error.BatchErrorException as e:
+        except BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
     @deprecated("0.10.0")
@@ -116,7 +116,7 @@ class Client(CoreClient):
 
     @deprecated("0.10.0")
     def get_application_status(self, cluster_id: str, app_name: str):
-        return self.cluster.get_application_status(id=cluster_id, application_name=app_name)
+        return self.cluster.get_application_state(id=cluster_id, application_name=app_name)
 
     @deprecated("0.10.0")
     def cluster_run(self, cluster_id: str, command: str, host=False, internal: bool = False, timeout=None):
@@ -217,14 +217,14 @@ class Client(CoreClient):
     def stop_job_app(self, job_id, application_name):    # NOT IMPLEMENTED
         try:
             return job_submit_helper.stop_app(self, job_id, application_name)
-        except batch_error.BatchErrorException as e:
+        except BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
     @deprecated("0.10.0")
     def wait_until_job_finished(self, job_id):
         try:
             self.job.wait(job_id)
-        except batch_error.BatchErrorException as e:
+        except BatchErrorException as e:
             raise error.AztkError(helpers.format_batch_exception(e))
 
     @deprecated("0.10.0")

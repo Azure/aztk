@@ -3,7 +3,7 @@ import aztk.models as models
 from aztk.utils import ssh as ssh_lib
 
 
-def node_run(base_client, cluster_id, node_id, command, internal, container_name=None, timeout=None):
+def node_run(base_client, cluster_id, node_id, command, internal, container_name=None, timeout=None, block=True):
     cluster = base_client.get(cluster_id)
     pool, nodes = cluster.pool, list(cluster.nodes)
     try:
@@ -25,7 +25,7 @@ def node_run(base_client, cluster_id, node_id, command, internal, container_name
             ssh_key=ssh_key.exportKey().decode("utf-8"),
             container_name=container_name,
             timeout=timeout,
-        )
+            block=block)
         return output
     finally:
         base_client.delete_user_on_node(cluster_id, node.id, generated_username)

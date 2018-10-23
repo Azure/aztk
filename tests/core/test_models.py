@@ -1,10 +1,10 @@
 from enum import Enum
 
-import yaml
 import pytest
+import yaml
 
-from aztk.core.models import Model, fields, ModelMergeStrategy, ListMergeStrategy
-from aztk.error import InvalidModelFieldError, AztkAttributeError
+from aztk.core.models import (ListMergeStrategy, Model, ModelMergeStrategy, fields)
+from aztk.error import AztkAttributeError, InvalidModelFieldError
 
 # pylint: disable=C1801
 
@@ -299,7 +299,7 @@ def test_serialize_simple_model_to_yaml():
     info = UserInfo(name="John", age=29)
     output = yaml.dump(info)
 
-    assert output == "!!python/object:test_models.UserInfo {age: 29, name: John}\n"
+    assert output == "!!python/object:tests.core.test_models.UserInfo {age: 29, name: John}\n"
 
     info_parsed = yaml.load(output)
 
@@ -316,7 +316,7 @@ def test_serialize_nested_model_to_yaml():
     )
     output = yaml.dump(user)
 
-    assert output == "!!python/object:test_models.User\nenabled: true\ninfo: {age: 29, name: John}\nstate: deleting\n"
+    assert output == "!!python/object:tests.core.test_models.User\nenabled: true\ninfo: {age: 29, name: John}\nstate: deleting\n"
 
     user_parsed = yaml.load(output)
 

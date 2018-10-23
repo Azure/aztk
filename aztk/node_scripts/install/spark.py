@@ -10,8 +10,8 @@ from typing import List
 
 import azure.batch.models as batchmodels
 
-from core import config
-from install import pick_master
+from aztk.node_scripts.core import config
+from aztk.node_scripts.install import pick_master
 
 batch_client = config.batch_client
 

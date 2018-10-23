@@ -144,4 +144,5 @@ def generate_cluster_start_task(
         environment_settings=environment_settings,
         user_identity=POOL_ADMIN_USER_IDENTITY,
         wait_for_success=True,
+        max_task_retry_count=2,
     )

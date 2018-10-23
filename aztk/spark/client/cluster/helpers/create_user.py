@@ -1,4 +1,4 @@
-import azure.batch.models.batch_error as batch_error
+from azure.batch.models import BatchErrorException
 
 from aztk import error
 from aztk.utils import helpers
@@ -18,5 +18,5 @@ def create_user(
         if not master_node_id:
             raise error.ClusterNotReadyError("The master has not yet been picked, a user cannot be added.")
         core_cluster_operations.create_user_on_cluster(cluster.id, cluster.nodes, username, ssh_key, password)
-    except batch_error.BatchErrorException as e:
+    except BatchErrorException as e:
         raise error.AztkError(helpers.format_batch_exception(e))

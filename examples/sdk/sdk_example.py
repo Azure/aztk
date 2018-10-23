@@ -66,7 +66,7 @@ app1 = aztk.spark.models.ApplicationConfiguration(
 client.cluster.submit(cluster.id, app1)
 
 # get status of application
-status = client.cluster.get_application_status(cluster_configuration.cluster_id, app1.name)
+status = client.cluster.get_application_state(cluster_configuration.cluster_id, app1.name)
 
 # stream logs of app, print to console as it runs
 current_bytes = 0

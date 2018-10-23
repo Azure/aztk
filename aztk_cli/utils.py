@@ -11,6 +11,7 @@ import azure.batch.models as batch_models
 from aztk import error, utils
 from aztk.models import ClusterConfiguration
 from aztk.spark import models
+from aztk.spark.models import ApplicationState, JobState
 from aztk.utils import get_ssh_key
 
 from . import log
@@ -126,7 +127,7 @@ def stream_logs(client, cluster_id, application_name):
         app_logs = client.cluster.get_application_log(
             id=cluster_id, application_name=application_name, tail=True, current_bytes=current_bytes)
         log.print(app_logs.log)
-        if app_logs.application_state == "completed":
+        if app_logs.application_state == ApplicationState.Completed:
             return app_logs.exit_code
         current_bytes = app_logs.total_bytes
         time.sleep(3)
@@ -237,8 +238,7 @@ def print_jobs(jobs: List[models.Job]):
     log.info(print_format.format("Job", "State", "Creation Time"))
     log.info(print_format_underline.format("", "", "", ""))
     for job in jobs:
-
-        log.info(print_format.format(job.id, job.state, utc_to_local(job.creation_time)))
+        log.info(print_format.format(job.id, job.state.name, utc_to_local(job.creation_time)))
 
 
 def print_job(client, job: models.Job):
@@ -247,14 +247,14 @@ def print_job(client, job: models.Job):
     log.info("")
     log.info("Job               %s", job.id)
     log.info("------------------------------------------")
-    log.info("State:            %s", job.state)
+    log.info("State:            %s", job.state.name)
     log.info("Transition Time:  %s", utc_to_local(job.state_transition_time))
     log.info("")
 
     if job.cluster:
         print_cluster_summary(job.cluster)
     else:
-        if job.state == "completed":
+        if job.state == JobState.completed:
             log.info("Cluster           %s", "Job completed, cluster deallocated.")
             log.info("")
         else:
@@ -292,8 +292,8 @@ def print_cluster_summary(cluster: models.Cluster):
 
 def application_summary(applications):
     states = {"scheduling": 0}
-    for state in batch_models.TaskState:
-        states[state.name] = 0
+    for state in models.ApplicationState:
+        states[state] = 0
 
     warn_scheduling = False
 
@@ -309,7 +309,7 @@ def application_summary(applications):
     log.info("-" * 42)
     for state in states:
         if states[state] > 0:
-            log.info(print_format.format(state + ":", states[state]))
+            log.info(print_format.format(state.value + ":", states[state]))
 
     if warn_scheduling:
         log.warning("\nNo Spark applications will be scheduled until the master is selected.")
@@ -331,7 +331,7 @@ def print_applications(applications):
             log.info(
                 print_format.format(
                     application.name,
-                    application.state,
+                    application.state.value,
                     utc_to_local(application.state_transition_time),
                     application.exit_code if application.exit_code is not None else "-",
                 ))
@@ -345,7 +345,7 @@ def print_application(application: models.Application):
     log.info("")
     log.info("Application         %s", application.name)
     log.info("-" * 42)
-    log.info(print_format.format("State", application.state))
+    log.info(print_format.format("State", application.state.value))
     log.info(print_format.format("State transition time", utc_to_local(application.state_transition_time)))
     log.info("")
 

@@ -114,18 +114,25 @@ def node_exec_command(node_id,
                       ssh_key=None,
                       password=None,
                       container_name=None,
-                      timeout=None):
+                      timeout=None,
+                      block=True):
     try:
         client = connect(
             hostname=hostname, port=port, username=username, password=password, pkey=ssh_key, timeout=timeout)
     except AztkError as e:
         return NodeOutput(node_id, None, e)
     if container_name:
-        cmd = "sudo docker exec 2>&1 -t {0} /bin/bash -c 'set -e; set -o pipefail; {1}; wait'".format(
-            container_name, command)
+        if not block:
+            cmd = "sudo docker exec 2>&1 -td {0} /bin/bash -c 'set -e -o pipefail; {1};'".format(
+                container_name, command)
+        else:
+            cmd = "sudo docker exec 2>&1 -t {0} /bin/bash -c 'set -e -o pipefail; {1};'".format(container_name, command)
     else:
-        cmd = "/bin/bash 2>&1 -c 'set -e; set -o pipefail; {0}; wait'".format(command)
-    _, stdout, _ = client.exec_command(cmd, get_pty=True)
+        cmd = "/bin/bash 2>&1 -c 'set -e -o pipefail; {0};'".format(command)
+
+    _, stdout, _ = client.exec_command(cmd, timeout=timeout)
+    return_code = stdout.channel.recv_exit_status()
+
     output = stdout.read().decode("utf-8")
     client.close()
     return NodeOutput(node_id, output, None)

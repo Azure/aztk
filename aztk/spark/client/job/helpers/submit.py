@@ -1,16 +1,21 @@
 import azure.batch.models as batch_models
-import azure.batch.models.batch_error as batch_error
 import yaml
+from azure.batch.models import BatchErrorException
 
 from aztk import error
 from aztk import models as base_models
 from aztk.internal.cluster_data import NodeData
 from aztk.spark import models
+from aztk.spark.models import SchedulingTarget
 from aztk.utils import helpers
 from aztk.utils.command_builder import CommandBuilder
 
 
-def __app_cmd():
+def __app_cmd(scheduling_target=None, resource_files=None):
+    resource_file_sas_list = None
+    if resource_files:
+        resource_file_sas_list = ' '.join(['\\\"{}\\\"'.format(task_def.blob_source) for task_def in resource_files])
+
     docker_exec = CommandBuilder("sudo docker exec")
     docker_exec.add_argument("-i")
     docker_exec.add_option("-e", "AZ_BATCH_TASK_WORKING_DIR=$AZ_BATCH_TASK_WORKING_DIR")
@@ -20,7 +25,9 @@ def __app_cmd():
         r"source ~/.bashrc; "
         r"export PYTHONPATH=$PYTHONPATH:\$AZTK_WORKING_DIR; "
         r"cd \$AZ_BATCH_TASK_WORKING_DIR; "
-        r'\$AZTK_WORKING_DIR/.aztk-env/.venv/bin/python \$AZTK_WORKING_DIR/aztk/node_scripts/job_submission.py"')
+        r'\$AZTK_WORKING_DIR/.aztk-env/.venv/bin/python \$AZTK_WORKING_DIR/aztk/node_scripts/scheduling/job_submission.py {0} {1}"'.
+        format(scheduling_target if scheduling_target else "", resource_file_sas_list
+               if resource_file_sas_list else ""))
     return docker_exec.to_str()
 
 
@@ -36,9 +43,12 @@ def generate_job_manager_task(core_job_operations, job, application_tasks):
         )
         resource_files.append(task_definition_resource_file)
 
-    task_cmd = __app_cmd()
+    if job.scheduling_target == SchedulingTarget.Master:
+        task_cmd = __app_cmd(SchedulingTarget.Master, resource_files)
+    else:
+        task_cmd = __app_cmd()
 
-    # Create task
+    # Create JobManagerTask
     task = batch_models.JobManagerTask(
         id=job.id,
         command_line=helpers.wrap_commands_in_shell([task_cmd]),
@@ -53,16 +63,13 @@ def generate_job_manager_task(core_job_operations, job, application_tasks):
     return task
 
 
-# def _default_scheduling_target(vm_count: int):
-#     if vm_count == 0:
-#         return models.SchedulingTarget.Any
-#     else:
-#         return models.SchedulingTarget.Dedicated
+def _default_scheduling_target(vm_count: int):
+    return models.SchedulingTarget.Any
 
 
 def _apply_default_for_job_config(job_conf: models.JobConfiguration):
-    # if job_conf.scheduling_target is None:
-    #     job_conf.scheduling_target = _default_scheduling_target(job_conf.max_dedicated_nodes)
+    if job_conf.scheduling_target is None:
+        job_conf.scheduling_target = _default_scheduling_target(job_conf.max_dedicated_nodes)
 
     return job_conf
 
@@ -120,5 +127,5 @@ def submit_job(core_job_operations,
 
         return models.Job(job)
 
-    except batch_error.BatchErrorException as e:
+    except BatchErrorException as e:
         raise error.AztkError(helpers.format_batch_exception(e))

@@ -1,4 +1,4 @@
-import azure.batch.models.batch_error as batch_error
+from azure.batch.models import BatchErrorException
 
 from aztk import error
 from aztk.spark import models
@@ -12,5 +12,5 @@ def _list_jobs(core_job_operations):
 def list_jobs(core_job_operations):
     try:
         return [models.Job(cloud_job_schedule) for cloud_job_schedule in _list_jobs(core_job_operations)]
-    except batch_error.BatchErrorException as e:
+    except BatchErrorException as e:
         raise error.AztkError(helpers.format_batch_exception(e))

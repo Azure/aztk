@@ -46,6 +46,7 @@ def start_spark_container(docker_repo: str = None,
     cmd.pass_env("AZTK_IS_MASTER")
     cmd.pass_env("AZTK_IS_WORKER")
     cmd.pass_env("AZTK_MASTER_IP")
+    cmd.pass_env("AZTK_CLUSTER_ID")
 
     cmd.pass_env("SPARK_WEB_UI_PORT")
     cmd.pass_env("SPARK_WORKER_UI_PORT")

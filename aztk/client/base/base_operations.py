@@ -1,19 +1,9 @@
 from aztk import models
 from aztk.internal import cluster_data
 
-from .helpers import (
-    create_user_on_cluster,
-    create_user_on_node,
-    delete_user_on_cluster,
-    delete_user_on_node,
-    generate_user_on_cluster,
-    generate_user_on_node,
-    get_application_log,
-    get_remote_login_settings,
-    node_run,
-    run,
-    ssh_into_node,
-)
+from .helpers import (create_user_on_cluster, create_user_on_node, delete_user_on_cluster, delete_user_on_node,
+                      generate_user_on_cluster, generate_user_on_node, get_application_log, get_recent_job,
+                      get_remote_login_settings, get_task_state, list_tasks, node_run, run, ssh_into_node, task_table)
 
 
 class BaseOperations:
@@ -31,6 +21,7 @@ class BaseOperations:
     def __init__(self, context):
         self.batch_client = context["batch_client"]
         self.blob_client = context["blob_client"]
+        self.table_service = context["table_service"]
         self.secrets_configuration = context["secrets_configuration"]
 
     def get_cluster_configuration(self, id: str) -> models.ClusterConfiguration:
@@ -168,7 +159,7 @@ class BaseOperations:
         """
         return delete_user_on_cluster.delete_user_on_cluster(self, username, id, nodes)
 
-    def node_run(self, id, node_id, command, internal, container_name=None, timeout=None):
+    def node_run(self, id, node_id, command, internal, container_name=None, timeout=None, block=True):
         """Run a bash command on the given node
 
         Args:
@@ -181,11 +172,12 @@ class BaseOperations:
                 If None, the command will run on the host VM. Defaults to None.
             timeout=None (:obj:`str`, optional): The timeout in seconds for establishing a connection to the node.
                 Defaults to None.
+            block=True (:obj:`bool`, optional): If True, the command blocks until execution is complete.
 
         Returns:
             :obj:`aztk.models.NodeOutput`: object containing the output of the run command
         """
-        return node_run.node_run(self, id, node_id, command, internal, container_name, timeout)
+        return node_run.node_run(self, id, node_id, command, internal, container_name, timeout, block)
 
     def get_remote_login_settings(self, id: str, node_id: str):
         """Get the remote login information for a node in a cluster
@@ -233,3 +225,122 @@ class BaseOperations:
             :obj:`aztk.models.ApplicationLog`: a model representing the output of the application.
         """
         return get_application_log.get_application_log(self, id, application_name, tail, current_bytes)
+
+    def create_task_table(self, id: str):
+        """Create an Azure Table Storage to track tasks
+
+        Args:
+            id (:obj:`str`): the id of the cluster
+        """
+        return task_table.create_task_table(self.table_service, id)
+
+    def list_task_table_entries(self, id):
+        """list tasks in a storage table
+
+        Args:
+            id (:obj:`str`): the id of the cluster
+
+        Returns:
+            :obj:`[aztk.models.Task]`: a list of models representing all entries in the Task table
+        """
+        return task_table.list_task_table_entries(self.table_service, id)
+
+    def get_task_from_table(self, id, task_id):
+        """Create a storage table to track tasks
+
+        Args:
+            id (:obj:`str`): the id of the cluster
+
+        Returns:
+            :obj:`[aztk.models.Task]`: the task with id task_id from the cluster's storage table
+        """
+        return task_table.get_task_from_table(self.table_service, id, task_id)
+
+    def insert_task_into_task_table(self, id, task):
+        """Insert a task into the table
+
+        Args:
+            id (:obj:`str`): the id of the cluster
+
+        Returns:
+            :obj:`aztk.models.Task`: a model representing an entry in the Task table
+        """
+        return task_table.insert_task_into_task_table(self.table_service, id, task)
+
+    def update_task_in_task_table(self, id, task):
+        """Update a task in the table
+
+        Args:
+            id (:obj:`str`): the id of the cluster
+
+        Returns:
+            :obj:`aztk.models.Task`: a model representing an entry in the Task table
+        """
+        return task_table.update_task_in_task_table(self.table_service, id, task)
+
+    def delete_task_table(self, id):
+        """Delete the table that tracks tasks
+
+        Args:
+            id (:obj:`str`): the id of the cluster
+
+        Returns:
+            :obj:`bool`: if True, the deletion was successful
+        """
+        return task_table.delete_task_table(self.table_service, id)
+
+    def list_tasks(self, id):
+        """list tasks in a storage table
+
+        Args:
+            id (:obj:`str`): the id of the cluster
+
+        Returns:
+            :obj:`[aztk.models.Task]`: a list of models representing all entries in the Task table
+        """
+        return list_tasks.list_tasks(self, id)
+
+    def get_recent_job(self, id):
+        """Get the most recently run job in an Azure Batch job schedule
+
+        Args:
+            id (:obj:`str`): the id of the job schedule
+        Returns:
+            :obj:`[azure.batch.models.Job]`: the most recently run job on the job schedule
+        """
+        return get_recent_job.get_recent_job(self, id)
+
+    def get_task_state(self, id: str, task_name: str):
+        """Get the status of a submitted task
+
+        Args:
+            id (:obj:`str`): the name of the cluster the task was submitted to
+            task_name (:obj:`str`): the name of the task to get
+
+        Returns:
+            :obj:`str`: the status state of the task
+        """
+        return get_task_state.get_task_state(self, id, task_name)
+
+    def list_batch_tasks(self, id: str):
+        """Get the status of a submitted task
+
+        Args:
+            id (:obj:`str`): the name of the cluster the task was submitted to
+
+        Returns:
+            :obj:`str`: the status state of the task
+        """
+        return task_table.list_batch_tasks(self.batch_client, id)
+
+    def get_batch_task(self, id: str, task_id: str):
+        """Get the status of a submitted task
+
+        Args:
+            id (:obj:`str`): the name of the cluster the task was submitted to
+            task_id (:obj:`str`): the name of the task to get
+
+        Returns:
+            :obj:`str`: the status state of the task
+        """
+        return task_table.get_batch_task(self.batch_client, id, task_id)

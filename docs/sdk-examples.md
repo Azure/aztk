@@ -96,7 +96,7 @@ print(app1_logs.log)
 
 ```python
 # get status of application
-status = client.cluster.get_application_status(cluster_configuration.cluster_id, app1.name)
+status = client.cluster.get_application_state(cluster_configuration.cluster_id, app1.name)
 ```
 
 ## Stream logs of app, print to console as it runs

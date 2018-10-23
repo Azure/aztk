@@ -1,5 +1,6 @@
 # TODO: return Cluster instead of (pool, nodes)
 from aztk import models
+from aztk.utils import helpers
 
 
 def get_pool_details(core_cluster_operations, cluster_id: str):

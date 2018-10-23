@@ -3,7 +3,7 @@ import concurrent.futures
 from datetime import datetime, timedelta, timezone
 
 import azure.batch.models as batch_models
-import azure.batch.models.batch_error as batch_error
+from azure.batch.models import BatchErrorException
 from Cryptodome.PublicKey import RSA
 
 import aztk.error as error
@@ -36,9 +36,11 @@ class CoreClient:
         azure_api.validate_secrets(secrets_configuration)
         self.batch_client = azure_api.make_batch_client(secrets_configuration)
         self.blob_client = azure_api.make_blob_client(secrets_configuration)
+        self.table_service = azure_api.make_table_service(secrets_configuration)
         context = {
             "batch_client": self.batch_client,
             "blob_client": self.blob_client,
+            "table_service": self.table_service,
             "secrets_configuration": self.secrets_configuration,
         }
         return context
@@ -72,7 +74,7 @@ class CoreClient:
 
         try:
             self.batch_client.job.get(job_id)
-        except batch_models.batch_error.BatchErrorException:
+        except batch_models.BatchErrorException:
             job_exists = False
 
         pool_exists = self.batch_client.pool.exists(pool_id)
@@ -224,11 +226,11 @@ class CoreClient:
     def __create_user_on_node(self, username, pool_id, node_id, ssh_key=None, password=None):
         try:
             self.__create_user(pool_id=pool_id, node_id=node_id, username=username, ssh_key=ssh_key, password=password)
-        except batch_error.BatchErrorException as error:
+        except BatchErrorException as error:
             try:
                 self.__delete_user(pool_id, node_id, username)
                 self.__create_user(pool_id=pool_id, node_id=node_id, username=username, ssh_key=ssh_key)
-            except batch_error.BatchErrorException as error:
+            except BatchErrorException as error:
                 raise error
 
     @deprecated("0.10.0")
@@ -355,7 +357,7 @@ class CoreClient:
                     timeout=timeout,
                 ))
             return output
-        except (OSError, batch_error.BatchErrorException) as exc:
+        except (OSError, BatchErrorException) as exc:
             raise exc
         finally:
             self.__delete_user_on_pool(generated_username, pool.id, nodes)

@@ -1,2 +1,2 @@
+from .fields import (Boolean, Datetime, Float, Integer, List, ListMergeStrategy, ModelMergeStrategy, String)
 from .model import Model
-from .fields import String, Integer, Boolean, Float, List, ModelMergeStrategy, ListMergeStrategy

@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 import datetime
+import hashlib
 import io
 import logging
 import os
@@ -258,7 +259,7 @@ def wrap_commands_in_shell(commands):
     :rtype: str
     :return: a shell wrapping commands
     """
-    return "/bin/bash -c 'set -e; set -o pipefail; {}; wait'".format(";".join(commands))
+    return "/bin/bash -c 'set -e -o pipefail; {};'".format(";".join(commands))
 
 
 def get_connection_info(pool_id, node_id, batch_client):
@@ -387,3 +388,8 @@ def bool_env(value: bool):
         return "true"
     else:
         return "false"
+
+
+def convert_id_to_table_id(id):
+    # table storage doesn't allow names to begin with numbers
+    return 'a' + hashlib.sha256(id.encode()).hexdigest()[0:62]

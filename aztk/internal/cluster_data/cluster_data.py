@@ -5,6 +5,7 @@ import azure.common
 import yaml
 from msrest.exceptions import ClientRequestError
 
+from aztk import error
 from aztk.models import ClusterConfiguration
 from aztk.utils import BackOffPolicy, retry
 
@@ -41,9 +42,9 @@ class ClusterData:
             result = self.blob_client.get_blob_to_text(self.cluster_id, blob_path)
             return yaml.load(result.content)
         except azure.common.AzureMissingResourceHttpError:
-            logging.warning("Cluster %s doesn't have cluster configuration in storage", self.cluster_id)
+            raise error.AztkError("Cluster {} doesn't have cluster configuration in storage".format(self.cluster_id))
         except yaml.YAMLError:
-            logging.warning("Cluster %s contains invalid cluster configuration in blob", self.cluster_id)
+            raise error.AztkError("Cluster {} contains invalid cluster configuration in blob".format(self.cluster_id))
 
     @retry(retry_count=4, retry_interval=1, backoff_policy=BackOffPolicy.exponential, exceptions=(ClientRequestError))
     def upload_file(self, blob_path: str, local_path: str) -> BlobData:

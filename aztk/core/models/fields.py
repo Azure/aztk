@@ -246,3 +246,14 @@ class Enum(Field):
             return val.value
         else:
             return None
+
+
+class Datetime(Field):
+    """
+    Field that should be an datetime
+    """
+
+    def __init__(self, model, *args, **kwargs):
+        super().__init__(aztk_validators.InstanceOf(model), *args, **kwargs)
+
+        self.model = model
