@@ -1,4 +1,3 @@
-import hashlib
 from datetime import timedelta
 
 import azure.batch.models as batch_models

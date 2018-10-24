@@ -1,9 +1,7 @@
-import hashlib
-
 from azure.batch.models import BatchErrorException
 from msrest.exceptions import ClientRequestError
 
-from aztk.utils import BackOffPolicy, helpers, retry
+from aztk.utils import BackOffPolicy, retry
 
 
 def delete_pool_and_job_and_table(core_cluster_operations, pool_id: str, keep_logs: bool = False):

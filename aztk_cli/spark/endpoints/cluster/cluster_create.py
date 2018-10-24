@@ -10,11 +10,6 @@ from aztk_cli.config import load_aztk_spark_config
 def setup_parser(parser: argparse.ArgumentParser):
     parser.add_argument("--id", dest="cluster_id", help="The unique id of your spark cluster")
     parser.add_argument("--size", type=int, help="Number of vms in your cluster")
-    parser.add_argument(
-        "--size-low-pri",
-        type=int,
-        help="Number of low priority vms in your cluster (Deprecated, use --size-low-priority)",
-    )
     parser.add_argument("--size-low-priority", type=int, help="Number of low priority vms in your cluster")
     parser.add_argument("--vm-size", help="VM size for nodes in your cluster")
     parser.add_argument("--username", help="Username to access your cluster (required: --wait flag)")

@@ -338,7 +338,7 @@ def test_scheduling_target():
         assert application_log.exit_code == 0
 
         application_state = spark_client.cluster.get_application_state(
-            id=cluster_configuration.id, application_name="pipy100")
+            id=cluster_configuration.cluster_id, application_name="pipy100")
         assert application_state == aztk.spark.models.ApplicationState.Completed
 
     finally:

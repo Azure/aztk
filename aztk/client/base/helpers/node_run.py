@@ -1,5 +1,4 @@
-import aztk.error as error
-import aztk.models as models
+from aztk import error, models
 from aztk.utils import ssh as ssh_lib
 
 

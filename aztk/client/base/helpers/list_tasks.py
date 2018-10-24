@@ -1,4 +1,4 @@
-from aztk.models import SchedulingTarget, Task
+from aztk.models import SchedulingTarget
 
 from .get_recent_job import get_recent_job
 from .task_table import list_task_table_entries
@@ -12,7 +12,7 @@ def list_tasks(core_base_operations, id):
     Args:
         id: cluster or job id
     Returns:
-        List[aztk.models.Task] 
+        List[aztk.models.Task]
 
     """
     scheduling_target = core_base_operations.get_cluster_configuration(id).scheduling_target
