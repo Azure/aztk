@@ -39,10 +39,6 @@ class MissingRequiredAttributeError(InvalidModelError):
     pass
 
 
-class InvalidCustomScriptError(InvalidModelError):
-    pass
-
-
 class InvalidPluginReferenceError(InvalidModelError):
     pass
 

@@ -77,10 +77,6 @@ class SparkConfiguration(Model):
         return {"pub_key": pub_key, "priv_key": priv_key}
 
 
-class CustomScript(aztk.models.CustomScript):
-    pass
-
-
 class FileShare(aztk.models.FileShare):
     pass
 

@@ -2,7 +2,6 @@ import aztk.error as error
 from aztk.core.models import Model, fields
 from aztk.utils import helpers
 
-from .custom_script import CustomScript
 from .file_share import FileShare
 from .plugins import PluginConfiguration
 from .scheduling_target import SchedulingTarget

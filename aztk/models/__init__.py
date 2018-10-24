@@ -1,7 +1,6 @@
 from .application_log import ApplicationLog
 from .cluster import Cluster
 from .cluster_configuration import ClusterConfiguration
-from .custom_script import CustomScript
 from .file import File
 from .file_share import FileShare
 from .node_output import NodeOutput

@@ -8,7 +8,6 @@ from typing import List
 import yaml
 
 from aztk import models
-from aztk.error import InvalidCustomScriptError
 from aztk.utils import constants, file_utils, secure_utils
 
 ROOT_PATH = constants.ROOT_PATH
