@@ -22,11 +22,8 @@ def create_pool_and_job_and_table(
         :param VmImageModel: the type of image to provision for the cluster
         :param wait: wait until the cluster is ready
     """
-    # update storage with the necessary values
+    # save cluster configuration in storage
     core_cluster_operations.get_cluster_data(cluster_conf.cluster_id).save_cluster_config(cluster_conf)
-
-    if cluster_conf.scheduling_target != models.SchedulingTarget.Any:
-        core_cluster_operations.create_task_table(cluster_conf.cluster_id)
 
     # reuse pool_id as job_id
     pool_id = cluster_conf.cluster_id
@@ -70,5 +67,9 @@ def create_pool_and_job_and_table(
 
     # Add job to batch
     core_cluster_operations.batch_client.job.add(job)
+
+    # create storage task table
+    if cluster_conf.scheduling_target != models.SchedulingTarget.Any:
+        core_cluster_operations.create_task_table(cluster_conf.cluster_id)
 
     return helpers.get_cluster(cluster_conf.cluster_id, core_cluster_operations.batch_client)

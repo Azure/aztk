@@ -29,9 +29,6 @@ def submit_job(
     core_job_operations.get_cluster_data(job_configuration.id).save_cluster_config(
         job_configuration.to_cluster_config())
 
-    if job_configuration.scheduling_target != models.SchedulingTarget.Any:
-        core_job_operations.create_task_table(job_configuration.id)
-
     # get a verified node agent sku
     sku_to_use, image_ref_to_use = helpers.select_latest_verified_vm_image_with_node_agent_sku(
         vm_image_model.publisher, vm_image_model.offer, vm_image_model.sku, core_job_operations.batch_client)
@@ -83,5 +80,8 @@ def submit_job(
     setup = batch_models.JobScheduleAddParameter(id=job_configuration.id, schedule=schedule, job_specification=job_spec)
 
     core_job_operations.batch_client.job_schedule.add(setup)
+
+    if job_configuration.scheduling_target != models.SchedulingTarget.Any:
+        core_job_operations.create_task_table(job_configuration.id)
 
     return core_job_operations.batch_client.job_schedule.get(job_schedule_id=job_configuration.id)

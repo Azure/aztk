@@ -42,8 +42,11 @@ install_prerequisites () {
 
 install_docker_compose () {
     echo "Installing Docker-Compose"
-    for i in {1..5}; do 
-        sudo curl -L https://github.com/docker/compose/releases/download/1.19.0/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose && break || sleep 2; 
+    url=https://github.com/docker/compose/releases/download/1.19.0/docker-compose-`uname -s`-`uname -m`
+    for i in {1..5}; do
+        sudo curl -L $url -o /usr/local/bin/docker-compose && break ||
+        echo "ERROR: failed to download docker-compose ... retrying in $($i**2) seconds" &&
+        sleep $i**2;
     done
     sudo chmod +x /usr/local/bin/docker-compose
     echo "Finished installing Docker-Compose"
@@ -59,7 +62,12 @@ pull_docker_container () {
         docker login $DOCKER_ENDPOINT --username $DOCKER_USERNAME --password $DOCKER_PASSWORD
     fi
 
-    docker pull $docker_repo_name
+
+    for i in {1..5}; do
+        docker pull $docker_repo_name && break ||
+        echo "ERROR: docker pull $docker_repo_name failed ... retrying after $($i**2) seconds" &&
+        sleep $i**2;
+    done
     echo "Finished pulling $docker_repo_name"
 }
 
