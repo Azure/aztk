@@ -82,6 +82,12 @@ def setup_parser(parser: argparse.ArgumentParser):
     )
 
     parser.add_argument(
+        "--internal",
+        action="store_true",
+        help="Connect using the local IP of the master node. Only use if using a VPN.",
+    )
+
+    parser.add_argument(
         "app",
         help="App jar OR python file to execute. A path to a local "
         "file is expected, unless used in conjunction with "
@@ -133,6 +139,7 @@ def execute(args: typing.NamedTuple):
             max_retry_count=args.max_retry_count,
         ),
         remote=args.remote,
+        internal=args.internal,
         wait=False,
     )
 

@@ -73,7 +73,7 @@ def schedule_with_target(scheduling_target, task_sas_urls):
             format(task_working_dir, aztk_cluster_id, task_sas_url, constants.SPARK_SUBMIT_LOGS_FILE))
         node_id = select_scheduling_target_node(config.spark_client.cluster, config.pool_id, scheduling_target)
         node_run_output = config.spark_client.cluster.node_run(
-            config.pool_id, node_id, task_cmd, timeout=120, block=False)
+            config.pool_id, node_id, task_cmd, timeout=120, block=False, internal=True)
     # block job_manager_task until scheduling_target task completion
     wait_until_tasks_complete(aztk_cluster_id)
 

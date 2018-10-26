@@ -40,7 +40,15 @@ def select_scheduling_target_node(spark_cluster_operations, cluster_id, scheduli
     return cluster.master_node_id
 
 
-def schedule_with_target(core_cluster_operations, spark_cluster_operations, cluster_id, scheduling_target, task, wait):
+def schedule_with_target(
+        core_cluster_operations,
+        spark_cluster_operations,
+        cluster_id,
+        scheduling_target,
+        task,
+        wait,
+        internal,
+):
     # upload "real" task definition to storage
     serialized_task_resource_file = upload_serialized_task_to_storage(core_cluster_operations.blob_client, cluster_id,
                                                                       task)
@@ -65,7 +73,8 @@ def schedule_with_target(core_cluster_operations, spark_cluster_operations, clus
         format(task_working_dir, cluster_id, serialized_task_resource_file.blob_source,
                constants.SPARK_SUBMIT_LOGS_FILE))
     node_id = select_scheduling_target_node(spark_cluster_operations, cluster_id, scheduling_target)
-    node_run_output = spark_cluster_operations.node_run(cluster_id, node_id, task_cmd, timeout=120, block=wait)
+    node_run_output = spark_cluster_operations.node_run(
+        cluster_id, node_id, task_cmd, timeout=120, block=wait, internal=internal)
 
 
 def get_cluster_scheduling_target(core_cluster_operations, cluster_id):
@@ -80,6 +89,7 @@ def submit_application(
         application,
         remote: bool = False,
         wait: bool = False,
+        internal: bool = False,
 ):
     """
     Submit a spark app
@@ -90,7 +100,7 @@ def submit_application(
     scheduling_target = get_cluster_scheduling_target(core_cluster_operations, cluster_id)
     if scheduling_target is not models.SchedulingTarget.Any:
         schedule_with_target(core_cluster_operations, spark_cluster_operations, cluster_id, scheduling_target, task,
-                             wait)
+                             wait, internal)
     else:
         # Add task to batch job (which has the same name as cluster_id)
         core_cluster_operations.batch_client.task.add(job_id=cluster_id, task=task)
@@ -107,9 +117,10 @@ def submit(
         application: models.ApplicationConfiguration,
         remote: bool = False,
         wait: bool = False,
-        scheduling_target: str = None,
+        internal: bool = False,
 ):
     try:
-        submit_application(core_cluster_operations, spark_cluster_operations, cluster_id, application, remote, wait)
+        submit_application(core_cluster_operations, spark_cluster_operations, cluster_id, application, remote, wait,
+                           internal)
     except BatchErrorException as e:
         raise error.AztkError(helpers.format_batch_exception(e))
