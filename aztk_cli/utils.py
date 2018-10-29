@@ -48,7 +48,7 @@ def print_cluster(client, cluster: models.Cluster, internal: bool = False):
     log.info("")
     log.info("Cluster         %s", cluster.id)
     log.info("------------------------------------------")
-    log.info("State:          %s", cluster.visible_state)
+    log.info("State:          %s", cluster.state.value)
     log.info("Node Size:      %s", cluster.vm_size)
     log.info("Nodes:          %s", node_count)
     log.info("| Dedicated:    %s", __pretty_dedicated_node_count(cluster))
@@ -114,7 +114,7 @@ def print_clusters(clusters: List[models.Cluster]):
     for cluster in clusters:
         node_count = __pretty_node_count(cluster)
 
-        log.info(print_format.format(cluster.id, cluster.visible_state, cluster.vm_size, node_count))
+        log.info(print_format.format(cluster.id, cluster.state.value, cluster.vm_size, node_count))
 
 
 def print_clusters_quiet(clusters: List[models.Cluster]):

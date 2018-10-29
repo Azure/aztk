@@ -329,7 +329,7 @@ class BaseOperations:
             id (:obj:`str`): the name of the cluster the task was submitted to
 
         Returns:
-            :obj:`str`: the status state of the task
+            :obj:`[aztk.models.Task]`: list of aztk tasks
         """
         return task_table.list_batch_tasks(self.batch_client, id)
 
@@ -341,6 +341,6 @@ class BaseOperations:
             task_id (:obj:`str`): the name of the task to get
 
         Returns:
-            :obj:`str`: the status state of the task
+            :obj:`aztk.models.Task`: aztk Task representing the Batch Task
         """
         return task_table.get_batch_task(self.batch_client, id, task_id)
