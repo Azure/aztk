@@ -156,7 +156,7 @@ class SshConfig:
                 "Please supply a username either in the ssh.yaml configuration file or with a parameter (--username)")
 
 
-def __convert_to_path(path: str):
+def _convert_to_path(path: str):
     if path:
         abs_path = os.path.abspath(os.path.expanduser(path))
         if not os.path.exists(abs_path):
@@ -226,10 +226,10 @@ class JobConfig:
 
         spark_configuration = config.get("spark_configuration")
         if spark_configuration:
-            self.spark_defaults_conf = __convert_to_path(spark_configuration.get("spark_defaults_conf"))
-            self.spark_env_sh = __convert_to_path(spark_configuration.get("spark_env_sh"))
-            self.core_site_xml = __convert_to_path(spark_configuration.get("core_site_xml"))
-            self.jars = [__convert_to_path(jar) for jar in spark_configuration.get("jars") or []]
+            self.spark_defaults_conf = _convert_to_path(spark_configuration.get("spark_defaults_conf"))
+            self.spark_env_sh = _convert_to_path(spark_configuration.get("spark_env_sh"))
+            self.core_site_xml = _convert_to_path(spark_configuration.get("core_site_xml"))
+            self.jars = [_convert_to_path(jar) for jar in spark_configuration.get("jars") or []]
 
     def _read_config_file(self, path: str = aztk.utils.constants.DEFAULT_SPARK_JOB_CONFIG):
         """
