@@ -40,7 +40,8 @@ def __convert_task_to_entity(partition_key, task):
 def __convert_batch_task_to_aztk_task(batch_task):
     task = Task()
     task.id = batch_task.id
-    task.node_id = batch_task.node_info.node_id
+    if batch_task.node_info:
+        task.node_id = batch_task.node_info.node_id
     task.state = batch_task.state
     task.state_transition_time = batch_task.state_transition_time
     task.command_line = batch_task.command_line
