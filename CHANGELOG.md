@@ -1,6 +1,14 @@
 # Changelog
 
-##   0.10.0 (2018-10-29)
+##  0.10.1 (2018-11-02)
+
+**Features**
+* Include cluster creation time in cluster list and cluster get output (#678) ([a0bc2f0](https://github.com/Azure/aztk/commit/a0bc2f0)), closes [#678](https://github.com/Azure/aztk/issues/678)
+
+**Bug Fixes**
+* Verify Batch task has node_info (#681) ([385040d](https://github.com/Azure/aztk/commit/385040d)), closes [#681](https://github.com/Azure/aztk/issues/681)
+
+##  0.10.0 (2018-10-29)
 
 **Breaking Changes**
 * Remove deprecated SDK API code (#671) ([fc50536](https://github.com/Azure/aztk/commit/fc50536)), closes [#671](https://github.com/Azure/aztk/issues/671)
