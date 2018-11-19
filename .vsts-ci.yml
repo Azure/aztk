@@ -3,9 +3,10 @@ name: $(Build.SourceBranch)$(Rev:.r)
 trigger:
   - master
 
-phases:
-  - phase: Test
-    queue: Hosted Linux Preview
+jobs:
+  - job: Test
+    pool: 
+      vmImage: 'ubuntu-16.04'
     steps:
     - task: UsePythonVersion@0
       inputs:
