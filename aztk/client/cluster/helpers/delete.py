@@ -20,7 +20,7 @@ def delete_pool_and_job_and_table(core_cluster_operations, pool_id: str, keep_lo
 
     pool_exists = core_cluster_operations.batch_client.pool.exists(pool_id)
 
-    table_exists = core_cluster_operations.table_service.exists(pool_id)
+    table_deleted = core_cluster_operations.delete_task_table(pool_id)
 
     if job_exists:
         delete_object(core_cluster_operations.batch_client.job.delete, pool_id)
@@ -28,14 +28,11 @@ def delete_pool_and_job_and_table(core_cluster_operations, pool_id: str, keep_lo
     if pool_exists:
         delete_object(core_cluster_operations.batch_client.pool.delete, pool_id)
 
-    if table_exists:
-        delete_object(core_cluster_operations.delete_task_table, pool_id)
-
     if not keep_logs:
         cluster_data = core_cluster_operations.get_cluster_data(pool_id)
         cluster_data.delete_container(pool_id)
 
-    return job_exists or pool_exists or table_exists
+    return job_exists or pool_exists or table_deleted
 
 
 @retry(retry_count=4, retry_interval=1, backoff_policy=BackOffPolicy.exponential, exceptions=(ClientRequestError))
