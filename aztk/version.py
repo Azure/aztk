@@ -23,7 +23,7 @@
 # DEALINGS IN THE SOFTWARE.
 major = 0
 minor = 10
-patch = 1
+patch = 2
 
 suffix = ""
 

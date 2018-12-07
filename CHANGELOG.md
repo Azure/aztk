@@ -1,5 +1,14 @@
 # Changelog
 
+##  0.10.2 (2018-12-07)
+
+**Bug Fixes**
+* Fix: Storage table never deleted (#690) ([723995c](https://github.com/Azure/aztk/commit/723995c)), closes [#690](https://github.com/Azure/aztk/issues/690)
+
+**Internal Changes**
+* Internal: Migrate off preview vsts queues (#685) ([a91690b](https://github.com/Azure/aztk/commit/a91690b)), closes [#685](https://github.com/Azure/aztk/issues/685)
+
+
 ##  0.10.1 (2018-11-02)
 
 **Features**
@@ -7,6 +16,7 @@
 
 **Bug Fixes**
 * Verify Batch task has node_info (#681) ([385040d](https://github.com/Azure/aztk/commit/385040d)), closes [#681](https://github.com/Azure/aztk/issues/681)
+
 
 ##  0.10.0 (2018-10-29)
 
@@ -26,6 +36,7 @@
 * Fix: pin all node dependencies not in Pipfile (#667) ([0606598](https://github.com/Azure/aztk/commit/0606598)), closes [#667](https://github.com/Azure/aztk/issues/667)
 * Fix: vsts integration tests block (#657) ([4a60c8a](https://github.com/Azure/aztk/commit/4a60c8a)), closes [#657](https://github.com/Azure/aztk/issues/657)
 * Fix: vsts mutliline secrets (#668) ([cb62207](https://github.com/Azure/aztk/commit/cb62207)), closes [#668](https://github.com/Azure/aztk/issues/668)
+
 
 ##  0.9.0 (2018-08-30)
 
