@@ -117,6 +117,17 @@ class ClusterOperations(SparkBaseOperations):
         """
         return get_application_state.get_application_state(self._core_cluster_operations, id, application_name)
 
+    def list_applications(self, id: str):
+        """Get all tasks that have been submitted to the cluster
+
+        Args:
+            id (:obj:`str`): the name of the cluster the tasks belong to
+
+        Returns:
+            :obj:`[aztk.spark.models.Application]`: list of aztk applications
+        """
+        return self._list_applications(self._core_cluster_operations, id)
+
     def run(self, id: str, command: str, host=False, internal: bool = False, timeout=None):
         """Run a bash command on every node in the cluster
 
