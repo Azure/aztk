@@ -1,5 +1,11 @@
 # Changelog
 
+##  0.10.3 (2020-02-13)
+
+**Bug Fixes**
+* Pin pipenv dependencies in setup_host.sh (#709) ([5be9e87](https://github.com/Azure/aztk/commit/5be9e87)), closes [#710](https://github.com/Azure/aztk/issues/710)
+
+
 ##  0.10.2 (2018-12-07)
 
 **Bug Fixes**

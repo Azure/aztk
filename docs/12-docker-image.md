@@ -24,7 +24,7 @@ aztk spark cluster create ... --docker-repo aztk/base:spark2.2.0 "--docker-run-o
 ```
 
 ## Using a custom Docker Image
-You can build your own Docker image on top or beneath one of our supported base images _OR_ you can modify the [supported Dockerfiles](https://github.com/Azure/aztk/tree/v0.10.2/docker-image) and build your own image that way.
+You can build your own Docker image on top or beneath one of our supported base images _OR_ you can modify the [supported Dockerfiles](https://github.com/Azure/aztk/tree/v0.10.3/docker-image) and build your own image that way.
 
 Once you have your Docker image built and hosted publicly, you can then use the **--docker-repo** parameter in your **aztk spark cluster create** command to point to it.
 
